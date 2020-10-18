@@ -1,5 +1,5 @@
 {
-  "name": "mypen",
+  "name": "@everseenflash/mypen",
   "description": "A better Markdown previewer",
   "license": "MIT",
   "author": "EverSeenTOTOTO <jialiuniu@gmail.com>",
@@ -11,10 +11,11 @@
   "bugs": {
     "url": "https://github.com/EverSeenTOTOTO/pen/issues"
   },
+  "version": "1.0.0",
   "main": "index.js",
   "preferGlobal": true,
   "bin": {
-    "mypen": "./bin/pen"
+    "mypen": "bin/pen"
   },
   "scripts": {
     "build": "NODE_ENV=production webpack -p",
@@ -68,6 +69,5 @@
   "keywords": [
     "markdown",
     "previewer"
-  ],
-  "version": "1.0.0"
+  ]
 }
