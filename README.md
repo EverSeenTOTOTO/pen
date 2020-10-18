@@ -1,5 +1,3 @@
-<h1><img src='media/logo.png' alt='logo' width='200'/></h1>
-
 > This is a fork project from [**pen**](https://github.com/utatti/pen).
 （这是fork自[**pen**](https://github.com/utatti/pen)的一个项目。）
 
@@ -14,5 +12,5 @@ npm install -g @everseenflash/mypen
 # preview one markdown file
 mypen xxx.md
 # watch a directory
-mypen .
+npx @everseenflash/mypen .
 ```
