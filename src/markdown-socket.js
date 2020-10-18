@@ -1,8 +1,6 @@
-"use strict";
-
-const MarkdownWatcher = require("./markdown-watcher");
-const path = require("path");
-const WebSocketServer = require("websocket").server;
+const path = require('path');
+const WebSocketServer = require('websocket').server;
+const Watcher = require('./watcher');
 
 class MarkdownSocket {
   constructor(rootPath) {
@@ -13,37 +11,40 @@ class MarkdownSocket {
 
   listenTo(httpServer) {
     this._server = new WebSocketServer();
-    this._server.mount({ httpServer: httpServer });
-    this._server.on("request", this.onRequest.bind(this));
-    this._server.on("connect", this.onConnect.bind(this));
+    this._server.mount({ httpServer });
+    this._server.on('request', this.onRequest.bind(this));
+    this._server.on('connect', this.onConnect.bind(this));
   }
 
   onRequest(request) {
     const extname = path.extname(request.resource);
-
-    if (extname !== ".md" && extname !== ".markdown") {
+    if (extname === '') {
+      this.pathname = '.';
+    } else {
+      this.pathname = request.resource;
+    }
+    /*     if (extname !== '.md' && extname !== '.markdown') {
       request.reject();
       return;
     }
-
-    this.pathname = request.resource;
+ */
     request.accept(null, request.origin);
   }
 
   onConnect(connection) {
     const decodedPath = decodeURIComponent(this.pathname);
-    const watcher = new MarkdownWatcher(path.join(this.rootPath, decodedPath));
-    watcher.onData(data => connection.send(data));
-    watcher.onError(err => {
-      if (err.code === "ENOENT") {
-        // if there is no file, ignore and send 'no file'
-        connection.send("Not found");
-        return;
-      }
-      throw err;
-    });
+    const watcher = new Watcher(path.join(this.rootPath, decodedPath));
+    // 使用websocket主动发送渲染后的html
+    watcher.ondata = (data) => {
+      connection.send(JSON.stringify(data));
+    };
+    watcher.onerror = (err) => {
+      connection.send(err.message);
+    };
+    watcher.start();
+    watcher.trigger();
 
-    connection.on("close", () => {
+    connection.on('close', () => {
       watcher.stop();
     });
   }

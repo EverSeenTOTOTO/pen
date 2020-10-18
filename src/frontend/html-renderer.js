@@ -1,36 +1,33 @@
-import React from "react";
-import renderHTML from "react-render-html";
-import SocketClient from "./socket-client";
-import PropTypes from "prop-types";
+import React, { useState, useEffect } from 'react';
+import SocketClient from './socket-client';
 
-class HTMLRenderer extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = { html: "" };
-  }
+const createMarkup = (__html) => ({ __html });
 
-  componentDidMount() {
-    this.socketClient = new SocketClient(this.props.location);
-    this.socketClient.onData(html => this.setState({ html }));
-  }
+// 渲染markdown
+const Markdown = ({ html }) => <main className="markdown-body" dangerouslySetInnerHTML={createMarkup(html)} />;
 
-  componentDidUpdate() {
-    if (this.props.onUpdate) {
-      this.props.onUpdate();
-    }
-  }
+// 渲染md文件列表
+const Static = ({ list }) => (
+  <main className="links">
+    {list.map((link) => <a href={link} key={link}>{link}</a>)}
+  </main>
+);
 
-  render() {
-    return React.createElement("div", null, renderHTML(this.state.html));
-  }
-}
+const HTMLRenderer = ({ location }) => {
+  const [data, setData] = useState('');
 
-HTMLRenderer.propTypes = {
-  location: PropTypes.shape({
-    host: PropTypes.string.isRequired,
-    pathname: PropTypes.string.isRequired
-  }).isRequired,
-  onUpdate: PropTypes.func
+  useEffect(() => {
+    // Set title to Markdown filename
+    const pathTokens = location.pathname.split('/');
+    document.title = pathTokens[pathTokens.length - 1];
+
+    const socketClient = new SocketClient(location);
+    socketClient.ondata = setData;
+  }, [location]);
+
+  return Array.isArray(data)
+    ? <Static list={data} />
+    : <Markdown html={data} />;
 };
 
 export default HTMLRenderer;

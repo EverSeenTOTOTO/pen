@@ -1,0 +1,24 @@
+{
+  "env": {
+      "browser": true,
+      "node": true,
+      "es6": true
+  },
+  "extends": [
+      "airbnb"
+  ],
+  "rules": {
+      "react/prop-types": "off",
+      "no-console": "off",
+      "import/no-extraneous-dependencies": "off",
+      "react/destructuring-assignment": "off",
+      "react/jsx-filename-extension": "off",
+      "no-restricted-globals": "off",
+      "no-underscore-dangle": "off"
+  },
+  "parser": "babel-eslint",
+  "parserOptions": {
+    "sourceType": "module",
+    "ecmaVersion": 2021
+  }
+}

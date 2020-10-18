@@ -1,73 +1,72 @@
 {
-  "name": "pen",
-  "version": "2.2.0",
+  "name": "mypen",
   "description": "A better Markdown previewer",
-  "main": "index.js",
-  "scripts": {
-    "test": "npm run lint && npm run build && npm run mocha",
-    "lint": "eslint --ext .js --ignore-path .gitignore .",
-    "lintfix": "eslint --fix --ext .js --ignore-path .gitignore .",
-    "build": "NODE_ENV=production webpack -p",
-    "mocha": "mocha -r babel-core/register -r babel-polyfill -r test/setup.js test/**/test-*",
-    "release": "npm run build && npm publish --access=public"
-  },
+  "license": "MIT",
+  "author": "EverSeenTOTOTO <jialiuniu@gmail.com>",
+  "homepage": "https://github.com/EverSeenTOTOTO/pen",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/utatti/pen.git"
+    "url": "git+https://github.com/EverSeenTOTOTO/pen.git"
   },
-  "keywords": [
-    "markdown",
-    "previewer"
-  ],
-  "author": "Jun <noraesae+dev@gmail.com>",
-  "license": "MIT",
   "bugs": {
-    "url": "https://github.com/utatti/pen/issues"
+    "url": "https://github.com/EverSeenTOTOTO/pen/issues"
   },
-  "homepage": "https://github.com/utatti/pen",
+  "main": "index.js",
+  "preferGlobal": true,
+  "bin": {
+    "mypen": "./bin/pen"
+  },
+  "scripts": {
+    "build": "NODE_ENV=production webpack -p",
+    "lint": "npm run lint:js && npm run lint:pkg",
+    "lint:js": "eslint --fix src/**/*.js",
+    "lint:pkg": "prettier-package-json --write",
+    "release": "npm run lint && npm run build && npm publish --access=public"
+  },
+  "dependencies": {
+    "@babel/polyfill": "^7.12.1",
+    "@babel/register": "^7.12.1",
+    "eslint-plugin-react": "^7.21.4",
+    "github-markdown-css": "^2.10.0",
+    "highlight.js": "^9.18.3",
+    "markdown-it": "^8.4.2",
+    "markdown-it-anchor": "^5.3.0",
+    "markdown-it-checkbox": "^1.1.0",
+    "markdown-it-emoji": "^1.2.0",
+    "markdown-it-highlightjs": "^2.0.0",
+    "node-watch": "^0.7.0",
+    "opn": "^4.0.2",
+    "react": "^16.14.0",
+    "react-dom": "^16.14.0",
+    "simple-pandoc": "^0.1.0",
+    "websocket": "^1.0.32",
+    "yargs": "^6.6.0"
+  },
   "devDependencies": {
-    "babel-core": "^6.26.3",
-    "babel-eslint": "^8.2.3",
-    "babel-loader": "^7.1.2",
-    "babel-polyfill": "^6.26.0",
-    "babel-preset-env": "^1.7.0",
-    "css-loader": "^0.28.7",
-    "eslint": "^4.19.1",
-    "eslint-config-prettier": "^2.9.0",
-    "eslint-plugin-prettier": "^2.6.0",
-    "eslint-plugin-react": "^7.7.0",
+    "@babel/core": "^7.12.3",
+    "@babel/preset-env": "^7.12.1",
+    "@babel/preset-react": "^7.12.1",
+    "babel-eslint": "^10.1.0",
+    "babel-loader": "^8.1.0",
+    "css-loader": "^0.28.11",
+    "eslint": "^7.11.0",
+    "eslint-config-airbnb": "^18.2.0",
+    "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-jsx-a11y": "^6.3.1",
     "extract-text-webpack-plugin": "^3.0.2",
-    "github-markdown-css": "^2.9.0",
     "html-webpack-inline-source-plugin": "^0.0.9",
     "html-webpack-plugin": "^2.30.1",
     "jsdom": "^9.4.2",
     "json-loader": "^0.5.7",
-    "mocha": "^5.2.0",
-    "prettier": "^1.12.1",
-    "react": "^16.2.0",
-    "react-dom": "^16.2.0",
-    "react-render-html": "^0.6.0",
-    "request": "^2.87.0",
-    "rimraf": "^2.5.4",
-    "style-loader": "^0.19.0",
-    "webpack": "^3.8.1",
+    "prettier-package-json": "^2.1.3",
+    "request": "^2.88.2",
+    "rimraf": "^2.7.1",
+    "style-loader": "^0.19.1",
+    "webpack": "^3.12.0",
     "webpack-fail-plugin": "^2.0.0"
   },
-  "dependencies": {
-    "highlight.js": "^9.9.0",
-    "markdown-it": "^8.2.2",
-    "markdown-it-anchor": "^5.0.2",
-    "markdown-it-checkbox": "^1.1.0",
-    "markdown-it-emoji": "^1.2.0",
-    "markdown-it-highlightjs": "^2.0.0",
-    "opn": "^4.0.2",
-    "prop-types": "^15.6.0",
-    "simple-pandoc": "^0.1.0",
-    "websocket": "^1.0.26",
-    "yargs": "^6.6.0"
-  },
-  "preferGlobal": true,
-  "bin": {
-    "pen": "./bin/pen"
-  }
+  "keywords": [
+    "markdown",
+    "previewer"
+  ]
 }

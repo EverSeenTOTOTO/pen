@@ -1,71 +1,52 @@
-"use strict";
+const fs = require('fs');
+const nodeWatch = require('node-watch');
+const convert = require('./markdown');
 
-const fs = require("fs");
+const MarkdownFilePattern = /^[^.].*.md$/;
+const readMarkdownFiles = (path) => {
+  const stat = fs.statSync(path);
+  if (stat.isDirectory()) {
+    // 也可以把files渲染markdown的列表，自由度很高
+    return fs.promises.readdir(path).then(
+      (files) => files.filter((filename) => MarkdownFilePattern.test(filename)),
+    );
+  }
+  return convert(fs.readFileSync(path).toString());
+};
 
-const WatchInterval = 200; // milliseconds
-
-class Watcher {
+/* eslint-disable class-methods-use-this */
+module.exports = class Watcher {
   constructor(p) {
     this.path = p;
-    this._watchLoop = null;
-    this._dataCallback = null;
-    this._errorCallback = null;
-    this._previousData = null;
-
-    this.start();
+    this.watchObj = null;
+    this.ondata = null;
+    this.onerror = null;
   }
 
   start() {
-    if (this._watchLoop) {
-      clearInterval(this._watchLoop);
+    try {
+      const watchObj = nodeWatch(this.path, {
+        recursive: false,
+        filter: MarkdownFilePattern,
+      });
+      watchObj.on('change', this.trigger.bind(this));
+      watchObj.on('error', this.onerror);// 不需要bind因为是传入的闭包
+    } catch (e) {
+      this.onerror(e);
     }
-
-    setTimeout(() => this.watch(), 0); // for the first execution
-    this._watchLoop = setInterval(() => this.watch(), WatchInterval);
   }
 
   stop() {
-    clearInterval(this._watchLoop);
-    this._watchLoop = null;
-  }
-
-  watch() {
-    fs.readFile(this.path, (error, data) => {
-      if (error) {
-        this.triggerOnError(error);
-        this.stop();
-      } else {
-        if (!this._previousData || data.compare(this._previousData) !== 0) {
-          this.triggerOnData(data);
-          this._previousData = data;
-        }
-      }
-    });
-  }
-
-  onData(callback) {
-    this._dataCallback = callback;
-    return this;
-  }
-
-  onError(callback) {
-    this._errorCallback = callback;
-    return this;
-  }
-
-  triggerOnData(data) {
-    if (this._dataCallback) {
-      this._dataCallback(data);
+    if (this.watchObj) {
+      this.watchObj.close();
     }
   }
 
-  triggerOnError(error) {
-    if (this._errorCallback) {
-      this._errorCallback(error);
-    } else {
-      throw error;
+  trigger() {
+    try {
+      readMarkdownFiles(this.path).then(this.ondata).catch(this.onerror);
+    } catch (e) {
+      this.onerror(e);
     }
   }
-}
-
-module.exports = Watcher;
+};
