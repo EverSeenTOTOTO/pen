@@ -11,6 +11,6 @@
 npm install -g @everseenflash/mypen
 # preview one markdown file
 mypen xxx.md
-# watch a directory
+# watch a directory (use npx commands)
 npx @everseenflash/mypen .
 ```
