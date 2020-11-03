@@ -17,12 +17,7 @@ class MarkdownSocket {
   }
 
   onRequest(request) {
-    const extname = path.extname(request.resource);
-    if (extname === '') {
-      this.pathname = '.';
-    } else {
-      this.pathname = request.resource;
-    }
+    this.pathname = request.resource;
     /*     if (extname !== '.md' && extname !== '.markdown') {
       request.reject();
       return;

@@ -1,15 +1,31 @@
 const fs = require('fs');
+const { resolve } = require('path');
 const nodeWatch = require('node-watch');
 const convert = require('./markdown');
 
 const MarkdownFilePattern = /^[^.].*.md$/;
+const isDir = (filepath) => {
+  const stat = fs.statSync(filepath);
+  return stat.isDirectory();
+};
 const readMarkdownFiles = (path) => {
-  const stat = fs.statSync(path);
-  if (stat.isDirectory()) {
-    // 也可以把files渲染markdown的列表，自由度很高
-    return fs.promises.readdir(path).then(
-      (files) => files.filter((filename) => MarkdownFilePattern.test(filename)),
-    );
+  if (isDir(path)) {
+    return fs.promises.readdir(path).then((files) => files.map((filename) => {
+      if (MarkdownFilePattern.test(filename)) {
+        return {
+          filename,
+          type: 'markdown',
+        };
+      } if (isDir(resolve(path, filename))) {
+        return {
+          filename: `${filename}/`,
+          type: 'dir',
+        };
+      }
+      return {
+        type: 'other',
+      };
+    }).filter(({ type }) => type !== 'other'));
   }
   return convert(fs.readFileSync(path).toString());
 };

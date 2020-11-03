@@ -35,6 +35,11 @@ li>input[type='checkbox'] {
   padding-left: 64px;
 }
 
+.links a.dir {
+  font-weight: normal;
+  color: #4492eb;
+}
+
 .links a:hover {
   animation: scaleLink 0.3s;
   transform: scale(1.03);

@@ -9,7 +9,10 @@ const Markdown = ({ html }) => <main className="markdown-body" dangerouslySetInn
 // 渲染md文件列表
 const Static = ({ list }) => (
   <main className="links">
-    {list.map((link) => <a href={link} key={link}>{link}</a>)}
+    {list.length > 0 ? list.map((link) => {
+      const { filename, type } = link;
+      return <a className={type} href={filename} key={filename}>{filename}</a>;
+    }) : <section>没有markdown文件</section>}
   </main>
 );
 

@@ -20,7 +20,7 @@
   "scripts": {
     "build": "NODE_ENV=production webpack -p",
     "lint": "npm run lint:js && npm run lint:pkg",
-    "lint:js": "eslint --fix src/**/*.js",
+    "lint:js": "eslint --fix ./src/**/*.js",
     "lint:pkg": "prettier-package-json --write",
     "release": "npm run lint && npm run build && npm publish --access=public"
   },
