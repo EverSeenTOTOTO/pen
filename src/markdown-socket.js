@@ -5,15 +5,15 @@ const Watcher = require('./watcher');
 class MarkdownSocket {
   constructor(rootPath) {
     this.rootPath = rootPath;
-    this._server = null;
+    this.server = null;
     this.pathname = null;
   }
 
   listenTo(httpServer) {
-    this._server = new WebSocketServer();
-    this._server.mount({ httpServer });
-    this._server.on('request', this.onRequest.bind(this));
-    this._server.on('connect', this.onConnect.bind(this));
+    this.server = new WebSocketServer();
+    this.server.mount({ httpServer });
+    this.server.on('request', this.onRequest.bind(this));
+    this.server.on('connect', this.onConnect.bind(this));
   }
 
   onRequest(request) {
@@ -45,7 +45,7 @@ class MarkdownSocket {
   }
 
   close() {
-    this._server.closeAllConnections();
+    this.server.closeAllConnections();
   }
 }
 

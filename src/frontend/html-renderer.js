@@ -12,11 +12,16 @@ const Static = ({ list }) => (
     {list.length > 0 ? list.map((link) => {
       const { filename, type } = link;
       return <a className={type} href={filename} key={filename}>{filename}</a>;
-    }) : <section>没有markdown文件</section>}
+    }) : (
+      <section className="nofile">
+        <span>{'No markdown files in '}</span>
+        {location.pathname}
+      </section>
+    )}
   </main>
 );
 
-const HTMLRenderer = ({ location }) => {
+const HTMLRenderer = () => {
   const [data, setData] = useState('');
 
   useEffect(() => {
@@ -24,9 +29,9 @@ const HTMLRenderer = ({ location }) => {
     const pathTokens = location.pathname.split('/');
     document.title = pathTokens[pathTokens.length - 1];
 
-    const socketClient = new SocketClient(location);
+    const socketClient = new SocketClient();
     socketClient.ondata = setData;
-  }, [location]);
+  });
 
   return Array.isArray(data)
     ? <Static list={data} />

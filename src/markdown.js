@@ -3,8 +3,8 @@ const pandoc = require('simple-pandoc');
 const argv = require('./argv');
 
 const singleton = (creator) => {
-  let obj;
-  return () => obj || (obj = creator());
+  const obj = creator();
+  return () => obj;
 };
 
 const md = singleton(() => mdit({ html: true, linkify: true })
@@ -15,4 +15,8 @@ const md = singleton(() => mdit({ html: true, linkify: true })
 
 const pd = singleton(() => pandoc(argv.pandoc, 'html'));
 
-module.exports = (markdown) => (argv.pandoc ? pd()(markdown) : Promise.resolve(md().render(markdown)));
+module.exports = (markdown) => (
+  argv.pandoc
+    ? pd()(markdown)
+    : Promise.resolve(md().render(markdown))
+);

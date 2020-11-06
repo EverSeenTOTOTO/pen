@@ -47,6 +47,7 @@ module.exports = class Watcher {
       });
       watchObj.on('change', this.trigger.bind(this));
       watchObj.on('error', this.onerror);// 不需要bind因为是传入的闭包
+      this.watchObj = watchObj;
     } catch (e) {
       this.onerror(e);
     }

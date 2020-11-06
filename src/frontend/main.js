@@ -9,7 +9,7 @@ import HTMLRenderer from './html-renderer';
 
 ReactDOM.render(
   <div id="app">
-    <HTMLRenderer location={location} />
+    <HTMLRenderer />
   </div>,
   document.body,
 );

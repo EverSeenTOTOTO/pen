@@ -14,7 +14,8 @@
       "react/destructuring-assignment": "off",
       "react/jsx-filename-extension": "off",
       "no-restricted-globals": "off",
-      "no-underscore-dangle": "off"
+      "no-underscore-dangle": "off",
+      "global-require": "warn"
   },
   "parser": "babel-eslint",
   "parserOptions": {
