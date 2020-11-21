@@ -1,4 +1,4 @@
-const open = require('opn');
+const open = require('open');
 const Server = require('./src/server');
 const argv = require('./src/argv');
 

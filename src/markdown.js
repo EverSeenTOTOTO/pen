@@ -1,22 +1,10 @@
 const mdit = require('markdown-it');
-const pandoc = require('simple-pandoc');
-const argv = require('./argv');
 
-const singleton = (creator) => {
-  const obj = creator();
-  return () => obj;
-};
-
-const md = singleton(() => mdit({ html: true, linkify: true })
+const md = mdit({ html: true, linkify: true })
   .use(require('markdown-it-highlightjs'))
   .use(require('markdown-it-emoji'))
   .use(require('markdown-it-checkbox'))
-  .use(require('markdown-it-anchor')));
+  .use(require('markdown-it-anchor'))
+  .use(require('markdown-it-multimd-table'));
 
-const pd = singleton(() => pandoc(argv.pandoc, 'html'));
-
-module.exports = (markdown) => (
-  argv.pandoc
-    ? pd()(markdown)
-    : Promise.resolve(md().render(markdown))
-);
+module.exports = (markdown) => Promise.resolve(md.render(markdown));
