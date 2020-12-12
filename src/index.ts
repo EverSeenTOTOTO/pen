@@ -7,15 +7,17 @@ import Watcher, { MdContent } from './watcher';
 type PenOptions = {
   path: string,
   namespace?: string,
-  socketPath?: string
 };
 
-export default class Pen {
+const middleware = (_req: any, res: any): void => {
+  res.setHeader('Content-Type', 'text/html');
+  fs.createReadStream(path.join(__dirname, './spa/index.html')).pipe(res);
+};
+
+class Pen {
   public readonly path;
 
   public readonly namespace ;
-
-  public readonly socketPath ;
 
   private iobase?: Server;
 
@@ -26,7 +28,6 @@ export default class Pen {
   constructor(opts: PenOptions) {
     this.path = opts.path;
     this.namespace = opts.namespace || '/';
-    this.socketPath = opts.socketPath || '/socket.io';
     this.connectedSockets = [];
   }
 
@@ -46,13 +47,6 @@ export default class Pen {
   use(socketioMiddleware: (socket: Socket, next: (...args: any[]) => void) => void):Pen {
     this.io?.use(socketioMiddleware);
     return this;
-  }
-
-  static get middleware() {
-    return (_req: any, res: any): void => {
-      res.setHeader('Content-Type', 'text/html');
-      fs.createReadStream(path.join(__dirname, './spa/index.html')).pipe(res);
-    };
   }
 
   private onConnection(socket: Socket) {
@@ -87,3 +81,8 @@ export default class Pen {
     this.iobase?.close();
   }
 }
+
+export {
+  middleware,
+  Pen,
+};
