@@ -1,7 +1,5 @@
 import { Namespace, Server, Socket } from 'socket.io';
 import { Server as HttpServer } from 'http';
-import path from 'path';
-import fs from 'fs';
 import Watcher, { MdContent } from './watcher';
 
 type PenOptions = {
@@ -9,12 +7,7 @@ type PenOptions = {
   namespace?: string,
 };
 
-const middleware = (_req: any, res: any): void => {
-  res.setHeader('Content-Type', 'text/html');
-  fs.createReadStream(path.join(__dirname, './spa/index.html')).pipe(res);
-};
-
-class Pen {
+export default class Pen {
   public readonly path;
 
   public readonly namespace ;
@@ -81,8 +74,3 @@ class Pen {
     this.iobase?.close();
   }
 }
-
-export {
-  middleware,
-  Pen,
-};

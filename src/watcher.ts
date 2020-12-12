@@ -1,4 +1,3 @@
-import nodeWatch from 'node-watch';
 import { resolve } from 'path';
 import fs, { FSWatcher } from 'fs';
 import mdrender from './markdown';
@@ -14,7 +13,6 @@ type WatcherOptions = {
   onerror: (e: Error) => void
 };
 
-const MarkdownFilePattern = /^[^.].*.(md|markdown)$/;
 const isDir = (filepath: string) => {
   const stat = fs.statSync(filepath);
   return stat.isDirectory();
@@ -23,7 +21,7 @@ const readMarkdownFiles = (path: string): Promise<MdContent> => {
   if (isDir(path)) {
     return fs.promises.readdir(path)
       .then((files) => files.map((filename: string) => {
-        if (MarkdownFilePattern.test(filename)) {
+        if (/^[^.].*.(md|markdown)$/.test(filename)) {
           return {
             filename, type: 'markdown',
           };
@@ -52,14 +50,19 @@ export default class Watcher {
 
   start(): Watcher {
     this.stop();
-    const watch = nodeWatch(this.options.path, {
-      recursive: false,
-      filter: MarkdownFilePattern,
-    });
-    watch.on('change', this.trigger.bind(this));
-    watch.on('error', this.options.onerror);
+    const watcher = fs.watch(
+      this.options.path,
+      {
+        recursive: false,
+      },
+      (event) => {
+        if (event === 'change') {
+          this.trigger();
+        }
+      },
+    );
 
-    this.watcher = watch;
+    this.watcher = watcher;
     return this;
   }
 
