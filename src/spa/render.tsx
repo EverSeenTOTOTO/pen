@@ -47,7 +47,6 @@ const HTMLRenderer = () => {
     });
     socket.on('pencontent', (serialized) => {
       try {
-        console.info(serialized);
         setData(JSON.parse(serialized));
       } catch (e) {
         setData(e.message);

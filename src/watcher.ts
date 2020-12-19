@@ -57,26 +57,31 @@ export default class Watcher {
 
   start(): Watcher {
     this.stop();
-    const watcher = fs.watch(
-      this.options.path,
-      {
-        recursive: false,
-      },
-      (event) => {
-        if (event === 'change') {
-          this.trigger();
-        } else if (event === 'rename') {
-          if (!isDir(this.options.path)) {
-            this.options.onerror(new Error(`no such file or directory: ${this.options.path}`));
-          } else {
+    try {
+      const watcher = fs.watch(
+        this.options.path,
+        {
+          recursive: false,
+        },
+        (event) => {
+          if (event === 'change') {
             this.trigger();
+          } else if (event === 'rename') {
+            if (!isDir(this.options.path)) {
+              this.options.onerror(new Error(`no such file or directory: ${this.options.path}`));
+            } else {
+              this.trigger();
+            }
           }
-        }
-      },
-    );
-    watcher.on('error', this.options.onerror);
+        },
+      );
+      watcher.on('error', this.options.onerror);
 
-    this.watcher = watcher;
+      this.watcher = watcher;
+    } catch (e) {
+      this.options.onerror(e);
+    }
+
     return this;
   }
 
