@@ -71,12 +71,7 @@ export default class Pen {
 
   private onConnection(socket: Socket) {
     const startWatch = (path: string) => {
-      const filepath = resolve(this.root, path);
-      const newWatcher = new Watcher({
-        path: filepath,
-        ondata: (content: MdContent) => socket.emit('pencontent', JSON.stringify(content)),
-        onerror: (e: Error) => socket.emit('penerror', e.message || `Internal Pen Error: ${e}`),
-      });
+      let filepath: string;
 
       const id = this.connectedSockets.findIndex(
         ({ socket: s }) => s === socket,
@@ -84,7 +79,16 @@ export default class Pen {
       if (id !== -1) { // if exist old watcher, stop it
         const { watcher: oldWatcher } = this.connectedSockets.splice(id, 1)[0];
         oldWatcher.stop();
+        filepath = resolve(oldWatcher.path, path); // 目录层级
+      } else {
+        filepath = resolve(this.root, path);
       }
+
+      const newWatcher = new Watcher({
+        path: filepath,
+        ondata: (content: MdContent) => socket.emit('pencontent', JSON.stringify(content)),
+        onerror: (e: Error) => socket.emit('penerror', e.message || `Internal Pen Error: ${e}`),
+      });
 
       this.connectedSockets.push({
         socket,

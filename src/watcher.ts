@@ -51,7 +51,7 @@ export default class Watcher {
     this.options = opts;
   }
 
-  get path() {
+  get path():string {
     return this.options.path;
   }
 
