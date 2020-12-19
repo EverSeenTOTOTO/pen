@@ -46,7 +46,7 @@ const HTMLRenderer = () => {
       socket.disconnect();
       socket.close();
     };
-  });
+  }, []);
 
   return Array.isArray(data)
     ? <Static list={data} />
