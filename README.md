@@ -14,15 +14,15 @@ yarn add @everseenflash/pen-middleware
 
 ```js
 const { createServer } = require('http');
-const { createReadStream } = require('fs');
-const Pen = require('@everseenflash/pen-middleware');
+const Pen, { middleware } = require('@everseenflash/pen-middleware');
 
 
-const server = createServer(/* ... */);
-
+const server = createServer(middleware);
 const pen = new Pen({
     path: './markdown/' //本地markdown文件或者目录
-}).attach(server);
+})
+
+pen.attach(server);
 
 server.listen(3000);
 ```

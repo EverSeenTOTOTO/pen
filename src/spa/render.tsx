@@ -34,8 +34,14 @@ const HTMLRenderer = () => {
     const socket = io({
       path: '/pensocket.io',
     });
-    socket.on('pencontent', setData);
-    socket.on('penerror', console.error);
+    socket.on('pencontent', (serialized) => {
+      try {
+        setData(JSON.parse(serialized));
+      } catch (e) {
+        setData(e.message);
+      }
+    });
+    socket.on('penerror', (e) => setData(e.message));
   });
 
   return Array.isArray(data)
