@@ -31,7 +31,9 @@ const HTMLRenderer = () => {
     const pathTokens = location.pathname.split('/');
     document.title = pathTokens[pathTokens.length - 1];
 
-    const socket = io(location.pathname);
+    const socket = io({
+      path: '/pensocket.io',
+    });
     socket.on('pencontent', setData);
     socket.on('penerror', console.error);
   });

@@ -1,14 +1,24 @@
+import fs from 'fs';
+import { Server as HttpServer, IncomingMessage, ServerResponse } from 'http';
 import { Namespace, Server, Socket } from 'socket.io';
-import { Server as HttpServer } from 'http';
 import Watcher, { MdContent } from './watcher';
 
 type PenOptions = {
-  path: string,
+  path?: string,
+  sockPath?: string,
   namespace?: string,
+};
+
+export const middleware = <Req extends IncomingMessage, Res extends ServerResponse>
+  (_req: Req, res: Res): void => {
+  fs.createReadStream(require.resolve('@everseenflash/pen-middleware/dist/spa/index.html'))
+    .pipe(res);
 };
 
 export default class Pen {
   public readonly path; // markdown path
+
+  public readonly sockPath; // socket.io capture path
 
   public readonly namespace;
 
@@ -20,13 +30,16 @@ export default class Pen {
 
   constructor(opts?: PenOptions) {
     this.path = opts?.path || '.';
+    this.sockPath = opts?.sockPath || '/pensocket.io';
     this.namespace = opts?.namespace || '/';
     this.connectedSockets = [];
   }
 
-  attach(server: HttpServer): Pen {
+  attach<T extends HttpServer>(server: T): Pen {
     server.on('listening', () => {
-      const iobase = new Server(server);
+      const iobase = new Server(server, {
+        path: this.sockPath,
+      });
       const io = iobase.of(this.namespace);
 
       io.on('connection', this.onConnection.bind(this));

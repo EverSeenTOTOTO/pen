@@ -26,6 +26,7 @@ describe('test pen', () => {
   it('test construct pen with default value', (done) => {
     const pen = new Pen();
     expect(pen.path).toBe('.');
+    expect(pen.sockPath).toBe('/pensocket.io');
     expect(pen.namespace).toBe('/');
     pen.close(done);
   });
@@ -36,7 +37,9 @@ describe('test pen', () => {
     });
     pen.attach(server);
 
-    const client = io('http://localhost:4213');
+    const client = io('http://localhost:4213', {
+      path: '/pensocket.io',
+    });
     client.on('pencontent', (data) => {
       expect(data).toMatch(/<h1.+>md<\/h1>/);
       client.close();
@@ -50,7 +53,9 @@ describe('test pen', () => {
     });
     pen.attach(server);
 
-    const client = io('http://localhost:4213');
+    const client = io('http://localhost:4213', {
+      path: '/pensocket.io',
+    });
     client.on('pencontent', (data) => {
       const arr = JSON.parse(data);
       expect(arr).toStrictEqual([
@@ -75,7 +80,9 @@ describe('test pen', () => {
     });
     pen.attach(server);
 
-    const client = io('http://localhost:4213/special');
+    const client = io('http://localhost:4213/special', {
+      path: '/pensocket.io',
+    });
     client.on('pencontent', (data) => {
       expect(data).toMatch(/<h1.+>md<\/h1>/);
       client.close();

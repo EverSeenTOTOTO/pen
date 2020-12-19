@@ -1,0 +1,9 @@
+node_modules
+*.log
+.vscode
+.eslint*
+babel.config.js
+webpack.config.js
+tsconfig.*
+dist/spa/*.css
+dist/spa/*.js
