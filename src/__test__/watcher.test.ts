@@ -2,23 +2,23 @@ import path from 'path';
 import fs from 'fs';
 import Watcher from '../watcher';
 
-const TMP_DIR = './tmp';
-const md = path.resolve(TMP_DIR, './hello.md');
-const notMd = path.resolve(TMP_DIR, './hello.txt');
-
-beforeEach(() => {
-  fs.mkdirSync(TMP_DIR);
-  fs.mkdirSync(path.resolve(TMP_DIR, './sub'));
-  fs.writeFileSync(md, '# md');
-  fs.writeFileSync(notMd, '# not md');
-});
-afterEach(() => {
-  fs.rmdirSync(TMP_DIR, {
-    recursive: true,
-  });
-});
-
 describe('test wathcer', () => {
+  const TMP_DIR = './tmp/';
+  const md = path.resolve(TMP_DIR, './hello.md');
+  const notMd = path.resolve(TMP_DIR, './hello.txt');
+
+  beforeEach(() => {
+    fs.mkdirSync(TMP_DIR);
+    fs.mkdirSync(path.resolve(TMP_DIR, './sub/'));
+    fs.writeFileSync(md, '# md');
+    fs.writeFileSync(notMd, '# not md');
+  });
+  afterEach(() => {
+    fs.rmdirSync(TMP_DIR, {
+      recursive: true,
+    });
+  });
+
   it('test watch file, trigger', (done) => {
     const watcher = new Watcher({
       path: md,
@@ -29,10 +29,11 @@ describe('test wathcer', () => {
       },
       onerror: () => {},
     });
+    watcher.start();
     watcher.trigger();
   });
 
-  it('test watch file, modify', (done) => {
+  it('watch file, modify', (done) => {
     const watcher = new Watcher({
       path: md,
       ondata: (data) => {
@@ -42,25 +43,25 @@ describe('test wathcer', () => {
       },
       onerror: () => {},
     });
+    watcher.start();
     fs.writeFileSync(md, '# wow');
-    expect(fs.readFileSync(md).toString()).toMatch(/# wow/);
   });
 
-  it('test watch file, delete', (done) => {
+  it('watch file, delete', (done) => {
     const watcher = new Watcher({
       path: md,
       ondata: () => {},
       onerror: (e) => {
-        console.info(e.message);
-        expect(e.message).toMatch(/file/);
+        expect(e.message).toMatch(/no such file or directory/);
         watcher.stop();
         done();
       },
     });
+    watcher.start();
     fs.unlinkSync(md);
   });
 
-  it('test watch not a md file', (done) => {
+  it('watch a no-md file', (done) => {
     const watcher = new Watcher({
       path: notMd,
       ondata: (data) => {
@@ -70,10 +71,11 @@ describe('test wathcer', () => {
       },
       onerror: () => {},
     });
+    watcher.start();
     watcher.trigger();
   });
 
-  it('test watch a dir, trigger', (done) => {
+  it('watch a dir, trigger', (done) => {
     const watcher = new Watcher({
       path: TMP_DIR,
       ondata: (data) => {
@@ -92,10 +94,11 @@ describe('test wathcer', () => {
       },
       onerror: () => {},
     });
+    watcher.start();
     watcher.trigger();
   });
 
-  it('test watch a dir, delete', (done) => {
+  it('watch a dir, delete file', (done) => {
     const watcher = new Watcher({
       path: TMP_DIR,
       ondata: (data) => {
@@ -110,6 +113,7 @@ describe('test wathcer', () => {
       },
       onerror: () => {},
     });
+    watcher.start();
     fs.unlinkSync(md);
   });
 });

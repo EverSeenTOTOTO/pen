@@ -15,12 +15,10 @@ yarn add @everseenflash/pen-middleware
 ```js
 const { createServer } = require('http');
 const { createReadStream } = require('fs');
-const { Pen, middleware } = require('@everseenflash/pen-middleware');
+const Pen = require('@everseenflash/pen-middleware');
 
 
-// 这个middleware用于将一个集成了socket.io客户端和内置md样式的html发送给浏览器
-// 这个html放在pen/dist/spa下，其实就是个(req, res) => { /* send html */ })方法
-const server = createServer(middleware);
+const server = createServer(/* ... */);
 
 const pen = new Pen({
     path: './markdown/' //本地markdown文件或者目录

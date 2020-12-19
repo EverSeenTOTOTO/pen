@@ -18,9 +18,9 @@ const isDir = (filepath: string) => {
   return stat.isDirectory();
 };
 const readMarkdownFiles = (path: string): Promise<MdContent> => {
-  if (isDir(path)) {
-    return fs.promises.readdir(path)
-      .then((files) => files.map((filename: string) => {
+  try {
+    if (isDir(path)) {
+      return fs.promises.readdir(path).then((files) => files.map((filename: string) => {
         if (/^[^.].*.(md|markdown)$/.test(filename)) {
           return {
             filename, type: 'markdown',
@@ -35,8 +35,11 @@ const readMarkdownFiles = (path: string): Promise<MdContent> => {
           type: 'other',
         };
       }));
+    }
+    return Promise.resolve(mdrender(fs.readFileSync(path).toString()));
+  } catch (e) {
+    return Promise.reject(e);
   }
-  return Promise.resolve(mdrender(fs.readFileSync(path).toString()));
 };
 
 export default class Watcher {
@@ -58,9 +61,16 @@ export default class Watcher {
       (event) => {
         if (event === 'change') {
           this.trigger();
+        } else if (event === 'rename') {
+          if (!isDir(this.options.path)) {
+            this.options.onerror(new Error(`no such file or directory: ${this.options.path}`));
+          } else {
+            this.trigger();
+          }
         }
       },
     );
+    watcher.on('error', this.options.onerror);
 
     this.watcher = watcher;
     return this;

@@ -8,32 +8,46 @@ type PenOptions = {
 };
 
 export default class Pen {
-  public readonly path;
+  public readonly path; // markdown path
 
-  public readonly namespace ;
+  public readonly namespace;
 
   private iobase?: Server;
 
   private io?: Namespace;
 
-  private readonly connectedSockets: {socket: Socket, watcher: Watcher}[];
+  private readonly connectedSockets: { socket: Socket, watcher: Watcher }[];
 
-  constructor(opts: PenOptions) {
-    this.path = opts.path;
-    this.namespace = opts.namespace || '/';
+  constructor(opts?: PenOptions) {
+    this.path = opts?.path || '.';
+    this.namespace = opts?.namespace || '/';
     this.connectedSockets = [];
   }
 
   attach(server: HttpServer): Pen {
-    const iobase = new Server(server);
-    const io = iobase.of(this.namespace);
+    server.on('listening', () => {
+      const iobase = new Server(server);
+      const io = iobase.of(this.namespace);
 
-    io.on('connection', this.onConnection.bind(this));
-    server.on('close', this.onClose.bind(this));
+      io.on('connection', this.onConnection.bind(this));
 
-    this.iobase = iobase;
-    this.io = io;
+      this.iobase = iobase;
+      this.io = io;
+    });
     return this;
+  }
+
+  close(callback?: () => void):void {
+    this.connectedSockets.forEach(({ socket, watcher }) => {
+      socket.removeAllListeners();
+      socket.disconnect(true);
+      watcher.stop();
+    });
+    if (this.iobase) {
+      this.iobase.close(callback);
+    } else {
+      callback?.();
+    }
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -43,34 +57,27 @@ export default class Pen {
   }
 
   private onConnection(socket: Socket) {
-    socket.on('disconnect', () => {
-      this.onDisconnection(socket);
-    });
     // 为这个socket配置一个watcher
     const watcher = new Watcher({
       path: this.path,
       ondata: (content: MdContent) => socket.emit('pencontent', JSON.stringify(content)),
       onerror: (e: Error) => socket.emit('penerror', e.message || `Internal Pen Error: ${e}`),
     });
-    watcher.start();
-    this.connectedSockets.push({ socket, watcher });
-  }
-
-  private onDisconnection(socket: Socket) {
-    const index = this.connectedSockets.findIndex(({ socket: sock }) => sock === socket);
-    if (index !== -1) {
-      const { socket: sock, watcher } = this.connectedSockets[index];
-      sock.disconnect();
+    socket.on('disconnect', () => {
       watcher.stop();
-      this.connectedSockets.splice(index, 1);
-    }
-  }
-
-  private onClose() {
-    this.connectedSockets.forEach(({ socket, watcher }) => {
-      socket.disconnect();
-      watcher.stop();
+      socket.disconnect(true);
+      const id = this.connectedSockets.findIndex(
+        ({ socket: s, watcher: w }) => s === socket && w === watcher,
+      );
+      if (id !== -1) {
+        this.connectedSockets.splice(id, 1);
+      }
     });
-    this.iobase?.close();
+    this.connectedSockets.push({
+      socket,
+      watcher,
+    });
+    watcher.start();
+    watcher.trigger();
   }
 }
