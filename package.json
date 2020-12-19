@@ -1,7 +1,7 @@
 {
   "name": "@everseenflash/pen-middleware",
   "main": "dist/index.js",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "types": "dist/index.d.ts",
   "license": "MIT",
   "author": "EverSeenTOTOTO <jialiuniu@gmail.com>",
