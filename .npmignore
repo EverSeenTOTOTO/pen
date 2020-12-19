@@ -9,3 +9,4 @@ webpack.config.js
 tsconfig.*
 dist/spa/*.css
 dist/spa/*.js
+dist/spa/*.txt

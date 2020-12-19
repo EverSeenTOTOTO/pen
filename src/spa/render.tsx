@@ -42,6 +42,10 @@ const HTMLRenderer = () => {
       }
     });
     socket.on('penerror', (e) => setData(e.message));
+    return () => {
+      socket.disconnect();
+      socket.close();
+    };
   });
 
   return Array.isArray(data)
