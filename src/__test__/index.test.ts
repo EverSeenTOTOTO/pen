@@ -25,7 +25,7 @@ describe('test pen', () => {
 
   it('test construct pen with default value', (done) => {
     const pen = new Pen();
-    expect(pen.path).toBe('.');
+    expect(pen.path).toBe(path.resolve('.'));
     expect(pen.sockPath).toBe('/pensocket.io');
     expect(pen.namespace).toBe('/');
     pen.close(done);

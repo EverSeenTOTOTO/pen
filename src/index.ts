@@ -1,4 +1,5 @@
-import fs from 'fs';
+import { createReadStream } from 'fs';
+import { resolve } from 'path';
 import { Server as HttpServer, IncomingMessage, ServerResponse } from 'http';
 import { Namespace, Server, Socket } from 'socket.io';
 import Watcher, { MdContent } from './watcher';
@@ -11,7 +12,7 @@ type PenOptions = {
 
 export const middleware = <Req extends IncomingMessage, Res extends ServerResponse>
   (_req: Req, res: Res): void => {
-  fs.createReadStream(require.resolve('@everseenflash/pen-middleware/dist/spa/index.html'))
+  createReadStream(require.resolve('@everseenflash/pen-middleware/dist/spa/index.html'))
     .pipe(res);
 };
 
@@ -29,7 +30,7 @@ export default class Pen {
   private readonly connectedSockets: { socket: Socket, watcher: Watcher }[];
 
   constructor(opts?: PenOptions) {
-    this.path = opts?.path || '.';
+    this.path = opts?.path ? resolve('.', opts.path) : resolve('.');
     this.sockPath = opts?.sockPath || '/pensocket.io';
     this.namespace = opts?.namespace || '/';
     this.connectedSockets = [];
