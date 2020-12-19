@@ -5,8 +5,8 @@ import { Namespace, Server, Socket } from 'socket.io';
 import Watcher, { MdContent } from './watcher';
 
 type PenOptions = {
+  root?: string,
   path?: string,
-  sockPath?: string,
   namespace?: string,
 };
 
@@ -15,11 +15,10 @@ export const middleware = <Req extends IncomingMessage, Res extends ServerRespon
   createReadStream(require.resolve('@everseenflash/pen-middleware/dist/spa/index.html'))
     .pipe(res);
 };
-
 export default class Pen {
-  public readonly path; // markdown path
+  public readonly root; // markdown path
 
-  public readonly sockPath; // socket.io capture path
+  public readonly path; // socket.io capture path
 
   public readonly namespace;
 
@@ -30,8 +29,8 @@ export default class Pen {
   private readonly connectedSockets: { socket: Socket, watcher: Watcher }[];
 
   constructor(opts?: PenOptions) {
-    this.path = opts?.path ? resolve('.', opts.path) : resolve('.');
-    this.sockPath = opts?.sockPath || '/pensocket.io';
+    this.root = opts?.root || resolve('.');
+    this.path = opts?.path || '/pensocket.io';
     this.namespace = opts?.namespace || '/';
     this.connectedSockets = [];
   }
@@ -39,7 +38,7 @@ export default class Pen {
   attach<T extends HttpServer>(server: T): Pen {
     server.on('listening', () => {
       const iobase = new Server(server, {
-        path: this.sockPath,
+        path: this.path,
       });
       const io = iobase.of(this.namespace);
 
@@ -71,27 +70,45 @@ export default class Pen {
   }
 
   private onConnection(socket: Socket) {
-    // 为这个socket配置一个watcher
-    const watcher = new Watcher({
-      path: this.path,
-      ondata: (content: MdContent) => socket.emit('pencontent', JSON.stringify(content)),
-      onerror: (e: Error) => socket.emit('penerror', e.message || `Internal Pen Error: ${e}`),
-    });
+    const startWatch = (path: string) => {
+      const filepath = resolve(this.root, path);
+      const newWatcher = new Watcher({
+        path: filepath,
+        ondata: (content: MdContent) => socket.emit('pencontent', JSON.stringify(content)),
+        onerror: (e: Error) => socket.emit('penerror', e.message || `Internal Pen Error: ${e}`),
+      });
+
+      const id = this.connectedSockets.findIndex(
+        ({ socket: s }) => s === socket,
+      );
+      if (id !== -1) { // if exist old watcher, stop it
+        const { watcher: oldWatcher } = this.connectedSockets.splice(id, 1)[0];
+        oldWatcher.stop();
+      }
+
+      this.connectedSockets.push({
+        socket,
+        watcher: newWatcher,
+      });
+
+      newWatcher.start();
+      newWatcher.trigger();
+    };
+
     socket.on('disconnect', () => {
-      watcher.stop();
       socket.disconnect(true);
       const id = this.connectedSockets.findIndex(
-        ({ socket: s, watcher: w }) => s === socket && w === watcher,
+        ({ socket: s }) => s === socket,
       );
       if (id !== -1) {
-        this.connectedSockets.splice(id, 1);
+        const { watcher } = this.connectedSockets.splice(id, 1)[0];
+        watcher.stop();
       }
     });
-    this.connectedSockets.push({
-      socket,
-      watcher,
-    });
-    watcher.start();
-    watcher.trigger();
+
+    // change watch file
+    socket.on('penfile', startWatch);
+
+    startWatch('./');
   }
 }

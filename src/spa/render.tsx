@@ -9,11 +9,21 @@ const createMarkup = (__html) => ({ __html });
 const Markdown = ({ html }) => <main className="markdown-body" dangerouslySetInnerHTML={createMarkup(html)} />;
 
 // 渲染md文件列表
-const Static = ({ list }) => (
+const Static = ({ client, list }) => (
   <main className="links">
     {list.length > 0 ? list.map((link) => {
       const { filename, type } = link;
-      return <a className={type} href={filename} key={filename}>{filename}</a>;
+      return (
+      // eslint-disable-next-line jsx-a11y/no-static-element-interactions
+        <span
+          className={type}
+          key={filename}
+          onClick={() => client.emit('penfile', filename)}
+          onKeyUp={() => {}}
+        >
+          {filename}
+        </span>
+      );
     }) : (
       <section className="nofile">
         <span>{'No markdown files in '}</span>
@@ -25,6 +35,7 @@ const Static = ({ list }) => (
 
 const HTMLRenderer = () => {
   const [data, setData] = useState('');
+  const [client, setClient] = useState(null);
 
   useEffect(() => {
     // Set title to Markdown filename
@@ -42,6 +53,7 @@ const HTMLRenderer = () => {
       }
     });
     socket.on('penerror', (e) => setData(e.message));
+    setClient(socket);
     return () => {
       socket.disconnect();
       socket.close();
@@ -49,7 +61,7 @@ const HTMLRenderer = () => {
   }, []);
 
   return Array.isArray(data)
-    ? <Static list={data} />
+    ? <Static client={client} list={data} />
     : <Markdown html={data} />;
 };
 

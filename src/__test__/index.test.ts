@@ -25,15 +25,15 @@ describe('test pen', () => {
 
   it('test construct pen with default value', (done) => {
     const pen = new Pen();
-    expect(pen.path).toBe(path.resolve('.'));
-    expect(pen.sockPath).toBe('/pensocket.io');
+    expect(pen.root).toBe(path.resolve('.'));
+    expect(pen.path).toBe('/pensocket.io');
     expect(pen.namespace).toBe('/');
     pen.close(done);
   });
 
   it('serve file', (done) => {
     const pen = new Pen({
-      path: md,
+      root: md,
     });
     pen.attach(server);
 
@@ -49,7 +49,7 @@ describe('test pen', () => {
 
   it('serve dir', (done) => {
     const pen = new Pen({
-      path: TMP_DIR,
+      root: TMP_DIR,
     });
     pen.attach(server);
 
@@ -75,7 +75,7 @@ describe('test pen', () => {
 
   it('use special namespace', (done) => {
     const pen = new Pen({
-      path: md,
+      root: md,
       namespace: '/special',
     });
     pen.attach(server);
@@ -87,6 +87,37 @@ describe('test pen', () => {
       expect(data).toMatch(/<h1.+>md<\/h1>/);
       client.close();
       pen.close(done);
+    });
+  });
+
+  it('client request', (done) => {
+    const pen = new Pen({
+      root: TMP_DIR,
+    });
+    pen.attach(server);
+
+    const client = io('http://localhost:4213', {
+      path: '/pensocket.io',
+    });
+    client.on('pencontent', (data) => {
+      const res = JSON.parse(data);
+      if (Array.isArray(res)) {
+        expect(res).toStrictEqual([
+          {
+            filename: path.basename(md),
+            type: 'markdown',
+          },
+          {
+            filename: 'sub',
+            type: 'dir',
+          },
+        ]);
+        client.emit('penfile', 'hello.md');
+      } else {
+        expect(res).toMatch(/md/);
+        client.close();
+        pen.close(done);
+      }
     });
   });
 });

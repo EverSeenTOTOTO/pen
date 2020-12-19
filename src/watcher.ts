@@ -51,6 +51,10 @@ export default class Watcher {
     this.options = opts;
   }
 
+  get path() {
+    return this.options.path;
+  }
+
   start(): Watcher {
     this.stop();
     const watcher = fs.watch(
