@@ -14,7 +14,7 @@ yarn add @everseenflash/pen-middleware
 
 ```js
 const { createServer } = require('http');
-const Pen, { middleware } = require('@everseenflash/pen-middleware');
+const { Pen, middleware } = require('@everseenflash/pen-middleware');
 
 
 const server = createServer(middleware);

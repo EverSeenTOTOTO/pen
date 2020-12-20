@@ -8,6 +8,7 @@ export type MdContent = string | {
 }[];
 
 type WatcherOptions = {
+  root: string,
   path: string,
   ondata: (content: MdContent) => void,
   onerror: (e: Error) => void
@@ -89,6 +90,13 @@ export default class Watcher {
     readMarkdownFiles(this.options.path)
       .then((content) => {
         if (typeof content !== 'string') {
+          // 如果不是根目录，添加“..”返回上一页
+          if (this.options.path !== this.options.root) {
+            content.push({
+              type: 'dir',
+              filename: '..',
+            });
+          }
           this.options.ondata(content.filter(({ type }) => type !== 'other'));
         } else {
           this.options.ondata(content);

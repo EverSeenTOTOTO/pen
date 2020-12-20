@@ -15,7 +15,7 @@ export const middleware = <Req extends IncomingMessage, Res extends ServerRespon
   createReadStream(require.resolve('@everseenflash/pen-middleware/dist/spa/index.html'))
     .pipe(res);
 };
-export default class Pen {
+export class Pen {
   public readonly root; // markdown path
 
   public readonly path; // socket.io capture path
@@ -86,6 +86,7 @@ export default class Pen {
 
       const newWatcher = new Watcher({
         path: filepath,
+        root: this.root,
         ondata: (content: MdContent) => socket.emit('pencontent', JSON.stringify(content)),
         onerror: (e: Error) => socket.emit('penerror', e.message || `Internal Pen Error: ${e}`),
       });
