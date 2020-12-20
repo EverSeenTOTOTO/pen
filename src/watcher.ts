@@ -92,7 +92,7 @@ export default class Watcher {
         if (typeof content !== 'string') {
           // 如果不是根目录，添加“..”返回上一页
           if (this.options.path !== this.options.root) {
-            content.push({
+            content.unshift({
               type: 'dir',
               filename: '..',
             });
