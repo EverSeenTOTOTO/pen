@@ -11,7 +11,7 @@ const Markdown = ({ html }) => <main className="markdown-body" dangerouslySetInn
 // 渲染md文件列表
 const Static = ({ client, list }) => (
   <main className="links">
-    {list.length > 0 ? list.map((link) => {
+    {list.map((link) => {
       const { filename, type } = link;
       return (
       // eslint-disable-next-line jsx-a11y/no-static-element-interactions
@@ -27,12 +27,7 @@ const Static = ({ client, list }) => (
           {filename}
         </span>
       );
-    }) : (
-      <section className="nofile">
-        <span>{'No markdown files in '}</span>
-        {location.pathname}
-      </section>
-    )}
+    })}
   </main>
 );
 
@@ -56,7 +51,6 @@ const HTMLRenderer = () => {
     socket.on('penerror', (e) => setData(e.message));
     setClient(socket);
     return () => {
-      socket.disconnect();
       socket.close();
     };
   }, []);

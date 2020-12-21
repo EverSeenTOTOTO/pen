@@ -4,7 +4,7 @@ import { Server as HttpServer, IncomingMessage, ServerResponse } from 'http';
 import { Namespace, Server, Socket } from 'socket.io';
 import Watcher, { MdContent } from './watcher';
 
-type PenOptions = {
+export type PenOptions = {
   root?: string,
   path?: string,
   namespace?: string,
@@ -36,17 +36,15 @@ export class Pen {
   }
 
   attach<T extends HttpServer>(server: T): Pen {
-    server.on('listening', () => {
-      const iobase = new Server(server, {
-        path: this.path,
-      });
-      const io = iobase.of(this.namespace);
-
-      io.on('connection', this.onConnection.bind(this));
-
-      this.iobase = iobase;
-      this.io = io;
+    const iobase = new Server(server, {
+      path: this.path,
     });
+    const io = iobase.of(this.namespace);
+
+    io.on('connection', this.onConnection.bind(this));
+
+    this.iobase = iobase;
+    this.io = io;
     return this;
   }
 
@@ -57,7 +55,7 @@ export class Pen {
       watcher.stop();
     });
     if (this.iobase) {
-      this.iobase.close(callback);
+      this.iobase.close(() => callback?.());
     } else {
       callback?.();
     }

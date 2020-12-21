@@ -1,6 +1,6 @@
 import path from 'path';
 import fs from 'fs';
-import http from 'http';
+import http, { ServerResponse } from 'http';
 import { io } from 'socket.io-client';
 import { Pen } from '../index';
 
@@ -8,28 +8,41 @@ describe('test pen', () => {
   const TMP_DIR = './tmp/';
   const md = path.resolve(TMP_DIR, './hello.md');
   const port = 4213;
-  const url = `http://localhost:${port}`;
   let server: http.Server;
-  beforeAll(() => new Promise<void>((res) => {
+  const checkClosedConnection = (res) => () => {
+    server.getConnections((e, c) => {
+      expect(c).toBe(0);
+      res();
+    });
+  };
+
+  beforeAll(() => {
     fs.mkdirSync(TMP_DIR);
     fs.mkdirSync(path.resolve(TMP_DIR, './sub/'));
     fs.writeFileSync(md, '# md');
-    server = http.createServer();
-    server.listen(port, res);
-  }));
-  afterAll(() => new Promise((res) => {
+    server = http.createServer((_req, res: ServerResponse) => {
+      fs.createReadStream(path.resolve('./dist/spa/index.html'))
+        .pipe(res);
+    });
+    return new Promise<void>((res) => {
+      server.listen(port, res);
+    });
+  });
+  afterAll(() => {
     fs.rmdirSync(TMP_DIR, {
       recursive: true,
     });
-    server.close(res);
-  }));
+    return new Promise((res) => {
+      server.close(res);
+    });
+  });
 
   it('test construct pen with default value', () => new Promise<void>((res) => {
     const pen = new Pen();
     expect(pen.root).toBe(path.resolve('.'));
     expect(pen.path).toBe('/pensocket.io');
     expect(pen.namespace).toBe('/');
-    pen.close(res);
+    pen.close(checkClosedConnection(res));
   }));
 
   it('serve file', () => new Promise<void>((res, rej) => {
@@ -38,13 +51,13 @@ describe('test pen', () => {
     });
     pen.attach(server);
 
-    const client = io(url, {
+    const client = io({
       path: '/pensocket.io',
     });
     client.on('pencontent', (data) => {
       expect(data).toMatch(/<h1.+>md<\/h1>/);
       client.close();
-      pen.close(res);
+      pen.close(checkClosedConnection(res));
     });
     client.on('penerror', rej);
   }));
@@ -55,7 +68,7 @@ describe('test pen', () => {
     });
     pen.attach(server);
 
-    const client = io(url, {
+    const client = io('/', {
       path: '/pensocket.io',
     });
     client.on('pencontent', (data) => {
@@ -71,7 +84,7 @@ describe('test pen', () => {
         },
       ]);
       client.close();
-      pen.close(res);
+      pen.close(checkClosedConnection(res));
     });
     client.on('penerror', rej);
   }));
@@ -83,13 +96,13 @@ describe('test pen', () => {
     });
     pen.attach(server);
 
-    const client = io(`${url}/special`, {
+    const client = io('/special', {
       path: '/pensocket.io',
     });
     client.on('pencontent', (data) => {
       expect(data).toMatch(/<h1.+>md<\/h1>/);
       client.close();
-      pen.close(res);
+      pen.close(checkClosedConnection(res));
     });
     client.on('penerror', rej);
   }));
@@ -100,7 +113,7 @@ describe('test pen', () => {
     });
     pen.attach(server);
 
-    const client = io(url, {
+    const client = io('/', {
       path: '/pensocket.io',
     });
     client.on('pencontent', (data) => {
@@ -121,7 +134,7 @@ describe('test pen', () => {
       } else {
         expect(result).toMatch(/md/);
         client.close();
-        pen.close(res);
+        pen.close(checkClosedConnection(res));
       }
     });
     client.on('penerror', rej);
