@@ -117,3 +117,5 @@ export class Pen {
     startWatch('./');
   }
 }
+
+export default Pen;

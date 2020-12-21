@@ -18,7 +18,10 @@ const Static = ({ client, list }) => (
         <span
           className={type}
           key={filename}
-          onClick={() => client.emit('penfile', filename)}
+          onClick={() => {
+            document.title = filename;
+            client.emit('penfile', filename);
+          }}
           onKeyUp={() => {}}
         >
           {filename}
@@ -38,9 +41,7 @@ const HTMLRenderer = () => {
   const [client, setClient] = useState(null);
 
   useEffect(() => {
-    // Set title to Markdown filename
-    const pathTokens = location.pathname.split('/');
-    document.title = pathTokens[pathTokens.length - 1];
+    document.title = 'Pen';
 
     const socket = io(location.pathname, {
       path: '/pensocket.io',
