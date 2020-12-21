@@ -2,7 +2,7 @@ import path from 'path';
 import fs from 'fs';
 import http, { ServerResponse } from 'http';
 import { io } from 'socket.io-client';
-import { Pen } from '../index';
+import { pen } from '../index';
 
 describe('test pen', () => {
   const TMP_DIR = path.resolve('./tmp/');
@@ -36,18 +36,21 @@ describe('test pen', () => {
   });
   afterEach(() => new Promise((res) => {
     server.close(res);
+    pen.clear();
   }));
 
   it('test construct pen with default value', () => new Promise<void>((res) => {
-    const pen = new Pen();
-    expect(pen.root).toBe(path.resolve('.'));
-    expect(pen.path).toBe('/pensocket.io');
-    expect(pen.namespace).toBe('/');
+    pen.create();
+    expect(pen.namespaces.length).toBe(1);
+    const nsp = pen.namespaces[0];
+    expect(nsp.namespace).toBe('/');
+    expect(nsp.root).toBe(path.resolve('.'));
+    expect(nsp.io).toBeNull();
     pen.close(checkClosedConnection(res));
   }));
 
   it('serve file', () => new Promise<void>((res, rej) => {
-    const pen = new Pen({
+    pen.create({
       root: md,
     });
     pen.attach(server);
@@ -64,7 +67,7 @@ describe('test pen', () => {
   }));
 
   it('serve dir', () => new Promise<void>((res, rej) => {
-    const pen = new Pen({
+    pen.create({
       root: TMP_DIR,
     });
     pen.attach(server);
@@ -91,7 +94,7 @@ describe('test pen', () => {
   }));
 
   it('use special namespace', () => new Promise<void>((res, rej) => {
-    const pen = new Pen({
+    pen.create({
       root: md,
       namespace: '/special',
     });
@@ -109,7 +112,7 @@ describe('test pen', () => {
   }));
 
   it('client request', () => new Promise<void>((res, rej) => {
-    const pen = new Pen({
+    pen.create({
       root: TMP_DIR,
     });
     pen.attach(server);
