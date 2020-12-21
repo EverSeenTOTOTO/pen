@@ -41,6 +41,7 @@ const HTMLRenderer = () => {
     const socket = io(location.pathname, {
       path: '/pensocket.io',
     });
+    socket.on('connect_error', console.error);
     socket.on('pencontent', (serialized) => {
       try {
         setData(JSON.parse(serialized));

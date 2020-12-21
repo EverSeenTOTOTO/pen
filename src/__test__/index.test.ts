@@ -68,7 +68,7 @@ describe('test pen', () => {
     });
     pen.attach(server);
 
-    const client = io('/', {
+    const client = io({
       path: '/pensocket.io',
     });
     client.on('pencontent', (data) => {
@@ -113,7 +113,7 @@ describe('test pen', () => {
     });
     pen.attach(server);
 
-    const client = io('/', {
+    const client = io({
       path: '/pensocket.io',
     });
     client.on('pencontent', (data) => {
