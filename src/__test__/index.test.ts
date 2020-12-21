@@ -5,9 +5,10 @@ import { io } from 'socket.io-client';
 import { Pen } from '../index';
 
 describe('test pen', () => {
-  const TMP_DIR = './tmp/';
+  const TMP_DIR = path.resolve('./tmp/');
   const md = path.resolve(TMP_DIR, './hello.md');
   const port = 4213;
+  const url = `http://localhost:${port}`;
   let server: http.Server;
   const checkClosedConnection = (res) => () => {
     server.getConnections((e, c) => {
@@ -24,18 +25,18 @@ describe('test pen', () => {
       fs.createReadStream(path.resolve('./dist/spa/index.html'))
         .pipe(res);
     });
-    return new Promise<void>((res) => {
-      server.listen(port, res);
-    });
   });
+  beforeEach(() => new Promise<void>((res) => {
+    server.listen(port, res);
+  }));
   afterAll(() => {
     fs.rmdirSync(TMP_DIR, {
       recursive: true,
     });
-    return new Promise((res) => {
-      server.close(res);
-    });
   });
+  afterEach(() => new Promise((res) => {
+    server.close(res);
+  }));
 
   it('test construct pen with default value', () => new Promise<void>((res) => {
     const pen = new Pen();
@@ -51,7 +52,7 @@ describe('test pen', () => {
     });
     pen.attach(server);
 
-    const client = io({
+    const client = io(url, {
       path: '/pensocket.io',
     });
     client.on('pencontent', (data) => {
@@ -68,7 +69,7 @@ describe('test pen', () => {
     });
     pen.attach(server);
 
-    const client = io({
+    const client = io(url, {
       path: '/pensocket.io',
     });
     client.on('pencontent', (data) => {
@@ -96,7 +97,7 @@ describe('test pen', () => {
     });
     pen.attach(server);
 
-    const client = io('/special', {
+    const client = io(`${url}/special`, {
       path: '/pensocket.io',
     });
     client.on('pencontent', (data) => {
@@ -113,7 +114,7 @@ describe('test pen', () => {
     });
     pen.attach(server);
 
-    const client = io({
+    const client = io(url, {
       path: '/pensocket.io',
     });
     client.on('pencontent', (data) => {

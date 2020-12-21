@@ -38,7 +38,7 @@ const HTMLRenderer = () => {
   useEffect(() => {
     document.title = 'Pen';
 
-    const socket = io(location.pathname, {
+    const socket = io(location.href, {
       path: '/pensocket.io',
     });
     socket.on('connect_error', console.error);
