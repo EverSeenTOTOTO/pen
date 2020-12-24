@@ -12,6 +12,7 @@ export type PenOptions = {
 
 const middleware = <Req extends IncomingMessage, Res extends ServerResponse>
   (_req: Req, res: Res): void => {
+  res.setHeader('Content-Type', 'text/html');
   createReadStream(require.resolve('@everseenflash/pen-middleware/dist/spa/index.html'))
     .pipe(res);
 };
