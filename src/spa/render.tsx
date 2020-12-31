@@ -29,9 +29,9 @@ const Static = ({ list }) => (
 const getHashUrl = (url) => {
   const index = url.indexOf('#');
   if (index >= 0) {
-    return url.slice(index + 1);
+    return url.slice(index + 2);
   }
-  return '/';
+  return '';
 };
 
 const HTMLRenderer = ():JSX.Element => {
@@ -56,8 +56,10 @@ const HTMLRenderer = ():JSX.Element => {
     socket.on('penerror', (e) => setData(e.message));
 
     window.addEventListener('hashchange', (e) => {
-      const path = getHashUrl(e.newURL);
-      console.log(path);
+      let path = getHashUrl(e.newURL);
+      if (path === '') {
+        path = getHashUrl(e.oldURL);
+      }
       socket.emit('penfile', path);
     });
 
