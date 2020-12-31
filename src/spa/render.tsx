@@ -9,23 +9,18 @@ const createMarkup = (__html) => ({ __html });
 const Markdown = ({ html }) => <main className="markdown-body" dangerouslySetInnerHTML={createMarkup(html)} />;
 
 // 渲染md文件列表
-const Static = ({ client, list }) => (
+const Static = ({ list }) => (
   <main className="links">
     {list.map((link) => {
       const { filename, type } = link;
       return (
-      // eslint-disable-next-line jsx-a11y/no-static-element-interactions
-        <span
+        <a
           className={type}
           key={filename}
-          onClick={() => {
-            client.emit('penfile', filename);
-            history.pushState(filename, filename, `#/${filename}`);
-          }}
-          onKeyUp={() => {}}
+          href={`/${filename}`}
         >
           {filename}
-        </span>
+        </a>
       );
     })}
   </main>
@@ -33,7 +28,6 @@ const Static = ({ client, list }) => (
 
 const HTMLRenderer = ():JSX.Element => {
   const [data, setData] = useState('');
-  const [client, setClient] = useState(null);
 
   const isDirs = Array.isArray(data);
 
@@ -52,7 +46,12 @@ const HTMLRenderer = ():JSX.Element => {
       }
     });
     socket.on('penerror', (e) => setData(e.message));
-    setClient(socket);
+
+    window.addEventListener('popstate', (e) => {
+      const path = e.state?.path;
+      socket.emit('penfile', path);
+    });
+
     return () => {
       socket.close();
     };
@@ -62,7 +61,7 @@ const HTMLRenderer = ():JSX.Element => {
     <>
       <span id="pen-scroll-item" />
       {isDirs
-        ? <Static client={client} list={data} />
+        ? <Static list={data} />
         : <Markdown html={data} />}
     </>
   );
