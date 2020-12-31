@@ -63,7 +63,7 @@ const HTMLRenderer = ():JSX.Element => {
     return () => {
       socket.close();
     };
-  }, [location.href]);
+  }, []);
 
   return (
     <>
