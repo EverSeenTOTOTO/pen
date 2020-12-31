@@ -17,7 +17,7 @@ const Static = ({ list }) => (
         <a
           className={type}
           key={filename}
-          href={`/${filename}`}
+          href={`#/${filename}`}
         >
           {filename}
         </a>
@@ -25,6 +25,14 @@ const Static = ({ list }) => (
     })}
   </main>
 );
+
+const getHashUrl = (url) => {
+  const index = url.indexOf('#');
+  if (index >= 0) {
+    return url.slice(index + 1);
+  }
+  return '/';
+};
 
 const HTMLRenderer = ():JSX.Element => {
   const [data, setData] = useState('');
@@ -47,8 +55,9 @@ const HTMLRenderer = ():JSX.Element => {
     });
     socket.on('penerror', (e) => setData(e.message));
 
-    window.addEventListener('popstate', (e) => {
-      const path = e.state?.path;
+    window.addEventListener('hashchange', (e) => {
+      const path = getHashUrl(e.newURL);
+      console.log(path);
       socket.emit('penfile', path);
     });
 

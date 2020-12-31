@@ -21,7 +21,7 @@ li>input[type='checkbox'] {
   flex-direction: column;
 }
 
-.links span {
+.links a {
   width: 100%;
   font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif;
   font-size: 1.2em;
@@ -35,12 +35,12 @@ li>input[type='checkbox'] {
   cursor: pointer;
 }
 
-.links span.dir {
+.links a.dir {
   font-weight: normal;
   color: #4492eb;
 }
 
-.links span:hover {
+.links a:hover {
   animation: scaleLink 0.3s;
   transform: scale(1.03);
   background-color: #e2edf8;
