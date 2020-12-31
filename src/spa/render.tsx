@@ -56,17 +56,14 @@ const HTMLRenderer = ():JSX.Element => {
     socket.on('penerror', (e) => setData(e.message));
 
     window.addEventListener('hashchange', (e) => {
-      let path = getHashUrl(e.newURL);
-      if (path === '') {
-        path = getHashUrl(e.oldURL);
-      }
+      const path = getHashUrl(e.newURL);
       socket.emit('penfile', path);
     });
 
     return () => {
       socket.close();
     };
-  }, []);
+  }, [location.href]);
 
   return (
     <>

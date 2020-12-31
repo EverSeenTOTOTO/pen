@@ -53,7 +53,7 @@ export default class Pen {
 
       io.on('connection', (socket: Socket) => {
         const startWatch = (path: string) => {
-          let filepath: string;
+          const filepath = resolve(root, path);
 
           const id = this.connectedSockets.findIndex(
             ({ socket: s }) => s === socket,
@@ -62,9 +62,6 @@ export default class Pen {
             const { watcher: oldWatcher } = this.connectedSockets.splice(id, 1)[0];
             this.logger?.info(`Pen stop watching ${oldWatcher.path} due to new connection.`);
             oldWatcher.stop();
-            filepath = resolve(oldWatcher.path, path); // 目录层级
-          } else {
-            filepath = resolve(root, path);
           }
 
           this.logger?.info(`Pen start watching ${filepath} due to new connection`);
