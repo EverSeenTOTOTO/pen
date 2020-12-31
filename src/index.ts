@@ -2,12 +2,19 @@ import { createReadStream } from 'fs';
 import { resolve } from 'path';
 import { Server as HttpServer, IncomingMessage, ServerResponse } from 'http';
 import { Namespace, Server, Socket } from 'socket.io';
-import Watcher, { MdContent } from './watcher';
+import Watcher, { PenLogger, MdContent } from './watcher';
 
-export type PenOptions = {
+type PenOptions = {
   root?: string,
   namespace?: string,
   io?: Namespace | null
+};
+
+export type PenCreateOptions = Pick<PenOptions, 'root' | 'namespace'>;
+
+export type PenConstructorOptions = {
+  path?: string,
+  logger?: PenLogger,
 };
 
 const middleware = <Req extends IncomingMessage, Res extends ServerResponse>
@@ -21,14 +28,19 @@ export default class Pen {
 
   private iobase?: Server;
 
+  private logger?: PenLogger;
+
   public namespaces: Required<PenOptions>[];
 
   private readonly connectedSockets: { socket: Socket, watcher: Watcher }[];
 
-  constructor(path?: string) {
-    this.path = path || '/pensocket.io';
+  constructor(opts ?:PenConstructorOptions) {
+    this.path = opts?.path || '/pensocket.io';
+    this.logger = opts?.logger || undefined;
     this.connectedSockets = [];
     this.namespaces = [];
+
+    this.logger?.info(`Construct pen with socket.io path: ${this.path}`);
   }
 
   attach<T extends HttpServer>(server: T): Pen {
@@ -36,6 +48,7 @@ export default class Pen {
       path: this.path,
     });
     this.namespaces.forEach(({ root, namespace }) => {
+      this.logger?.info(`Create pen middleware with root ${root}, namespace: ${namespace}`);
       const io = iobase.of(namespace);
 
       io.on('connection', (socket: Socket) => {
@@ -47,12 +60,14 @@ export default class Pen {
           );
           if (id !== -1) { // if exist old watcher, stop it
             const { watcher: oldWatcher } = this.connectedSockets.splice(id, 1)[0];
+            this.logger?.info(`Pen stop watching ${oldWatcher.path} due to new connection.`);
             oldWatcher.stop();
             filepath = resolve(oldWatcher.path, path); // 目录层级
           } else {
             filepath = resolve(root, path);
           }
 
+          this.logger?.info(`Pen start watching ${filepath} due to new connection`);
           const newWatcher = new Watcher({
             path: filepath,
             root,
@@ -76,6 +91,7 @@ export default class Pen {
           );
           if (id !== -1) {
             const { watcher } = this.connectedSockets.splice(id, 1)[0];
+            this.logger?.info(`Pen stop watching ${watcher.path} due to disconnection`);
             watcher.stop();
           }
         });
@@ -92,22 +108,24 @@ export default class Pen {
     return this;
   }
 
-  create(opts?: Pick<PenOptions, 'root' | 'namespace'>): Pen {
+  create(opts?: PenCreateOptions): Pen {
     const namespace = {
       root: opts?.root || resolve('.'),
       namespace: opts?.namespace || '/',
       io: null,
     };
+    this.logger?.info(`Construct pen middleware with socket.io namespace ${namespace}, prepare to watch ${namespace.root}`);
     this.namespaces.push(namespace);
     return this;
   }
 
-  clear(filter?: (nsp: Pick<PenOptions, 'root' | 'namespace'>) => boolean): Pen {
+  clear(filter?: (nsp: PenCreateOptions) => boolean): Pen {
     const matched = this.namespaces.filter(
       ({ root, namespace }) => (filter ? filter({ root, namespace }) : true),
     );
     if (matched.length > 0) {
       matched.forEach((match) => {
+        this.logger?.info(`Remove pen middleware ${match.namespace}`);
         match.io?.removeAllListeners();
         const index = this.namespaces.indexOf(match);
         this.namespaces.splice(index, 1);
@@ -122,6 +140,7 @@ export default class Pen {
       socket.disconnect(true);
       watcher.stop();
     });
+    this.logger?.info('Pen closed.');
     if (this.iobase) {
       this.iobase.close(() => callback?.());
     } else {

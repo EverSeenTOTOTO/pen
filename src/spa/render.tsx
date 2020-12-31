@@ -19,8 +19,8 @@ const Static = ({ client, list }) => (
           className={type}
           key={filename}
           onClick={() => {
-            document.title = filename;
             client.emit('penfile', filename);
+            history.pushState(filename, filename, `#/${filename}`);
           }}
           onKeyUp={() => {}}
         >
@@ -31,9 +31,11 @@ const Static = ({ client, list }) => (
   </main>
 );
 
-const HTMLRenderer = () => {
+const HTMLRenderer = ():JSX.Element => {
   const [data, setData] = useState('');
   const [client, setClient] = useState(null);
+
+  const isDirs = Array.isArray(data);
 
   useEffect(() => {
     document.title = 'Pen';
@@ -56,9 +58,14 @@ const HTMLRenderer = () => {
     };
   }, []);
 
-  return Array.isArray(data)
-    ? <Static client={client} list={data} />
-    : <Markdown html={data} />;
+  return (
+    <>
+      <span id="pen-scroll-item" />
+      {isDirs
+        ? <Static client={client} list={data} />
+        : <Markdown html={data} />}
+    </>
+  );
 };
 
 export default HTMLRenderer;

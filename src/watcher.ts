@@ -2,6 +2,13 @@ import { resolve } from 'path';
 import fs, { FSWatcher } from 'fs';
 import mdrender from './markdown';
 
+export type PenLogger = {
+  info: (...args: any[]) => void,
+  warn: (...args: any[]) => void,
+  error: (...args: any[]) => void,
+  log: (...args: any[]) => void
+};
+
 export type MdContent = string | {
   filename?: string,
   type: 'markdown' | 'dir' | 'other'
@@ -10,6 +17,7 @@ export type MdContent = string | {
 type WatcherOptions = {
   root: string,
   path: string,
+  logger?: PenLogger,
   ondata: (content: MdContent) => void,
   onerror: (e: Error) => void
 };
@@ -43,6 +51,13 @@ const readMarkdownFiles = (path: string): Promise<MdContent> => {
   }
 };
 
+const checkPermission = (filepath: string, root:string) => {
+  if (!resolve(filepath).startsWith(resolve(root))) {
+    throw new Error(`Pen not permitted to watch: ${filepath}`);
+  }
+  return true;
+};
+
 export default class Watcher {
   private readonly options: WatcherOptions;
 
@@ -56,20 +71,26 @@ export default class Watcher {
     return this.options.path;
   }
 
+  get logger(): PenLogger | undefined {
+    return this.options.logger;
+  }
+
   start(): Watcher {
     this.stop();
     try {
+      checkPermission(this.path, this.options.root);
       const watcher = fs.watch(
-        this.options.path,
+        this.path,
         {
           recursive: false,
         },
         (event) => {
+          this.logger?.info(`${this.path} -> ${event}`);
           if (event === 'change') {
             this.trigger();
           } else if (event === 'rename') {
-            if (!isDir(this.options.path)) {
-              this.options.onerror(new Error(`no such file or directory: ${this.options.path}`));
+            if (!isDir(this.path)) {
+              this.options.onerror(new Error(`no such file or directory: ${this.path}`));
             } else {
               this.trigger();
             }
@@ -80,6 +101,7 @@ export default class Watcher {
 
       this.watcher = watcher;
     } catch (e) {
+      this.logger?.error(e);
       this.options.onerror(e);
     }
 
@@ -87,11 +109,11 @@ export default class Watcher {
   }
 
   trigger(): Watcher {
-    readMarkdownFiles(this.options.path)
+    readMarkdownFiles(this.path)
       .then((content) => {
         if (typeof content !== 'string') {
           // 如果不是根目录，添加“..”返回上一页
-          if (resolve(this.options.path) !== resolve(this.options.root)) {
+          if (resolve(this.path) !== resolve(this.options.root)) {
             content.unshift({
               type: 'dir',
               filename: '..',
@@ -102,7 +124,10 @@ export default class Watcher {
           this.options.ondata(content);
         }
       })
-      .catch(this.options.onerror);
+      .catch((e) => {
+        this.logger?.error(e);
+        this.options.onerror(e);
+      });
     return this;
   }
 
