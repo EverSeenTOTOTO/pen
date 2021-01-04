@@ -111,11 +111,7 @@ export default class Watcher {
   trigger(): Watcher {
     readMarkdownFiles(this.path)
       .then((content) => {
-        if (typeof content !== 'string') {
-          this.options.ondata(content.filter(({ type }) => type !== 'other'));
-        } else {
-          this.options.ondata(content);
-        }
+        this.options.ondata(content);
       })
       .catch((e) => {
         this.logger?.error(e);
