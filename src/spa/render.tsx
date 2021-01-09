@@ -22,12 +22,12 @@ const Static = ({ list }) => (
     {list.map((link) => {
       const { filename, type } = link;
       let basepath = getHashUrl(location.href);
-      basepath = basepath.endsWith('/') ? basepath : `${basepath}/`;
+      basepath = basepath !== '' && basepath.endsWith('/') ? basepath : `${basepath}/`;
       return (
         <a
           className={type}
           key={filename}
-          href={`#/${basepath}/${filename}`}
+          href={`#/${basepath}${filename}`}
         >
           {filename}
         </a>
