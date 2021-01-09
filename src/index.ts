@@ -68,7 +68,13 @@ export default class Pen {
           const newWatcher = new Watcher({
             path: filepath,
             root,
-            ondata: (content: MdContent) => socket.emit('pencontent', JSON.stringify(content)),
+            ondata: (content: MdContent) => {
+              const data = typeof content === 'string'
+                ? JSON.stringify(content) : JSON.stringify(content.filter(
+                  (item) => item.type !== 'other',
+                ));
+              socket.emit('pencontent', data);
+            },
             onerror: (e: Error) => socket.emit('penerror', e.message || `Internal Pen Error: ${e}`),
           });
 

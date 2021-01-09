@@ -88,10 +88,6 @@ describe('test wathcer', () => {
       ondata: (data) => {
         expect(data).toEqual([
           {
-            filename: '..',
-            type: 'dir',
-          },
-          {
             filename: path.basename(md),
             type: 'markdown',
           },
@@ -115,10 +111,6 @@ describe('test wathcer', () => {
       root,
       ondata: (data) => {
         expect(data).toEqual([
-          {
-            filename: '..',
-            type: 'dir',
-          },
           {
             filename: 'sub',
             type: 'dir',

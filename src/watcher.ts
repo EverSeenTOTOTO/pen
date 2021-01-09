@@ -112,13 +112,6 @@ export default class Watcher {
     readMarkdownFiles(this.path)
       .then((content) => {
         if (typeof content !== 'string') {
-          // 如果不是根目录，添加“..”返回上一页
-          if (resolve(this.path) !== resolve(this.options.root)) {
-            content.unshift({
-              type: 'dir',
-              filename: '..',
-            });
-          }
           this.options.ondata(content.filter(({ type }) => type !== 'other'));
         } else {
           this.options.ondata(content);

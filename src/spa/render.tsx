@@ -8,24 +8,6 @@ const createMarkup = (__html) => ({ __html });
 // 渲染markdown
 const Markdown = ({ html }) => <main className="markdown-body" dangerouslySetInnerHTML={createMarkup(html)} />;
 
-// 渲染md文件列表
-const Static = ({ list }) => (
-  <main className="links">
-    {list.map((link) => {
-      const { filename, type } = link;
-      return (
-        <a
-          className={type}
-          key={filename}
-          href={`#/${filename}`}
-        >
-          {filename}
-        </a>
-      );
-    })}
-  </main>
-);
-
 const getHashUrl = (url) => {
   const index = url.indexOf('#');
   if (index >= 0) {
@@ -33,6 +15,26 @@ const getHashUrl = (url) => {
   }
   return '';
 };
+
+// 渲染md文件列表
+const Static = ({ list }) => (
+  <main className="links">
+    {list.map((link) => {
+      const { filename, type } = link;
+      let basepath = getHashUrl(location.href);
+      basepath = basepath.endsWith('/') ? basepath : `${basepath}/`;
+      return (
+        <a
+          className={type}
+          key={filename}
+          href={`#/${basepath}/${filename}`}
+        >
+          {filename}
+        </a>
+      );
+    })}
+  </main>
+);
 
 const HTMLRenderer = ():JSX.Element => {
   const [data, setData] = useState('');

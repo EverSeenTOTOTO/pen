@@ -6,7 +6,10 @@ import { pen } from '../index';
 
 describe('test pen', () => {
   const TMP_DIR = path.resolve('./tmp/');
+  const TMP_SUB_DIR = path.resolve(TMP_DIR, './sub/');
   const md = path.resolve(TMP_DIR, './hello.md');
+  const submd = path.resolve(TMP_SUB_DIR, './world.md');
+  const subtxt = path.resolve(TMP_SUB_DIR, './world.txt');
   const port = 4213;
   const url = `http://localhost:${port}`;
   let server: http.Server;
@@ -19,8 +22,10 @@ describe('test pen', () => {
 
   beforeAll(() => {
     fs.mkdirSync(TMP_DIR);
-    fs.mkdirSync(path.resolve(TMP_DIR, './sub/'));
+    fs.mkdirSync(TMP_SUB_DIR);
     fs.writeFileSync(md, '# md');
+    fs.writeFileSync(submd, '# md');
+    fs.writeFileSync(subtxt, '# md');
     server = http.createServer((_req, res: ServerResponse) => {
       fs.createReadStream(path.resolve('./dist/spa/index.html'))
         .pipe(res);
@@ -135,6 +140,40 @@ describe('test pen', () => {
           },
         ]);
         client.emit('penfile', file);
+      } else {
+        expect(result).toMatch(/md/);
+        client.close();
+        pen.close(checkClosedConnection(res));
+      }
+    });
+    client.on('penerror', rej);
+  }));
+
+  it('client request sub dir', () => new Promise<void>((res, rej) => {
+    pen.create({
+      root: TMP_DIR,
+    });
+    pen.attach(server);
+
+    const client = io(url, {
+      path: '/pensocket.io',
+    });
+    client.on('pencontent', (data) => {
+      const result = JSON.parse(data);
+      if (Array.isArray(result)) {
+      // tmp dir
+        if (result.find((item) => item.filename === 'sub' && item.type === 'dir')) {
+          client.emit('penfile', 'sub');
+        } else { // sub dir
+          const file = path.basename(submd);
+          expect(result).toStrictEqual([
+            {
+              filename: file,
+              type: 'markdown',
+            },
+          ]);
+          client.emit('penfile', `sub/${file}`);
+        }
       } else {
         expect(result).toMatch(/md/);
         client.close();
