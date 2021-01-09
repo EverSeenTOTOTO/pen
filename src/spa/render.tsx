@@ -16,13 +16,19 @@ const getHashUrl = (url) => {
   return '';
 };
 
+const handleSlashes = (path) => {
+  if (path === '') return path;
+  let tmp = path;
+  if (path.startsWith('/')) tmp = tmp.substr(1);
+  return tmp.endsWith('/') ? tmp : `${tmp}/`;
+};
+
 // 渲染md文件列表
 const Static = ({ list }) => (
   <main className="links">
     {list.map((link) => {
       const { filename, type } = link;
-      let basepath = getHashUrl(location.href);
-      basepath = basepath !== '' && basepath.endsWith('/') ? basepath : `${basepath}/`;
+      const basepath = handleSlashes(getHashUrl(location.href));
       return (
         <a
           className={type}
