@@ -69,10 +69,7 @@ export default class Pen {
             path: filepath,
             root,
             ondata: (content: MdContent) => {
-              const data = typeof content === 'string'
-                ? JSON.stringify(content) : JSON.stringify(content.filter(
-                  (item) => item.type !== 'other',
-                ));
+              const data = JSON.stringify(content);
               socket.emit('pencontent', data);
             },
             onerror: (e: Error) => socket.emit('penerror', e.message || `Internal Pen Error: ${e}`),
