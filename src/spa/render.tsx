@@ -44,9 +44,11 @@ const Static = ({ list }) => (
 
 const HTMLRenderer = ():JSX.Element => {
   const [data, setData] = useState('');
+  const [isDirs, setIsDir] = useState(false);
 
-  const isDirs = Array.isArray(data);
-
+  useEffect(() => {
+    setIsDir(Array.isArray(data));
+  }, [data]);
   useEffect(() => {
     document.title = 'Pen';
 
@@ -58,18 +60,20 @@ const HTMLRenderer = ():JSX.Element => {
       try {
         setData(JSON.parse(serialized));
       } catch (e) {
-        setData(e.message);
+        setData(e.stack || e.message);
       }
     });
-    socket.on('penerror', (e) => setData(e.message));
+    socket.on('penerror', (e) => setData(e.stack || e.message));
 
-    window.addEventListener('hashchange', (e) => {
+    const callback = (e) => {
       const path = getHashUrl(e.newURL);
       socket.emit('penfile', path);
-    });
+    };
+    window.addEventListener('hashchange', callback);
 
     return () => {
       socket.close();
+      window.removeEventListener('hashchange', callback);
     };
   }, []);
 
