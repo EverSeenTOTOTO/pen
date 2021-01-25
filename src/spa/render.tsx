@@ -47,9 +47,6 @@ const HTMLRenderer = ():JSX.Element => {
   const [isDirs, setIsDir] = useState(false);
 
   useEffect(() => {
-    setIsDir(Array.isArray(data));
-  }, [data]);
-  useEffect(() => {
     document.title = 'Pen';
 
     const socket = io(location.href, {
@@ -58,7 +55,9 @@ const HTMLRenderer = ():JSX.Element => {
     socket.on('connect_error', console.error);
     socket.on('pencontent', (serialized) => {
       try {
-        setData(JSON.parse(serialized));
+        const content = JSON.parse(serialized);
+        setIsDir(Array.isArray(content));
+        setData(content);
       } catch (e) {
         setData(e.stack || e.message);
       }
