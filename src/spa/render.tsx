@@ -26,7 +26,7 @@ const handleSlashes = (path) => {
 // 渲染md文件列表
 const Static = ({ list }) => (
   <main className="links">
-    {list.map((link) => {
+    {list && list.map((link) => {
       const { filename, type } = link;
       const basepath = handleSlashes(getHashUrl(location.href));
       return (
@@ -57,12 +57,16 @@ const HTMLRenderer = ():JSX.Element => {
       try {
         const content = JSON.parse(serialized);
         setIsDir(Array.isArray(content));
-        setData(content);
+        setTimeout(() => setData(content), 0);
       } catch (e) {
-        setData(e.stack || e.message);
+        setIsDir(false);
+        setTimeout(() => setData(e.stack || e.message), 0);
       }
     });
-    socket.on('penerror', (e) => setData(e.stack || e.message));
+    socket.on('penerror', (e) => {
+      setIsDir(false);
+      setTimeout(() => setData(e.stack || e.message), 0);
+    });
 
     const callback = (e) => {
       const path = getHashUrl(e.newURL);
