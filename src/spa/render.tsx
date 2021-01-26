@@ -26,7 +26,7 @@ const handleSlashes = (path) => {
 // 渲染md文件列表
 const Static = ({ list }) => (
   <main className="links">
-    {list && list.map((link) => {
+    {list.map((link) => {
       const { filename, type } = link;
       const basepath = handleSlashes(getHashUrl(location.href));
       return (
@@ -44,7 +44,6 @@ const Static = ({ list }) => (
 
 const HTMLRenderer = ():JSX.Element => {
   const [data, setData] = useState('');
-  const [isDirs, setIsDir] = useState(false);
 
   useEffect(() => {
     document.title = 'Pen';
@@ -56,16 +55,13 @@ const HTMLRenderer = ():JSX.Element => {
     socket.on('pencontent', (serialized) => {
       try {
         const content = JSON.parse(serialized);
-        setIsDir(Array.isArray(content));
-        setTimeout(() => setData(content), 0);
+        setData(content);
       } catch (e) {
-        setIsDir(false);
-        setTimeout(() => setData(e.stack || e.message), 0);
+        setData(e.stack || e.message);
       }
     });
     socket.on('penerror', (e) => {
-      setIsDir(false);
-      setTimeout(() => setData(e.stack || e.message), 0);
+      setData(e.stack || e.message);
     });
 
     const callback = (e) => {
@@ -83,7 +79,7 @@ const HTMLRenderer = ():JSX.Element => {
   return (
     <>
       <span id="pen-scroll-item" />
-      {isDirs
+      {Array.isArray(data)
         ? <Static list={data} />
         : <Markdown html={data} />}
     </>
