@@ -99,21 +99,44 @@ describe('test pen', () => {
   }));
 
   it('use special namespace', () => new Promise<void>((res, rej) => {
-    pen.create({
-      root: md,
-      namespace: '/special',
-    });
-    pen.attach(server);
+    pen
+      .create({
+        root: md,
+        namespace: '/special',
+      })
+      .create({
+        root: TMP_DIR,
+        namespace: '/special2',
+      })
+      .attach(server);
 
     const client = io(`${url}/special`, {
+      path: '/pensocket.io',
+    });
+    const client2 = io(`${url}/special2`, {
       path: '/pensocket.io',
     });
     client.on('pencontent', (data) => {
       expect(data).toMatch(/<h1.+>md<\/h1>/);
       client.close();
+    });
+    client2.on('pencontent', (data) => {
+      const arr = JSON.parse(data);
+      expect(arr).toStrictEqual([
+        {
+          filename: path.basename(md),
+          type: 'markdown',
+        },
+        {
+          filename: 'sub',
+          type: 'dir',
+        },
+      ]);
+      client2.close();
       pen.close(checkClosedConnection(res));
     });
     client.on('penerror', rej);
+    client2.on('penerror', rej);
   }));
 
   it('client request', () => new Promise<void>((res, rej) => {

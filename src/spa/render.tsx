@@ -22,12 +22,13 @@ const Static = ({ list }) => (
   <main className="links">
     {list.map((link) => {
       const { filename, type } = link;
-      const basepath = handleSlashes(getHashUrl(location.href));
+      const basepath = handleSlashes(getHashUrl(location.hash));
+      const href = `#/${basepath}${filename}`;
       return (
         <a
           className={type}
           key={filename}
-          href={`/#/${basepath}${filename}`}
+          href={href}
         >
           {filename}
         </a>
@@ -42,7 +43,7 @@ const HTMLRenderer = ():JSX.Element => {
   useEffect(() => {
     document.title = 'Pen';
 
-    const socket = io(`${location.origin}/${location.pathname}`, {
+    const socket = io(`${location.origin}${location.pathname}`, {
       path: '/pensocket.io',
     });
     socket.on('connect_error', console.error);

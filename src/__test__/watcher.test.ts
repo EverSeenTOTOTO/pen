@@ -23,9 +23,8 @@ describe('test wathcer', () => {
   it('test watch file, trigger', () => new Promise<void>((res, rej) => {
     const watcher = new Watcher({
       path: md,
-      root,
       ondata: (data) => {
-        expect(data).toMatch(/<h1 id="md">md<\/h1>/);
+        expect(JSON.parse(data)).toMatch(/<h1 id="md">md<\/h1>/);
         watcher.stop();
         res();
       },
@@ -38,9 +37,8 @@ describe('test wathcer', () => {
   it('watch file, modify', () => new Promise<void>((res, rej) => {
     const watcher = new Watcher({
       path: md,
-      root,
       ondata: (data) => {
-        expect(data).toMatch(/wow/);
+        expect(JSON.parse(data)).toMatch(/wow/);
         watcher.stop();
         res();
       },
@@ -53,7 +51,6 @@ describe('test wathcer', () => {
   it('watch file, delete', () => new Promise<void>((res, rej) => {
     const watcher = new Watcher({
       path: md,
-      root,
       ondata: rej,
       onerror: (e) => {
         expect(e.message).toMatch(/no such file or directory/);
@@ -68,9 +65,8 @@ describe('test wathcer', () => {
   it('watch a no-md file', () => new Promise<void>((res, rej) => {
     const watcher = new Watcher({
       path: notMd,
-      root,
       ondata: (data) => {
-        expect(data).toMatch(/not md/);
+        expect(JSON.parse(data)).toMatch(/not md/);
         watcher.stop();
         res();
       },
@@ -84,9 +80,8 @@ describe('test wathcer', () => {
     fs.writeFileSync(md, '# md'); // rebuild file
     const watcher = new Watcher({
       path: TMP_DIR,
-      root,
       ondata: (data) => {
-        expect(data).toEqual([
+        expect(JSON.parse(data)).toEqual([
           {
             filename: path.basename(md),
             type: 'markdown',
@@ -108,9 +103,8 @@ describe('test wathcer', () => {
   it('watch a dir, delete file', () => new Promise<void>((res, rej) => {
     const watcher = new Watcher({
       path: TMP_DIR,
-      root,
       ondata: (data) => {
-        expect(data).toEqual([
+        expect(JSON.parse(data)).toEqual([
           {
             filename: 'sub',
             type: 'dir',

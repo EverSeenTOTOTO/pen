@@ -1,7 +1,7 @@
 {
   "name": "@everseenflash/pen-middleware",
   "main": "dist/index.js",
-  "version": "0.1.18",
+  "version": "0.1.20",
   "types": "dist/index.d.ts",
   "license": "MIT",
   "author": "EverSeenTOTOTO <jialiuniu@gmail.com>",
@@ -67,8 +67,8 @@
   },
   "scripts": {
     "build:server": "tsc",
-    "build:spa": "rm -rf dist/spa && NODE_ENV=production webpack",
-    "build": "yarn build:spa && yarn build:server",
+    "build:spa": "NODE_ENV=production webpack",
+    "build": "rm -rf dist/spa && yarn build:spa && yarn build:server",
     "lint": "eslint --fix .",
     "test": "jest --detectOpenHandles"
   }

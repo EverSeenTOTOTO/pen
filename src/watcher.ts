@@ -1,5 +1,5 @@
 import { resolve } from 'path';
-import fs, { existsSync, FSWatcher } from 'fs';
+import fs, { FSWatcher } from 'fs';
 import mdrender from './markdown';
 
 export type PenLogger = {
@@ -15,10 +15,9 @@ export type MdContent = string | {
 }[];
 
 type WatcherOptions = {
-  root: string,
   path: string,
   logger?: PenLogger,
-  ondata: (content: MdContent) => void,
+  ondata: (data: string) => void,
   onerror: (e: Error) => void
 };
 
@@ -51,12 +50,14 @@ const readMarkdownFiles = (path: string): Promise<MdContent> => {
   }
 };
 
-const checkPermission = (filepath: string, root:string) => {
-  const file = resolve(filepath);
-  if (!file.startsWith(resolve(root)) || !existsSync(file)) {
-    throw new Error(`Pen not permitted to watch: ${filepath}, or maybe file is not exits.`);
+const handleData = (content: MdContent) => {
+  let data = '';
+  if (Array.isArray(content)) {
+    data = JSON.stringify(content.filter((item) => item.type !== 'other' && item.filename));
+  } else {
+    data = JSON.stringify(content);
   }
-  return true;
+  return data;
 };
 
 export default class Watcher {
@@ -79,7 +80,6 @@ export default class Watcher {
   start(): Watcher {
     this.stop();
     try {
-      checkPermission(this.path, this.options.root);
       const watcher = fs.watch(
         this.path,
         {
@@ -112,7 +112,7 @@ export default class Watcher {
   trigger(): Watcher {
     readMarkdownFiles(this.path)
       .then((content) => {
-        this.options.ondata(content);
+        this.options.ondata(handleData(content));
       })
       .catch((e) => {
         this.logger?.error(e);
