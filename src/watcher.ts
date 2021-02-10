@@ -1,5 +1,5 @@
 import { resolve } from 'path';
-import fs, { FSWatcher } from 'fs';
+import fs, { existsSync, FSWatcher } from 'fs';
 import mdrender from './markdown';
 
 export type PenLogger = {
@@ -52,8 +52,9 @@ const readMarkdownFiles = (path: string): Promise<MdContent> => {
 };
 
 const checkPermission = (filepath: string, root:string) => {
-  if (!resolve(filepath).startsWith(resolve(root))) {
-    throw new Error(`Pen not permitted to watch: ${filepath}`);
+  const file = resolve(filepath);
+  if (!file.startsWith(resolve(root)) || !existsSync(file)) {
+    throw new Error(`Pen not permitted to watch: ${filepath}, or maybe file is not exits.`);
   }
   return true;
 };

@@ -8,19 +8,13 @@ const createMarkup = (__html) => ({ __html });
 // 渲染markdown
 const Markdown = ({ html }) => <main className="markdown-body" dangerouslySetInnerHTML={createMarkup(html)} />;
 
-const getHashUrl = (url) => {
-  const index = url.indexOf('#');
-  if (index >= 0) {
-    return url.slice(index + 2);
-  }
-  return '';
-};
+const getHashUrl = (hash) => (hash === '' ? hash : hash.slice(2));
 
 const handleSlashes = (path) => {
   if (path === '') return path;
   let tmp = path;
-  if (path.startsWith('/')) tmp = tmp.substr(1);
-  return tmp.endsWith('/') ? tmp : `${tmp}/`;
+  if (path.startsWith('/')) tmp = tmp.substr(1);// 掐头
+  return tmp.endsWith('/') ? tmp : `${tmp}/`;// 补尾
 };
 
 // 渲染md文件列表
@@ -33,7 +27,7 @@ const Static = ({ list }) => (
         <a
           className={type}
           key={filename}
-          href={`#/${basepath}${filename}`}
+          href={`/#/${basepath}${filename}`}
         >
           {filename}
         </a>
@@ -48,7 +42,7 @@ const HTMLRenderer = ():JSX.Element => {
   useEffect(() => {
     document.title = 'Pen';
 
-    const socket = io(location.href, {
+    const socket = io(`${location.origin}/${location.pathname}`, {
       path: '/pensocket.io',
     });
     socket.on('connect_error', console.error);
@@ -57,21 +51,23 @@ const HTMLRenderer = ():JSX.Element => {
         const content = JSON.parse(serialized);
         setData(content);
       } catch (e) {
-        setData(e.stack || e.message);
+        setData(e.stack || e.message || `failed to parse pensocket message ${serialized}`);
       }
     });
     socket.on('penerror', (e) => {
       setData(e.stack || e.message);
     });
 
-    const callback = (e) => {
-      const path = getHashUrl(e.newURL);
+    const callback = () => {
+      const path = getHashUrl(location.hash);
       socket.emit('penfile', path);
     };
+    const timeout = setTimeout(callback, 0);
     window.addEventListener('hashchange', callback);
 
     return () => {
       socket.close();
+      clearTimeout(timeout);
       window.removeEventListener('hashchange', callback);
     };
   }, []);
