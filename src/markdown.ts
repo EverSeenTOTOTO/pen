@@ -12,24 +12,11 @@ import mditSup from 'markdown-it-sup';
 import mditAbbr from 'markdown-it-abbr';
 import mditInclude from 'markdown-it-include';
 
-// from vuepress-plugin-container
-function call(target: any, ...args: any[]) {
-  if (typeof target === 'function') {
-    return target(...args);
-  }
-  return target;
-}
-
-type RenderOpts = {
-  type: string,
-  before: string|((info: string) => string),
-  after: string|((info: string) => string),
-};
-
-const createRender = (opts: RenderOpts) => (tokens: any, index: number) => {
-  const { type, before, after } = opts;
-  const info = tokens[index].info.trim().slice(type.length).trim();
-  return tokens[index].nesting === 1 ? call(before, info) : call(after, info);
+const createRender = (color: string) => (tokens: any, index: number) => {
+  const info = tokens[index].info.trim().slice(color.length).trim();
+  return tokens[index].nesting === 1
+    ? `<div class="container bg-${color}"><p class="bold">${info}</p>`
+    : '</div>';
 };
 
 const md = (root: string) => mdit({
@@ -45,12 +32,29 @@ const md = (root: string) => mdit({
   .use(mditSub)
   .use(mditSup)
   .use(mditAbbr)
-  .use(mditContainer, 'theorem', {
-    render: createRender({
-      type: 'theorem',
-      before: (info: string) => `<div class="theorem"><p class="title">${info}</p>`,
-      after: '</div>',
-    }),
+  .use(mditContainer, 'azure', {
+    render: createRender('azure'),
+  })
+  .use(mditContainer, 'snow', {
+    render: createRender('snow'),
+  })
+  .use(mditContainer, 'lightyellow', {
+    render: createRender('lightyellow'),
+  })
+  .use(mditContainer, 'honeydew', {
+    render: createRender('honeydew'),
+  })
+  .use(mditContainer, 'mintcream', {
+    render: createRender('mintcream'),
+  })
+  .use(mditContainer, 'aliceblue', {
+    render: createRender('aliceblue'),
+  })
+  .use(mditContainer, 'ghostwhite', {
+    render: createRender('ghostwhite'),
+  })
+  .use(mditContainer, 'lavenderblush', {
+    render: createRender('lavenderblush'),
   })
   .use(mditInclude, {
     root,

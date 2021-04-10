@@ -7,7 +7,7 @@
 ```json
 "markdown-it-abbr"
 "markdown-it-anchor"
-"markdown-it-container"
+"markdown-it-container" (azure, snow, lightyellow, honeydew, mintcream, aliceblue, ghostwhite, lavenderblush)
 "markdown-it-deflist"
 "markdown-it-emoji"
 "markdown-it-footnote"

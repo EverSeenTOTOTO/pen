@@ -28,7 +28,10 @@ describe('test wathcer', () => {
         watcher.stop();
         res();
       },
-      onerror: rej,
+      onerror: () => {
+        watcher.stop();
+        rej();
+      },
     });
     watcher.start();
     watcher.trigger();
@@ -42,7 +45,10 @@ describe('test wathcer', () => {
         watcher.stop();
         res();
       },
-      onerror: rej,
+      onerror: () => {
+        watcher.stop();
+        rej();
+      },
     });
     watcher.start();
     fs.writeFileSync(md, '# wow');
@@ -51,7 +57,10 @@ describe('test wathcer', () => {
   it('watch file, delete', () => new Promise<void>((res, rej) => {
     const watcher = new Watcher({
       path: md,
-      ondata: rej,
+      ondata: () => {
+        watcher.stop();
+        rej();
+      },
       onerror: (e) => {
         expect(e.message).toMatch(/no such file or directory/);
         watcher.stop();
@@ -70,7 +79,10 @@ describe('test wathcer', () => {
         watcher.stop();
         res();
       },
-      onerror: rej,
+      onerror: rej() => {
+        watcher.stop();
+        rej();
+      },
     });
     watcher.start();
     watcher.trigger();
@@ -94,7 +106,10 @@ describe('test wathcer', () => {
         watcher.stop();
         res();
       },
-      onerror: rej,
+      onerror: () => {
+        watcher.stop();
+        rej();
+      },
     });
     watcher.start();
     watcher.trigger();
@@ -113,7 +128,10 @@ describe('test wathcer', () => {
         watcher.stop();
         res();
       },
-      onerror: rej,
+      onerror: () => {
+        watcher.stop();
+        rej();
+      },
     });
     watcher.start();
     fs.unlinkSync(md);

@@ -40,6 +40,7 @@ describe('test pen', () => {
     fs.rmdirSync(TMP_DIR, {
       recursive: true,
     });
+    server.close();
   });
   afterEach(() => new Promise((res) => {
     server.close(res);

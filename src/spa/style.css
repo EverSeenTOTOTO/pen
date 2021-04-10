@@ -39,12 +39,7 @@
   font-size: 1.2rem;
 }
 
-.links .link .dir {
-  font-weight: normal;
-  color: #4492eb;
-}
-
-.links .link:hover {
+.link:hover {
   animation: scaleLink 0.3s;
   transform: scale(1.03);
   background-color: #e2edf8;
@@ -62,12 +57,45 @@
   }
 }
 
-.theorem {
-  margin: 1rem 0;
-  padding: .1rem 1.5rem;
-  border-radius: 0.4rem;
-  background-color: #f0f4f8;
+.dir {
+  font-weight: normal;
+  color: #4492eb;
 }
-.theorem .title {
-  font-weight: bold;
+
+.container {
+  margin: 1rem 0;
+  padding: .5rem 1rem;
+  border-radius: 0.4rem;
+}
+
+.bg-azure {
+  background-color: azure;
+}
+
+.bg-snow {
+  background-color: snow;
+}
+
+.bg-lightyellow {
+  background-color: lightyellow;
+}
+
+.bg-honeydew {
+  background-color: honeydew;
+}
+
+.bg-mintcream {
+  background-color: mintcream;
+}
+
+.bg-aliceblue {
+  background-color: aliceblue;
+}
+
+.bg-ghostwhite {
+  background-color: ghostwhite;
+}
+
+.bg-lavenderblush {
+  background-color: lavenderblush;
 }

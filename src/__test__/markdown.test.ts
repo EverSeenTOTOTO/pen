@@ -19,10 +19,10 @@ describe('test markdown-it', () => {
 
   it('test render container', () => {
     const html = render(`
-::: theorem demo
+::: snow demo
 wow
 :::`, __dirname);
-    expect(html).toMatch(/<div class="theorem">/);
+    expect(html).toMatch(/<div class="container bg-snow">/);
   });
 
   it('test render file inclusion', () => {
