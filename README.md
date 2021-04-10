@@ -2,6 +2,23 @@
 
 一个http server中间件，提供对markdown文件的预览能力，基于[**socket.io**](https://socket.io/)。灵感来源自[**pen**](https://github.com/utatti/pen)。
 
+## Embedded markdown-it plugins
+
+```json
+"markdown-it-abbr"
+"markdown-it-anchor"
+"markdown-it-container"
+"markdown-it-deflist"
+"markdown-it-emoji"
+"markdown-it-footnote"
+"markdown-it-highlightjs"
+"markdown-it-include"
+"markdown-it-ins"
+"markdown-it-mark"
+"markdown-it-sub"
+"markdown-it-sup"
+```
+
 ## Install
 
 ```bash
@@ -17,6 +34,7 @@ const { createServer } = require('http');
 const { pen, middleware } = require('@everseenflash/pen-middleware');
 
 const server = createServer(middleware);
+
 pen
   .create({
     root: './markdown-path/' //本地markdown文件或者目录
@@ -42,12 +60,12 @@ const app = express();
 const server = http.createServer(app);
 pen
   .create({
-  root: './markdown/', // 本地markdown文件或者目录
-  namespace: doc,
+  root // 本地markdown文件或者目录
+  namespace
 })
   .create({
-  root: './admin/',
-  namespace: admin,
+  root
+  namespace
 })
   .attach(server);
 

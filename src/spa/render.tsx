@@ -19,14 +19,14 @@ const handleSlashes = (path) => {
 
 // 渲染md文件列表
 const Static = ({ list }) => (
-  <main className="links">
+  <main className="flex flex-column">
     {list.map((link) => {
       const { filename, type } = link;
       const basepath = handleSlashes(getHashUrl(location.hash));
       const href = `#/${basepath}${filename}`;
       return (
         <a
-          className={type}
+          className={`link hand-cursor color-primary bold no-decoration ${type}`}
           key={filename}
           href={href}
         >

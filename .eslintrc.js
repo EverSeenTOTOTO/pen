@@ -23,6 +23,7 @@ module.exports = {
   rules: {
     'no-console': 'off',
     '@typescript-eslint/no-unused-expressions': 'off',
+    'arrow-body-style': 'off',
   },
   overrides: [
     {

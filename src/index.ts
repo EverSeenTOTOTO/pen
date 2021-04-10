@@ -16,6 +16,7 @@ export type PenConstructorOptions = {
   logger?: PenLogger,
 };
 
+// express middleware
 const middleware = <Req extends IncomingMessage, Res extends ServerResponse>
   (_req: Req, res: Res): void => {
   res.setHeader('Content-Type', 'text/html');
@@ -23,10 +24,11 @@ const middleware = <Req extends IncomingMessage, Res extends ServerResponse>
     .pipe(res);
 };
 
+// check file permission
 const checkPermission = (filepath: string, root:string) => {
   const file = resolve(filepath);
   if (!file.startsWith(resolve(root)) || !existsSync(file)) {
-    throw new Error(`Pen not permitted to watch: ${filepath}, or maybe file is not exits.`);
+    throw new Error(`Pen not permitted to watch: ${filepath}, or maybe file does not exits.`);
   }
 };
 
@@ -35,7 +37,7 @@ export default class Pen {
 
   private logger?: PenLogger;
 
-  public namespaces: Required<PenOptions>[];
+  public readonly namespaces: Required<PenOptions>[];
 
   private readonly connectedSockets: { socket: Socket, watcher: Watcher }[];
 
@@ -45,12 +47,14 @@ export default class Pen {
     this.namespaces = [];
   }
 
+  // attach to http server
   attach<T extends HttpServer>(server: T): Pen {
     const iobase = new Server(server, {
       path: '/pensocket.io',
     });
     this.namespaces.forEach(({ root, namespace }) => {
       this.logger?.info(`Create pen middleware with root ${root}, namespace: ${namespace}`);
+
       iobase.of(namespace).on('connection', (socket: Socket) => {
         socket.on('disconnect', () => {
           socket.disconnect(true);
@@ -68,7 +72,6 @@ export default class Pen {
         socket.on('penfile', (path: string) => {
           const filepath = resolve(root, path);
           checkPermission(filepath, root);
-
           this.startWatch({ socket, filepath });
         });
         this.startWatch({
@@ -82,6 +85,7 @@ export default class Pen {
     return this;
   }
 
+  // init pen
   create(opts?: PenCreateOptions): Pen {
     const namespace = {
       root: opts?.root || resolve('.'),
@@ -100,9 +104,11 @@ export default class Pen {
     if (matched.length > 0) {
       matched.forEach((match) => {
         this.logger?.info(`Remove pen middleware ${match.namespace}`);
-        match.io?.removeAllListeners();
+
         const index = this.namespaces.indexOf(match);
+
         this.namespaces.splice(index, 1);
+        match.io?.removeAllListeners();
       });
     }
     return this;
@@ -114,7 +120,9 @@ export default class Pen {
       socket.disconnect(true);
       watcher.stop();
     });
+
     this.logger?.info('Pen closed.');
+
     if (this.iobase) {
       this.iobase.close(() => callback?.());
     } else {
@@ -129,7 +137,9 @@ export default class Pen {
 
     if (id !== -1) { // if exist old watcher, stop it
       const { watcher: oldWatcher } = this.connectedSockets.splice(id, 1)[0];
+
       this.logger?.info(`Pen stop watching ${oldWatcher.path} due to new connection.`);
+
       oldWatcher.stop();
     }
 

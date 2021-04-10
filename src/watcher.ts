@@ -44,7 +44,7 @@ const readMarkdownFiles = (path: string): Promise<MdContent> => {
         };
       }));
     }
-    return Promise.resolve(mdrender(fs.readFileSync(path).toString()));
+    return Promise.resolve(mdrender(fs.readFileSync(path).toString(), path));
   } catch (e) {
     return Promise.reject(e);
   }
@@ -87,6 +87,7 @@ export default class Watcher {
         },
         (event) => {
           this.logger?.info(`${this.path} -> ${event}`);
+
           if (event === 'change') {
             this.trigger();
           } else if (event === 'rename') {
@@ -98,6 +99,7 @@ export default class Watcher {
           }
         },
       );
+
       watcher.on('error', this.options.onerror);
 
       this.watcher = watcher;

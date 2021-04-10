@@ -12,9 +12,11 @@ describe('test pen', () => {
   const subtxt = path.resolve(TMP_SUB_DIR, './world.txt');
   const port = 4213;
   const url = `http://localhost:${port}`;
+
   let server: http.Server;
+
   const checkClosedConnection = (res) => () => {
-    server.getConnections((e, c) => {
+    server.getConnections((_e, c) => {
       expect(c).toBe(0);
       res();
     });
@@ -47,24 +49,28 @@ describe('test pen', () => {
   it('test construct pen with default value', () => new Promise<void>((res) => {
     pen.create();
     expect(pen.namespaces.length).toBe(1);
+
     const nsp = pen.namespaces[0];
+
     expect(nsp.namespace).toBe('/');
     expect(nsp.root).toBe(path.resolve('.'));
     expect(nsp.io).toBeNull();
+
     pen.close(checkClosedConnection(res));
   }));
 
   it('serve file', () => new Promise<void>((res, rej) => {
     pen.create({
       root: md,
-    });
-    pen.attach(server);
+    }).attach(server);
 
     const client = io(url, {
       path: '/pensocket.io',
     });
+
     client.on('pencontent', (data) => {
       expect(data).toMatch(/<h1.+>md<\/h1>/);
+
       client.close();
       pen.close(checkClosedConnection(res));
     });
@@ -74,14 +80,15 @@ describe('test pen', () => {
   it('serve dir', () => new Promise<void>((res, rej) => {
     pen.create({
       root: TMP_DIR,
-    });
-    pen.attach(server);
+    }).attach(server);
 
     const client = io(url, {
       path: '/pensocket.io',
     });
+
     client.on('pencontent', (data) => {
       const arr = JSON.parse(data);
+
       expect(arr).toStrictEqual([
         {
           filename: path.basename(md),
@@ -92,6 +99,7 @@ describe('test pen', () => {
           type: 'dir',
         },
       ]);
+
       client.close();
       pen.close(checkClosedConnection(res));
     });
@@ -116,12 +124,14 @@ describe('test pen', () => {
     const client2 = io(`${url}/special2`, {
       path: '/pensocket.io',
     });
+
     client.on('pencontent', (data) => {
       expect(data).toMatch(/<h1.+>md<\/h1>/);
       client.close();
     });
     client2.on('pencontent', (data) => {
       const arr = JSON.parse(data);
+
       expect(arr).toStrictEqual([
         {
           filename: path.basename(md),
@@ -132,6 +142,7 @@ describe('test pen', () => {
           type: 'dir',
         },
       ]);
+
       client2.close();
       pen.close(checkClosedConnection(res));
     });
@@ -142,12 +153,12 @@ describe('test pen', () => {
   it('client request', () => new Promise<void>((res, rej) => {
     pen.create({
       root: TMP_DIR,
-    });
-    pen.attach(server);
+    }).attach(server);
 
     const client = io(url, {
       path: '/pensocket.io',
     });
+
     client.on('pencontent', (data) => {
       const result = JSON.parse(data);
       const file = path.basename(md);
@@ -162,9 +173,11 @@ describe('test pen', () => {
             type: 'dir',
           },
         ]);
+
         client.emit('penfile', file);
       } else {
         expect(result).toMatch(/md/);
+
         client.close();
         pen.close(checkClosedConnection(res));
       }
@@ -175,8 +188,7 @@ describe('test pen', () => {
   it('client request sub dir', () => new Promise<void>((res, rej) => {
     pen.create({
       root: TMP_DIR,
-    });
-    pen.attach(server);
+    }).attach(server);
 
     const client = io(url, {
       path: '/pensocket.io',
@@ -189,6 +201,7 @@ describe('test pen', () => {
           client.emit('penfile', 'sub');
         } else { // sub dir
           const file = path.basename(submd);
+
           expect(result).toStrictEqual([
             {
               filename: file,
@@ -199,6 +212,7 @@ describe('test pen', () => {
         }
       } else {
         expect(result).toMatch(/md/);
+
         client.close();
         pen.close(checkClosedConnection(res));
       }
