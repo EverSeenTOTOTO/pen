@@ -7,6 +7,7 @@ import { pen } from '../index';
 describe('test pen', () => {
   const TMP_DIR = path.resolve('./tmp/');
   const TMP_SUB_DIR = path.resolve(TMP_DIR, './sub/');
+  const TMP_GIT = path.resolve(TMP_DIR, './.git/');
   const md = path.resolve(TMP_DIR, './hello.md');
   const submd = path.resolve(TMP_SUB_DIR, './world.md');
   const subtxt = path.resolve(TMP_SUB_DIR, './world.txt');
@@ -25,9 +26,11 @@ describe('test pen', () => {
   beforeAll(() => {
     fs.mkdirSync(TMP_DIR);
     fs.mkdirSync(TMP_SUB_DIR);
+    fs.mkdirSync(TMP_GIT); // test ignores
     fs.writeFileSync(md, '# md');
     fs.writeFileSync(submd, '# md');
     fs.writeFileSync(subtxt, '# md');
+
     server = http.createServer((_req, res: ServerResponse) => {
       fs.createReadStream(path.resolve('./dist/spa/index.html'))
         .pipe(res);
@@ -63,6 +66,7 @@ describe('test pen', () => {
   it('serve file', () => new Promise<void>((res, rej) => {
     pen.create({
       root: md,
+      logger: console,
     }).attach(server);
 
     const client = io(url, {
@@ -81,6 +85,8 @@ describe('test pen', () => {
   it('serve dir', () => new Promise<void>((res, rej) => {
     pen.create({
       root: TMP_DIR,
+      logger: console,
+      ignores: /\.git/,
     }).attach(server);
 
     const client = io(url, {
@@ -110,12 +116,14 @@ describe('test pen', () => {
   it('use special namespace', () => new Promise<void>((res, rej) => {
     pen
       .create({
+        logger: console,
         root: md,
         namespace: '/special',
       })
       .create({
         root: TMP_DIR,
         namespace: '/special2',
+        ignores: [/\.git/],
       })
       .attach(server);
 
@@ -153,6 +161,7 @@ describe('test pen', () => {
 
   it('client request', () => new Promise<void>((res, rej) => {
     pen.create({
+      logger: console,
       root: TMP_DIR,
     }).attach(server);
 
@@ -165,6 +174,10 @@ describe('test pen', () => {
       const file = path.basename(md);
       if (Array.isArray(result)) {
         expect(result).toStrictEqual([
+          {
+            filename: '.git',
+            type: 'dir',
+          },
           {
             filename: file,
             type: 'markdown',
@@ -188,6 +201,7 @@ describe('test pen', () => {
 
   it('client request sub dir', () => new Promise<void>((res, rej) => {
     pen.create({
+      logger: console,
       root: TMP_DIR,
     }).attach(server);
 

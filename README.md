@@ -20,13 +20,16 @@ yarn add @everseenflash/pen-middleware
 
 + markdown-it-deflist
 + markdown-it-emoji
-+ markdown-it-footnote
+
+  > use [twemoji](https://github.com/twitter/twemoji)
+
 + markdown-it-highlightjs
 + markdown-it-include
 + markdown-it-ins
 + markdown-it-mark
 + markdown-it-sub
 + markdown-it-sup
++ markdown-it-toc-done-right
 
 ## Usage
 

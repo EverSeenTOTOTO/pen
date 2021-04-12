@@ -1,10 +1,10 @@
 import mdit from 'markdown-it';
+import twemoji from 'twemoji';
 import mditHighlightjs from 'markdown-it-highlightjs';
 import mditEmoji from 'markdown-it-emoji';
 import mditAnchor from 'markdown-it-anchor';
 import mditContainer from 'markdown-it-container';
 import mditDeflist from 'markdown-it-deflist';
-import mditFootnote from 'markdown-it-footnote';
 import mditIns from 'markdown-it-ins';
 import mditMark from 'markdown-it-mark';
 import mditSub from 'markdown-it-sub';
@@ -27,7 +27,6 @@ const md = (root: string) => mdit({
   .use(mditEmoji)
   .use(mditAnchor)
   .use(mditDeflist)
-  .use(mditFootnote)
   .use(mditIns)
   .use(mditMark)
   .use(mditSub)
@@ -63,5 +62,12 @@ const md = (root: string) => mdit({
   });
 
 export default (markdown: string, root: string):string => {
-  return md(root).render(markdown);
+  const mdrender = md(root);
+
+  // emoji
+  mdrender.renderer.rules.emoji = (token, idx) => {
+    return twemoji.parse(token[idx].content);
+  };
+
+  return mdrender.render(markdown);
 };
