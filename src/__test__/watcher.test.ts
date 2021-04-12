@@ -79,7 +79,7 @@ describe('test wathcer', () => {
         watcher.stop();
         res();
       },
-      onerror: rej() => {
+      onerror: () => {
         watcher.stop();
         rej();
       },

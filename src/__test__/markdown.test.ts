@@ -29,4 +29,9 @@ wow
     const html = render('!!!include(header.md)!!!\n\n*your content*\n\n', __dirname);
     expect(html).toMatch(/my header/);
   });
+
+  it('test render toc', () => {
+    const html = render('[[toc]]', __dirname);
+    expect(html).toMatch(/table-of-contents/);
+  });
 });

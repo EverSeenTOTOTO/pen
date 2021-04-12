@@ -5352,6 +5352,11 @@ markdown-it-sup@^1.0.0:
   resolved "https://registry.npm.taobao.org/markdown-it-sup/download/markdown-it-sup-1.0.0.tgz"
   integrity sha1-y5yf+RpSVawI8/09YyhuFd8KH8M=
 
+markdown-it-toc-done-right@^4.2.0:
+  version "4.2.0"
+  resolved "https://registry.npm.taobao.org/markdown-it-toc-done-right/download/markdown-it-toc-done-right-4.2.0.tgz#3ccdce22d5022ffae7b991d07261b1b1de5459d0"
+  integrity sha1-PM3OItUCL/rnuZHQcmGxsd5UWdA=
+
 markdown-it@^12.0.3:
   version "12.0.3"
   resolved "https://registry.npmjs.org/markdown-it/-/markdown-it-12.0.3.tgz"

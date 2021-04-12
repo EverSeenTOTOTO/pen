@@ -11,6 +11,7 @@ import mditSub from 'markdown-it-sub';
 import mditSup from 'markdown-it-sup';
 import mditAbbr from 'markdown-it-abbr';
 import mditInclude from 'markdown-it-include';
+import mditToc from 'markdown-it-toc-done-right';
 
 const createRender = (color: string) => (tokens: any, index: number) => {
   const info = tokens[index].info.trim().slice(color.length).trim();
@@ -32,6 +33,7 @@ const md = (root: string) => mdit({
   .use(mditSub)
   .use(mditSup)
   .use(mditAbbr)
+  .use(mditToc)
   .use(mditContainer, 'azure', {
     render: createRender('azure'),
   })
