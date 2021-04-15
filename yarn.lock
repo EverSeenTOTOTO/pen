@@ -5489,7 +5489,7 @@ markdown-it-emoji@^2.0.0:
 
 markdown-it-footnote@^3.0.2:
   version "3.0.2"
-  resolved "https://registry.npm.taobao.org/markdown-it-footnote/download/markdown-it-footnote-3.0.2.tgz"
+  resolved "https://registry.npm.taobao.org/markdown-it-footnote/download/markdown-it-footnote-3.0.2.tgz#1575ee7a093648d4e096aa33386b058d92ac8bc1"
   integrity sha1-FXXuegk2SNTglqozOGsFjZKsi8E=
 
 markdown-it-highlightjs@^3.4.0:

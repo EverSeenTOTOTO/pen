@@ -2,6 +2,10 @@ declare module 'markdown-it-deflist' {
   const anything = any;
   export default anything;
 }
+declare module 'markdown-it-footnote' {
+  const anything = any;
+  export default anything;
+}
 declare module 'markdown-it-ins' {
   const anything = any;
   export default anything;

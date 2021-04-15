@@ -8,46 +8,36 @@ const createMarkup = (__html) => ({ __html });
 // 渲染markdown
 const Markdown = ({ html }) => <main className="markdown-body" dangerouslySetInnerHTML={createMarkup(html)} />;
 
-const getHashUrl = (hash) => (hash === '' ? hash : hash.slice(2));
-
-const handleSlashes = (path) => {
-  if (path === '') return path;
-  let tmp = path;
-  if (path.startsWith('/')) tmp = tmp.substr(1);// 掐头
-  return tmp.endsWith('/') ? tmp : `${tmp}/`;// 补尾
-};
-
 // 渲染md文件列表
-const Static = ({ list }) => (
+const Static = ({ list, onClick }) => (
   <main className="flex flex-column">
-    {list.map((link) => {
+    {list.map((link: {filename: string, type: string}) => {
       const { filename, type } = link;
-      const basepath = handleSlashes(getHashUrl(location.hash));
-      const href = `#/${basepath}${filename}`;
       return (
-        <a
+        <span
           className={`link hand-cursor color-primary bold no-decoration ${type}`}
           key={filename}
-          href={href}
+          onClick={() => onClick(filename)}
         >
           {filename}
-        </a>
+        </span>
       );
     })}
   </main>
 );
 
 const HTMLRenderer = ():JSX.Element => {
-  const [data, setData] = useState('');
+  const [data, setData] = useState<string>('');
+  const [emit, setEmit] = useState<() => void>(() => () => { 
+    console.warn('pen not connected.');
+  });
 
   useEffect(() => {
-    document.title = 'Pen';
-
     const socket = io(`${location.origin}${location.pathname}`, {
       path: '/pensocket.io',
     });
     socket.on('connect_error', console.error);
-    socket.on('pencontent', (serialized) => {
+    socket.on('pencontent', (serialized: string) => {
       try {
         const content = JSON.parse(serialized);
         setData(content);
@@ -59,17 +49,16 @@ const HTMLRenderer = ():JSX.Element => {
       setData(e.stack || e.message);
     });
 
-    const callback = () => {
-      const path = getHashUrl(location.hash);
-      socket.emit('penfile', path);
-    };
-    const timeout = setTimeout(callback, 0);
-    window.addEventListener('hashchange', callback);
+    // when conneted, emit to get first data
+    socket.emit('penfile', '.');
+    
+    setEmit(() => (filename: string) => {
+      socket.emit('penfile', filename);
+      document.title = filename;
+    });
 
     return () => {
       socket.close();
-      clearTimeout(timeout);
-      window.removeEventListener('hashchange', callback);
     };
   }, []);
 
@@ -77,7 +66,7 @@ const HTMLRenderer = ():JSX.Element => {
     <>
       <span id="pen-scroll-item" />
       {Array.isArray(data)
-        ? <Static list={data} />
+        ? <Static list={data} onClick={emit} />
         : <Markdown html={data} />}
     </>
   );

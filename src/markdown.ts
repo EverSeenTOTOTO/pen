@@ -12,6 +12,7 @@ import mditSup from 'markdown-it-sup';
 import mditAbbr from 'markdown-it-abbr';
 import mditInclude from 'markdown-it-include';
 import mditToc from 'markdown-it-toc-done-right';
+import mditFootnote from 'markdown-it-footnote';
 
 const createRender = (color: string) => (tokens: any, index: number) => {
   const info = tokens[index].info.trim().slice(color.length).trim();
@@ -25,6 +26,7 @@ const md = (root: string) => mdit({
   linkify: true,
 }).use(mditHighlightjs)
   .use(mditEmoji)
+  .use(mditFootnote)
   .use(mditAnchor)
   .use(mditDeflist)
   .use(mditIns)
