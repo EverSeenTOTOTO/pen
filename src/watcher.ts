@@ -1,5 +1,6 @@
 import { resolve } from 'path';
 import fs, { FSWatcher } from 'fs';
+import slash from 'slash';
 import mdrender from './markdown';
 
 export type PenLogger = {
@@ -11,11 +12,13 @@ export type PenLogger = {
 
 export type MdContent = string | {
   filename?: string,
+  directory?: string,
   type: 'markdown' | 'dir' | 'other'
 }[];
 
 interface PenWatcher {
   path: string,
+  root: string,
   ignores?: RegExp|RegExp[],
   logger?: PenLogger,
   ondata: (data: string) => void,
@@ -27,6 +30,15 @@ const isDir = (filepath: string) => {
   return stat.isDirectory();
 };
 
+const ensureSlash = (directory: string) => {
+  const dir = slash(directory);
+  return dir !== ''
+    ? dir.endsWith('/')
+    ? dir
+    : `${dir}/`
+    : '';
+}
+
 export const isIgnored = (filepath: string, ignores?: PenWatcher['ignores']):boolean => {
   if (ignores !== undefined) {
     if (Array.isArray(ignores)) {
@@ -37,8 +49,10 @@ export const isIgnored = (filepath: string, ignores?: PenWatcher['ignores']):boo
   return false;
 };
 
-const readMarkdownFiles = (path: string, ignores?: PenWatcher['ignores']): Promise<MdContent> => {
+const readMarkdownFiles = (option: Pick<PenWatcher, 'path'|'root'|'ignores'>): Promise<MdContent> => {
   try {
+    const { path, root, ignores } = option;
+    const dir = resolve(path).replace(resolve(root), '');
     if (isDir(path)) {
       return fs.promises.readdir(path).then((files) => files
         .filter((filename: string) => {
@@ -48,12 +62,12 @@ const readMarkdownFiles = (path: string, ignores?: PenWatcher['ignores']): Promi
         .map((filename: string) => {
           if (/^[^.].*.(md|markdown)$/.test(filename)) {
             return {
-              filename, type: 'markdown',
+              filename, type: 'markdown', directory: ensureSlash(dir)
             };
           }
           if (isDir(resolve(path, filename))) {
             return {
-              filename, type: 'dir',
+              filename, type: 'dir', directory: ensureSlash(dir)
             };
           }
           return {
@@ -80,6 +94,8 @@ const handleData = (content: MdContent) => {
 export default class Watcher implements PenWatcher {
   private watcher?: FSWatcher;
 
+  root: string;
+
   path: string;
 
   ignores?: RegExp | RegExp[] | undefined;
@@ -92,6 +108,7 @@ export default class Watcher implements PenWatcher {
 
   constructor(opts: PenWatcher) {
     this.path = opts.path;
+    this.root = opts.root;
     this.ignores = opts.ignores;
     this.logger = opts.logger;
     this.ondata = opts.ondata;
@@ -133,7 +150,11 @@ export default class Watcher implements PenWatcher {
   }
 
   trigger(): Watcher {
-    readMarkdownFiles(this.path, this.ignores)
+    readMarkdownFiles({
+      path: this.path,
+      root: this.root,
+      ignores: this.ignores
+    })
       .then((content) => {
         this.ondata(handleData(content));
       })

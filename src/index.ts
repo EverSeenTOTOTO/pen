@@ -69,10 +69,11 @@ export default class Pen {
         socket.on('penfile', (path: string) => {
           const filepath = resolve(root, path);
           checkPermission(filepath, root, this.ignores);
-          this.startWatch({ socket, filepath });
+          this.startWatch({ socket, root, filepath });
         });
         this.startWatch({
           filepath: resolve(root, './'),
+          root,
           socket,
         });
       });
@@ -129,7 +130,7 @@ export default class Pen {
     }
   }
 
-  private startWatch({ filepath, socket }:{ filepath: string, socket: Socket }) {
+  private startWatch({ filepath, root, socket }:{ filepath: string, root: string, socket: Socket }) {
     const id = this.connectedSockets.findIndex(
       ({ socket: s }) => s === socket,
     );
@@ -137,15 +138,16 @@ export default class Pen {
     if (id !== -1) { // if exist old watcher, stop it
       const { watcher: oldWatcher } = this.connectedSockets.splice(id, 1)[0];
 
-      this.logger?.info(`Pen stop watching ${oldWatcher.path} due to new connection.`);
+      this.logger?.info(`Pen stop watching ${oldWatcher.path}`);
 
       oldWatcher.stop();
     }
 
-    this.logger?.info(`Pen start watching ${filepath} due to new connection`);
+    this.logger?.info(`Pen start watching ${filepath}...`);
 
     const newWatcher = new Watcher({
       path: filepath,
+      root,
       ignores: this.ignores,
       ondata: (data) => socket.emit('pencontent', data),
       onerror: (err) => socket.emit('penerror', err.message || `Internal Pen Error: ${err}`),
