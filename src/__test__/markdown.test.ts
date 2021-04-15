@@ -27,6 +27,16 @@ wow
 
   it('test render file inclusion', () => {
     const html = render('!!!include(header.md)!!!\n\n*your content*\n\n', __dirname);
-    expect(html).toMatch(/my header/);
+    expect(html).toMatch(/header/);
+  });
+
+  it('test render toc', () => {
+    const html = render('[[toc]]', __dirname);
+    expect(html).toMatch(/table-of-contents/);
+  });
+
+  it('test render twemoji', () => {
+    const html = render('I \u2764\uFE0F emoji!', __dirname);
+    expect(html).toMatch(/I ❤️ emoji!/);
   });
 });

@@ -1,7 +1,7 @@
 {
   "name": "@everseenflash/pen-middleware",
   "main": "dist/index.js",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "types": "dist/index.d.ts",
   "license": "MIT",
   "author": "EverSeenTOTOTO <jialiuniu@gmail.com>",
@@ -14,6 +14,7 @@
     "url": "https://github.com/EverSeenTOTOTO/pen-middleware/issues"
   },
   "dependencies": {
+    "@types/twemoji": "^12.1.1",
     "markdown-it": "^12.0.3",
     "markdown-it-abbr": "^1.0.4",
     "markdown-it-anchor": "^6.0.1",
@@ -27,10 +28,13 @@
     "markdown-it-mark": "^3.0.1",
     "markdown-it-sub": "^1.0.0",
     "markdown-it-sup": "^1.0.0",
-    "socket.io": "^3.0.4"
+    "markdown-it-toc-done-right": "^4.2.0",
+    "socket.io": "^3.0.4",
+    "twemoji": "^13.0.2"
   },
   "devDependencies": {
     "@babel/core": "^7.12.9",
+    "@babel/plugin-proposal-class-properties": "^7.13.0",
     "@babel/plugin-transform-object-assign": "^7.12.1",
     "@babel/preset-env": "^7.12.7",
     "@babel/preset-react": "^7.12.10",

@@ -1,16 +1,17 @@
 import mdit from 'markdown-it';
+import twemoji from 'twemoji';
 import mditHighlightjs from 'markdown-it-highlightjs';
 import mditEmoji from 'markdown-it-emoji';
 import mditAnchor from 'markdown-it-anchor';
 import mditContainer from 'markdown-it-container';
 import mditDeflist from 'markdown-it-deflist';
-import mditFootnote from 'markdown-it-footnote';
 import mditIns from 'markdown-it-ins';
 import mditMark from 'markdown-it-mark';
 import mditSub from 'markdown-it-sub';
 import mditSup from 'markdown-it-sup';
 import mditAbbr from 'markdown-it-abbr';
 import mditInclude from 'markdown-it-include';
+import mditToc from 'markdown-it-toc-done-right';
 
 const createRender = (color: string) => (tokens: any, index: number) => {
   const info = tokens[index].info.trim().slice(color.length).trim();
@@ -26,12 +27,12 @@ const md = (root: string) => mdit({
   .use(mditEmoji)
   .use(mditAnchor)
   .use(mditDeflist)
-  .use(mditFootnote)
   .use(mditIns)
   .use(mditMark)
   .use(mditSub)
   .use(mditSup)
   .use(mditAbbr)
+  .use(mditToc)
   .use(mditContainer, 'azure', {
     render: createRender('azure'),
   })
@@ -61,5 +62,12 @@ const md = (root: string) => mdit({
   });
 
 export default (markdown: string, root: string):string => {
-  return md(root).render(markdown);
+  const mdrender = md(root);
+
+  // emoji
+  mdrender.renderer.rules.emoji = (token, idx) => {
+    return twemoji.parse(token[idx].content);
+  };
+
+  return mdrender.render(markdown);
 };

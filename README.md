@@ -2,28 +2,34 @@
 
 一个http server中间件，提供对markdown文件的预览能力，基于[**socket.io**](https://socket.io/)。灵感来源自[**pen**](https://github.com/utatti/pen)。
 
-## Embedded markdown-it plugins
-
-```json
-"markdown-it-abbr"
-"markdown-it-anchor"
-"markdown-it-container" (azure, snow, lightyellow, honeydew, mintcream, aliceblue, ghostwhite, lavenderblush)
-"markdown-it-deflist"
-"markdown-it-emoji"
-"markdown-it-footnote"
-"markdown-it-highlightjs"
-"markdown-it-include"
-"markdown-it-ins"
-"markdown-it-mark"
-"markdown-it-sub"
-"markdown-it-sup"
-```
-
 ## Install
 
 ```bash
 yarn add @everseenflash/pen-middleware
 ```
+
+## Embedded markdown-it plugin examples
+
+默认集成了一些markdown-it插件，下面是其语法示例：
+
++ markdown-it-abbr
++ markdown-it-anchor
++ markdown-it-container
+
+  > available colors: azure, snow, lightyellow, honeydew, mintcream, aliceblue, ghostwhite, lavenderblush
+
++ markdown-it-deflist
++ markdown-it-emoji
+
+  > use [twemoji](https://github.com/twitter/twemoji)
+
++ markdown-it-highlightjs
++ markdown-it-include
++ markdown-it-ins
++ markdown-it-mark
++ markdown-it-sub
++ markdown-it-sup
++ markdown-it-toc-done-right
 
 ## Usage
 
@@ -64,7 +70,7 @@ pen
   namespace
 })
   .create({
-  root
+  admin
   namespace
 })
   .attach(server);
@@ -75,3 +81,7 @@ app.get(admin, middleware);
 server.listen(3000);
 
 ```
+
+## Custom UI?
+
+Just fork this project and modify it! It is quite a simple project.

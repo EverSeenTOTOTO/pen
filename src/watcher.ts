@@ -14,35 +14,52 @@ export type MdContent = string | {
   type: 'markdown' | 'dir' | 'other'
 }[];
 
-type WatcherOptions = {
+interface PenWatcher {
   path: string,
+  ignores?: RegExp|RegExp[],
   logger?: PenLogger,
   ondata: (data: string) => void,
   onerror: (e: Error) => void
-};
+}
 
 const isDir = (filepath: string) => {
   const stat = fs.statSync(filepath);
   return stat.isDirectory();
 };
-const readMarkdownFiles = (path: string): Promise<MdContent> => {
+
+export const isIgnored = (filepath: string, ignores?: PenWatcher['ignores']):boolean => {
+  if (ignores !== undefined) {
+    if (Array.isArray(ignores)) {
+      return ignores.filter((regex) => regex.test(filepath)).length > 0;
+    }
+    return ignores.test(filepath);
+  }
+  return false;
+};
+
+const readMarkdownFiles = (path: string, ignores?: PenWatcher['ignores']): Promise<MdContent> => {
   try {
     if (isDir(path)) {
-      return fs.promises.readdir(path).then((files) => files.map((filename: string) => {
-        if (/^[^.].*.(md|markdown)$/.test(filename)) {
+      return fs.promises.readdir(path).then((files) => files
+        .filter((filename: string) => {
+          const fullpath = resolve(path, filename);
+          return !isIgnored(fullpath, ignores);
+        })
+        .map((filename: string) => {
+          if (/^[^.].*.(md|markdown)$/.test(filename)) {
+            return {
+              filename, type: 'markdown',
+            };
+          }
+          if (isDir(resolve(path, filename))) {
+            return {
+              filename, type: 'dir',
+            };
+          }
           return {
-            filename, type: 'markdown',
+            type: 'other',
           };
-        }
-        if (isDir(resolve(path, filename))) {
-          return {
-            filename, type: 'dir',
-          };
-        }
-        return {
-          type: 'other',
-        };
-      }));
+        }));
     }
     return Promise.resolve(mdrender(fs.readFileSync(path).toString(), path));
   } catch (e) {
@@ -60,21 +77,25 @@ const handleData = (content: MdContent) => {
   return data;
 };
 
-export default class Watcher {
-  private readonly options: WatcherOptions;
-
+export default class Watcher implements PenWatcher {
   private watcher?: FSWatcher;
 
-  constructor(opts: WatcherOptions) {
-    this.options = opts;
-  }
+  path: string;
 
-  get path():string {
-    return this.options.path;
-  }
+  ignores?: RegExp | RegExp[] | undefined;
 
-  get logger(): PenLogger | undefined {
-    return this.options.logger;
+  logger?: PenLogger | undefined;
+
+  ondata: (data: string) => void;
+
+  onerror: (e: Error) => void;
+
+  constructor(opts: PenWatcher) {
+    this.path = opts.path;
+    this.ignores = opts.ignores;
+    this.logger = opts.logger;
+    this.ondata = opts.ondata;
+    this.onerror = opts.onerror;
   }
 
   start(): Watcher {
@@ -92,7 +113,7 @@ export default class Watcher {
             this.trigger();
           } else if (event === 'rename') {
             if (!isDir(this.path)) {
-              this.options.onerror(new Error(`no such file or directory: ${this.path}`));
+              this.onerror(new Error(`no such file or directory: ${this.path}`));
             } else {
               this.trigger();
             }
@@ -100,25 +121,25 @@ export default class Watcher {
         },
       );
 
-      watcher.on('error', this.options.onerror);
+      watcher.on('error', this.onerror);
 
       this.watcher = watcher;
     } catch (e) {
       this.logger?.error(e);
-      this.options.onerror(e);
+      this.onerror(e);
     }
 
     return this;
   }
 
   trigger(): Watcher {
-    readMarkdownFiles(this.path)
+    readMarkdownFiles(this.path, this.ignores)
       .then((content) => {
-        this.options.ondata(handleData(content));
+        this.ondata(handleData(content));
       })
       .catch((e) => {
         this.logger?.error(e);
-        this.options.onerror(e);
+        this.onerror(e);
       });
     return this;
   }

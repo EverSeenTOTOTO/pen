@@ -2,19 +2,17 @@ import { createReadStream, existsSync } from 'fs';
 import { resolve } from 'path';
 import { Server as HttpServer, IncomingMessage, ServerResponse } from 'http';
 import { Namespace, Server, Socket } from 'socket.io';
-import Watcher, { PenLogger } from './watcher';
+import Watcher, { PenLogger, isIgnored } from './watcher';
 
 type PenOptions = {
   root?: string,
   namespace?: string,
-  io?: Namespace | null
-};
-
-export type PenCreateOptions = Pick<PenOptions, 'root' | 'namespace'>;
-
-export type PenConstructorOptions = {
+  ignores?: RegExp|RegExp[],
+  io?: Namespace | null,
   logger?: PenLogger,
 };
+
+export type PenCreateOptions = Omit<PenOptions, 'io'>;
 
 // express middleware
 const middleware = <Req extends IncomingMessage, Res extends ServerResponse>
@@ -25,10 +23,13 @@ const middleware = <Req extends IncomingMessage, Res extends ServerResponse>
 };
 
 // check file permission
-const checkPermission = (filepath: string, root:string) => {
+const checkPermission = (filepath: string, root:string, ignores?: PenCreateOptions['ignores']) => {
   const file = resolve(filepath);
   if (!file.startsWith(resolve(root)) || !existsSync(file)) {
     throw new Error(`Pen not permitted to watch: ${filepath}, or maybe file does not exits.`);
+  }
+  if (isIgnored(file, ignores)) {
+    throw new Error(`${file} is ignored due to your config`);
   }
 };
 
@@ -37,15 +38,11 @@ export default class Pen {
 
   private logger?: PenLogger;
 
-  public readonly namespaces: Required<PenOptions>[];
+  private ignores?: PenCreateOptions['ignores'];
 
-  private readonly connectedSockets: { socket: Socket, watcher: Watcher }[];
+  public readonly namespaces: Required<Omit<PenOptions, 'logger'|'ignores'>>[] = [];
 
-  constructor(opts ?:PenConstructorOptions) {
-    this.logger = opts?.logger || undefined;
-    this.connectedSockets = [];
-    this.namespaces = [];
-  }
+  private readonly connectedSockets: { socket: Socket, watcher: Watcher }[] = [];
 
   // attach to http server
   attach<T extends HttpServer>(server: T): Pen {
@@ -71,7 +68,7 @@ export default class Pen {
         // change watch file
         socket.on('penfile', (path: string) => {
           const filepath = resolve(root, path);
-          checkPermission(filepath, root);
+          checkPermission(filepath, root, this.ignores);
           this.startWatch({ socket, filepath });
         });
         this.startWatch({
@@ -87,13 +84,15 @@ export default class Pen {
 
   // init pen
   create(opts?: PenCreateOptions): Pen {
-    const namespace = {
+    const ns = {
       root: opts?.root || resolve('.'),
       namespace: opts?.namespace || '/',
       io: null,
     };
-    this.logger?.info(`Construct pen middleware with socket.io namespace ${namespace}, prepare to watch file ${namespace.root}`);
-    this.namespaces.push(namespace);
+    this.logger = opts?.logger;
+    this.logger?.info(`Construct pen middleware with socket.io namespace ${ns.namespace}, prepare to watch file ${ns.root}`);
+    this.namespaces.push(ns);
+    this.ignores = opts?.ignores;
     return this;
   }
 
@@ -147,6 +146,7 @@ export default class Pen {
 
     const newWatcher = new Watcher({
       path: filepath,
+      ignores: this.ignores,
       ondata: (data) => socket.emit('pencontent', data),
       onerror: (err) => socket.emit('penerror', err.message || `Internal Pen Error: ${err}`),
     });
