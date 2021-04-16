@@ -45,9 +45,7 @@ const HTMLRenderer = ():JSX.Element => {
         setData(e.stack || e.message || `failed to parse pensocket message ${serialized}`);
       }
     });
-    socket.on('penerror', (e) => {
-      setData(e.stack || e.message);
-    });
+    socket.on('penerror', setData);
 
     // when conneted, emit to get first data
     socket.emit('penfile', '.');
