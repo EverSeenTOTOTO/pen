@@ -123,13 +123,13 @@ img.emoji {
 
 .penback {
   position: fixed;
-  width: 8vw;
-  height: 8vw;
-  right: 6vw;
+  width: 4vw;
+  height: 4vw;
+  right: 3vw;
   bottom: 4vh;
   color: white;
   background: var(--primary);
-  border-radius: 10vw;
+  border-radius: 4vw;
   font-size: 1rem;
   box-shadow: 0 0 8px 2px var(--primary);
   cursor: pointer;

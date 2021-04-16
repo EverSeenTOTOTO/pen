@@ -19,7 +19,7 @@ yarn add @everseenflash/pen-middleware
   > available colors: azure, snow, lightyellow, honeydew, mintcream, aliceblue, ghostwhite, lavenderblush
 
 + markdown-it-deflist
-+ markdown-it-highlightjs
+e+ markdown-it-highlightjs
 + markdown-it-include
 + markdown-it-ins
 + markdown-it-mark
