@@ -58,23 +58,21 @@ export const isIgnored = (filepath: string, ignores?: PenWatcher['ignores']):boo
 
 // check file permission
 const checkPermission = (filepath: string, root:string, ignores?: PenWatcher['ignores']) => {
-  const file = resolve(root, filepath);
-
-  if (!fs.existsSync(file)) {
-    throw new Error(`${file} does not exits.`);
+  if (!resolve(filepath).startsWith(resolve(root)) || !fs.existsSync(filepath)) {
+    throw new Error(`Pen not permitted to watch: ${filepath}, or maybe file does not exits.`);
   }
-
-  if (isIgnored(file, ignores)) {
-    throw new Error(`${file} is ignored due to your config`);
+  if (isIgnored(filepath, ignores)) {
+    throw new Error(`${filepath} is ignored due to your config`);
   }
 };
 
 const readMarkdownFiles = (option: Pick<PenWatcher, 'path'|'root'|'ignores'>): Promise<MdContent> => {
   try {
     const { path, root, ignores } = option;
-    const dir = resolve(path).replace(resolve(root), '');
 
     checkPermission(path, root, ignores);
+
+    const dir = resolve(path).replace(resolve(root), '');
 
     if (isDir(path)) {
       return fs.promises.readdir(path).then((files) => files
