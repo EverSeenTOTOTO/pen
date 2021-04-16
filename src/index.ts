@@ -129,21 +129,21 @@ export default class Pen {
     if (id !== -1) { // if exist old watcher, stop it
       const { watcher: oldWatcher } = this.connectedSockets.splice(id, 1)[0];
 
-      this.logger?.info(`Pen stop watching ${oldWatcher.path}.`);
+      this.logger?.info(`Pen stop watching: ${oldWatcher.path}`);
 
       newPath = resolve(oldWatcher.path, newPath);
 
       oldWatcher.stop();
     }
 
-    this.logger?.info(`Pen start watching ${filepath}...`);
+    this.logger?.info(`Pen start watching: ${filepath}`);
 
     const newWatcher = new Watcher({
       path: newPath,
       root,
       ignores: this.ignores,
       ondata: (data) => socket.emit('pencontent', data),
-      onerror: (err) => socket.emit('penerror', err.message || `Internal Pen Error: ${err}`),
+      onerror: (err) => socket.emit('penerror', err.message || `Internal Pen Error: ${err.stack ?? err.message}`),
     });
 
     this.connectedSockets.push({
