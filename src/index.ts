@@ -68,6 +68,7 @@ export default class Pen {
         // change watch file
         socket.on('penfile', (path: string) => {
           const filepath = resolve(root, path);
+          this.logger?.info(`recieved new pen filepath: ${path}`)
           checkPermission(filepath, root, this.ignores);
           this.startWatch({ socket, root, filepath });
         });
@@ -138,7 +139,7 @@ export default class Pen {
     if (id !== -1) { // if exist old watcher, stop it
       const { watcher: oldWatcher } = this.connectedSockets.splice(id, 1)[0];
 
-      this.logger?.info(`Pen stop watching ${oldWatcher.path}`);
+      this.logger?.info(`Pen stop watching ${oldWatcher.path}.`);
 
       oldWatcher.stop();
     }

@@ -31,12 +31,19 @@ const isDir = (filepath: string) => {
 };
 
 const ensureSlash = (directory: string) => {
-  const dir = slash(directory);
-  return dir !== ''
-    ? dir.endsWith('/')
-      ? `./${dir}`
-      : `./${dir}/`
-    : './';
+  let dir = slash(directory);
+
+  if (dir.startsWith('/')) {
+    dir = `.${dir}`;
+  } else {
+    dir = `./${dir}`;
+  }
+
+  if (!dir.endsWith('/')) {
+    dir = `${dir}/`;
+  }
+
+  return dir;
 };
 
 export const isIgnored = (filepath: string, ignores?: PenWatcher['ignores']):boolean => {
