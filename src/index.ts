@@ -55,9 +55,8 @@ export default class Pen {
         });
 
         // change watch file
-        socket.on('penfile', (path: string) => {
-          const filepath = resolve(root, path);
-          this.logger?.info(`recieved new pen filepath: ${path}`);
+        socket.on('penfile', (filepath: string) => {
+          this.logger?.info(`recieved new pen filepath: ${filepath}`);
           this.startWatch({ socket, root, filepath });
         });
         this.startWatch({
