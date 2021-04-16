@@ -56,10 +56,26 @@ export const isIgnored = (filepath: string, ignores?: PenWatcher['ignores']):boo
   return false;
 };
 
+// check file permission
+const checkPermission = (filepath: string, root:string, ignores?: PenWatcher['ignores']) => {
+  const file = resolve(root, filepath);
+
+  if (!fs.existsSync(file)) {
+    throw new Error(`${file} does not exits.`);
+  }
+
+  if (isIgnored(file, ignores)) {
+    throw new Error(`${file} is ignored due to your config`);
+  }
+};
+
 const readMarkdownFiles = (option: Pick<PenWatcher, 'path'|'root'|'ignores'>): Promise<MdContent> => {
   try {
     const { path, root, ignores } = option;
     const dir = resolve(path).replace(resolve(root), '');
+
+    checkPermission(path, root, ignores);
+
     if (isDir(path)) {
       return fs.promises.readdir(path).then((files) => files
         .filter((filename: string) => {

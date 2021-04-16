@@ -1,8 +1,8 @@
-import { createReadStream, existsSync } from 'fs';
+import { createReadStream } from 'fs';
 import { resolve } from 'path';
 import { Server as HttpServer, IncomingMessage, ServerResponse } from 'http';
 import { Namespace, Server, Socket } from 'socket.io';
-import Watcher, { PenLogger, isIgnored } from './watcher';
+import Watcher, { PenLogger } from './watcher';
 
 type PenOptions = {
   root?: string,
@@ -20,17 +20,6 @@ const middleware = <Req extends IncomingMessage, Res extends ServerResponse>
   res.setHeader('Content-Type', 'text/html');
   createReadStream(require.resolve('@everseenflash/pen-middleware/dist/spa/index.html'))
     .pipe(res);
-};
-
-// check file permission
-const checkPermission = (filepath: string, root:string, ignores?: PenCreateOptions['ignores']) => {
-  const file = resolve(filepath);
-  if (!file.startsWith(resolve(root)) || !existsSync(file)) {
-    throw new Error(`Pen not permitted to watch: ${filepath}, or maybe file does not exits.`);
-  }
-  if (isIgnored(file, ignores)) {
-    throw new Error(`${file} is ignored due to your config`);
-  }
 };
 
 export default class Pen {
@@ -68,8 +57,7 @@ export default class Pen {
         // change watch file
         socket.on('penfile', (path: string) => {
           const filepath = resolve(root, path);
-          this.logger?.info(`recieved new pen filepath: ${path}`)
-          checkPermission(filepath, root, this.ignores);
+          this.logger?.info(`recieved new pen filepath: ${path}`);
           this.startWatch({ socket, root, filepath });
         });
         this.startWatch({
