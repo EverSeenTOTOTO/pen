@@ -1,6 +1,5 @@
 import { resolve } from 'path';
 import fs, { FSWatcher } from 'fs';
-import slash from 'slash';
 import mdrender from './markdown';
 
 export type PenLogger = {
@@ -12,7 +11,6 @@ export type PenLogger = {
 
 export type MdContent = string | {
   filename?: string,
-  directory?: string,
   type: 'markdown' | 'dir' | 'other'
 }[];
 
@@ -28,22 +26,6 @@ interface PenWatcher {
 const isDir = (filepath: string) => {
   const stat = fs.statSync(filepath);
   return stat.isDirectory();
-};
-
-const ensureSlash = (directory: string) => {
-  let dir = slash(directory);
-
-  if (dir.startsWith('/')) {
-    dir = `.${dir}`;
-  } else {
-    dir = `./${dir}`;
-  }
-
-  if (!dir.endsWith('/')) {
-    dir = `${dir}/`;
-  }
-
-  return dir;
 };
 
 export const isIgnored = (filepath: string, ignores?: PenWatcher['ignores']):boolean => {
@@ -72,8 +54,6 @@ const readMarkdownFiles = (option: Pick<PenWatcher, 'path'|'root'|'ignores'>): P
 
     checkPermission(path, root, ignores);
 
-    const dir = resolve(path).replace(resolve(root), '');
-
     if (isDir(path)) {
       return fs.promises.readdir(path).then((files) => files
         .filter((filename: string) => {
@@ -83,12 +63,12 @@ const readMarkdownFiles = (option: Pick<PenWatcher, 'path'|'root'|'ignores'>): P
         .map((filename: string) => {
           if (/^[^.].*.(md|markdown)$/.test(filename)) {
             return {
-              filename, type: 'markdown', directory: ensureSlash(dir),
+              filename, type: 'markdown',
             };
           }
           if (isDir(resolve(path, filename))) {
             return {
-              filename, type: 'dir', directory: ensureSlash(dir),
+              filename, type: 'dir',
             };
           }
           return {

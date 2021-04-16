@@ -1742,13 +1742,6 @@
     "@types/prop-types" "*"
     csstype "^3.0.2"
 
-"@types/slash@^3.0.0":
-  version "3.0.0"
-  resolved "https://registry.npm.taobao.org/@types/slash/download/@types/slash-3.0.0.tgz#87e9373e5ae6df7732f86a4548b8b2eb280a6c4f"
-  integrity sha1-h+k3Plrm33cy+GpFSLiy6ygKbE8=
-  dependencies:
-    slash "*"
-
 "@types/stack-utils@^2.0.0":
   version "2.0.0"
   resolved "https://registry.npmjs.org/@types/stack-utils/-/stack-utils-2.0.0.tgz"
@@ -7050,11 +7043,6 @@ sisteransi@^1.0.5:
   version "1.0.5"
   resolved "https://registry.npmjs.org/sisteransi/-/sisteransi-1.0.5.tgz"
   integrity sha512-bLGGlR1QxBcynn2d5YmDX4MGjlZvy2MRBDRNHLJ8VI6l6+9FUiyTFNJ0IveOSP0bcXgVDPRcfGqA0pjaqUpfVg==
-
-slash@*, slash@^4.0.0:
-  version "4.0.0"
-  resolved "https://registry.npm.taobao.org/slash/download/slash-4.0.0.tgz?cache=0&sync_timestamp=1618384496016&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2Fslash%2Fdownload%2Fslash-4.0.0.tgz#2422372176c4c6c5addb5e2ada885af984b396a7"
-  integrity sha1-JCI3IXbExsWt214q2oha+YSzlqc=
 
 slash@^3.0.0:
   version "3.0.0"

@@ -11,13 +11,13 @@ const Markdown = ({ html }) => <main className="markdown-body" dangerouslySetInn
 // 渲染md文件列表
 const Static = ({ list, onClick }) => (
   <main className="flex flex-column">
-    {list.map((link: {filename: string, directory: string, type: string}) => {
-      const { filename, directory, type } = link;
+    {list.map((link: {filename: string, type: string}) => {
+      const { filename, type } = link;
       return (
         <span
           className={`link hand-cursor color-primary bold no-decoration ${type}`}
           key={filename}
-          onClick={() => onClick(`${directory}${filename}`)}
+          onClick={() => onClick(filename)}
         >
           {filename}
         </span>
