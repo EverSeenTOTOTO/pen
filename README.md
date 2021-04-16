@@ -19,10 +19,6 @@ yarn add @everseenflash/pen-middleware
   > available colors: azure, snow, lightyellow, honeydew, mintcream, aliceblue, ghostwhite, lavenderblush
 
 + markdown-it-deflist
-+ markdown-it-emoji
-
-  > use [twemoji](https://github.com/twitter/twemoji)
-
 + markdown-it-highlightjs
 + markdown-it-include
 + markdown-it-ins
