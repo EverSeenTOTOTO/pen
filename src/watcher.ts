@@ -76,7 +76,7 @@ const readMarkdownFiles = (option: Pick<PenWatcher, 'path'|'root'|'ignores'>): P
           };
         }));
     }
-    return Promise.resolve(mdrender(fs.readFileSync(path).toString(), path));
+    return Promise.resolve(mdrender(fs.readFileSync(path).toString(), root));
   } catch (e) {
     return Promise.reject(e);
   }

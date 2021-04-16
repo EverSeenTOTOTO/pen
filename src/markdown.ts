@@ -1,7 +1,5 @@
 import mdit from 'markdown-it';
-import twemoji from 'twemoji';
 import mditHighlightjs from 'markdown-it-highlightjs';
-import mditEmoji from 'markdown-it-emoji';
 import mditAnchor from 'markdown-it-anchor';
 import mditContainer from 'markdown-it-container';
 import mditDeflist from 'markdown-it-deflist';
@@ -25,7 +23,6 @@ const md = (root: string) => mdit({
   html: true,
   linkify: true,
 }).use(mditHighlightjs)
-  .use(mditEmoji)
   .use(mditFootnote)
   .use(mditAnchor)
   .use(mditDeflist)
@@ -65,11 +62,6 @@ const md = (root: string) => mdit({
 
 export default (markdown: string, root: string):string => {
   const mdrender = md(root);
-
-  // emoji
-  mdrender.renderer.rules.emoji = (token, idx) => {
-    return twemoji.parse(token[idx].content);
-  };
 
   return mdrender.render(markdown);
 };
