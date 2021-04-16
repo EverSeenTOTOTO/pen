@@ -90,6 +90,7 @@ export default class Pen {
     const matched = this.namespaces.filter(
       ({ root, namespace }) => (filter ? filter({ root, namespace }) : true),
     );
+
     if (matched.length > 0) {
       matched.forEach((match) => {
         this.logger?.info(`Remove pen middleware ${match.namespace}`);
@@ -124,10 +125,14 @@ export default class Pen {
       ({ socket: s }) => s === socket,
     );
 
+    let newPath = filepath;
+
     if (id !== -1) { // if exist old watcher, stop it
       const { watcher: oldWatcher } = this.connectedSockets.splice(id, 1)[0];
 
       this.logger?.info(`Pen stop watching ${oldWatcher.path}.`);
+
+      newPath = resolve(oldWatcher.path, newPath);
 
       oldWatcher.stop();
     }
@@ -135,7 +140,7 @@ export default class Pen {
     this.logger?.info(`Pen start watching ${filepath}...`);
 
     const newWatcher = new Watcher({
-      path: filepath,
+      path: newPath,
       root,
       ignores: this.ignores,
       ondata: (data) => socket.emit('pencontent', data),
