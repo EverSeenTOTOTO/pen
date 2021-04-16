@@ -34,10 +34,10 @@ const ensureSlash = (directory: string) => {
   const dir = slash(directory);
   return dir !== ''
     ? dir.endsWith('/')
-    ? dir
-    : `${dir}/`
-    : '';
-}
+      ? `./${dir}`
+      : `./${dir}/`
+    : './';
+};
 
 export const isIgnored = (filepath: string, ignores?: PenWatcher['ignores']):boolean => {
   if (ignores !== undefined) {
@@ -62,12 +62,12 @@ const readMarkdownFiles = (option: Pick<PenWatcher, 'path'|'root'|'ignores'>): P
         .map((filename: string) => {
           if (/^[^.].*.(md|markdown)$/.test(filename)) {
             return {
-              filename, type: 'markdown', directory: ensureSlash(dir)
+              filename, type: 'markdown', directory: ensureSlash(dir),
             };
           }
           if (isDir(resolve(path, filename))) {
             return {
-              filename, type: 'dir', directory: ensureSlash(dir)
+              filename, type: 'dir', directory: ensureSlash(dir),
             };
           }
           return {
@@ -153,7 +153,7 @@ export default class Watcher implements PenWatcher {
     readMarkdownFiles({
       path: this.path,
       root: this.root,
-      ignores: this.ignores
+      ignores: this.ignores,
     })
       .then((content) => {
         this.ondata(handleData(content));

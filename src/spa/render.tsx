@@ -11,7 +11,7 @@ const Markdown = ({ html }) => <main className="markdown-body" dangerouslySetInn
 // 渲染md文件列表
 const Static = ({ list, onClick }) => (
   <main className="flex flex-column">
-    {[...list, { filename: '..', directory: '', type: 'dir'}]
+    {[...list, { filename: '..', directory: '', type: 'dir' }]
       .map((link: {filename: string, directory: string, type: string}) => {
         const { filename, directory, type } = link;
         return (
@@ -29,7 +29,7 @@ const Static = ({ list, onClick }) => (
 
 const HTMLRenderer = ():JSX.Element => {
   const [data, setData] = useState<string>('');
-  const [emit, setEmit] = useState<() => void>(() => () => { 
+  const [emit, setEmit] = useState<(filename?: string) => void>(() => () => {
     console.warn('pen not connected.');
   });
 
@@ -52,7 +52,7 @@ const HTMLRenderer = ():JSX.Element => {
 
     // when conneted, emit to get first data
     socket.emit('penfile', '.');
-    
+
     setEmit(() => (filename: string) => {
       socket.emit('penfile', filename);
       document.title = filename;
@@ -65,10 +65,12 @@ const HTMLRenderer = ():JSX.Element => {
 
   return (
     <>
-      <span id="pen-scroll-item" />
       {Array.isArray(data)
         ? <Static list={data} onClick={emit} />
         : <Markdown html={data} />}
+      <button className="penback" type="button" onClick={() => emit('..')}>
+        {'<-'}
+      </button>
     </>
   );
 };

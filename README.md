@@ -27,6 +27,7 @@ yarn add @everseenflash/pen-middleware
 + markdown-it-include
 + markdown-it-ins
 + markdown-it-mark
++ markdown-it-footnote
 + markdown-it-sub
 + markdown-it-sup
 + markdown-it-toc-done-right
