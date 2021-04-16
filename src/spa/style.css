@@ -72,7 +72,8 @@ button {
 
 .dir {
   font-weight: normal;
-  color: #4492eb;
+  color: var(--primary);
+  opacity: .9;
 }
 
 .container {
@@ -132,4 +133,12 @@ img.emoji {
   font-size: 1rem;
   box-shadow: 0 0 8px 2px var(--primary);
   cursor: pointer;
+}
+
+.penback:active {
+  box-shadow: 0 0 16px 4px var(--primary);
+}
+
+.penback:hover {
+  opacity: .7;
 }
