@@ -1,5 +1,7 @@
+/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 import { resolve } from 'path';
 import fs, { FSWatcher } from 'fs';
+import { Socket } from 'socket.io';
 import mdrender from './markdown';
 
 export type PenLogger = {
@@ -19,8 +21,7 @@ interface PenWatcher {
   root: string,
   ignores?: RegExp|RegExp[],
   logger?: PenLogger,
-  ondata: (data: string) => void,
-  onerror: (e: Error) => void
+  socket: Socket
 }
 
 const isDir = (filepath: string) => {
@@ -28,7 +29,7 @@ const isDir = (filepath: string) => {
   return stat.isDirectory();
 };
 
-export const isIgnored = (filepath: string, ignores?: PenWatcher['ignores']):boolean => {
+export const isIgnored = (filepath: string, ignores?: PenWatcher['ignores']) => {
   if (ignores !== undefined) {
     if (Array.isArray(ignores)) {
       return ignores.filter((regex) => regex.test(filepath)).length > 0;
@@ -55,44 +56,38 @@ const readMarkdownFiles = (option: Pick<PenWatcher, 'path'|'root'|'ignores'>): P
     checkPermission(path, root, ignores);
 
     if (isDir(path)) {
-      return fs.promises.readdir(path).then((files) => files
-        .filter((filename: string) => {
-          const fullpath = resolve(path, filename);
-          return !isIgnored(fullpath, ignores);
-        })
-        .map((filename: string) => {
-          if (/^[^.].*.(md|markdown)$/.test(filename)) {
+      return fs
+        .promises
+        .readdir(path)
+        .then((files) => files
+          .filter((filename: string) => {
+            const fullpath = resolve(path, filename);
+            return !isIgnored(fullpath, ignores);
+          })
+          .map((filename: string) => {
+            if (/\.(md|markdown)$/.test(filename)) {
+              return {
+                filename, type: 'markdown',
+              };
+            }
+            if (isDir(resolve(path, filename))) {
+              return {
+                filename, type: 'dir',
+              };
+            }
             return {
-              filename, type: 'markdown',
+              type: 'other',
             };
-          }
-          if (isDir(resolve(path, filename))) {
-            return {
-              filename, type: 'dir',
-            };
-          }
-          return {
-            type: 'other',
-          };
-        }));
+          }));
     }
+    // is md file
     return Promise.resolve(mdrender(fs.readFileSync(path).toString(), root));
   } catch (e) {
     return Promise.reject(e);
   }
 };
 
-const handleData = (content: MdContent) => {
-  let data = '';
-  if (Array.isArray(content)) {
-    data = JSON.stringify(content.filter((item) => item.type !== 'other' && item.filename));
-  } else {
-    data = JSON.stringify(content);
-  }
-  return data;
-};
-
-export default class Watcher implements PenWatcher {
+export default class Watcher implements Omit<PenWatcher, 'socket'> {
   private watcher?: FSWatcher;
 
   root: string;
@@ -103,17 +98,29 @@ export default class Watcher implements PenWatcher {
 
   logger?: PenLogger | undefined;
 
-  ondata: (data: string) => void;
-
   onerror: (e: Error) => void;
+
+  ondir: (dirs: Exclude<MdContent, string>) => void;
+
+  onfile: (content: string) => void;
 
   constructor(opts: PenWatcher) {
     this.path = opts.path;
     this.root = opts.root;
     this.ignores = opts.ignores;
     this.logger = opts.logger;
-    this.ondata = opts.ondata;
-    this.onerror = opts.onerror;
+
+    const { socket } = opts;
+
+    this.onerror = (e: Error) => {
+      socket.emit('penerror', JSON.stringify(e.stack ?? e.message ?? 'internal pen error'));
+    };
+    this.ondir = (dirs: Exclude<MdContent, string>) => {
+      socket.emit('pendir', JSON.stringify(dirs));
+    };
+    this.onfile = (content: string) => {
+      socket.emit('penfile', JSON.stringify(content));
+    };
   }
 
   start(): Watcher {
@@ -157,7 +164,11 @@ export default class Watcher implements PenWatcher {
       ignores: this.ignores,
     })
       .then((content) => {
-        this.ondata(handleData(content));
+        if (Array.isArray(content)) {
+          this.ondir(content.filter((item) => item.type !== 'other' && item.filename));
+        } else {
+          this.onfile(content);
+        }
       })
       .catch((e) => {
         this.logger?.error(e);

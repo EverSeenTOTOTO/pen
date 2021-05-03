@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 import { createReadStream } from 'fs';
 import { resolve } from 'path';
 import { Server as HttpServer, IncomingMessage, ServerResponse } from 'http';
@@ -59,6 +60,7 @@ export default class Pen {
           this.logger?.info(`recieved new pen filepath: ${filepath}`);
           this.startWatch({ socket, root, filepath });
         });
+
         this.startWatch({
           filepath: resolve(root, './'),
           root,
@@ -79,7 +81,9 @@ export default class Pen {
       io: null,
     };
     this.logger = opts?.logger;
+
     this.logger?.info(`Construct pen middleware with socket.io namespace ${ns.namespace}, prepare to watch file ${ns.root}`);
+
     this.namespaces.push(ns);
     this.ignores = opts?.ignores;
     return this;
@@ -142,8 +146,7 @@ export default class Pen {
       path: newPath,
       root,
       ignores: this.ignores,
-      ondata: (data) => socket.emit('pencontent', data),
-      onerror: (err) => socket.emit('penerror', err.message || `Internal Pen Error: ${err.stack ?? err.message}`),
+      socket,
     });
 
     this.connectedSockets.push({
@@ -154,7 +157,7 @@ export default class Pen {
   }
 }
 
-// default pen instance
+// a default pen instance
 const pen = new Pen();
 
 export {

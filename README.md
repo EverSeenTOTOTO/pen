@@ -10,7 +10,7 @@ yarn add @everseenflash/pen-middleware
 
 ## Embedded markdown-it plugin examples
 
-默认集成了一些markdown-it插件，下面是其语法示例：
+默认集成了一些markdown-it插件：
 
 + markdown-it-abbr
 + markdown-it-anchor

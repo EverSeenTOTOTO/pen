@@ -12,11 +12,11 @@ const SimpleInlineSourcePlugin = require('./scripts/simple-inline-source-plugin.
 // passed into alias object. Uses a flag if passed into the build command
 const paths = {
   root: resolve(__dirname, '.'),
-  src: resolve(__dirname, 'src/spa/'),
-  dist: resolve(__dirname, 'dist/spa/'),
+  src: resolve(__dirname, './src/spa/'),
+  dist: resolve(__dirname, './dist/spa/'),
   resouces: resolve(__dirname, './src/spa/assets/'),
-  packageJson: resolve(__dirname, 'package.json'),
-  nodeModules: resolve(__dirname, 'node_modules'),
+  packageJson: resolve(__dirname, './package.json'),
+  nodeModules: resolve(__dirname, './node_modules'),
 };
 
 module.exports = {
