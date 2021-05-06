@@ -6,38 +6,37 @@ import { Container, Grid } from '@material-ui/core';
 import { io, Socket } from 'socket.io-client';
 
 import Markdown from './Markdown';
-import Directory, { PenData } from './Directory';
+import Directory, { PenInfo } from './Directory';
 
 type BlogState = {
-  root: string,
   socket: Socket | null,
-  dirs: PenData,
+  dirs: PenInfo[],
   content: string,
 };
 
 const initialState: BlogState = {
-  root: '',
   socket: null,
-  dirs: new Map(),
+  dirs: [],
   content: '<h1>Pen socket not connected.</p>',
 };
 
 const reducer: Reducer<BlogState, any> = (state: BlogState, action) => {
   switch (action.type) {
-    case 'updateRoot':
-      return {
-        ...state,
-        root: action.payload,
-      };
-    case 'updateSocket':
+    case 'pensocket':
       return {
         ...state,
         socket: action.payload,
       };
-    case 'updateContent':
+    case 'penerror':
+    case 'pencontent':
       return {
         ...state,
         content: action.payload,
+      };
+    case 'pendirs':
+      return {
+        ...state,
+        dirs: action.payload,
       };
     default:
       return state;
@@ -48,45 +47,53 @@ const wrapDispatcher = (socket, dispatch) => (evt) => {
   socket.on(evt, (data) => {
     dispatch({
       type: evt,
-      payload: data,
+      payload: JSON.parse(data),
     });
   });
 };
 
 const Blog = () => {
   const [state, dispatch] = useReducer<Reducer<BlogState, any>>(reducer, initialState);
+  const {
+    dirs, content, socket,
+  } = state;
 
   useEffect(() => {
-    const socket = io(`${location.origin}${location.pathname}`, {
+    const sock = io(`${location.origin}${location.pathname}`, {
       path: '/pensocket.io',
     });
-    const wrap = wrapDispatcher(socket, dispatch);
+    const wrap = wrapDispatcher(sock, dispatch);
 
-    wrap('penroot');
     wrap('pendirs');
     wrap('pencontent');
+    wrap('penerror');
 
-    socket.emit('penroot');
+    sock.emit('peninit');
 
     dispatch({
-      type: 'updateSocket',
-      payload: socket,
+      type: 'pensocket',
+      payload: sock,
     });
 
     return () => {
-      socket.close();
+      sock.close();
     };
   }, []);
 
-  const { root, dirs, content } = state;
-  const ready = dirs.size > 0; // once ready, size should be > 0
+  useEffect(() => {
+    const mds = dirs.filter((each) => each.type === 'markdown');
+    if (mds.length > 0) {
+      socket.emit('peninit', mds[0].filename);
+    }
+  }, [socket, dirs]);
+  const ready = dirs.length > 0; // once ready, size should be > 0
 
   return (
     <Container>
       <Grid container>
-        { ready ?? (
+        { ready && (
         <Grid item xs={3}>
-          <Directory root={root} dirs={dirs} />
+          <Directory dirs={dirs} />
         </Grid>
         )}
         <Grid item xs={ready ? 9 : 12}>

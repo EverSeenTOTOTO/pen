@@ -56,15 +56,16 @@ export default class Pen {
         });
 
         // change watch file
-        socket.on('penfile', (filepath: string) => {
-          this.logger?.info(`recieved new pen filepath: ${filepath}`);
-          this.startWatch({ socket, root, filepath });
-        });
-
-        this.startWatch({
-          filepath: resolve(root, './'),
-          root,
-          socket,
+        socket.on('peninit', (filepath: string) => {
+          console.log(filepath);
+          this.logger?.info('pen recieved new watch signal');
+          this.startWatch({
+            socket,
+            root,
+            filepath: filepath
+              ? resolve(root, filepath)
+              : resolve(root, './'),
+          });
         });
       });
     });

@@ -5,7 +5,8 @@
         "babel.config.js",
         "scripts/**/*.js",
         ".eslintrc.js",
-        "webpack.config.js"
+        "webpack.config.js",
+        "devServer.js"
     ],
     "exclude": [
     ]

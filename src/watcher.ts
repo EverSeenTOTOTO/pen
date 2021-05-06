@@ -116,10 +116,10 @@ export default class Watcher implements Omit<PenWatcher, 'socket'> {
       socket.emit('penerror', JSON.stringify(e.stack ?? e.message ?? 'internal pen error'));
     };
     this.ondir = (dirs: Exclude<MdContent, string>) => {
-      socket.emit('pendir', JSON.stringify(dirs));
+      socket.emit('pendirs', JSON.stringify(dirs));
     };
     this.onfile = (content: string) => {
-      socket.emit('penfile', JSON.stringify(content));
+      socket.emit('pencontent', JSON.stringify(content));
     };
   }
 

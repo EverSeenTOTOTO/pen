@@ -8,8 +8,6 @@ import { createMarkup } from './common';
 const useStyles = makeStyles((theme) => ({
   paper: {
     padding: theme.spacing(2),
-    textAlign: 'center',
-    height: '100vh',
   },
 }));
 
