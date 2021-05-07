@@ -1,86 +1,15 @@
-#app {
-  max-width: 790px;
-  margin: 30px auto;
-  font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif;
+.list-item {
+  cursor: pointer
 }
 
-button {
-  outline: none;
-  appearance: none;
+.list-item--current {
+  background-color: rgba(0, 0, 0, 0.08);
 }
 
-:root{
-  --primary: royalblue
+.list-item:hover {
+  background-color: rgba(0, 0, 0, 0.04);
 }
 
-.flex {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.flex-column {
-  flex-direction: column;
-}
-
-.hand-cursor {
-  cursor: pointer;
-}
-
-.color-primary {
-  color: var(--primary)
-}
-
-.no-decoration {
-  text-decoration: none;
-}
-
-.no-border {
-  border: none;
-}
-
-.bold {
-  font-weight: bold;
-}
-
-.link {
-  width: 100%;
-  height: 2rem;
-  line-height: 2rem;
-  margin-top: .75rem;
-  padding-left: 4rem;
-  font-size: 1.2rem;
-}
-
-.link:hover {
-  animation: scaleLink 0.3s;
-  transform: scale(1.03);
-  background-color: #e2edf8;
-  box-shadow: 0 0.7px 1px  #e2edf8,
-      0 1.7px 2.6px  #ccd9e6,
-      0 3.5px 5.3px #b0bfce
-}
-
-@keyframes scaleLink{
-  from {
-    transform: scale(1.00);
-  }
-  to {
-    transform: scale(1.03);
-  }
-}
-
-.dir {
-  font-weight: normal;
-  color: var(--primary);
-  opacity: .9;
-}
-
-.container {
-  margin: 1rem 0;
-  padding: .5rem 1rem;
-  border-radius: 0.4rem;
-}
 
 .bg-azure {
   background-color: azure;
@@ -112,33 +41,4 @@ button {
 
 .bg-lavenderblush {
   background-color: lavenderblush;
-}
-
-img.emoji {
-  height: 1em;
-  width: 1em;
-  margin: 0 .05em 0 .1em;
-  vertical-align: -0.1em;
-}
-
-.penback {
-  position: fixed;
-  width: 4vw;
-  height: 4vw;
-  right: 3vw;
-  bottom: 4vh;
-  color: white;
-  background: var(--primary);
-  border-radius: 4vw;
-  font-size: 1rem;
-  box-shadow: 0 0 8px 2px var(--primary);
-  cursor: pointer;
-}
-
-.penback:active {
-  box-shadow: 0 0 16px 4px var(--primary);
-}
-
-.penback:hover {
-  opacity: .7;
 }

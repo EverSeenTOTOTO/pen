@@ -6,8 +6,11 @@ import { makeStyles } from '@material-ui/core/styles';
 import { createMarkup } from './common';
 
 const useStyles = makeStyles((theme) => ({
-  paper: {
-    padding: theme.spacing(2),
+  root: {
+    paddingLeft: theme.spacing(4),
+    paddingRight: theme.spacing(4),
+    height: '100%',
+    overflowY: 'scroll',
   },
 }));
 
@@ -15,7 +18,12 @@ const Markdown = ({ html }: { html: string }) => {
   const classes = useStyles();
 
   return (
-    <Paper className={classes.paper} dangerouslySetInnerHTML={createMarkup(html)} />
+    <Paper
+      classes={{
+        root: classes.root,
+      }}
+      dangerouslySetInnerHTML={createMarkup(html)}
+    />
   );
 };
 

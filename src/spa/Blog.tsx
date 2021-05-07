@@ -3,6 +3,7 @@
 /* eslint-disable no-restricted-globals */
 import React, { useReducer, useEffect, Reducer } from 'react';
 import { Container, Grid } from '@material-ui/core';
+import { makeStyles } from '@material-ui/core/styles';
 import { io, Socket } from 'socket.io-client';
 
 import Markdown from './Markdown';
@@ -52,7 +53,18 @@ const wrapDispatcher = (socket, dispatch) => (evt) => {
   });
 };
 
+const useStyles = makeStyles({
+  root: {
+    paddingLeft: 0,
+    paddingRight: 0,
+  },
+  markdown: {
+    height: '100vh',
+  },
+});
+
 const Blog = () => {
+  const classes = useStyles();
   const [state, dispatch] = useReducer<Reducer<BlogState, any>>(reducer, initialState);
   const {
     dirs, content, socket,
@@ -80,23 +92,32 @@ const Blog = () => {
     };
   }, []);
 
-  useEffect(() => {
-    const mds = dirs.filter((each) => each.type === 'markdown');
-    if (mds.length > 0) {
-      socket.emit('peninit', mds[0].filename);
-    }
-  }, [socket, dirs]);
   const ready = dirs.length > 0; // once ready, size should be > 0
 
   return (
-    <Container>
+    <Container
+      maxWidth={false}
+      classes={{
+        root: classes.root,
+      }}
+    >
       <Grid container>
         { ready && (
-        <Grid item xs={3}>
-          <Directory dirs={dirs} />
+        <Grid
+          item
+          xs={2}
+        >
+          <Directory socket={socket} dirs={dirs} />
         </Grid>
         )}
-        <Grid item xs={ready ? 9 : 12}>
+        <Grid
+          item
+          xs={ready ? 10 : 12}
+          spacing={2}
+          classes={{
+            root: classes.markdown,
+          }}
+        >
           <Markdown html={content} />
         </Grid>
       </Grid>

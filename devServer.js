@@ -20,6 +20,7 @@ instance.waitUntilValid(() => {
   const server = http.createServer(app);
 
   pen.create({
+    root: '../docs/',
     logger: console,
     ignores: /\.git/,
   }).attach(server);
