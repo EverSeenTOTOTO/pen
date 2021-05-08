@@ -113,7 +113,6 @@ const Blog = () => {
         <Grid
           item
           xs={ready ? 10 : 12}
-          spacing={2}
           classes={{
             root: classes.markdown,
           }}

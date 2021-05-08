@@ -57,7 +57,6 @@ export default class Pen {
 
         // change watch file
         socket.on('peninit', (filepath: string) => {
-          console.log(filepath);
           this.logger?.info('pen recieved new watch signal');
           this.startWatch({
             socket,

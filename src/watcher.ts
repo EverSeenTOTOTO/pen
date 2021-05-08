@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
-import { resolve } from 'path';
+import { resolve, relative } from 'path';
 import fs, { FSWatcher } from 'fs';
 import { Socket } from 'socket.io';
 import mdrender from './markdown';
@@ -11,8 +11,10 @@ export type PenLogger = {
   log: (...args: any[]) => void
 };
 
-export type MdContent = string | {
-  filename?: string,
+export type MdContent = string
+| {
+  filename: string,
+  relative: string,
   type: 'markdown' | 'dir' | 'other'
 }[];
 
@@ -65,17 +67,26 @@ const readMarkdownFiles = (option: Pick<PenWatcher, 'path'|'root'|'ignores'>): P
             return !isIgnored(fullpath, ignores);
           })
           .map((filename: string) => {
+            const filepath = resolve(path, filename);
+            const relativePath = relative(root, filepath);
+
             if (/\.(md|markdown)$/.test(filename)) {
               return {
-                filename, type: 'markdown',
+                filename,
+                relative: relativePath,
+                type: 'markdown',
               };
             }
-            if (isDir(resolve(path, filename))) {
+            if (isDir(filepath)) {
               return {
-                filename, type: 'dir',
+                filename,
+                relative: relativePath,
+                type: 'dir',
               };
             }
             return {
+              filename: '',
+              relative: '',
               type: 'other',
             };
           }));

@@ -12,6 +12,7 @@ import { Socket } from 'socket.io-client';
 
 export type PenInfo = {
   filename: string,
+  relative: string,
   type: 'dir' | 'markdown'
 };
 
@@ -21,7 +22,7 @@ const Directory = ({ dirs, socket }: { dirs: PenInfo[], socket: Socket }) => {
   useEffect(() => {
     const mds = dirs.filter((each) => each.type === 'markdown');
     if (mds.length > 0) {
-      socket.emit('peninit', mds[0].filename);
+      socket.emit('peninit', mds[0].relative);
       setCurrent(mds[0]);
     }
   }, [socket, dirs]);
@@ -33,7 +34,7 @@ const Directory = ({ dirs, socket }: { dirs: PenInfo[], socket: Socket }) => {
       <ListItem
         className={`list-item ${currentItemClassName}`}
         onClick={() => {
-          socket.emit('peninit', each.filename);
+          socket.emit('peninit', each.relative);
         }}
       >
         <ListItemAvatar>
