@@ -58,6 +58,9 @@ const useStyles = makeStyles({
     paddingLeft: 0,
     paddingRight: 0,
   },
+  dir: {
+    height: '100vh',
+  },
   markdown: {
     height: '100vh',
   },
@@ -105,14 +108,17 @@ const Blog = () => {
         { ready && (
         <Grid
           item
-          xs={2}
+          xs={3}
+          classes={{
+            root: classes.dir,
+          }}
         >
           <Directory socket={socket} dirs={dirs} />
         </Grid>
         )}
         <Grid
           item
-          xs={ready ? 10 : 12}
+          xs={ready ? 9 : 12}
           classes={{
             root: classes.markdown,
           }}

@@ -8,6 +8,7 @@ import {
 } from '@material-ui/core';
 import React, { useState, useEffect } from 'react';
 import { Folder, TextFields } from '@material-ui/icons';
+import { makeStyles } from '@material-ui/core/styles';
 import { Socket } from 'socket.io-client';
 
 export type PenInfo = {
@@ -16,8 +17,16 @@ export type PenInfo = {
   type: 'dir' | 'markdown'
 };
 
+const useStyles = makeStyles({
+  root: {
+    height: '100%',
+    overflowY: 'scroll',
+  },
+});
+
 const Directory = ({ dirs, socket }: { dirs: PenInfo[], socket: Socket }) => {
   const [current, setCurrent] = useState<any>();
+  const classes = useStyles();
 
   useEffect(() => {
     const mds = dirs.filter((each) => each.type === 'markdown');
@@ -49,6 +58,9 @@ const Directory = ({ dirs, socket }: { dirs: PenInfo[], socket: Socket }) => {
 
   return (
     <List
+      classes={{
+        root: classes.root,
+      }}
       component="nav"
       aria-labelledby="nested-list-subheader"
     >
