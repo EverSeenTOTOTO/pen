@@ -14,7 +14,7 @@ const App = () => {
   const [theme] = useTheme();
 
   return (
-    <div id="app">
+    <div id="app" className="markdown-body">
       <ThemeProvider theme={theme}>
         <CssBaseline />
         <Blog />
