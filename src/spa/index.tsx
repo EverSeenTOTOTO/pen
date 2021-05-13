@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom';
 import { ThemeProvider } from '@material-ui/core/styles';
 import CssBaseline from '@material-ui/core/CssBaseline';
 
+import 'github-markdown-css/github-markdown.css';
 import 'highlight.js/styles/github.css';
 import './style.css';
 
