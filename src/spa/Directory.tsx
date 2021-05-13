@@ -17,12 +17,12 @@ export type PenInfo = {
   type: 'dir' | 'markdown'
 };
 
-const useStyles = makeStyles({
+const useStyles = makeStyles((theme) => ({
   root: {
     height: '100%',
     overflowY: 'scroll',
   },
-});
+}));
 
 const Directory = ({ dirs, socket }: { dirs: PenInfo[], socket: Socket }) => {
   const [current, setCurrent] = useState<any>();
@@ -41,7 +41,7 @@ const Directory = ({ dirs, socket }: { dirs: PenInfo[], socket: Socket }) => {
 
     return (
       <ListItem
-        className={`list-item ${currentItemClassName}`}
+        className={`list-item ripple ${currentItemClassName}`}
         onClick={() => {
           socket.emit('peninit', each.relative);
         }}

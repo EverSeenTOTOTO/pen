@@ -12,7 +12,6 @@ const useStyles = makeStyles((theme) => ({
     paddingRight: theme.spacing(4),
     paddingTop: theme.spacing(2),
     paddingBottom: theme.spacing(2),
-    backgroundColor: 'white',
     height: '100%',
     overflowY: 'scroll',
   },
@@ -27,6 +26,7 @@ const Markdown = ({ html }: { html: string }) => {
   return (
     <Container
       maxWidth={false}
+      className="markdown-body"
       classes={{
         root: classes.root,
       }}
