@@ -33,6 +33,12 @@
   transition: background 0s;
 }
 
+.container {
+  margin: 1rem 0;
+  padding: .25rem 1rem;
+  border-radius: 0.4rem;
+}
+
 .bg-azure {
   background-color: azure;
 }

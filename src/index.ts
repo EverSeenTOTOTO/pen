@@ -140,7 +140,7 @@ export default class Pen {
       oldWatcher.stop();
     }
 
-    this.logger?.info(`Pen start watching: ${filepath}`);
+    this.logger?.info(`Pen start watching: ${newPath}`);
 
     const newWatcher = new Watcher({
       path: newPath,
