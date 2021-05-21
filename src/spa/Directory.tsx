@@ -32,12 +32,9 @@ const Directory = ({ dirs, socket }: { dirs: PenInfo[], socket: Socket }) => {
 
   const onClick = useCallback(
     (info: PenInfo) => {
-      if (info.type === 'markdown') {
-        window.history.pushState(info, info.filename, '');
-        setStack((stk) => [...stk, info]);
-      }
-
+      window.history.pushState(info, info.filename, '');
       socket.emit('peninit', info.relative);
+      setStack((stk) => [...stk, info]);
       setCurrent(info.relative);
     },
     [socket],
@@ -50,7 +47,6 @@ const Directory = ({ dirs, socket }: { dirs: PenInfo[], socket: Socket }) => {
       setStack((stk) => {
         stk.pop();
         last = stk.pop();
-        console.log(last, stk);
         return [...stk];
       });
 
