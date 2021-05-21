@@ -11,12 +11,14 @@ export type PenLogger = {
   log: (...args: any[]) => void
 };
 
-export type MdContent = string
-| {
-  filename: string,
-  relative: string,
-  type: 'markdown' | 'dir' | 'other'
-}[];
+export type MdContent = {
+  dirs: {
+    filename: string,
+    relative: string,
+    type: string
+  }[],
+  content: string
+};
 
 interface PenWatcher {
   path: string,
@@ -42,57 +44,77 @@ export const isIgnored = (filepath: string, ignores?: PenWatcher['ignores']) => 
 };
 
 // check file permission
-const checkPermission = (filepath: string, root:string, ignores?: PenWatcher['ignores']) => {
-  if (!resolve(filepath).startsWith(resolve(root)) || !fs.existsSync(filepath)) {
-    throw new Error(`Pen not permitted to watch: ${filepath}, or maybe file does not exits.`);
+const checkPermission = (option: Pick<PenWatcher, 'path'|'root'|'ignores'>) => {
+  const { path, root, ignores } = option;
+  if (!resolve(path).startsWith(resolve(root)) || !fs.existsSync(path)) {
+    throw new Error(`Pen not permitted to watch: ${path}, or maybe file does not exits.`);
   }
-  if (isIgnored(filepath, ignores)) {
-    throw new Error(`${filepath} is ignored due to your config`);
+  if (isIgnored(path, ignores)) {
+    throw new Error(`${path} is ignored due to your config`);
   }
 };
 
-const readMarkdownFiles = (option: Pick<PenWatcher, 'path'|'root'|'ignores'>): Promise<MdContent> => {
-  try {
-    const { path, root, ignores } = option;
+const readDirs = (option: Pick<PenWatcher, 'path'|'root'|'ignores'>) => {
+  const { path, root, ignores } = option;
+  return fs
+    .promises
+    .readdir(path)
+    .then((files) => files
+      .filter((filename: string) => {
+        const fullpath = resolve(path, filename);
+        return !isIgnored(fullpath, ignores);
+      })
+      .map((filename: string) => {
+        const filepath = resolve(path, filename);
+        const relativePath = relative(root, filepath);
 
-    checkPermission(path, root, ignores);
+        if (/\.(md|markdown)$/.test(filename)) {
+          return {
+            filename,
+            relative: relativePath,
+            type: 'markdown',
+          };
+        }
+        if (isDir(filepath)) {
+          return {
+            filename,
+            relative: relativePath,
+            type: 'dir',
+          };
+        }
+        return {
+          filename: '',
+          relative: '',
+          type: 'other',
+        };
+      }));
+};
+
+const readMarkdownFiles = async (option: Pick<PenWatcher, 'path'|'root'|'ignores'>): Promise<MdContent> => {
+  try {
+    const { path, root } = option;
+
+    checkPermission(option);
 
     if (isDir(path)) {
-      return fs
-        .promises
-        .readdir(path)
-        .then((files) => files
-          .filter((filename: string) => {
-            const fullpath = resolve(path, filename);
-            return !isIgnored(fullpath, ignores);
-          })
-          .map((filename: string) => {
-            const filepath = resolve(path, filename);
-            const relativePath = relative(root, filepath);
+      const dirs = await readDirs(option);
 
-            if (/\.(md|markdown)$/.test(filename)) {
-              return {
-                filename,
-                relative: relativePath,
-                type: 'markdown',
-              };
-            }
-            if (isDir(filepath)) {
-              return {
-                filename,
-                relative: relativePath,
-                type: 'dir',
-              };
-            }
-            return {
-              filename: '',
-              relative: '',
-              type: 'other',
-            };
-          }));
+      return {
+        dirs: dirs.filter((each) => each.type !== 'other'),
+        content: '',
+      };
     }
+
     // is md file
-    return Promise.resolve(mdrender(fs.readFileSync(path).toString(), root));
+    const parent = resolve(path, '..');
+    const dirs = await readDirs({
+      ...option,
+      path: parent,
+    });
+    return {
+      dirs: dirs.filter((each) => each.type !== 'other'),
+      content: mdrender(fs.readFileSync(path).toString(), root),
+    };
   } catch (e) {
     return Promise.reject(e);
   }
@@ -111,9 +133,7 @@ export default class Watcher implements Omit<PenWatcher, 'socket'> {
 
   onerror: (e: Error) => void;
 
-  ondir: (dirs: Exclude<MdContent, string>) => void;
-
-  onfile: (content: string) => void;
+  ondata: (data: MdContent) => void;
 
   constructor(opts: PenWatcher) {
     this.path = opts.path;
@@ -126,11 +146,8 @@ export default class Watcher implements Omit<PenWatcher, 'socket'> {
     this.onerror = (e: Error) => {
       socket.emit('penerror', JSON.stringify(e.stack ?? e.message ?? 'internal pen error'));
     };
-    this.ondir = (dirs: Exclude<MdContent, string>) => {
-      socket.emit('pendirs', JSON.stringify(dirs));
-    };
-    this.onfile = (content: string) => {
-      socket.emit('pencontent', JSON.stringify(content));
+    this.ondata = (data: MdContent) => {
+      socket.emit('pendata', JSON.stringify(data));
     };
   }
 
@@ -175,11 +192,7 @@ export default class Watcher implements Omit<PenWatcher, 'socket'> {
       ignores: this.ignores,
     })
       .then((content) => {
-        if (Array.isArray(content)) {
-          this.ondir(content.filter((item) => item.type !== 'other' && item.filename));
-        } else {
-          this.onfile(content);
-        }
+        this.ondata(content);
       })
       .catch((e) => {
         this.logger?.error(e);

@@ -29,15 +29,11 @@ const reducer: Reducer<BlogState, any> = (state: BlogState, action) => {
         socket: action.payload,
       };
     case 'penerror':
-    case 'pencontent':
+    case 'pendata':
       return {
         ...state,
-        content: action.payload,
-      };
-    case 'pendirs':
-      return {
-        ...state,
-        dirs: action.payload,
+        content: action.payload.content,
+        dirs: action.payload.dirs,
       };
     default:
       return state;
@@ -79,8 +75,7 @@ const Blog = () => {
     });
     const wrap = wrapDispatcher(sock, dispatch);
 
-    wrap('pendirs');
-    wrap('pencontent');
+    wrap('pendata');
     wrap('penerror');
 
     sock.emit('peninit');
