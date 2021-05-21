@@ -31,8 +31,8 @@ const Directory = ({ dirs, socket }: { dirs: PenInfo[], socket: Socket }) => {
   const classes = useStyles();
 
   const onClick = useCallback(
-    (info: PenInfo) => {
-      info.type === 'markdown' && pushState(`/${info.relative}`);
+    (info: PenInfo & { route?: string}) => {
+      info.type === 'markdown' && pushState(info.route);
       socket.emit('peninit', info.relative);
       setCurrent(info.relative);
     },
