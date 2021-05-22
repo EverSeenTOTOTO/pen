@@ -34,39 +34,24 @@
 }
 
 .container {
+  padding: .1rem 1.5rem;
+  border-left-width: .5rem;
+  border-left-style: solid;
   margin: 1rem 0;
-  padding: .25rem 1rem;
-  border-radius: 0.4rem;
 }
 
-.bg-azure {
-  background-color: azure;
+.container-warn {
+  background-color: rgba(255,229,100,.3);
+  border-color: #e7c000;
+  color: #6b5900;
 }
 
-.bg-snow {
-  background-color: snow;
+.container-info {
+  background-color: #f0fffd;
+  border-color: #51b6e3;
 }
 
-.bg-lightyellow {
-  background-color: lightyellow;
-}
-
-.bg-honeydew {
-  background-color: honeydew;
-}
-
-.bg-mintcream {
-  background-color: mintcream;
-}
-
-.bg-aliceblue {
-  background-color: aliceblue;
-}
-
-.bg-ghostwhite {
-  background-color: ghostwhite;
-}
-
-.bg-lavenderblush {
-  background-color: lavenderblush;
+.container-error {
+  background-color: #fbefef;
+  border-color: red;
 }

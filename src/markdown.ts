@@ -1,7 +1,6 @@
 import mdit from 'markdown-it';
 import mditHighlightjs from 'markdown-it-highlightjs';
 import mditAnchor from 'markdown-it-anchor';
-import mditContainer from 'markdown-it-container';
 import mditDeflist from 'markdown-it-deflist';
 import mditIns from 'markdown-it-ins';
 import mditMark from 'markdown-it-mark';
@@ -11,11 +10,14 @@ import mditAbbr from 'markdown-it-abbr';
 import mditInclude from 'markdown-it-include';
 import mditToc from 'markdown-it-toc-done-right';
 import mditFootnote from 'markdown-it-footnote';
+import mditKatex from 'markdown-it-katex';
+import mditCopy from 'markdown-it-copy';
+import mditContainer from 'markdown-it-container';
 
 const createRender = (color: string) => (tokens: any, index: number) => {
-  const info = tokens[index].info.trim().slice(color.length).trim();
+  // const info = tokens[index].info.trim().slice(color.length).trim();
   return tokens[index].nesting === 1
-    ? `<div class="container bg-${color}"><p class="bold">${info}</p>`
+    ? `<div class="container container-${color}">`
     : '</div>';
 };
 
@@ -32,29 +34,26 @@ const md = (root: string) => mdit({
   .use(mditSup)
   .use(mditAbbr)
   .use(mditToc)
-  .use(mditContainer, 'azure', {
-    render: createRender('azure'),
+  .use(mditKatex)
+  .use(mditCopy, {
+    btnText: 'copy', // 'copy' | button text
+    failText: 'copy failed', // 'copy fail' | copy-fail text
+    successText: 'copied', // 'copy success' | copy-success text
+    successTextDelay: 2000, // 2000 | successText show time [ms]
+    extraHtmlBeforeBtn: '', // '' | a html-fragment before <button>
+    extraHtmlAfterBtn: '', // '' | a html-fragment after <button>
+    // eslint-disable-next-line max-len
+    showCodeLanguage: false, // false | show code language before [btn || extraHtmlBeforeBtn] | [add-after-1.1.0]
+    attachText: '', // '' | some text append copyText， Such as: copyright | [add-after-1.2.0]
   })
-  .use(mditContainer, 'snow', {
-    render: createRender('snow'),
+  .use(mditContainer, 'Warn', {
+    render: createRender('warn'),
   })
-  .use(mditContainer, 'lightyellow', {
-    render: createRender('lightyellow'),
+  .use(mditContainer, 'Info', {
+    render: createRender('info'),
   })
-  .use(mditContainer, 'honeydew', {
-    render: createRender('honeydew'),
-  })
-  .use(mditContainer, 'mintcream', {
-    render: createRender('mintcream'),
-  })
-  .use(mditContainer, 'aliceblue', {
-    render: createRender('aliceblue'),
-  })
-  .use(mditContainer, 'ghostwhite', {
-    render: createRender('ghostwhite'),
-  })
-  .use(mditContainer, 'lavenderblush', {
-    render: createRender('lavenderblush'),
+  .use(mditContainer, 'Error', {
+    render: createRender('error'),
   })
   .use(mditInclude, {
     root,

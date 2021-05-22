@@ -16,10 +16,16 @@ yarn add @everseenflash/pen-middleware
 + markdown-it-anchor
 + markdown-it-container
 
-  > available colors: azure, snow, lightyellow, honeydew, mintcream, aliceblue, ghostwhite, lavenderblush
+> Warn|Error|Info, vuepress style like
+
+```md
+::: Warn
+balabala
+:::
+```
 
 + markdown-it-deflist
-e+ markdown-it-highlightjs
++ markdown-it-highlightjs
 + markdown-it-include
 + markdown-it-ins
 + markdown-it-mark
@@ -27,6 +33,8 @@ e+ markdown-it-highlightjs
 + markdown-it-sub
 + markdown-it-sup
 + markdown-it-toc-done-right
++ markdown-it-katex
++ markdown-it-copy
 
 ## Usage
 

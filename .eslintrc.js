@@ -22,6 +22,8 @@ module.exports = {
   ],
   rules: {
     'no-console': 'off',
+    'no-plusplus': 'off',
+    'no-continue': 'off',
     'no-nested-ternary': 'off',
     '@typescript-eslint/no-unused-expressions': 'off',
     'arrow-body-style': 'off',

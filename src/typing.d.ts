@@ -2,6 +2,16 @@ declare module 'markdown-it-deflist' {
   const anything = any;
   export default anything;
 }
+
+declare module 'markdown-it-katex' {
+  const anything = any;
+  export default anything;
+}
+
+declare module 'markdown-it-copy' {
+  const anything = any;
+  export default anything;
+}
 declare module 'markdown-it-footnote' {
   const anything = any;
   export default anything;
