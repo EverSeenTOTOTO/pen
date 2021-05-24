@@ -41,17 +41,19 @@ const Directory = ({ dirs, socket }: { dirs: PenInfo[], socket: Socket }) => {
   );
 
   useEffect(() => {
-    const onPopState = () => {
-      let last: PenInfo|undefined;
+    const onPopState = (e: PopStateEvent) => {
+      if (e.state !== null) {
+        let last: PenInfo|undefined;
 
-      setStack((stk) => {
-        stk.pop();
-        last = stk.pop();
-        return [...stk];
-      });
+        setStack((stk) => {
+          stk.pop();
+          last = stk.pop();
+          return [...stk];
+        });
 
-      if (last) {
-        onClick(last);
+        if (last) {
+          onClick(last);
+        }
       }
     };
 
