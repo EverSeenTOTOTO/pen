@@ -5,7 +5,6 @@ const HtmlWebPackPlugin = require('html-webpack-plugin');
 const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 const safePostCssParser = require('postcss-safe-parser');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-// const SimpleInlineSourcePlugin = require('./scripts/simple-inline-source-plugin.js');
 
 // Variable used for enabling profiling in Production
 // passed into alias object. Uses a flag if passed into the build command
@@ -30,7 +29,7 @@ module.exports = {
   },
   target: ['web', 'es5'],
   optimization: {
-    minimize: true,
+    minimize: false,
   },
   module: {
     strictExportPresence: true,
@@ -102,21 +101,11 @@ module.exports = {
   plugins: [
     new HtmlWebPackPlugin({
       title: 'Pen',
-      inject: true,
+      inject: false,
       template: './public/index.html',
       favicon: './public/favicon.ico',
-      minify: {
-        removeComments: true,
-        collapseWhitespace: true,
-        removeRedundantAttributes: true,
-        useShortDoctype: true,
-        removeEmptyAttributes: true,
-        removeStyleLinkTypeAttributes: true,
-        keepClosingSlash: true,
-        minifyJS: true,
-        minifyCSS: true,
-        minifyURLs: true,
-      },
+      minify: false,
+      scriptLoading: 'blocking',
     }),
     new webpack.DefinePlugin({
       'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),
@@ -132,7 +121,6 @@ module.exports = {
         preset: ['default', { minifyFontValues: { removeQuotes: false } }],
       },
     }),
-    // new SimpleInlineSourcePlugin(),
   ],
   resolve: {
     modules: [paths.nodeModules],
