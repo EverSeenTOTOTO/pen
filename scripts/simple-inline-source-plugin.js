@@ -9,8 +9,6 @@ const { createHtmlTagObject } = require('html-webpack-plugin/lib/html-tags');
 module.exports = class SimpleInlineSourcePlugin {
   compilation = null;
 
-  filename = 'index.html';
-
   apply(compiler) {
     compiler.hooks.compilation.tap('SimpleInlineSourcePlugin', (compilation) => {
       HtmlWebpackPlugin.getHooks(compilation).alterAssetTags.tapAsync(
@@ -18,7 +16,6 @@ module.exports = class SimpleInlineSourcePlugin {
         (data, cb) => {
           // Manipulate the content
           this.compilation = compilation;
-          this.filename = data.plugin.options.filename;
           const newData = this.process(data);
           // Tell webpack to move on
           cb(null, newData);
@@ -37,19 +34,6 @@ module.exports = class SimpleInlineSourcePlugin {
       ...data,
       assetTags,
     };
-  }
-
-  processTag(tag, filepath) {
-    let assetName = filepath;
-    const preTag = { ...tag };
-    if (path.basename(this.filename) !== this.filename) {
-      assetName = `${path.dirname(this.filename)}/${filepath}`;
-    }
-    const asset = this.compilation.assets[assetName];
-    if (asset) {
-      preTag.innerHTML = asset.source(); // suppose not using source-map
-    }
-    return preTag;
   }
 
   processScript(scriptTags) {
@@ -76,5 +60,14 @@ module.exports = class SimpleInlineSourcePlugin {
       const newTag = createHtmlTagObject('style', attributes);
       return this.processTag(newTag, filepath);
     });
+  }
+
+  processTag(tag, filepath) {
+    const asset = this.compilation.assets[filepath];
+    if (asset) {
+      // eslint-disable-next-line no-param-reassign
+      tag.innerHTML = asset.source(); // suppose not using source-map
+    }
+    return tag;
   }
 };

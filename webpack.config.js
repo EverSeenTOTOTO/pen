@@ -4,9 +4,8 @@ const webpack = require('webpack');
 const HtmlWebPackPlugin = require('html-webpack-plugin');
 const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 const safePostCssParser = require('postcss-safe-parser');
-const TerserPlugin = require('terser-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-const SimpleInlineSourcePlugin = require('./scripts/simple-inline-source-plugin.js');
+// const SimpleInlineSourcePlugin = require('./scripts/simple-inline-source-plugin.js');
 
 // Variable used for enabling profiling in Production
 // passed into alias object. Uses a flag if passed into the build command
@@ -20,7 +19,8 @@ const paths = {
 };
 
 module.exports = {
-  devtool: false,
+  mode: 'production',
+  devtool: 'source-map',
   entry: {
     app: './src/spa/index.tsx',
   },
@@ -28,35 +28,9 @@ module.exports = {
     filename: 'bundle.js',
     path: paths.dist,
   },
+  target: ['web', 'es5'],
   optimization: {
     minimize: true,
-    minimizer: [
-      // This is only used in production mode
-      new TerserPlugin({
-        terserOptions: {
-          parse: {
-            ecma: 8,
-          },
-          compress: {
-            ecma: 5,
-            warnings: false,
-            comparisons: false,
-            inline: 2,
-          },
-          mangle: {
-            safari10: true,
-          },
-          // Added for profiling in devtools
-          keep_classnames: false,
-          keep_fnames: false,
-          output: {
-            ecma: 5,
-            comments: false,
-            ascii_only: true,
-          },
-        },
-      }),
-    ],
   },
   module: {
     strictExportPresence: true,
@@ -97,15 +71,6 @@ module.exports = {
         },
       },
       {
-        test: /\.html$/,
-        use: [
-          {
-            loader: require.resolve('html-loader'),
-          },
-        ],
-        include: paths.root,
-      },
-      {
         test: /.css$/,
         use: [
           {
@@ -139,6 +104,7 @@ module.exports = {
       title: 'Pen',
       inject: true,
       template: './public/index.html',
+      favicon: './public/favicon.ico',
       minify: {
         removeComments: true,
         collapseWhitespace: true,
@@ -166,7 +132,7 @@ module.exports = {
         preset: ['default', { minifyFontValues: { removeQuotes: false } }],
       },
     }),
-    new SimpleInlineSourcePlugin(),
+    // new SimpleInlineSourcePlugin(),
   ],
   resolve: {
     modules: [paths.nodeModules],

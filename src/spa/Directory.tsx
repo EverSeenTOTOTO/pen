@@ -6,7 +6,9 @@ import {
   ListItemText,
   Avatar,
 } from '@material-ui/core';
-import React, { useState, useEffect, useCallback } from 'react';
+import React, {
+  useState, useEffect, useCallback, useRef,
+} from 'react';
 import { Folder, TextFields } from '@material-ui/icons';
 import { makeStyles } from '@material-ui/core/styles';
 import { Socket } from 'socket.io-client';
@@ -24,8 +26,21 @@ const useStyles = makeStyles({
   },
 });
 
+const isSame = (dirs: PenInfo[], last: PenInfo[]) => {
+  if (dirs.length !== last.length) return false;
+  for (let i = 0; i < dirs.length; ++i) {
+    if (dirs[i].filename !== last[i].filename
+      || dirs[i].relative !== last[i].relative
+      || dirs[i].type !== last[i].type) {
+      return false;
+    }
+  }
+  return true;
+};
+
 const Directory = ({ dirs, socket }: { dirs: PenInfo[], socket: Socket }) => {
   const [current, setCurrent] = useState<string>('');
+  const dirsRef = useRef<PenInfo[]>([]);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [stack, setStack] = useState<PenInfo[]>([{ relative: '', filename: '', type: 'dir' }]);
   const classes = useStyles();
@@ -39,6 +54,15 @@ const Directory = ({ dirs, socket }: { dirs: PenInfo[], socket: Socket }) => {
     },
     [socket],
   );
+
+  useEffect(() => {
+    if (!isSame(dirs, dirsRef.current)) {
+      dirsRef.current = dirs;
+      if (dirs.length > 0) {
+        onClick(dirs[0]);
+      }
+    }
+  }, [dirs, onClick]);
 
   useEffect(() => {
     const onPopState = (e: PopStateEvent) => {

@@ -11,7 +11,7 @@ import Directory, { PenInfo } from './Directory';
 
 type BlogState = {
   socket: Socket | null,
-  dirs: PenInfo[],
+  dirs: PenInfo[] | undefined,
   content: string,
 };
 
@@ -90,7 +90,7 @@ const Blog = () => {
     };
   }, []);
 
-  const ready = dirs.length > 0; // once ready, size should be > 0
+  const ready = dirs?.length > 0; // once ready, size should be > 0
 
   return (
     <Container
