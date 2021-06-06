@@ -38,7 +38,7 @@ const isSame = (dirs: PenInfo[], last: PenInfo[]) => {
   return true;
 };
 
-const Directory = ({ dirs, socket }: { dirs: PenInfo[], socket: Socket }) => {
+const Directory = ({ content, dirs, socket }: { content: string, dirs: PenInfo[], socket: Socket }) => {
   const [current, setCurrent] = useState<string>('');
   const dirsRef = useRef<PenInfo[]>([]);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -47,7 +47,9 @@ const Directory = ({ dirs, socket }: { dirs: PenInfo[], socket: Socket }) => {
 
   const onClick = useCallback(
     (info: PenInfo) => {
-      window.history.pushState(info, info.filename, '');
+      if (info.type === 'markdown') {
+        window.history.pushState(info, info.filename, '');
+      }
       socket.emit('peninit', info.relative);
       setStack((stk) => [...stk, info]);
       setCurrent(info.relative);
@@ -56,13 +58,15 @@ const Directory = ({ dirs, socket }: { dirs: PenInfo[], socket: Socket }) => {
   );
 
   useEffect(() => {
-    if (!isSame(dirs, dirsRef.current)) {
+    // content不为空说明跨越目录访问md，此时不需要展示一个默认的md
+    if (content === '' && !isSame(dirs, dirsRef.current)) {
       dirsRef.current = dirs;
-      if (dirs.length > 0) {
-        onClick(dirs[0]);
+      const mds = dirs.filter((each) => each.type === 'markdown');
+      if (mds.length > 0) {
+        onClick(mds[0]);
       }
     }
-  }, [dirs, onClick]);
+  }, [dirs, content, onClick]);
 
   useEffect(() => {
     const onPopState = (e: PopStateEvent) => {
@@ -72,7 +76,7 @@ const Directory = ({ dirs, socket }: { dirs: PenInfo[], socket: Socket }) => {
         setStack((stk) => {
           stk.pop();
           last = stk.pop();
-          return [...stk];
+          return stk;
         });
 
         if (last) {

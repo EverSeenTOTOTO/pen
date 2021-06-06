@@ -108,7 +108,7 @@ const Blog = () => {
             root: classes.dir,
           }}
         >
-          <Directory socket={socket} dirs={dirs} />
+          <Directory socket={socket} content={content} dirs={dirs} />
         </Grid>
         )}
         <Grid
