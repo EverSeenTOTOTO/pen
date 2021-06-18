@@ -1,11 +1,8 @@
 import mdit from 'markdown-it';
 import mditHighlightjs from 'markdown-it-highlightjs';
 import mditAnchor from 'markdown-it-anchor';
-import mditDeflist from 'markdown-it-deflist';
 import mditIns from 'markdown-it-ins';
 import mditMark from 'markdown-it-mark';
-import mditSub from 'markdown-it-sub';
-import mditSup from 'markdown-it-sup';
 import mditAbbr from 'markdown-it-abbr';
 import mditInclude from 'markdown-it-include';
 import mditToc from 'markdown-it-toc-done-right';
@@ -27,11 +24,8 @@ const md = (root: string) => mdit({
 }).use(mditHighlightjs)
   .use(mditFootnote)
   .use(mditAnchor)
-  .use(mditDeflist)
   .use(mditIns)
   .use(mditMark)
-  .use(mditSub)
-  .use(mditSup)
   .use(mditAbbr)
   .use(mditToc)
   .use(mditKatex)

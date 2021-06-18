@@ -24,21 +24,18 @@ balabala
 :::
 ```
 
-+ markdown-it-deflist
 + markdown-it-highlightjs
 + markdown-it-include
 + markdown-it-ins
 + markdown-it-mark
 + markdown-it-footnote
-+ markdown-it-sub
-+ markdown-it-sup
 + markdown-it-toc-done-right
 + markdown-it-katex
 + markdown-it-copy
 
 ## Usage
 
-### Basic Usage Example
+### Basic Usage
 
 ```js
 const { createServer } = require('http');
@@ -48,7 +45,7 @@ const server = createServer(middleware);
 
 pen
   .create({
-    root: './markdown-path/' //本地markdown文件或者目录
+    root: './' // 本地markdown文件或者目录
 })
   .attach(server);
 
@@ -64,28 +61,51 @@ import http from 'http';
 import express from 'express';
 import { pen, middleware } from '@everseenflash/pen-middleware';
 
-const doc = '/doc'; // 可以设置页面访问上下文，默认是'/'
-const admin = '/admin';
-
 const app = express();
 const server = http.createServer(app);
 pen
   .create({
-  root // 本地markdown文件或者目录
-  namespace
+  root, // 本地markdown文件或者目录
+  namespace: '/doc', // 默认 '/'
+  ignores: /[\\/]\.git$/,
+  logger: console
 })
   .create({
-  admin
-  namespace
+  root
+  namespace: '/admin'
 })
   .attach(server);
 
-app.get(doc, middleware);
-app.get(admin, middleware);
+app.get('/doc', middleware);
+app.get('/admin', middleware);
 
 server.listen(3000);
-
 ```
+
+### Use with Terminal
+
+```bash
+npx pen
+npx pen -si -p 8080 -r ~/docs
+```
+
+#### Cli Options
+
++ `--port|-p`
+
+设置port，默认3000。
+
++ `--root|-r`
+
+设置markdown文件目录，默认'./'。
+
++ `-i`
+
+是否显示隐藏文件，默认不现实。
+
++ `-s`
+
+是否输出日志，默认输出。
 
 ## Custom UI?
 
