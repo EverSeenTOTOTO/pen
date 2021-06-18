@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 /* eslint-disable import/order */
 /* eslint-disable @typescript-eslint/no-var-requires */
 const { createServer } = require('http');

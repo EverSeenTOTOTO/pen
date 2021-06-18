@@ -85,6 +85,7 @@ server.listen(3000);
 ### Use with Terminal
 
 ```bash
+npm i -g @everseenflash/pen-middleware
 npx pen
 npx pen -si -p 8080 -r ~/docs
 ```
