@@ -112,7 +112,9 @@ const readMarkdownFiles = async (option: Pick<PenWatcher, 'path'|'root'|'ignores
       path: parent,
     });
     return {
-      dirs: dirs.filter((each) => each.type !== 'other'),
+      dirs: dirs.filter((each) => each.type !== 'other').sort((a, b) => {
+        return a.filename.toLowerCase() < b.filename.toLowerCase() ? -1 : 0;
+      }),
       content: mdrender(fs.readFileSync(path).toString(), root),
     };
   } catch (e) {

@@ -2990,6 +2990,11 @@ commander@^4.1.1:
   resolved "https://registry.npmjs.org/commander/-/commander-4.1.1.tgz"
   integrity sha512-NOKm8xhkzAjzFx8B2v5OAHT+u5pRQc2UCa2Vq9jYL/31o2wi9mxBA7LIFs3sV5VSC49z6pEhfbMULvShKj26WA==
 
+commander@^6.0.0:
+  version "6.2.1"
+  resolved "https://registry.nlark.com/commander/download/commander-6.2.1.tgz#0792eb682dfbc325999bb2b84fddddba110ac73c"
+  integrity sha1-B5LraC37wyWZm7K4T93duhEKxzw=
+
 commander@^6.2.0:
   version "6.2.0"
   resolved "https://registry.npmjs.org/commander/-/commander-6.2.0.tgz"
@@ -5803,12 +5808,12 @@ jss@10.6.0, jss@^10.5.1:
     array-includes "^3.1.1"
     object.assign "^4.1.1"
 
-katex@^0.6.0:
-  version "0.6.0"
-  resolved "https://registry.nlark.com/katex/download/katex-0.6.0.tgz#12418e09121c05c92041b6b3b9fb6bab213cb6f3"
-  integrity sha1-EkGOCRIcBckgQbazuftrqyE8tvM=
+katex@^0.13.11:
+  version "0.13.11"
+  resolved "https://registry.nlark.com/katex/download/katex-0.13.11.tgz#66138ebf173f25ef130cd3a3ea3ea1d12a3f1362"
+  integrity sha1-ZhOOvxc/Je8TDNOj6j6h0So/E2I=
   dependencies:
-    match-at "^0.1.0"
+    commander "^6.0.0"
 
 keyv@^3.0.0:
   version "3.1.0"
@@ -6079,18 +6084,6 @@ markdown-it-ins@^3.0.1:
   resolved "https://registry.npm.taobao.org/markdown-it-ins/download/markdown-it-ins-3.0.1.tgz"
   integrity sha1-wJNWuRfPHb9zrdCyddZ6uMc9S00=
 
-markdown-it-katex@^2.0.3:
-  version "2.0.3"
-  resolved "https://registry.npm.taobao.org/markdown-it-katex/download/markdown-it-katex-2.0.3.tgz#d7b86a1aea0b9d6496fab4e7919a18fdef589c39"
-  integrity sha1-17hqGuoLnWSW+rTnkZoY/e9YnDk=
-  dependencies:
-    katex "^0.6.0"
-
-markdown-it-mark@^3.0.1:
-  version "3.0.1"
-  resolved "https://registry.npm.taobao.org/markdown-it-mark/download/markdown-it-mark-3.0.1.tgz"
-  integrity sha1-USV9tYeH14qvRtwTQY2ZqfPw69M=
-
 markdown-it-toc-done-right@^4.2.0:
   version "4.2.0"
   resolved "https://registry.npm.taobao.org/markdown-it-toc-done-right/download/markdown-it-toc-done-right-4.2.0.tgz#3ccdce22d5022ffae7b991d07261b1b1de5459d0"
@@ -6106,11 +6099,6 @@ markdown-it@^12.0.3:
     linkify-it "^3.0.1"
     mdurl "^1.0.1"
     uc.micro "^1.0.5"
-
-match-at@^0.1.0:
-  version "0.1.1"
-  resolved "https://registry.npm.taobao.org/match-at/download/match-at-0.1.1.tgz#25d040d291777704d5e6556bbb79230ec2de0540"
-  integrity sha1-JdBA0pF3dwTV5lVru3kjDsLeBUA=
 
 mdn-data@2.0.14:
   version "2.0.14"

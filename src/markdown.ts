@@ -2,14 +2,13 @@ import mdit from 'markdown-it';
 import mditHighlightjs from 'markdown-it-highlightjs';
 import mditAnchor from 'markdown-it-anchor';
 import mditIns from 'markdown-it-ins';
-import mditMark from 'markdown-it-mark';
 import mditAbbr from 'markdown-it-abbr';
 import mditInclude from 'markdown-it-include';
 import mditToc from 'markdown-it-toc-done-right';
 import mditFootnote from 'markdown-it-footnote';
-import mditKatex from 'markdown-it-katex';
 import mditCopy from 'markdown-it-copy';
 import mditContainer from 'markdown-it-container';
+import mditKatex from './plugins/katex';
 
 const createRender = (color: string) => (tokens: any, index: number) => {
   // const info = tokens[index].info.trim().slice(color.length).trim();
@@ -25,7 +24,6 @@ const md = (root: string) => mdit({
   .use(mditFootnote)
   .use(mditAnchor)
   .use(mditIns)
-  .use(mditMark)
   .use(mditAbbr)
   .use(mditToc)
   .use(mditKatex)

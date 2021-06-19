@@ -27,10 +27,9 @@ balabala
 + markdown-it-highlightjs
 + markdown-it-include
 + markdown-it-ins
-+ markdown-it-mark
 + markdown-it-footnote
 + markdown-it-toc-done-right
-+ markdown-it-katex
++ markdown-it-katex (forked, update to katex@0.13.11)
 + markdown-it-copy
 
 ## Usage
@@ -102,7 +101,7 @@ npx pen -si -p 8080 -r ~/docs
 
 + `-i`
 
-是否显示隐藏文件，默认不现实。
+是否显示隐藏文件，默认不显示。
 
 + `-s`
 
