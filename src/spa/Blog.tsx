@@ -1,53 +1,18 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 /* eslint-disable max-len */
 /* eslint-disable no-restricted-globals */
-import React, { useReducer, useEffect, Reducer } from 'react';
+import React, {
+  useState, useCallback, useReducer, useEffect,
+} from 'react';
 import { Container, Grid } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
-import { io, Socket } from 'socket.io-client';
+import { io } from 'socket.io-client';
 
 import Markdown from './Markdown';
-import Directory, { PenInfo } from './Directory';
-
-type BlogState = {
-  socket: Socket | null,
-  dirs: PenInfo[] | undefined,
-  content: string,
-};
-
-const initialState: BlogState = {
-  socket: null,
-  dirs: [],
-  content: '<h1>Pen socket not connected.</p>',
-};
-
-const reducer: Reducer<BlogState, any> = (state: BlogState, action) => {
-  switch (action.type) {
-    case 'pensocket':
-      return {
-        ...state,
-        socket: action.payload,
-      };
-    case 'penerror':
-    case 'pendata':
-      return {
-        ...state,
-        content: action.payload.content,
-        dirs: action.payload.dirs,
-      };
-    default:
-      return state;
-  }
-};
-
-const wrapDispatcher = (socket, dispatch) => (evt) => {
-  socket.on(evt, (data) => {
-    dispatch({
-      type: evt,
-      payload: JSON.parse(data),
-    });
-  });
-};
+import Directory from './Directory';
+import {
+  reducer, initialState, PenEvents, PenDirInfo,
+} from './common';
 
 const useStyles = makeStyles({
   root: {
@@ -64,24 +29,55 @@ const useStyles = makeStyles({
 
 const Blog = () => {
   const classes = useStyles();
-  const [state, dispatch] = useReducer<Reducer<BlogState, any>>(reducer, initialState);
+  const [state, dispatch] = useReducer<typeof reducer>(reducer, initialState);
   const {
-    dirs, content, socket,
+    files, content, socket,
   } = state;
+  const [stack, setStack] = useState<PenDirInfo[]>([]);
+
+  const onClick = useCallback(
+    (info: PenDirInfo) => {
+      if (info.current || !socket) return;
+      window.history.pushState(info, info.filename, '');
+      socket.emit('peninit', info.relative);
+      setStack((stk) => [...stk, info]);
+    },
+    [socket],
+  );
+
+  useEffect(() => {
+    console.log('current stack: ');
+    console.log(stack);
+  }, [stack]);
+
+  useEffect(() => {
+    // init with root
+    onClick({
+      relative: './', filename: '', type: 'dir', current: false,
+    });
+  }, [onClick]);
 
   useEffect(() => {
     const sock = io(`${location.origin}${location.pathname}`, {
       path: '/pensocket.io',
     });
-    const wrap = wrapDispatcher(sock, dispatch);
 
-    wrap('pendata');
-    wrap('penerror');
+    sock.on(PenEvents.UpdateData, (data) => {
+      dispatch({
+        type: PenEvents.UpdateData,
+        payload: JSON.parse(data),
+      });
+    });
 
-    sock.emit('peninit');
+    sock.on(PenEvents.ErrorOccured, (data) => {
+      dispatch({
+        type: PenEvents.ErrorOccured,
+        payload: JSON.parse(data),
+      });
+    });
 
     dispatch({
-      type: 'pensocket',
+      type: PenEvents.CreateSocket,
       payload: sock,
     });
 
@@ -90,7 +86,26 @@ const Blog = () => {
     };
   }, []);
 
-  const ready = dirs?.length > 0; // once ready, size should be > 0
+  useEffect(() => {
+    const onPopState = (e: PopStateEvent) => {
+      if (e.state !== null) {
+        let last: PenDirInfo|undefined;
+
+        setStack((stk) => {
+          stk.pop();
+          last = stk.pop();
+          return stk;
+        });
+
+        if (last) {
+          onClick(last);
+        }
+      }
+    };
+
+    window.addEventListener('popstate', onPopState);
+    return () => window.removeEventListener('popstate', onPopState);
+  }, [onClick]);
 
   return (
     <Container
@@ -100,7 +115,7 @@ const Blog = () => {
       }}
     >
       <Grid container>
-        { ready && (
+        { files?.length > 0 && (
         <Grid
           item
           xs={3}
@@ -108,12 +123,12 @@ const Blog = () => {
             root: classes.dir,
           }}
         >
-          <Directory socket={socket} content={content} dirs={dirs} />
+          <Directory onClick={onClick} files={files} />
         </Grid>
         )}
         <Grid
           item
-          xs={ready ? 9 : 12}
+          xs={files?.length > 0 ? 9 : 12}
           classes={{
             root: classes.markdown,
           }}

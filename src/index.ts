@@ -1,46 +1,45 @@
 /* eslint-disable max-len */
-import { createReadStream } from 'fs';
 import { resolve } from 'path';
-import { Server as HttpServer, IncomingMessage, ServerResponse } from 'http';
-import { Namespace, Server, Socket } from 'socket.io';
+import { Server as HttpServer } from 'http';
+import { Namespace, Server as IOBase, Socket } from 'socket.io';
 import Watcher, { PenLogger } from './watcher';
 
-type PenOptions = {
+export {
+  createPenMiddleware,
+  middleware,
+} from './middleware';
+
+export type PenCreateOptions = {
   root?: string,
   namespace?: string,
   ignores?: RegExp|RegExp[],
-  io?: Namespace | null,
   logger?: PenLogger,
 };
 
-export type PenCreateOptions = Omit<PenOptions, 'io'>;
-
-// express middleware
-const middleware = <Req extends IncomingMessage, Res extends ServerResponse>
-  (_req: Req, res: Res): void => {
-  res.setHeader('Content-Type', 'text/html');
-  createReadStream(require.resolve('@everseenflash/pen-middleware/dist/spa/index.html'))
-    .pipe(res);
+type PenNamespaceOptions = {
+  root: string,
+  namespace: string,
+  io: Namespace | null,
 };
 
 export default class Pen {
-  private iobase?: Server;
+  private iobase?: IOBase;
 
   private logger?: PenLogger;
 
   private ignores?: PenCreateOptions['ignores'];
 
-  public readonly namespaces: Required<Omit<PenOptions, 'logger'|'ignores'>>[] = [];
+  public readonly namespaces: PenNamespaceOptions[] = [];
 
   private readonly connectedSockets: { socket: Socket, watcher: Watcher }[] = [];
 
   // attach to http server
   attach<T extends HttpServer>(server: T): Pen {
-    const iobase = new Server(server, {
+    const iobase = new IOBase(server, {
       path: '/pensocket.io',
     });
     this.namespaces.forEach(({ root, namespace }) => {
-      this.logger?.info(`Create pen middleware with root ${root}, namespace: ${namespace}`);
+      this.logger?.info(`Pen create with root: ${root}, namespace: ${namespace}`);
 
       iobase.of(namespace).on('connection', (socket: Socket) => {
         socket.on('disconnect', () => {
@@ -57,7 +56,6 @@ export default class Pen {
 
         // change watch file
         socket.on('peninit', (filepath: string) => {
-          this.logger?.info('pen recieved new watch signal');
           this.startWatch({
             socket,
             root,
@@ -133,19 +131,21 @@ export default class Pen {
     if (id !== -1) { // if exist old watcher, stop it
       const { watcher: oldWatcher } = this.connectedSockets.splice(id, 1)[0];
 
-      this.logger?.info(`Pen stop watching: ${oldWatcher.path}`);
-
-      newPath = resolve(oldWatcher.path, newPath);
-
+      newPath = resolve(oldWatcher.path, newPath); // compute relative path with the old
       oldWatcher.stop();
     }
 
-    this.logger?.info(`Pen start watching: ${newPath}`);
-
-    const newWatcher = new Watcher({
+    const watcherOptions = {
       path: newPath,
       root,
       ignores: this.ignores,
+    };
+
+    this.logger?.info(`Pen start watching: ${JSON.stringify(watcherOptions)}`);
+
+    const newWatcher = new Watcher({
+      ...watcherOptions,
+      logger: this.logger,
       socket,
     });
 
@@ -158,9 +158,4 @@ export default class Pen {
 }
 
 // a default pen instance
-const pen = new Pen();
-
-export {
-  middleware,
-  pen,
-};
+export const pen = new Pen();

@@ -62,21 +62,23 @@ import { pen, middleware } from '@everseenflash/pen-middleware';
 
 const app = express();
 const server = http.createServer(app);
+
+const Doc = '/doc';
+const Admin = '/admin';
+
 pen
   .create({
-  root, // 本地markdown文件或者目录
-  namespace: '/doc', // 默认 '/'
+  namespace: Doc,             // 默认 '/'
   ignores: /[\\/]\.git$/,
   logger: console
 })
   .create({
-  root
   namespace: '/admin'
 })
   .attach(server);
 
-app.get('/doc', middleware);
-app.get('/admin', middleware);
+app.get(Doc, middleware);
+app.get(Admin, middleware);
 
 server.listen(3000);
 ```
@@ -109,6 +111,20 @@ pen -si -p 8080 -r ~/docs
 + `-s`
 
 是否输出日志，默认输出。
+
+## Serve static files
+
+默认会部署'./'目录下的以下文件:
+
+```js
+/\.(?:css(\.map)?|js(\.map)?|jpe?g|png|gif|ico|cur|heic|webp|tiff?|mp3|m4a|aac|ogg|midi?|wav|mp4|mov|webm|mpe?g|avi|ogv|flv|wmv)$/
+```
+
+可以使用`createPenMiddleware`指定静态资源文件目录.
+
+```js
+const middleware = createPenMiddleware('../docs');
+```
 
 ## Custom UI?
 

@@ -21,12 +21,14 @@ module.exports = {
     'jest',
   ],
   rules: {
+    'arrow-body-style': 'off',
+    'max-len': 'off',
     'no-console': 'off',
     'no-plusplus': 'off',
     'no-continue': 'off',
     'no-nested-ternary': 'off',
+    'no-restricted-syntax': 'off',
     '@typescript-eslint/no-unused-expressions': 'off',
-    'arrow-body-style': 'off',
   },
   overrides: [
     {

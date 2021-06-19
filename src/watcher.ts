@@ -11,12 +11,15 @@ export type PenLogger = {
   log: (...args: any[]) => void
 };
 
+type FileInfo = {
+  filename: string,
+  relative: string,
+  type: string,
+  current: boolean
+};
+
 export type MdContent = {
-  dirs: {
-    filename: string,
-    relative: string,
-    type: string
-  }[],
+  files: FileInfo[],
   content: string
 };
 
@@ -50,76 +53,125 @@ const checkPermission = (option: Pick<PenWatcher, 'path'|'root'|'ignores'>) => {
     throw new Error(`Pen not permitted to watch: ${path}, or maybe file does not exits.`);
   }
   if (isIgnored(path, ignores)) {
-    throw new Error(`${path} is ignored due to your config`);
+    throw new Error(`Pen ignored ${path} due to your config`);
   }
 };
 
-const readDirs = (option: Pick<PenWatcher, 'path'|'root'|'ignores'>) => {
+const readFiles = (option: Pick<PenWatcher, 'path'|'root'|'ignores'>): FileInfo[] => {
   const { path, root, ignores } = option;
-  return fs
-    .promises
-    .readdir(path)
-    .then((files) => files
-      .filter((filename: string) => {
-        const fullpath = resolve(path, filename);
-        return !isIgnored(fullpath, ignores);
-      })
-      .map((filename: string) => {
-        const filepath = resolve(path, filename);
-        const relativePath = relative(root, filepath);
+  const files = fs.readdirSync(path);
 
-        if (/\.(md|markdown)$/.test(filename)) {
-          return {
-            filename,
-            relative: relativePath,
-            type: 'markdown',
-          };
-        }
-        if (isDir(filepath)) {
-          return {
-            filename,
-            relative: relativePath,
-            type: 'dir',
-          };
-        }
+  return files
+    .filter((filename: string) => {
+      const fullpath = resolve(path, filename);
+      return !isIgnored(fullpath, ignores);
+    })
+    .map((filename: string) => {
+      const filepath = resolve(path, filename);
+      const relativePath = relative(root, filepath);
+
+      if (/\.(md|markdown)$/.test(filename)) {
         return {
-          filename: '',
-          relative: '',
-          type: 'other',
+          filename,
+          relative: relativePath,
+          type: 'markdown',
+          current: false,
         };
-      }));
+      }
+      if (isDir(filepath)) {
+        return {
+          filename,
+          relative: relativePath,
+          type: 'dir',
+          current: false,
+        };
+      }
+      return {
+        filename: '',
+        relative: '',
+        type: 'other',
+        current: false,
+      };
+    });
 };
 
-const readMarkdownFiles = async (option: Pick<PenWatcher, 'path'|'root'|'ignores'>): Promise<MdContent> => {
-  try {
-    const { path, root } = option;
+const sort = (a: FileInfo, b: FileInfo) => {
+  if (a.filename < b.filename) {
+    return -1;
+  }
+  return 0;
+};
 
-    checkPermission(option);
+const readMarkdownFiles = (option: Pick<PenWatcher, 'path'|'root'|'ignores'>): MdContent => {
+  checkPermission(option);
 
-    if (isDir(path)) {
-      const dirs = await readDirs(option);
+  const { root, path, ignores } = option;
+  // 是一个md
+  if (!isDir(option.path)) {
+    const { files } = readMarkdownFiles({
+      ...option,
+      path: resolve(path, '..'),
+    });
 
-      return {
-        dirs: dirs.filter((each) => each.type !== 'other'),
-        content: '',
-      };
+    for (const each of files) {
+      if (path.endsWith(each.filename)) {
+        each.current = true;
+      } else {
+        each.current = false;
+      }
     }
 
-    // is md file
-    const parent = resolve(path, '..');
-    const dirs = await readDirs({
-      ...option,
-      path: parent,
-    });
     return {
-      dirs: dirs.filter((each) => each.type !== 'other').sort((a, b) => {
-        return a.filename.toLowerCase() < b.filename.toLowerCase() ? -1 : 0;
-      }),
+      files,
       content: mdrender(fs.readFileSync(path).toString(), root),
     };
-  } catch (e) {
-    return Promise.reject(e);
   }
+
+  const files = readFiles({
+    root,
+    path,
+    ignores,
+  });
+  const mds: FileInfo[] = [];
+  const subdirs: FileInfo[] = [];
+
+  // eslint-disable-next-line no-restricted-syntax
+  for (const file of files) {
+    if (file.type === 'markdown') {
+      mds.push(file);
+    } else if (file.type === 'dir') {
+      subdirs.push(file);
+    }
+  }
+
+  // 1. 目录下有md文件
+  if (mds.length > 0) {
+    mds[0].current = true;
+
+    return {
+      files: [
+        ...mds.sort(sort),
+        ...subdirs.sort(sort),
+      ],
+      content: mdrender(fs.readFileSync(resolve(path, mds[0].filename)).toString(), root),
+    };
+  }
+
+  // 2. 目录下有子目录
+  if (subdirs.length > 0) {
+    return {
+      files: [
+        ...mds.sort(sort),
+        ...subdirs.sort(sort),
+      ],
+      content: '',
+    };
+  }
+
+  return {
+    files: [],
+    content: '',
+  };
 };
 
 export default class Watcher implements Omit<PenWatcher, 'socket'> {
@@ -146,9 +198,11 @@ export default class Watcher implements Omit<PenWatcher, 'socket'> {
     const { socket } = opts;
 
     this.onerror = (e: Error) => {
-      socket.emit('penerror', JSON.stringify(e.stack ?? e.message ?? 'internal pen error'));
+      this.logger?.error(e);
+      socket.emit('penerror', JSON.stringify(e.stack ?? e.message ?? 'internal pen server error'));
     };
     this.ondata = (data: MdContent) => {
+      this.logger?.info(data);
       socket.emit('pendata', JSON.stringify(data));
     };
   }
@@ -162,17 +216,9 @@ export default class Watcher implements Omit<PenWatcher, 'socket'> {
           recursive: false,
         },
         (event) => {
-          this.logger?.info(`${this.path} -> ${event}`);
+          this.logger?.info(`Pen ${this.path} -> ${event}`);
 
-          if (event === 'change') {
-            this.trigger();
-          } else if (event === 'rename') {
-            if (!isDir(this.path)) {
-              this.onerror(new Error(`no such file or directory: ${this.path}`));
-            } else {
-              this.trigger();
-            }
-          }
+          this.trigger();
         },
       );
 
@@ -180,7 +226,6 @@ export default class Watcher implements Omit<PenWatcher, 'socket'> {
 
       this.watcher = watcher;
     } catch (e) {
-      this.logger?.error(e);
       this.onerror(e);
     }
 
@@ -188,18 +233,17 @@ export default class Watcher implements Omit<PenWatcher, 'socket'> {
   }
 
   trigger(): Watcher {
-    readMarkdownFiles({
-      path: this.path,
-      root: this.root,
-      ignores: this.ignores,
-    })
-      .then((content) => {
-        this.ondata(content);
-      })
-      .catch((e) => {
-        this.logger?.error(e);
-        this.onerror(e);
+    try {
+      const content = readMarkdownFiles({
+        path: this.path,
+        root: this.root,
+        ignores: this.ignores,
       });
+      this.ondata(content);
+    } catch (e) {
+      this.logger?.error(e);
+      this.onerror(e);
+    }
     return this;
   }
 
