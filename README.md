@@ -16,7 +16,7 @@ yarn add @everseenflash/pen-middleware
 + markdown-it-anchor
 + markdown-it-container
 
-> Warn|Error|Info, vuepress style like
+> include three containers: `Warn|Error|Info`, vuepress style like
 
 ```md
 ::: Warn
@@ -84,9 +84,12 @@ server.listen(3000);
 ### Use with Terminal
 
 ```bash
+# install globally
 npm i -g @everseenflash/pen-middleware
-npx pen
-npx pen -si -p 8080 -r ~/docs
+# default usage
+pen
+# use with simple options
+pen -si -p 8080 -r ~/docs
 ```
 
 #### Cli Options
@@ -109,4 +112,4 @@ npx pen -si -p 8080 -r ~/docs
 
 ## Custom UI?
 
-Just fork this project and modify it! It is quite a simple project.
+Just fork this project and modify it! It is quite a simple project. Otherwise you can use your own `middleware`.
