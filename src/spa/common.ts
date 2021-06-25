@@ -1,3 +1,4 @@
+/* eslint-disable import/no-extraneous-dependencies */
 import { Reducer } from 'react';
 import { Socket } from 'socket.io-client';
 

@@ -1,8 +1,3 @@
-declare module 'markdown-it-deflist' {
-  const anything = any;
-  export default anything;
-}
-
 declare module 'markdown-it-katex' {
   const anything = any;
   export default anything;
@@ -21,14 +16,6 @@ declare module 'markdown-it-ins' {
   export default anything;
 }
 declare module 'markdown-it-mark' {
-  const anything = any;
-  export default anything;
-}
-declare module 'markdown-it-sub' {
-  const anything = any;
-  export default anything;
-}
-declare module 'markdown-it-sup' {
   const anything = any;
   export default anything;
 }

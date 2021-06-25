@@ -7,7 +7,7 @@ const { resolve, dirname } = require('path');
 const { createReadStream } = require('fs');
 const getPort = require('get-port');
 const open = require('open');
-const { pen } = require('./dist/index');
+const { pen } = require('./dist/lib');
 const { existsSync } = require('fs');
 
 const argv = require('minimist')(process.argv.slice(2));

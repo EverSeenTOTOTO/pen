@@ -1,35 +1,26 @@
+/* eslint-disable import/no-extraneous-dependencies */
 /* eslint-disable @typescript-eslint/no-var-requires */
 const { resolve } = require('path');
 const HtmlWebPackPlugin = require('html-webpack-plugin');
 const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 const safePostCssParser = require('postcss-safe-parser');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 
-// Variable used for enabling profiling in Production
-// passed into alias object. Uses a flag if passed into the build command
-const paths = {
-  root: resolve(__dirname, '.'),
-  src: resolve(__dirname, './src/spa/'),
-  dist: resolve(__dirname, './dist/spa/'),
-  resouces: resolve(__dirname, './src/spa/assets/'),
-  packageJson: resolve(__dirname, './package.json'),
-  nodeModules: resolve(__dirname, './node_modules'),
-};
+const { paths } = require('./utils');
 
 module.exports = {
   mode: 'production',
   devtool: 'source-map',
   entry: {
-    app: './src/spa/index.tsx',
+    app: paths.spaEntry,
   },
   output: {
     filename: 'bundle.js',
-    path: paths.dist,
+    path: paths.spaDist,
+    clean: true,
   },
   target: ['web', 'es5'],
-  optimization: {
-    minimize: false,
-  },
   module: {
     strictExportPresence: true,
     rules: [
@@ -37,7 +28,7 @@ module.exports = {
       { parser: { requireEnsure: false } },
       {
         test: /\.(j|t)sx?$/,
-        include: paths.src,
+        include: paths.spa,
         use: [
           {
             loader: require.resolve('babel-loader'),
@@ -85,15 +76,12 @@ module.exports = {
           {
             loader: require.resolve('url-loader'),
             options: {
-              // 30KB 以下的文件采用 url-loader
-              limit: 1024 * 30,
-              // 否则采用 file-loader，默认值就是 file-loader
+              limit: 1024 * 120,
               fallback: require.resolve('file-loader'),
               name: 'static/media/[name].[hash:8].[ext]',
             },
           },
         ],
-        include: paths.resouces,
       },
     ],
   },
@@ -117,14 +105,17 @@ module.exports = {
         preset: ['default', { minifyFontValues: { removeQuotes: false } }],
       },
     }),
+    new BundleAnalyzerPlugin({
+      analyzerMode: 'disabled',
+      generateStatsFile: false,
+    }),
   ],
   resolve: {
     modules: [paths.nodeModules],
     mainFields: ['jsnext:main', 'browser', 'main'],
     alias: {
-      react: resolve(__dirname, './node_modules/react/umd/react.production.min.js'),
-      'react-dom': resolve(__dirname, './node_modules/react-dom/umd/react-dom.production.min.js'),
-      '@': paths.src,
+      react: resolve(__dirname, '../node_modules/react/umd/react.production.min.js'),
+      'react-dom': resolve(__dirname, '../node_modules/react-dom/umd/react-dom.production.min.js'),
     },
     extensions: ['.js', '.ts', '.tsx'],
   },

@@ -7,6 +7,7 @@ import React, {
 import { Container, Grid } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import { io } from 'socket.io-client';
+import mermaid from 'mermaid';
 
 import Markdown from './Markdown';
 import Directory from './Directory';
@@ -66,6 +67,20 @@ const Blog = () => {
       dispatch({
         type: PenEvents.UpdateData,
         payload: JSON.parse(data),
+      });
+      requestAnimationFrame(() => {
+        mermaid.initialize({
+          // startOnLoad: true,
+          theme: 'default',
+          gantt: {
+            axisFormatter: [
+              ['%Y-%m-%d', (d) => {
+                return d.getDay() === 1;
+              }],
+            ],
+          },
+        });
+        mermaid.init();
       });
     });
 

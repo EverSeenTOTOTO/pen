@@ -9,6 +9,7 @@ import mditFootnote from 'markdown-it-footnote';
 import mditCopy from 'markdown-it-copy';
 import mditContainer from 'markdown-it-container';
 import mditKatex from './plugins/katex';
+import mditMermaid from './plugins/mermaid';
 
 const createRender = (color: string) => (tokens: any, index: number) => {
   // const info = tokens[index].info.trim().slice(color.length).trim();
@@ -27,6 +28,7 @@ const md = (root: string) => mdit({
   .use(mditAbbr)
   .use(mditToc)
   .use(mditKatex)
+  .use(mditMermaid)
   .use(mditCopy, {
     btnText: 'copy', // 'copy' | button text
     failText: 'copy failed', // 'copy fail' | copy-fail text
