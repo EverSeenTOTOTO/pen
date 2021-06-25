@@ -21,7 +21,7 @@ export const createPenMiddleware = (root: string, logger ?: PenLogger) => <Req e
   } else {
     logger && logger.warn('Pen fallback to index.html');
     res.setHeader('Content-Type', 'text/html');
-    createReadStream(require.resolve('@everseenflash/pen-middleware/dist/spa/index.html'))
+    createReadStream(resolve(__dirname, 'spa/index.html'))
       .pipe(res);
   }
 };
