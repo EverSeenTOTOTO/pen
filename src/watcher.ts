@@ -1,15 +1,9 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
-import { resolve, relative } from 'path';
+import { resolve, relative, basename } from 'path';
 import fs, { FSWatcher } from 'fs';
 import { Socket } from 'socket.io';
 import mdrender from './markdown';
-
-export type PenLogger = {
-  info: (...args: any[]) => void,
-  warn: (...args: any[]) => void,
-  error: (...args: any[]) => void,
-  log: (...args: any[]) => void
-};
+import * as logger from './logger';
 
 type FileInfo = {
   filename: string,
@@ -27,7 +21,7 @@ interface PenWatcher {
   path: string,
   root: string,
   ignores?: RegExp|RegExp[],
-  logger?: PenLogger,
+  logger?: typeof logger,
   socket: Socket
 }
 
@@ -183,7 +177,7 @@ export default class Watcher implements Omit<PenWatcher, 'socket'> {
 
   ignores?: RegExp | RegExp[] | undefined;
 
-  logger?: PenLogger | undefined;
+  logger?: typeof logger | undefined;
 
   onerror: (e: Error) => void;
 
@@ -216,7 +210,7 @@ export default class Watcher implements Omit<PenWatcher, 'socket'> {
           recursive: false,
         },
         (event) => {
-          this.logger?.info(`Pen ${this.path} -> ${event}`);
+          this.logger?.info(`Pen detected ${basename(this.path)} -> ${event}`);
 
           this.trigger();
         },

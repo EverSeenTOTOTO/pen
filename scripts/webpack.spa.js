@@ -111,7 +111,7 @@ module.exports = {
     }),
     new BundleAnalyzerPlugin({
       analyzerMode: 'disabled',
-      generateStatsFile: true,
+      generateStatsFile: false,
     }),
   ],
   resolve: {

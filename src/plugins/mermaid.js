@@ -1,7 +1,6 @@
-/* eslint-disable import/no-extraneous-dependencies */
-/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
-/* eslint-disable no-param-reassign */
 // forked from markdown-it-mermaid
+/* eslint-disable import/no-extraneous-dependencies */
+/* eslint-disable no-param-reassign */
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-nocheck
 import mermaid from 'mermaid';

@@ -12,16 +12,10 @@ const argv = require('minimist')(process.argv.slice(2));
 const port = argv.port || argv.p || 3000;
 const root = argv.root || argv.r || './';
 const assets = argv.assets || argv.a || root;
-const logger = argv.s ? undefined : console;
+const logger = argv.s ? undefined : require('./dist/lib').logger;
 
-logger && logger.info(
-  `
-======== Pen ========
-root: ${root}
-assets: ${assets}
-port: ${port}
-`,
-);
+logger && logger.clearConsole();
+logger && logger.info(`Pen starting with root: ${root}, assets: ${assets}, port: ${port}...`);
 
 const server = createServer(createPenMiddleware(assets, logger));
 
@@ -39,12 +33,12 @@ pen
   });
 
   if (avaliablePort !== port) {
-    logger && logger.warn(`Pen port ${port} is not avaliable, use random port ${avaliablePort} instead`);
+    logger && logger.warn(`Pen find port ${port} is not avaliable, use random port ${avaliablePort} instead`);
   }
 
   server.listen(avaliablePort, () => {
     const url = `http://localhost:${avaliablePort}`;
-    logger && logger.info(`Pen listen on ${url}`);
+    logger && logger.done(`Pen listen on ${url}`);
     open(url);
   });
 }());

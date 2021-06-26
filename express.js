@@ -1,6 +1,6 @@
 const http = require('http');
 const express = require('express');
-const { pen, middleware, createPenMiddleware } = require('./dist/lib');
+const { pen, middleware, createPenMiddleware, logger } = require('./dist/lib');
 
 const app = express();
 const server = http.createServer(app);
@@ -12,12 +12,12 @@ pen
   .create({
   namespace: Doc,             // 默认 '/'
   ignores: /[\\/]\.git$/,
-  logger: console
+  logger
 })
   .create({
   root: '../docs',
   namespace: '/admin',
-  logger: console
+  logger
 })
   .attach(server);
 

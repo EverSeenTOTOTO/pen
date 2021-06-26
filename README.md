@@ -2,7 +2,7 @@
 
 一个http server中间件，提供对markdown文件的预览能力，基于[**socket.io**](https://socket.io/)。灵感来源自[**pen**](https://github.com/utatti/pen)。
 
-live example: <https://www.everseenflash.com/docs>
+<image src="./demo.gif" width="800">
 
 ## Install
 
@@ -45,7 +45,7 @@ const server = createServer(middleware);
 
 pen
   .create({
-    root: './' // 本地markdown文件或者目录
+    root: './markdown-folder' // 本地markdown文件或者目录，默认./
 })
   .attach(server);
 
@@ -57,9 +57,9 @@ server.listen(3000);
 ### Use with Express
 
 ```ts
-import http from 'http';
-import express from 'express';
-import { pen, middleware } from '@everseenflash/pen-middleware';
+const http = require('http');
+const express = require('express');
+const { pen, middleware, createPenMiddleware, logger } = require('./dist/lib');
 
 const app = express();
 const server = http.createServer(app);
@@ -71,14 +71,16 @@ pen
   .create({
   namespace: Doc,             // 默认 '/'
   ignores: /[\\/]\.git$/,
-  logger: console
+  logger // a built-in logger
 })
   .create({
-  namespace: '/admin'
+  root: '../docs',
+  namespace: '/admin',
+  logger
 })
   .attach(server);
 
-app.get(Doc, middleware);
+app.get(Doc, createPenMiddleware('./src/spa', console));
 app.get(Admin, middleware);
 
 server.listen(3000);

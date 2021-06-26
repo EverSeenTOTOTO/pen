@@ -2,7 +2,12 @@
 import { resolve } from 'path';
 import { Server as HttpServer } from 'http';
 import { Namespace, Server as IOBase, Socket } from 'socket.io';
-import Watcher, { PenLogger } from './watcher';
+import Watcher from './watcher';
+import * as logger from './logger';
+
+export {
+  logger,
+};
 
 export {
   createPenMiddleware,
@@ -13,7 +18,7 @@ export type PenCreateOptions = {
   root?: string,
   namespace?: string,
   ignores?: RegExp|RegExp[],
-  logger?: PenLogger,
+  logger?: typeof logger,
 };
 
 type PenNamespaceOptions = {
@@ -25,7 +30,7 @@ type PenNamespaceOptions = {
 export default class Pen {
   private iobase?: IOBase;
 
-  private logger?: PenLogger;
+  private logger?: typeof logger;
 
   private ignores?: PenCreateOptions['ignores'];
 
@@ -39,7 +44,7 @@ export default class Pen {
       path: '/pensocket.io',
     });
     this.namespaces.forEach(({ root, namespace }) => {
-      this.logger?.info(`Pen create with root: ${root}, namespace: ${namespace}`);
+      this.logger?.info(`Pen initialized with root: ${root}, namespace: ${namespace}`);
 
       iobase.of(namespace).on('connection', (socket: Socket) => {
         socket.on('disconnect', () => {
@@ -49,7 +54,7 @@ export default class Pen {
           );
           if (id !== -1) {
             const { watcher } = this.connectedSockets.splice(id, 1)[0];
-            this.logger?.info(`Pen stop watching ${watcher.path} due to disconnection`);
+            this.logger?.info(`Pen stopped watching ${watcher.path} due to disconnection`);
             watcher.stop();
           }
         });
@@ -80,7 +85,7 @@ export default class Pen {
     };
     this.logger = opts?.logger;
 
-    this.logger?.info(`Pen construct middleware with socket.io namespace ${ns.namespace}, prepare to watch file ${ns.root}`);
+    this.logger?.info(`Pen constructed with socket.io namespace ${ns.namespace}, prepare to watch file ${ns.root}`);
 
     this.namespaces.push(ns);
     this.ignores = opts?.ignores;
@@ -94,7 +99,7 @@ export default class Pen {
 
     if (matched.length > 0) {
       matched.forEach((match) => {
-        this.logger?.info(`Remove pen middleware ${match.namespace}`);
+        this.logger?.info(`Pen removed middleware ${match.namespace}`);
 
         const index = this.namespaces.indexOf(match);
 
@@ -112,7 +117,7 @@ export default class Pen {
       watcher.stop();
     });
 
-    this.logger?.info('Pen closed.');
+    this.logger?.done('Pen closed.');
 
     if (this.iobase) {
       this.iobase.close(() => callback?.());
@@ -141,7 +146,7 @@ export default class Pen {
       ignores: this.ignores,
     };
 
-    this.logger?.info(`Pen start watching: ${JSON.stringify(watcherOptions)}`);
+    this.logger?.info(`Pen began watching: ${JSON.stringify(watcherOptions)}`);
 
     const newWatcher = new Watcher({
       ...watcherOptions,
