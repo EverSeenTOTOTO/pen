@@ -14,7 +14,7 @@ const root = argv.root || argv.r || './';
 const assets = argv.assets || argv.a || root;
 const logger = argv.s ? undefined : console;
 
-logger.info(
+logger && logger.info(
   `
 ======== Pen ========
 root: ${root}

@@ -2,6 +2,8 @@
 
 一个http server中间件，提供对markdown文件的预览能力，基于[**socket.io**](https://socket.io/)。灵感来源自[**pen**](https://github.com/utatti/pen)。
 
+live example: <https://www.everseenflash.com/docs>
+
 ## Install
 
 ```bash
