@@ -80,7 +80,7 @@ export default class Pen {
     };
     this.logger = opts?.logger;
 
-    this.logger?.info(`Construct pen middleware with socket.io namespace ${ns.namespace}, prepare to watch file ${ns.root}`);
+    this.logger?.info(`Pen construct middleware with socket.io namespace ${ns.namespace}, prepare to watch file ${ns.root}`);
 
     this.namespaces.push(ns);
     this.ignores = opts?.ignores;

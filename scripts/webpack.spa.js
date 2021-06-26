@@ -93,6 +93,7 @@ module.exports = {
   plugins: [
     new HtmlWebPackPlugin({
       title: 'Pen',
+      inject: false,
       template: './public/index.html',
       favicon: './public/favicon.ico',
     }),

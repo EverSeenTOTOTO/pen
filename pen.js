@@ -14,6 +14,15 @@ const root = argv.root || argv.r || './';
 const assets = argv.assets || argv.a || root;
 const logger = argv.s ? undefined : console;
 
+logger.info(
+  `
+======== Pen ========
+root: ${root}
+assets: ${assets}
+port: ${port}
+`,
+);
+
 const server = createServer(createPenMiddleware(assets, logger));
 
 pen
@@ -30,12 +39,12 @@ pen
   });
 
   if (avaliablePort !== port) {
-    logger && logger.warn(`port ${port} is not avaliable, use random port ${avaliablePort} instead`);
+    logger && logger.warn(`Pen port ${port} is not avaliable, use random port ${avaliablePort} instead`);
   }
 
   server.listen(avaliablePort, () => {
     const url = `http://localhost:${avaliablePort}`;
-    logger && logger.info(`server listening on ${url}`);
+    logger && logger.info(`Pen listening on ${url}`);
     open(url);
   });
 }());

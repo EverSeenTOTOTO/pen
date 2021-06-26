@@ -6,6 +6,7 @@
       name="viewport"
       content="minimum-scale=1, initial-scale=1, width=device-width"
     />
+    <meta name="theme-color" content="#000000" />
     <meta
       name="description"
       content="Web site for PenMiddleware"
@@ -14,8 +15,18 @@
     <% if (htmlWebpackPlugin.files.favicon) { %>
       <link rel="shortcut icon" href="<%= htmlWebpackPlugin.files.favicon%>">
     <% } %>
+    <% for (var css in htmlWebpackPlugin.files.css) { %>
+      <style>
+        <%= compilation.assets[htmlWebpackPlugin.files.css[css]].source() %>
+      </style>
+    <% } %>
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
   </body>
+  <% for (var js in htmlWebpackPlugin.files.js) { %>
+    <script>
+      <%= compilation.assets[htmlWebpackPlugin.files.js[js]].source() %>
+    </script>
+  <% } %>
 </html>
