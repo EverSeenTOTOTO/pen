@@ -111,7 +111,7 @@ module.exports = {
     }),
     new BundleAnalyzerPlugin({
       analyzerMode: 'disabled',
-      generateStatsFile: false,
+      generateStatsFile: true,
     }),
   ],
   resolve: {
@@ -119,8 +119,9 @@ module.exports = {
     mainFields: ['jsnext:main', 'browser', 'main'],
     alias: {
       fonts: resolve(__dirname, '../node_modules/katex/dist/fonts'),
-      react: resolve(__dirname, '../node_modules/react/umd/react.production.min.js'),
-      'react-dom': resolve(__dirname, '../node_modules/react-dom/umd/react-dom.production.min.js'),
+      react: 'preact/compat',
+      'react-dom/test-utils': 'preact/test-utils',
+      'react-dom': 'preact/compat',
     },
     extensions: ['.js', '.ts', '.tsx'],
   },

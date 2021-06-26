@@ -14,7 +14,6 @@ yarn add @everseenflash/pen-middleware
 
 默认集成了一些markdown-it插件：
 
-+ markdown-it-abbr
 + markdown-it-anchor
 + markdown-it-container
 
@@ -28,7 +27,6 @@ balabala
 
 + markdown-it-highlightjs
 + markdown-it-include
-+ markdown-it-ins
 + markdown-it-footnote
 + markdown-it-toc-done-right
 + markdown-it-katex (forked, update to katex@0.13.11)

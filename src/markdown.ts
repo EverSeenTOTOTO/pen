@@ -1,8 +1,6 @@
 import mdit from 'markdown-it';
 import mditHighlightjs from 'markdown-it-highlightjs';
 import mditAnchor from 'markdown-it-anchor';
-import mditIns from 'markdown-it-ins';
-import mditAbbr from 'markdown-it-abbr';
 import mditInclude from 'markdown-it-include';
 import mditToc from 'markdown-it-toc-done-right';
 import mditFootnote from 'markdown-it-footnote';
@@ -24,8 +22,6 @@ const md = (root: string) => mdit({
 }).use(mditHighlightjs)
   .use(mditFootnote)
   .use(mditAnchor)
-  .use(mditIns)
-  .use(mditAbbr)
   .use(mditToc)
   .use(mditKatex)
   .use(mditMermaid)
