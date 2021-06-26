@@ -17,6 +17,7 @@ module.exports = {
   },
   output: {
     filename: 'pen.[contenthash:8].js',
+    chunkFilename: 'pen.[contenthash:8].js',
     path: paths.spaDist,
     clean: true,
   },
@@ -97,6 +98,7 @@ module.exports = {
     }),
     new MiniCssExtractPlugin({
       filename: 'pen.[contenthash:8].css',
+      chunkFilename: 'pen.[contenthash:8].css',
     }),
     new OptimizeCSSAssetsPlugin({
       cssProcessorOptions: {

@@ -2684,6 +2684,17 @@ browserslist@^4.0.0, browserslist@^4.14.5, browserslist@^4.15.0:
     escalade "^3.1.1"
     node-releases "^1.1.67"
 
+browserslist@^4.16.6:
+  version "4.16.6"
+  resolved "https://registry.nlark.com/browserslist/download/browserslist-4.16.6.tgz?cache=0&sync_timestamp=1619789101558&other_urls=https%3A%2F%2Fregistry.nlark.com%2Fbrowserslist%2Fdownload%2Fbrowserslist-4.16.6.tgz#d7901277a5a88e554ed305b183ec9b0c08f66fa2"
+  integrity "sha1-15ASd6WojlVO0wWxg+ybDAj2b6I= sha512-Wspk/PqO+4W9qp5iUTJsa1B/QrYn1keNCcEP5OvP7WBwT4KaDly0uONYmC6Xa3Z5IqnUgS0KcgLYu1l74x0ZXQ=="
+  dependencies:
+    caniuse-lite "^1.0.30001219"
+    colorette "^1.2.2"
+    electron-to-chromium "^1.3.723"
+    escalade "^3.1.1"
+    node-releases "^1.1.71"
+
 bser@2.1.1:
   version "2.1.1"
   resolved "https://registry.npmjs.org/bser/-/bser-2.1.1.tgz"
@@ -2797,10 +2808,10 @@ caniuse-api@^3.0.0:
     lodash.memoize "^4.1.2"
     lodash.uniq "^4.5.0"
 
-caniuse-lite@^1.0.0, caniuse-lite@^1.0.30001165:
+caniuse-lite@^1.0.0, caniuse-lite@^1.0.30001165, caniuse-lite@^1.0.30001219:
   version "1.0.30001239"
   resolved "https://registry.nlark.com/caniuse-lite/download/caniuse-lite-1.0.30001239.tgz"
-  integrity undefined
+  integrity sha512-cyBkXJDMeI4wthy8xJ2FvDU6+0dtcZSJW3voUF8+e9f1bBeuvyZfc3PNbkOETyhbR+dGCPzn9E7MA3iwzusOhQ==
 
 capture-exit@^2.0.0:
   version "2.0.0"
@@ -2998,6 +3009,11 @@ colorette@^1.2.1:
   version "1.2.1"
   resolved "https://registry.npmjs.org/colorette/-/colorette-1.2.1.tgz"
   integrity sha512-puCDz0CzydiSYOrnXpz/PKd69zRrribezjtE9yd4zvytoRc8+RY/KJPvtPFKZS3E3wP6neGyMe0vOTlHO5L3Pw==
+
+colorette@^1.2.2:
+  version "1.2.2"
+  resolved "https://registry.nlark.com/colorette/download/colorette-1.2.2.tgz?cache=0&sync_timestamp=1618847174680&other_urls=https%3A%2F%2Fregistry.nlark.com%2Fcolorette%2Fdownload%2Fcolorette-1.2.2.tgz#cbcc79d5e99caea2dbf10eb3a26fd8b3e6acfa94"
+  integrity "sha1-y8x51emcrqLb8Q6zom/Ys+as+pQ= sha512-MKGMzyfeuutC/ZJ1cba9NqcNpfeqMUcYmyF1ZFY6/Cn7CNSAKx6a+s48sqLqyAiZuaP2TcqMhoo+dlwFnVxT9w=="
 
 combined-stream@^1.0.6, combined-stream@~1.0.6:
   version "1.0.8"
@@ -3941,6 +3957,11 @@ electron-to-chromium@^1.3.621:
   version "1.3.621"
   resolved "https://registry.npmjs.org/electron-to-chromium/-/electron-to-chromium-1.3.621.tgz"
   integrity sha512-FeIuBzArONbAmKmZIsZIFGu/Gc9AVGlVeVbhCq+G2YIl6QkT0TDn2HKN/FMf1btXEB9kEmIuQf3/lBTVAbmFOg==
+
+electron-to-chromium@^1.3.723:
+  version "1.3.759"
+  resolved "https://registry.nlark.com/electron-to-chromium/download/electron-to-chromium-1.3.759.tgz?cache=0&sync_timestamp=1624658593703&other_urls=https%3A%2F%2Fregistry.nlark.com%2Felectron-to-chromium%2Fdownload%2Felectron-to-chromium-1.3.759.tgz#b0d652d376831470a4c230ba721da2427bfb996a"
+  integrity "sha1-sNZS03aDFHCkwjC6ch2iQnv7mWo= sha512-nM76xH0t2FBH5iMEZDVc3S/qbdKjGH7TThezxC8k1Q7w7WHvIAyJh8lAe2UamGfdRqBTjHfPDn82LJ0ksCiB9g=="
 
 emittery@^0.7.1:
   version "0.7.2"
@@ -6759,6 +6780,11 @@ node-releases@^1.1.67:
   version "1.1.67"
   resolved "https://registry.npmjs.org/node-releases/-/node-releases-1.1.67.tgz"
   integrity sha512-V5QF9noGFl3EymEwUYzO+3NTDpGfQB4ve6Qfnzf3UNydMhjQRVPR1DZTuvWiLzaFJYw2fmDwAfnRNEVb64hSIg==
+
+node-releases@^1.1.71:
+  version "1.1.73"
+  resolved "https://registry.nlark.com/node-releases/download/node-releases-1.1.73.tgz?cache=0&sync_timestamp=1623060224459&other_urls=https%3A%2F%2Fregistry.nlark.com%2Fnode-releases%2Fdownload%2Fnode-releases-1.1.73.tgz#dd4e81ddd5277ff846b80b52bb40c49edf7a7b20"
+  integrity "sha1-3U6B3dUnf/hGuAtSu0DEnt96eyA= sha512-uW7fodD6pyW2FZNZnp/Z3hvWKeEW1Y8R1+1CnErE8cXFXzl5blBOoVB41CvMer6P6Q0S5FXDwcHgFd1Wj0U9zg=="
 
 nodemon@^2.0.7:
   version "2.0.7"
