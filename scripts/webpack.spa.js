@@ -16,7 +16,7 @@ module.exports = {
     app: paths.spaEntry,
   },
   output: {
-    filename: 'bundle.js',
+    filename: 'pen.[contenthash:8].js',
     path: paths.spaDist,
     clean: true,
   },
@@ -83,19 +83,20 @@ module.exports = {
           },
         ],
       },
+      {
+        test: /\.(woff2?|ttf)$/i,
+        loader: 'url-loader',
+      },
     ],
   },
   plugins: [
     new HtmlWebPackPlugin({
       title: 'Pen',
-      inject: false,
       template: './public/index.html',
       favicon: './public/favicon.ico',
-      minify: false,
-      scriptLoading: 'blocking',
     }),
     new MiniCssExtractPlugin({
-      filename: 'bundle.css',
+      filename: 'pen.[contenthash:8].css',
     }),
     new OptimizeCSSAssetsPlugin({
       cssProcessorOptions: {
@@ -114,6 +115,7 @@ module.exports = {
     modules: [paths.nodeModules],
     mainFields: ['jsnext:main', 'browser', 'main'],
     alias: {
+      fonts: resolve(__dirname, '../node_modules/katex/dist/fonts'),
       react: resolve(__dirname, '../node_modules/react/umd/react.production.min.js'),
       'react-dom': resolve(__dirname, '../node_modules/react-dom/umd/react-dom.production.min.js'),
     },

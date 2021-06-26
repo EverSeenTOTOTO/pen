@@ -8,16 +8,25 @@ const AssetsPattern = /\.(?:css(\.map)?|js(\.map)?|jpe?g|png|gif|ico|cur|heic|we
 export const createPenMiddleware = (root: string, logger ?: PenLogger) => <Req extends IncomingMessage, Res extends ServerResponse>
   (req: Req, res: Res): void => {
   const url = new URL(req.url ?? '/', `http://${req.headers.host}`);
+
   if (AssetsPattern.test(url.pathname)) {
+    const penAsset = resolve(__dirname, `spa${url.pathname}`);
+    if (existsSync(penAsset)) { // 去除inline资源后，需优先看是不是pen的资源
+      logger?.info(`Pen request asset: ${penAsset}`);
+      createReadStream(penAsset).pipe(res);
+      return;
+    }
+
     const asset = resolve(dirname(root), `.${url.pathname}`);
     if (existsSync(asset)) {
       logger?.info(`Pen request asset: ${asset}`);
       createReadStream(asset).pipe(res);
-    } else {
-      logger?.error(`Pen not found asset: ${asset}`);
-      res.statusCode = 404;
-      res.end();
+      return;
     }
+
+    logger?.error(`Pen not found asset: ${asset}`);
+    res.statusCode = 404;
+    res.end();
   } else {
     logger && logger.warn('Pen fallback to index.html');
     res.setHeader('Content-Type', 'text/html');

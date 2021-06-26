@@ -3,20 +3,18 @@
 /* eslint-disable import/order */
 /* eslint-disable @typescript-eslint/no-var-requires */
 const { createServer } = require('http');
-const { resolve, dirname } = require('path');
-const { createReadStream } = require('fs');
 const getPort = require('get-port');
 const open = require('open');
-const { pen, middleware } = require('./dist/lib');
-const { existsSync } = require('fs');
+const { pen, createPenMiddleware } = require('./dist/lib');
 
 const argv = require('minimist')(process.argv.slice(2));
 
 const port = argv.port || argv.p || 3000;
 const root = argv.root || argv.r || './';
+const assets = argv.assets || argv.a || root;
 const logger = argv.s ? undefined : console;
 
-const server = createServer(middleware);
+const server = createServer(createPenMiddleware(assets, logger));
 
 pen
   .create({
