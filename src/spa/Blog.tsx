@@ -4,29 +4,25 @@
 import React, {
   useState, useCallback, useReducer, useEffect,
 } from 'react';
-import { Container, Grid } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import { io } from 'socket.io-client';
 import mermaid from 'mermaid';
 
 import Markdown from './Markdown';
-import Directory from './Directory';
+import Drawer from './Drawer';
+import BottomNavigation from './BottomNavigation';
 import {
   reducer, initialState, PenEvents, PenDirInfo,
 } from './common';
 
-const useStyles = makeStyles({
+const useStyles = makeStyles(() => ({
   root: {
-    paddingLeft: 0,
-    paddingRight: 0,
-  },
-  dir: {
-    height: '100vh',
+    display: 'flex',
   },
   markdown: {
-    height: '100vh',
+    flexGrow: 1,
   },
-});
+}));
 
 const Blog = () => {
   const classes = useStyles();
@@ -35,6 +31,26 @@ const Blog = () => {
     files, content, socket,
   } = state;
   const [stack, setStack] = useState<PenDirInfo[]>([]);
+  const [open, setOpen] = React.useState(false);
+
+  const toggleDrawer = (value?: boolean) => (
+    event: React.KeyboardEvent | React.MouseEvent,
+  ) => {
+    if (
+      event
+      && event.type === 'keydown'
+      && ((event as React.KeyboardEvent).key === 'Tab'
+        || (event as React.KeyboardEvent).key === 'Shift')
+    ) {
+      return;
+    }
+
+    if (typeof value === 'boolean') {
+      setOpen(value);
+    } else {
+      setOpen((op) => !op);
+    }
+  };
 
   const onClick = useCallback(
     (info: PenDirInfo) => {
@@ -46,6 +62,12 @@ const Blog = () => {
     [socket],
   );
 
+  const backHome = useCallback(() => {
+    onClick({
+      relative: './', filename: '', type: 'dir', current: false,
+    });
+  }, [onClick]);
+
   useEffect(() => {
     console.log('current stack: ');
     console.log(stack);
@@ -53,10 +75,8 @@ const Blog = () => {
 
   useEffect(() => {
     // init with root
-    onClick({
-      relative: './', filename: '', type: 'dir', current: false,
-    });
-  }, [onClick]);
+    backHome();
+  }, [backHome]);
 
   useEffect(() => {
     const sock = io(`${location.origin}${location.pathname}`, {
@@ -123,35 +143,13 @@ const Blog = () => {
   }, [onClick]);
 
   return (
-    <Container
-      maxWidth={false}
-      classes={{
-        root: classes.root,
-      }}
-    >
-      <Grid container>
-        { files?.length > 0 && (
-        <Grid
-          item
-          xs={3}
-          classes={{
-            root: classes.dir,
-          }}
-        >
-          <Directory onClick={onClick} files={files} />
-        </Grid>
-        )}
-        <Grid
-          item
-          xs={files?.length > 0 ? 9 : 12}
-          classes={{
-            root: classes.markdown,
-          }}
-        >
-          <Markdown html={content} />
-        </Grid>
-      </Grid>
-    </Container>
+    <div className={classes.root}>
+      <Drawer open={open} toggleDrawer={toggleDrawer} onClick={onClick} files={files} />
+      <main className={classes.markdown}>
+        <Markdown html={content} />
+      </main>
+      <BottomNavigation toggleMenu={toggleDrawer} backHome={backHome} />
+    </div>
   );
 };
 

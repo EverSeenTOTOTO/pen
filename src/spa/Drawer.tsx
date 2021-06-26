@@ -1,4 +1,5 @@
-/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
+import React from 'react';
+import SwipeableDrawer from '@material-ui/core/SwipeableDrawer';
 import {
   List,
   ListItem,
@@ -6,20 +7,27 @@ import {
   ListItemText,
   Avatar,
 } from '@material-ui/core';
-import React from 'react';
-import { Folder, TextFields } from '@material-ui/icons';
 import { makeStyles } from '@material-ui/core/styles';
+import { Folder, TextFields } from '@material-ui/icons';
 
 import { PenDirInfo } from './common';
 
 const useStyles = makeStyles({
-  root: {
-    height: '100%',
-    overflowY: 'scroll',
+  drawerPaper: {
+    width: 320,
   },
 });
 
-const Directory = ({ files, onClick }: { files: PenDirInfo[], onClick: (info: PenDirInfo) => void }) => {
+type DrawerProps = {
+  open: boolean,
+  toggleDrawer: (value?: boolean)=> (e: React.KeyboardEvent | React.MouseEvent) => void,
+  files: PenDirInfo[],
+  onClick: (info: PenDirInfo) => void
+};
+
+const Drawer = ({
+  open, toggleDrawer, files, onClick,
+}: DrawerProps) => {
   const classes = useStyles();
 
   const items = files.map((each: PenDirInfo) => {
@@ -41,16 +49,23 @@ const Directory = ({ files, onClick }: { files: PenDirInfo[], onClick: (info: Pe
   });
 
   return (
-    <List
+    <SwipeableDrawer
+      anchor="left"
+      open={open}
+      onClose={toggleDrawer(false)}
+      onOpen={toggleDrawer(true)}
       classes={{
-        root: classes.root,
+        paper: classes.drawerPaper,
       }}
-      component="nav"
-      aria-labelledby="nested-list-subheader"
     >
-      {items}
-    </List>
+      <List
+        component="nav"
+        aria-labelledby="nested-list-subheader"
+      >
+        {items}
+      </List>
+    </SwipeableDrawer>
   );
 };
 
-export default Directory;
+export default Drawer;

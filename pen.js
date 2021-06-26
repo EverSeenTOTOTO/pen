@@ -44,7 +44,7 @@ pen
 
   server.listen(avaliablePort, () => {
     const url = `http://localhost:${avaliablePort}`;
-    logger && logger.info(`Pen listening on ${url}`);
+    logger && logger.info(`Pen listen on ${url}`);
     open(url);
   });
 }());

@@ -1,3 +1,7 @@
+html, body {
+  scroll-behavior: smooth;
+}
+
 :root {
   --penListItemHover: rgba(0, 0, 0, 0.04);
   --penListItemCurrent: rgba(0, 0, 0, 0.08);

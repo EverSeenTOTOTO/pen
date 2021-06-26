@@ -29,6 +29,7 @@ module.exports = {
     'no-nested-ternary': 'off',
     'no-restricted-syntax': 'off',
     '@typescript-eslint/no-unused-expressions': 'off',
+    '@typescript-eslint/explicit-module-boundary-types': 'off',
   },
   overrides: [
     {
