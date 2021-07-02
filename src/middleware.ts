@@ -9,10 +9,12 @@ export const createPenMiddleware = (root: string, logger ?: typeof Logger) => <R
   (req: Req, res: Res): void => {
   const url = new URL(req.url ?? '/', `http://${req.headers.host}`);
 
+  logger?.info(`Pen got request: ${url.pathname}`);
+
   if (AssetsPattern.test(url.pathname)) {
     const asset = resolve(root, `.${url.pathname}`);
-    logger?.info(`Pen got asset request: ${asset}`);
     if (existsSync(asset)) {
+      logger?.info(`Pen try asset: ${asset}`);
       createReadStream(asset).pipe(res);
     } else {
       logger?.error(`Pen found no asset: ${asset}`);
@@ -20,7 +22,7 @@ export const createPenMiddleware = (root: string, logger ?: typeof Logger) => <R
       res.end();
     }
   } else {
-    logger && logger.info('Pen redirect to index.html');
+    logger?.info('Pen redirect to index.html');
     res.setHeader('Content-Type', 'text/html');
     createReadStream(resolve(__dirname, 'spa/index.html'))
       .pipe(res);

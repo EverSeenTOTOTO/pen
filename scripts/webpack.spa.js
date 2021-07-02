@@ -19,7 +19,6 @@ module.exports = {
     filename: 'pen.[contenthash:8].js',
     chunkFilename: 'pen.[contenthash:8].js',
     path: paths.spaDist,
-    clean: true,
   },
   target: ['web', 'es5'],
   module: {
@@ -72,21 +71,8 @@ module.exports = {
         ],
       },
       {
-        test: /\.(png|jpg|gif|svg)$/i,
-        use: [
-          {
-            loader: require.resolve('url-loader'),
-            options: {
-              limit: 1024 * 120,
-              fallback: require.resolve('file-loader'),
-              name: 'static/media/[name].[hash:8].[ext]',
-            },
-          },
-        ],
-      },
-      {
-        test: /\.(woff2?|ttf)$/i,
-        loader: 'url-loader',
+        test: /\.(png|jpg|gif|svg|woff2?|ttf)$/i,
+        type: 'asset/inline',
       },
     ],
   },

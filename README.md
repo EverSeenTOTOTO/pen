@@ -64,7 +64,7 @@ const { pen, middleware, createPenMiddleware, logger } = require('./dist/lib');
 const app = express();
 const server = http.createServer(app);
 
-const Doc = '/doc';
+const Doc = /\/doc/;
 const Admin = '/admin';
 
 pen

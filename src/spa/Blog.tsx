@@ -1,9 +1,7 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 /* eslint-disable max-len */
 /* eslint-disable no-restricted-globals */
-import React, {
-  useState, useCallback, useReducer, useEffect,
-} from 'react';
+import React from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import { io } from 'socket.io-client';
 import mermaid from 'mermaid';
@@ -11,6 +9,7 @@ import mermaid from 'mermaid';
 import Markdown from './Markdown';
 import Drawer from './Drawer';
 import BottomNavigation from './BottomNavigation';
+import BreadCrumbRoutes from './Breadcrumbs';
 import {
   reducer, initialState, PenEvents, PenDirInfo,
 } from './common';
@@ -24,13 +23,30 @@ const useStyles = makeStyles(() => ({
   },
 }));
 
+const initMermaid = () => {
+  requestAnimationFrame(() => {
+    mermaid.initialize({
+      // startOnLoad: true,
+      theme: 'default',
+      gantt: {
+        axisFormatter: [
+          ['%Y-%m-%d', (d) => {
+            return d.getDay() === 1;
+          }],
+        ],
+      },
+    });
+    mermaid.init();
+  });
+};
+
 const Blog = () => {
   const classes = useStyles();
-  const [state, dispatch] = useReducer<typeof reducer>(reducer, initialState);
+  const [state, dispatch] = React.useReducer<typeof reducer>(reducer, initialState);
   const {
     files, content, socket,
   } = state;
-  const [stack, setStack] = useState<PenDirInfo[]>([]);
+  const [stack, setStack] = React.useState<PenDirInfo[]>([]);
   const [open, setOpen] = React.useState(false);
 
   const toggleDrawer = (value?: boolean) => (
@@ -52,7 +68,7 @@ const Blog = () => {
     }
   };
 
-  const onClick = useCallback(
+  const onClick = React.useCallback(
     (info: PenDirInfo) => {
       if (info.current || !socket) return;
       window.history.pushState(info, info.filename, '');
@@ -62,23 +78,14 @@ const Blog = () => {
     [socket],
   );
 
-  const backHome = useCallback(() => {
+  React.useEffect(() => {
+    // init with root
     onClick({
       relative: './', filename: '', type: 'dir', current: false,
     });
   }, [onClick]);
 
-  useEffect(() => {
-    console.log('current stack: ');
-    console.log(stack);
-  }, [stack]);
-
-  useEffect(() => {
-    // init with root
-    backHome();
-  }, [backHome]);
-
-  useEffect(() => {
+  React.useEffect(() => {
     const sock = io(`${location.origin}${location.pathname}`, {
       path: '/pensocket.io',
     });
@@ -88,20 +95,7 @@ const Blog = () => {
         type: PenEvents.UpdateData,
         payload: JSON.parse(data),
       });
-      requestAnimationFrame(() => {
-        mermaid.initialize({
-          // startOnLoad: true,
-          theme: 'default',
-          gantt: {
-            axisFormatter: [
-              ['%Y-%m-%d', (d) => {
-                return d.getDay() === 1;
-              }],
-            ],
-          },
-        });
-        mermaid.init();
-      });
+      initMermaid();
     });
 
     sock.on(PenEvents.ErrorOccured, (data) => {
@@ -121,7 +115,7 @@ const Blog = () => {
     };
   }, []);
 
-  useEffect(() => {
+  React.useEffect(() => {
     const onPopState = (e: PopStateEvent) => {
       if (e.state !== null) {
         let last: PenDirInfo|undefined;
@@ -146,9 +140,17 @@ const Blog = () => {
     <div className={classes.root}>
       <Drawer open={open} toggleDrawer={toggleDrawer} onClick={onClick} files={files} />
       <main className={classes.markdown}>
+        <BreadCrumbRoutes onClick={onClick} files={files} stack={stack} />
         <Markdown html={content} />
       </main>
-      <BottomNavigation toggleMenu={toggleDrawer} backHome={backHome} />
+      <BottomNavigation
+        toggleMenu={toggleDrawer}
+        backHome={() => {
+          onClick({
+            relative: './', filename: '', type: 'dir', current: false,
+          });
+        }}
+      />
     </div>
   );
 };

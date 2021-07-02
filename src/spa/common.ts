@@ -15,18 +15,16 @@ export type PenState = {
   socket: Socket | null,
   files: PenDirInfo[] | undefined,
   content: string,
-  stack: PenDirInfo[]
 };
 
 export const initialState: PenState = {
   socket: null,
   files: [],
   content: '<h1>Pen socket not connected.</p>',
-  stack: [],
 };
 
 export enum PenEvents {
-  CreateSocket = 'pensocket',
+  CreateSocket = 'createsocket',
   ErrorOccured = 'penerror',
   UpdateData = 'pendata',
   EmitFile = 'peninit',

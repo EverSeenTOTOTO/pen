@@ -21,6 +21,7 @@ module.exports = {
     'jest',
   ],
   rules: {
+    'consistent-return': 'off',
     'arrow-body-style': 'off',
     'max-len': 'off',
     'no-console': 'off',
@@ -28,6 +29,7 @@ module.exports = {
     'no-continue': 'off',
     'no-nested-ternary': 'off',
     'no-restricted-syntax': 'off',
+    'no-restricted-globals': 'off',
     '@typescript-eslint/no-unused-expressions': 'off',
     '@typescript-eslint/explicit-module-boundary-types': 'off',
   },

@@ -5,7 +5,7 @@ const { pen, middleware, createPenMiddleware, logger } = require('./dist/lib');
 const app = express();
 const server = http.createServer(app);
 
-const Doc = '/doc';
+const Doc = /\/doc/;
 const Admin = '/admin';
 
 pen
@@ -21,7 +21,7 @@ pen
 })
   .attach(server);
 
-app.get(Doc, createPenMiddleware('./src/spa', console));
+app.get(Doc, createPenMiddleware('./src/spa', logger));
 app.get(Admin, middleware);
 
 server.listen(3000);
