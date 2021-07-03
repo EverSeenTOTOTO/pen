@@ -5,7 +5,6 @@ import { ThemeProvider } from '@material-ui/core/styles';
 import CssBaseline from '@material-ui/core/CssBaseline';
 
 import './style/fonts.css';
-import './style/katex.min.css';
 import 'github-markdown-css/github-markdown.css';
 import 'highlight.js/styles/github.css';
 import './style/mdit-copy.css';

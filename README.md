@@ -107,6 +107,10 @@ pen -si -p 8080 -r ~/docs
 
 设置markdown文件目录，默认'./'。
 
++ `--namespace|-n`
+
+设置namespace，默认'/'。
+
 + `--assets|-a`
 
 设置静态资源目录，默认与`root`保持一致。
@@ -133,6 +137,14 @@ pen -si -p 8080 -r ~/docs
 const middleware = createPenMiddleware('../docs');
 ```
 
-## Custom UI?
+## Q&A
+
++ Custom UI?
 
 Just fork this project and modify it! It is quite a simple project. Otherwise you can use your own `middleware`.
+
++ `ENOSPC: System limit for number of file watchers reached`
+
+```bash
+echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p
+```
