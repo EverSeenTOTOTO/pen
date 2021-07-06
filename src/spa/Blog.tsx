@@ -2,7 +2,7 @@
 /* eslint-disable max-len */
 /* eslint-disable no-restricted-globals */
 import React from 'react';
-import { makeStyles } from '@material-ui/core/styles';
+import { makeStyles, useTheme } from '@material-ui/core/styles';
 import { io } from 'socket.io-client';
 import mermaid from 'mermaid';
 
@@ -11,7 +11,7 @@ import Drawer from './Drawer';
 import BottomNavigation from './BottomNavigation';
 import BreadCrumbRoutes from './Breadcrumbs';
 import {
-  reducer, initialState, PenEvents, PenDirInfo,
+  reducer, initialState, PenEvents, PenDirInfo, PenState,
 } from './common';
 
 const useStyles = makeStyles(() => ({
@@ -23,11 +23,13 @@ const useStyles = makeStyles(() => ({
   },
 }));
 
-const initMermaid = () => {
+const mermaidThemes = ['default', 'forest'];
+
+const initMermaid = (darkMode: boolean) => {
   requestAnimationFrame(() => {
     mermaid.initialize({
       // startOnLoad: true,
-      theme: 'default',
+      theme: darkMode ? 'dark' : mermaidThemes[Math.floor(Math.random() * mermaidThemes.length)],
       gantt: {
         axisFormatter: [
           ['%Y-%m-%d', (d) => {
@@ -35,9 +37,17 @@ const initMermaid = () => {
           }],
         ],
       },
+      sequence: {
+        showSequenceNumbers: true,
+      },
     });
     mermaid.init();
   });
+};
+
+const PenSessionKey = 'pen-session-cache';
+const PenDefaultRoute: PenDirInfo = {
+  relative: './', filename: '', type: 'dir', current: false,
 };
 
 const Blog = () => {
@@ -48,6 +58,7 @@ const Blog = () => {
   } = state;
   const [stack, setStack] = React.useState<PenDirInfo[]>([]);
   const [open, setOpen] = React.useState(false);
+  const theme = useTheme();
 
   const toggleDrawer = (value?: boolean) => (
     event: React.KeyboardEvent | React.MouseEvent,
@@ -79,10 +90,7 @@ const Blog = () => {
   );
 
   React.useEffect(() => {
-    // init with root
-    onClick({
-      relative: './', filename: '', type: 'dir', current: false,
-    });
+    onClick(PenDefaultRoute);
   }, [onClick]);
 
   React.useEffect(() => {
@@ -95,7 +103,7 @@ const Blog = () => {
         type: PenEvents.UpdateData,
         payload: JSON.parse(data),
       });
-      initMermaid();
+      initMermaid(theme.palette.type === 'dark');
     });
 
     sock.on(PenEvents.ErrorOccured, (data) => {
@@ -113,7 +121,7 @@ const Blog = () => {
     return () => {
       sock.close();
     };
-  }, []);
+  }, [theme]);
 
   React.useEffect(() => {
     const onPopState = (e: PopStateEvent) => {

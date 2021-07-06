@@ -44,18 +44,48 @@ html, body {
   margin: 1rem 0;
 }
 
-.container-warn {
-  background-color: rgba(255,229,100,.3);
-  border-color: #e7c000;
-  color: #6b5900;
+@media (prefers-color-scheme: light) {
+  .container-warn {
+    background-color: rgba(255,229,100,.3);
+    border-color: #e7c000;
+    color: #6b5900;
+  }
+
+  .container-info {
+    background-color: #f0fffd;
+    border-color: #51b6e3;
+  }
+
+  .container-error {
+    background-color: #fbefef;
+    border-color: red;
+  }
 }
 
-.container-info {
-  background-color: #f0fffd;
-  border-color: #51b6e3;
-}
+@media (prefers-color-scheme: dark) {
+  .markdown-body a {
+    color: skyblue
+  }
 
-.container-error {
-  background-color: #fbefef;
-  border-color: red;
+  .markdown-body table {
+    color: rgba(0, 0, 0, 0.87);
+  }
+
+  .container-warn {
+    background-color: #ecdca6;
+    color: rgba(0, 0, 0, 0.87);
+    border-color: darkorange;
+  }
+
+  .container-info {
+    background-color: #9acde2;
+    color: rgba(0, 0, 0, 0.87);
+    border-color: royalblue;
+  }
+
+  .container-error {
+    color: rgba(0, 0, 0, 0.87);
+    background-color: rgb(240, 188, 188);
+    border-color: red;
+  }
 }

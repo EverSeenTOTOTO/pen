@@ -4,7 +4,6 @@ import ReactDOM from 'react-dom';
 import { ThemeProvider } from '@material-ui/core/styles';
 import CssBaseline from '@material-ui/core/CssBaseline';
 
-import './style/fonts.css';
 import 'github-markdown-css/github-markdown.css';
 import 'highlight.js/styles/github.css';
 import './style/mdit-copy.css';
@@ -14,7 +13,7 @@ import useTheme from './theme';
 import Blog from './Blog';
 
 const App = () => {
-  const [theme] = useTheme();
+  const theme = useTheme();
 
   return (
     <div id="app">

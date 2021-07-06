@@ -16,7 +16,6 @@ const assets = argv.assets || argv.a || root;
 const logger = argv.s ? undefined : require('./dist/lib').logger;
 
 logger && logger.clearConsole();
-logger && logger.info(`Pen starting with root: ${root}, assets: ${assets}, port: ${port}...`);
 
 const server = createServer(createPenMiddleware(assets, logger));
 

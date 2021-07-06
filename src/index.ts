@@ -44,8 +44,6 @@ export default class Pen {
       path: '/pensocket.io',
     });
     this.namespaces.forEach(({ root, namespace }) => {
-      this.logger?.info(`Pen initialized with root: ${root}, namespace: ${namespace}`);
-
       iobase.of(namespace).on('connection', (socket: Socket) => {
         socket.on('disconnect', () => {
           socket.disconnect(true);
