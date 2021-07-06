@@ -2,15 +2,6 @@
 
 每一次store变化（SET）都会调用dispatch变更state，进入每一个state时都会机械地执行既定逻辑，这些逻辑可能改变store，从而触发下一次状态变更（下一次“机械执行”）。
 
-```js
-{
-  socket: null,
-  current: string,
-  files: [],
-  content: string,
-}
-```
-
 ```mermaid
 stateDiagram-v2
   init --> init: IF socket is not connected

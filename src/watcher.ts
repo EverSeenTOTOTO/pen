@@ -108,7 +108,7 @@ const readMarkdownFiles = (option: Pick<PenWatcher, 'path'|'root'|'ignores'>): M
     });
 
     for (const each of files) {
-      if (path.endsWith(each.filename)) {
+      if (basename(path) === basename(each.filename)) {
         each.current = true;
       } else {
         each.current = false;
