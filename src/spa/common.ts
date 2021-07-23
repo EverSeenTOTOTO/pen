@@ -46,6 +46,10 @@ export const reducer: Reducer<PenState, any> = (state: PenState, action: any) =>
         socket: action.payload,
       };
     case PenConstants.ErrorOccured:
+      return {
+        ...state,
+        content: action.payload,
+      };
     case PenConstants.UpdateData:
       return {
         ...state,

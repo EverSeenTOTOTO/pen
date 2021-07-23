@@ -59,7 +59,7 @@ const Blog = () => {
     sock.on(PenConstants.ErrorOccured, (data) => {
       dispatch({
         type: PenConstants.ErrorOccured,
-        payload: JSON.parse(data),
+        payload: data,
       });
     });
 

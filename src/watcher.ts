@@ -158,10 +158,13 @@ export default class Watcher implements Omit<PenWatcher, 'socket'> {
 
     this.onerror = (e: Error) => {
       this.logger?.error(e.stack ?? e.message);
-      socket.emit('penerror', JSON.stringify(e.stack ?? e.message ?? 'internal pen server error'));
+      socket.emit('penerror', mdrender(`
+\`\`\`txt
+${e.stack ?? e.message ?? 'internal pen server error'}
+\`\`\`
+`, this.root));
     };
     this.ondata = (data: MdContent) => {
-      console.log(data.files);
       socket.emit('pendata', JSON.stringify(data));
     };
   }
@@ -200,7 +203,6 @@ export default class Watcher implements Omit<PenWatcher, 'socket'> {
       });
       this.ondata(content);
     } catch (e) {
-      this.logger?.error(e);
       this.onerror(e);
     }
     return this;

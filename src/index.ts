@@ -65,6 +65,7 @@ class Pen {
       });
     });
 
+    this.logger?.info(`Pen intialized with root: ${this.root}`);
     this.iobase = iobase;
   }
 

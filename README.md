@@ -48,6 +48,10 @@ pen -si -p 8080 -r ~/docs
 
 #### Cli Options
 
++ `--help|-h`
+
+help.
+
 + `--port|-p`
 
 设置port，默认3000。
@@ -68,7 +72,7 @@ pen -si -p 8080 -r ~/docs
 
 是否输出日志，默认输出。
 
-### Use as a Middleware
+### Use with Node.js API
 
 Just check [pen.js](./pen.js) as an example.
 
