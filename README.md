@@ -43,48 +43,12 @@ const { pen, middleware } = require('@everseenflash/pen-middleware');
 
 const server = createServer(middleware);
 
-pen
-  .create({
-    root: './markdown-folder' // 本地markdown文件或者目录，默认./
-})
-  .attach(server);
+pen.attach(server);
 
 server.listen(3000);
 ```
 
 一切就绪，现在在支持[socket.io客户端](https://socket.io/docs/v3/client-installation/)的浏览器上打开<http://localhost:3000>看看吧！
-
-### Use with Express
-
-```ts
-const http = require('http');
-const express = require('express');
-const { pen, middleware, createPenMiddleware, logger } = require('./dist/lib');
-
-const app = express();
-const server = http.createServer(app);
-
-const Doc = /\/doc/;
-const Admin = '/admin';
-
-pen
-  .create({
-  namespace: Doc,             // 默认 '/'
-  ignores: /[\\/]\.git$/,
-  logger // a built-in logger
-})
-  .create({
-  root: '../docs',
-  namespace: '/admin',
-  logger
-})
-  .attach(server);
-
-app.get(Doc, createPenMiddleware('./src/spa', console));
-app.get(Admin, middleware);
-
-server.listen(3000);
-```
 
 ### Use with Terminal
 
@@ -106,10 +70,6 @@ pen -si -p 8080 -r ~/docs
 + `--root|-r`
 
 设置markdown文件目录，默认'./'。
-
-+ `--namespace|-n`
-
-设置namespace，默认'/'。
 
 + `--assets|-a`
 

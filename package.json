@@ -19,6 +19,7 @@
   "dependencies": {
     "browserslist": "^4.16.6",
     "chalk": "^4.1.1",
+    "express": "^4.17.1",
     "get-port": "^5.1.1",
     "markdown-it": "^12.0.3",
     "markdown-it-anchor": "^6.0.1",
@@ -48,6 +49,7 @@
     "@types/node": "^14.14.37",
     "@types/react": "^17.0.0",
     "@types/react-dom": "^17.0.0",
+    "@types/react-router-dom": "^5.1.8",
     "@typescript-eslint/eslint-plugin": "^4.4.1",
     "@typescript-eslint/parser": "^4.9.0",
     "babel-jest": "^26.6.3",
@@ -63,7 +65,6 @@
     "eslint-plugin-jsx-a11y": "^6.4.1",
     "eslint-plugin-react": "^7.20.3",
     "eslint-plugin-react-hooks": "^4.0.8",
-    "express": "^4.17.1",
     "file-loader": "^6.2.0",
     "github-markdown-css": "^4.0.0",
     "highlight.js": "^10.4.1",
@@ -78,18 +79,20 @@
     "preact": "^10.5.13",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
+    "react-router-dom": "^5.2.0",
     "socket.io-client": "^3.0.4",
     "typescript": "^4.1.2",
     "url-loader": "^4.1.1",
     "webpack": "^5.38.1",
     "webpack-bundle-analyzer": "^4.4.2",
-    "webpack-cli": "^4.2.0"
+    "webpack-cli": "^4.2.0",
+    "webpack-dev-server": "^3.11.2"
   },
   "scripts": {
     "build:server": "tsc && webpack --config scripts/webpack.server.js",
     "build:spa": "NODE_ENV=production webpack --config scripts/webpack.spa.js",
     "build": "run-s build:*",
-    "dev": "nodemon --config nodemon.json",
+    "dev": "NODE_ENV=production webpack serve --config scripts/webpack.spa.js",
     "lint": "eslint --fix .",
     "test": "jest --detectOpenHandles"
   }

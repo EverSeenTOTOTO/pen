@@ -44,4 +44,7 @@ module.exports = {
       generateStatsFile: false,
     }),
   ],
+  optimization: {
+    minimize: false,
+  },
 };

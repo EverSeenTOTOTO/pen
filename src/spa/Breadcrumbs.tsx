@@ -4,8 +4,7 @@ import { makeStyles, Theme, createStyles } from '@material-ui/core/styles';
 import Breadcrumbs from '@material-ui/core/Breadcrumbs';
 import Link from '@material-ui/core/Link';
 import HomeIcon from '@material-ui/icons/Home';
-
-import { PenDirInfo } from './common';
+import { useHistory } from 'react-router-dom';
 
 const useStyles = makeStyles((theme: Theme) => createStyles({
   root: {
@@ -23,39 +22,9 @@ const useStyles = makeStyles((theme: Theme) => createStyles({
   },
 }));
 
-const getLinks = (current: PenDirInfo) => {
-  const split = current.relative.split('/');
-  const lks = [];
-
-  for (let i = 0; i < split.length; ++i) {
-    lks.push({
-      filename: split[i],
-      relative: split.slice(0, i + 1).join('/'),
-      type: /(md|markdown)$/.test(split[i]) ? 'markdown' : 'dir',
-      current: i === split.length - 1, // 最后一个是current本身
-    });
-  }
-
-  return lks;
-};
-
-const BreadCrumbRoutes = ({ onClick, files, stack }: { onClick: any, files: PenDirInfo[]|undefined, stack: PenDirInfo[]}) => {
+const BreadCrumbRoutes = ({ stack }: {stack: { relative: string, name: string }[]}) => {
   const classes = useStyles();
-  const [links, setLinks] = React.useState<PenDirInfo[]>([]);
-
-  React.useEffect(() => {
-    if (Array.isArray(files)) {
-      const current = files.filter((each) => each.current)[0];
-      if (current) { // is markdown
-        setLinks(getLinks(current));
-      } else { // is dir
-        const dir = stack[stack.length - 1];
-        if (dir) {
-          setLinks(getLinks(dir));
-        }
-      }
-    }
-  }, [files]);
+  const history = useHistory();
 
   return (
     <Breadcrumbs
@@ -68,15 +37,20 @@ const BreadCrumbRoutes = ({ onClick, files, stack }: { onClick: any, files: PenD
       >
         <HomeIcon
           className={classes.icon}
-          onClick={() => onClick({
-            relative: './', filename: '', type: 'dir', current: false,
-          })}
+          onClick={() => history.push('/')}
         />
       </Link>
-      {links.map((link) => {
+      {stack.map((link) => {
         return (
-          <Link component="button" color="inherit" onClick={() => onClick(link)}>
-            {link.filename}
+          <Link
+            component="button"
+            color="inherit"
+            onClick={() => {
+              console.log(link);
+              history.push(link.relative);
+            }}
+          >
+            {link.name}
           </Link>
         );
       })}

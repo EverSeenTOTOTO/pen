@@ -3,30 +3,31 @@
 /* eslint-disable import/order */
 /* eslint-disable @typescript-eslint/no-var-requires */
 const { createServer } = require('http');
+const express = require('express');
 const getPort = require('get-port');
 const open = require('open');
-const { pen, createPenMiddleware } = require('./dist/lib');
+const { Pen } = require('./dist/lib');
 
 const argv = require('minimist')(process.argv.slice(2));
 
 const port = argv.port || argv.p || 3000;
-const root = argv.root || argv.r || './';
-const namespace = argv.namespace || argv.n;
-const assets = argv.assets || argv.a || root;
+const root = argv.root || argv.r || '.';
+const assets = argv.assets || argv.a;
 const logger = argv.s ? undefined : require('./dist/lib').logger;
 
 logger && logger.clearConsole();
 
-const server = createServer(createPenMiddleware(assets, logger));
+const app = express();
+const server = createServer(app);
 
-pen
-  .create({
-    root,
-    namespace,
-    logger,
-    ignores: argv.i ? undefined : /[\\/]\./,
-  })
-  .attach(server);
+const pen = new Pen({
+  root,
+  assets,
+  logger,
+});
+
+pen.attach(server);
+app.get(new RegExp('/(.*)?$'), pen.middleware);
 
 (async function main() {
   const avaliablePort = await getPort({
@@ -38,7 +39,7 @@ pen
   }
 
   server.listen(avaliablePort, () => {
-    const url = `http://localhost:${avaliablePort}${namespace || '/'}`;
+    const url = `http://localhost:${avaliablePort}/`;
     logger && logger.done(`Pen listening on ${url}`);
     open(url);
   });

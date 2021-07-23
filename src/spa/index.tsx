@@ -1,5 +1,10 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import {
+  BrowserRouter,
+  Switch,
+  Route,
+} from 'react-router-dom';
 
 import { ThemeProvider } from '@material-ui/core/styles';
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -19,7 +24,13 @@ const App = () => {
     <div id="app">
       <ThemeProvider theme={theme}>
         <CssBaseline />
-        <Blog />
+        <BrowserRouter>
+          <Switch>
+            <Route path="/*">
+              <Blog />
+            </Route>
+          </Switch>
+        </BrowserRouter>
       </ThemeProvider>
     </div>
   );

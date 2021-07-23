@@ -1,17 +1,19 @@
-/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 /* eslint-disable max-len */
-/* eslint-disable no-restricted-globals */
 import React from 'react';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
 import { io } from 'socket.io-client';
-import mermaid from 'mermaid';
 
 import Markdown from './Markdown';
 import Drawer from './Drawer';
 import BottomNavigation from './BottomNavigation';
 import BreadCrumbRoutes from './Breadcrumbs';
 import {
-  reducer, initialState, PenEvents, PenDirInfo, PenState,
+  reducer,
+  initMermaid,
+  initialState,
+  useToggleHandler,
+  usePathname,
+  PenConstants,
 } from './common';
 
 const useStyles = makeStyles(() => ({
@@ -23,98 +25,48 @@ const useStyles = makeStyles(() => ({
   },
 }));
 
-const mermaidThemes = ['default', 'forest'];
-
-const initMermaid = (darkMode: boolean) => {
-  requestAnimationFrame(() => {
-    mermaid.initialize({
-      // startOnLoad: true,
-      theme: darkMode ? 'dark' : mermaidThemes[Math.floor(Math.random() * mermaidThemes.length)],
-      gantt: {
-        axisFormatter: [
-          ['%Y-%m-%d', (d) => {
-            return d.getDay() === 1;
-          }],
-        ],
-      },
-      sequence: {
-        showSequenceNumbers: true,
-      },
-    });
-    mermaid.init();
-  });
-};
-
-const PenSessionKey = 'pen-session-cache';
-const PenDefaultRoute: PenDirInfo = {
-  relative: './', filename: '', type: 'dir', current: false,
-};
-
 const Blog = () => {
   const classes = useStyles();
-  const [state, dispatch] = React.useReducer<typeof reducer>(reducer, initialState);
-  const {
-    files, content, socket,
-  } = state;
-  const [stack, setStack] = React.useState<PenDirInfo[]>([]);
-  const [open, setOpen] = React.useState(false);
   const theme = useTheme();
-
-  const toggleDrawer = (value?: boolean) => (
-    event: React.KeyboardEvent | React.MouseEvent,
-  ) => {
-    if (
-      event
-      && event.type === 'keydown'
-      && ((event as React.KeyboardEvent).key === 'Tab'
-        || (event as React.KeyboardEvent).key === 'Shift')
-    ) {
-      return;
-    }
-
-    if (typeof value === 'boolean') {
-      setOpen(value);
-    } else {
-      setOpen((op) => !op);
-    }
-  };
-
-  const onClick = React.useCallback(
-    (info: PenDirInfo) => {
-      if (info.current || !socket) return;
-      window.history.pushState(info, info.filename, '');
-      socket.emit('peninit', info.relative);
-      setStack((stk) => [...stk, info]);
+  const [
+    {
+      files, content, open, socket,
     },
-    [socket],
-  );
+    dispatch,
+  ] = React.useReducer(reducer, initialState);
+  const toggleDrawer = useToggleHandler(dispatch);
+  const stack = usePathname(socket);
 
   React.useEffect(() => {
-    onClick(PenDefaultRoute);
-  }, [onClick]);
+    if (!content) {
+      toggleDrawer(true);
+    }
+  }, [content, toggleDrawer]);
 
   React.useEffect(() => {
-    const sock = io(`${location.origin}${location.pathname}`, {
+    const sock = io({
       path: '/pensocket.io',
     });
 
-    sock.on(PenEvents.UpdateData, (data) => {
+    sock.on(PenConstants.ErrorOccured, (data) => {
       dispatch({
-        type: PenEvents.UpdateData,
+        type: PenConstants.ErrorOccured,
         payload: JSON.parse(data),
       });
+    });
+    sock.on(PenConstants.UpdateData, (data) => {
+      const payload = JSON.parse(data);
+
+      dispatch({
+        type: PenConstants.UpdateData,
+        payload,
+      });
+
       initMermaid(theme.palette.type === 'dark');
     });
 
-    sock.on(PenEvents.ErrorOccured, (data) => {
-      dispatch({
-        type: PenEvents.ErrorOccured,
-        payload: JSON.parse(data),
-      });
-    });
-
     dispatch({
-      type: PenEvents.CreateSocket,
+      type: PenConstants.CreateSocket,
       payload: sock,
     });
 
@@ -124,42 +76,22 @@ const Blog = () => {
   }, [theme]);
 
   React.useEffect(() => {
-    const onPopState = (e: PopStateEvent) => {
-      if (e.state !== null) {
-        let last: PenDirInfo|undefined;
+    const current = files.filter((each) => each.current)[0];
 
-        setStack((stk) => {
-          stk.pop();
-          last = stk.pop();
-          return stk;
-        });
-
-        if (last) {
-          onClick(last);
-        }
-      }
-    };
-
-    window.addEventListener('popstate', onPopState);
-    return () => window.removeEventListener('popstate', onPopState);
-  }, [onClick]);
+    if (current) {
+      window.history.pushState(current, current.filename, `/${current.relative}`);
+    }
+  }, [files]);
 
   return (
-    <div className={classes.root}>
-      <Drawer open={open} toggleDrawer={toggleDrawer} onClick={onClick} files={files} />
-      <main className={classes.markdown}>
-        <BreadCrumbRoutes onClick={onClick} files={files} stack={stack} />
+    <main className={classes.root}>
+      <Drawer open={open} toggleDrawer={toggleDrawer} files={files} />
+      <div className={classes.markdown}>
+        <BreadCrumbRoutes stack={stack} />
         <Markdown html={content} />
-      </main>
-      <BottomNavigation
-        toggleMenu={toggleDrawer}
-        backHome={() => {
-          onClick({
-            relative: './', filename: '', type: 'dir', current: false,
-          });
-        }}
-      />
-    </div>
+      </div>
+      <BottomNavigation toggleMenu={toggleDrawer} />
+    </main>
   );
 };
 

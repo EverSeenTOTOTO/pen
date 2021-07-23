@@ -126,44 +126,9 @@ const readMarkdownFiles = (option: Pick<PenWatcher, 'path'|'root'|'ignores'>): M
     path,
     ignores,
   });
-  const mds: FileInfo[] = [];
-  const subdirs: FileInfo[] = [];
-
-  // eslint-disable-next-line no-restricted-syntax
-  for (const file of files) {
-    if (file.type === 'markdown') {
-      mds.push(file);
-    } else if (file.type === 'dir') {
-      subdirs.push(file);
-    }
-  }
-
-  // 1. 目录下有md文件
-  if (mds.length > 0) {
-    mds[0].current = true;
-
-    return {
-      files: [
-        ...mds.sort(sort),
-        ...subdirs.sort(sort),
-      ],
-      content: mdrender(fs.readFileSync(resolve(path, mds[0].filename)).toString(), root),
-    };
-  }
-
-  // 2. 目录下有子目录
-  if (subdirs.length > 0) {
-    return {
-      files: [
-        ...mds.sort(sort),
-        ...subdirs.sort(sort),
-      ],
-      content: '',
-    };
-  }
 
   return {
-    files: [],
+    files: files.sort(sort),
     content: '',
   };
 };
@@ -192,11 +157,10 @@ export default class Watcher implements Omit<PenWatcher, 'socket'> {
     const { socket } = opts;
 
     this.onerror = (e: Error) => {
-      this.logger?.error(e);
+      this.logger?.error(e.stack ?? e.message);
       socket.emit('penerror', JSON.stringify(e.stack ?? e.message ?? 'internal pen server error'));
     };
     this.ondata = (data: MdContent) => {
-      // this.logger?.info(data);
       socket.emit('pendata', JSON.stringify(data));
     };
   }

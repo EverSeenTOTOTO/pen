@@ -9,6 +9,7 @@ import {
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import { Folder, TextFields } from '@material-ui/icons';
+import { useHistory } from 'react-router';
 
 import { PenDirInfo } from './common';
 
@@ -22,21 +23,22 @@ type DrawerProps = {
   open: boolean,
   toggleDrawer: (value?: boolean)=> (e: React.KeyboardEvent | React.MouseEvent) => void,
   files: PenDirInfo[],
-  onClick: (info: PenDirInfo) => void
 };
 
 const Drawer = ({
-  open, toggleDrawer, files, onClick,
+  open, toggleDrawer, files,
 }: DrawerProps) => {
   const classes = useStyles();
-
+  const history = useHistory();
   const items = files.map((each: PenDirInfo) => {
     const currentItemClassName = each.current ? 'list-item--current' : '';
 
     return (
       <ListItem
         className={`list-item ripple ${currentItemClassName}`}
-        onClick={() => onClick(each)}
+        onClick={() => {
+          history.push(each.relative);
+        }}
       >
         <ListItemAvatar>
           <Avatar>

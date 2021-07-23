@@ -5,6 +5,7 @@ import BottomNavigationAction from '@material-ui/core/BottomNavigationAction';
 import ListTwoToneIcon from '@material-ui/icons/ListTwoTone';
 import HomeTwoToneIcon from '@material-ui/icons/HomeTwoTone';
 import ExpandLessTwoToneIcon from '@material-ui/icons/ExpandLessTwoTone';
+import { useHistory } from 'react-router-dom';
 
 const useStyles = makeStyles({
   footer: {
@@ -18,20 +19,6 @@ const useStyles = makeStyles({
   },
 });
 
-/**
-
-* 缓冲函数
-
-* @param {Number} position 当前滚动位置
-
-* @param {Number} destination 目标位置
-
-* @param {Number} rate 缓动率
-
-* @param {Function} callback 缓动结束回调函数 两个参数分别是当前位置和是否结束
-
-*/
-
 const backTop = (destination = 0) => {
   const rate = 4;
   const scrollTo = (posY: number) => window.scrollTo(0, posY);
@@ -39,8 +26,6 @@ const backTop = (destination = 0) => {
   let position = scrollTop + (destination - scrollTop) / rate;
 
   const step = () => {
-    console.log(scrollTop, position);
-
     if (Math.abs(position) < 10) {
       scrollTo(0);
     } else {
@@ -53,9 +38,10 @@ const backTop = (destination = 0) => {
   requestAnimationFrame(step);
 };
 
-const BottomNav = ({ toggleMenu, backHome }: {toggleMenu: () => (e: React.KeyboardEvent | React.MouseEvent) => void, backHome: () => void}) => {
+const BottomNav = ({ toggleMenu }: {toggleMenu: () => (e: React.KeyboardEvent | React.MouseEvent) => void}) => {
   const classes = useStyles();
   const [value, setValue] = React.useState(0);
+  const history = useHistory();
 
   return (
     <footer className={classes.footer}>
@@ -67,7 +53,7 @@ const BottomNav = ({ toggleMenu, backHome }: {toggleMenu: () => (e: React.Keyboa
         showLabels
       >
         <BottomNavigationAction label="Menu" icon={<ListTwoToneIcon />} onClick={toggleMenu()} />
-        <BottomNavigationAction label="Home" icon={<HomeTwoToneIcon />} onClick={backHome} />
+        <BottomNavigationAction label="Home" icon={<HomeTwoToneIcon />} onClick={() => history.push('/')} />
         <BottomNavigationAction
           label="BackTop"
           icon={(<ExpandLessTwoToneIcon />)}

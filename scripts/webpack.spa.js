@@ -111,4 +111,11 @@ module.exports = {
     },
     extensions: ['.js', '.ts', '.tsx'],
   },
+  devServer: {
+    contentBase: paths.spaDist,
+    historyApiFallback: true,
+    compress: true,
+    progress: true,
+    host: '0.0.0.0',
+  },
 };
