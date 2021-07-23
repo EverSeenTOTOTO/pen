@@ -1,25 +1,25 @@
 /* eslint-disable max-len */
 import { resolve } from 'path';
-import { existsSync } from 'fs';
+import { existsSync, createReadStream } from 'fs';
 import { Server as HttpServer } from 'http';
 import { Server as IOBase, Socket } from 'socket.io';
+import type { IncomingMessage, ServerResponse } from 'http';
 import Watcher from './watcher';
 import * as logger from './logger';
 
-import createPenMiddleware from './middleware';
+export { logger };
 
-export {
-  logger,
-};
+const AssetsPattern = /\.(?:css(\.map)?|js(\.map)?|jpe?g|png|gif|ico|cur|heic|webp|tiff?|mp3|m4a|aac|ogg|midi?|wav|mp4|mov|webm|mpe?g|avi|ogv|flv|wmv)$/;
 
 export type PenCreateOptions = {
   root?: string,
+  assets?: string,
   ignores?: RegExp|RegExp[],
   logger?: typeof logger,
-  assets?: string
+  server: HttpServer
 };
 
-export class Pen {
+class Pen {
   private iobase?: IOBase;
 
   public readonly root: string;
@@ -28,20 +28,14 @@ export class Pen {
 
   public readonly logger?: typeof logger;
 
-  public readonly middleware?: ReturnType<typeof createPenMiddleware>;
-
   private readonly connectedSockets: { socket: Socket, watcher: Watcher }[] = [];
 
-  constructor(opts?: PenCreateOptions) {
-    this.root = opts?.root ?? '.';
-    this.ignores = opts?.ignores;
-    this.logger = opts?.logger;
-    this.middleware = createPenMiddleware(opts?.assets ?? this.root, this.logger);
-  }
+  constructor(opts: PenCreateOptions) {
+    this.root = opts.root ?? '.';
+    this.ignores = opts.ignores;
+    this.logger = opts.logger;
 
-  // attach to http server
-  attach<T extends HttpServer>(server: T): Pen {
-    const iobase = new IOBase(server, {
+    const iobase = new IOBase(opts.server, {
       path: '/pensocket.io',
     });
     iobase.on('connection', (socket: Socket) => {
@@ -72,7 +66,6 @@ export class Pen {
     });
 
     this.iobase = iobase;
-    return this;
   }
 
   close(callback?: () => void): void {
@@ -120,3 +113,33 @@ export class Pen {
     newWatcher.start().trigger();
   }
 }
+
+export default (opts: PenCreateOptions) => {
+  const assets = opts?.assets ?? opts?.root ?? '.';
+
+  function middleware<Req extends IncomingMessage, Res extends ServerResponse>(req: Req, res: Res) {
+    const url = new URL(req.url ?? '/', `http://${req.headers.host}`);
+
+    logger?.info(`Pen got request: ${url.pathname}`);
+
+    if (AssetsPattern.test(url.pathname)) {
+      const asset = resolve(assets, `.${url.pathname}`);
+      if (existsSync(asset)) {
+        logger?.info(`Pen found asset: ${asset}`);
+        createReadStream(asset).pipe(res);
+      } else {
+        logger?.error(`Pen asset not founded: ${asset}`);
+        res.statusCode = 404;
+        res.end();
+      }
+    } else {
+      logger?.info('Pen redirect to index.html');
+      res.setHeader('Content-Type', 'text/html');
+      createReadStream(resolve(__dirname, 'spa/index.html'))
+        .pipe(res);
+    }
+  }
+
+  middleware.prototype.pen = new Pen(opts);
+  return middleware;
+};

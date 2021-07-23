@@ -1,23 +1,15 @@
 import React from 'react';
 import { makeStyles } from '@material-ui/core/styles';
-import BottomNavigation from '@material-ui/core/BottomNavigation';
-import BottomNavigationAction from '@material-ui/core/BottomNavigationAction';
-import ListTwoToneIcon from '@material-ui/icons/ListTwoTone';
-import HomeTwoToneIcon from '@material-ui/icons/HomeTwoTone';
+import Fab from '@material-ui/core/Fab';
 import ExpandLessTwoToneIcon from '@material-ui/icons/ExpandLessTwoTone';
-import { useHistory } from 'react-router-dom';
 
-const useStyles = makeStyles({
-  footer: {
+const useStyles = makeStyles((theme) => ({
+  fab: {
     position: 'fixed',
-    bottom: 0,
-    left: '25%',
-    width: '50%',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
+    bottom: theme.spacing(4),
+    right: theme.spacing(2),
   },
-});
+}));
 
 const backTop = (destination = 0) => {
   const rate = 4;
@@ -38,29 +30,18 @@ const backTop = (destination = 0) => {
   requestAnimationFrame(step);
 };
 
-const BottomNav = ({ toggleMenu }: {toggleMenu: () => (e: React.KeyboardEvent | React.MouseEvent) => void}) => {
+const BottomNav = () => {
   const classes = useStyles();
-  const [value, setValue] = React.useState(0);
-  const history = useHistory();
 
   return (
-    <footer className={classes.footer}>
-      <BottomNavigation
-        value={value}
-        onChange={(event, newValue) => {
-          setValue(newValue);
-        }}
-        showLabels
-      >
-        <BottomNavigationAction label="Menu" icon={<ListTwoToneIcon />} onClick={toggleMenu()} />
-        <BottomNavigationAction label="Home" icon={<HomeTwoToneIcon />} onClick={() => history.push('/')} />
-        <BottomNavigationAction
-          label="BackTop"
-          icon={(<ExpandLessTwoToneIcon />)}
-          onClick={() => backTop()}
-        />
-      </BottomNavigation>
-    </footer>
+    <Fab
+      aria-label="BackTop"
+      className={classes.fab}
+      color="primary"
+      onClick={() => backTop()}
+    >
+      <ExpandLessTwoToneIcon />
+    </Fab>
   );
 };
 

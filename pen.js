@@ -6,7 +6,7 @@ const { createServer } = require('http');
 const express = require('express');
 const getPort = require('get-port');
 const open = require('open');
-const { Pen } = require('./dist/lib');
+const createPenMiddleware = require('./dist/lib').default;
 
 const argv = require('minimist')(process.argv.slice(2));
 
@@ -19,15 +19,14 @@ logger && logger.clearConsole();
 
 const app = express();
 const server = createServer(app);
-
-const pen = new Pen({
+const pen = createPenMiddleware({
   root,
   assets,
   logger,
+  server,
 });
 
-pen.attach(server);
-app.get(new RegExp('/(.*)?$'), pen.middleware);
+app.get(new RegExp('/(.*)?$'), pen);
 
 (async function main() {
   const avaliablePort = await getPort({

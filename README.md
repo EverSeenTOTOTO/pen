@@ -35,22 +35,7 @@ balabala
 
 ## Usage
 
-### Basic Usage
-
-```js
-const { createServer } = require('http');
-const { pen, middleware } = require('@everseenflash/pen-middleware');
-
-const server = createServer(middleware);
-
-pen.attach(server);
-
-server.listen(3000);
-```
-
-一切就绪，现在在支持[socket.io客户端](https://socket.io/docs/v3/client-installation/)的浏览器上打开<http://localhost:3000>看看吧！
-
-### Use with Terminal
+### Use with CLI
 
 ```bash
 # install globally
@@ -82,6 +67,10 @@ pen -si -p 8080 -r ~/docs
 + `-s`
 
 是否输出日志，默认输出。
+
+### Use as a Middleware
+
+Just check [pen.js](./pen.js) as an example.
 
 ## Serve static files
 

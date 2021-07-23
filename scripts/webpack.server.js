@@ -4,7 +4,7 @@ const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 const { paths } = require('./utils');
 
 module.exports = {
-  mode: 'production',
+  mode: process.env.NODE_ENV,
   externals: /^@everseenflash\/pen-middleware|socket\.io|markdown-it/,
   devtool: 'source-map',
   entry: {
@@ -45,6 +45,6 @@ module.exports = {
     }),
   ],
   optimization: {
-    minimize: false,
+    minimize: process.env.NODE_ENV === 'production',
   },
 };

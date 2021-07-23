@@ -2,6 +2,7 @@
 import React from 'react';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
 import { io } from 'socket.io-client';
+import { useLocation } from 'react-router';
 
 import Markdown from './Markdown';
 import Drawer from './Drawer';
@@ -12,7 +13,6 @@ import {
   initMermaid,
   initialState,
   useToggleHandler,
-  usePathname,
   PenConstants,
 } from './common';
 
@@ -28,6 +28,7 @@ const useStyles = makeStyles(() => ({
 const Blog = () => {
   const classes = useStyles();
   const theme = useTheme();
+  const { pathname } = useLocation();
   const [
     {
       files, content, open, socket,
@@ -35,13 +36,20 @@ const Blog = () => {
     dispatch,
   ] = React.useReducer(reducer, initialState);
   const toggleDrawer = useToggleHandler(dispatch);
-  const stack = usePathname(socket);
 
   React.useEffect(() => {
-    if (!content) {
-      toggleDrawer(true);
-    }
+    toggleDrawer(!content)();
   }, [content, toggleDrawer]);
+
+  React.useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+
+  React.useEffect(() => {
+    if (socket && socket.connect) {
+      socket.emit(PenConstants.EmitFile, pathname.substr(1));
+    }
+  }, [pathname, socket]);
 
   React.useEffect(() => {
     const sock = io({
@@ -53,16 +61,6 @@ const Blog = () => {
         type: PenConstants.ErrorOccured,
         payload: JSON.parse(data),
       });
-    });
-    sock.on(PenConstants.UpdateData, (data) => {
-      const payload = JSON.parse(data);
-
-      dispatch({
-        type: PenConstants.UpdateData,
-        payload,
-      });
-
-      initMermaid(theme.palette.type === 'dark');
     });
 
     dispatch({
@@ -76,21 +74,29 @@ const Blog = () => {
   }, [theme]);
 
   React.useEffect(() => {
-    const current = files.filter((each) => each.current)[0];
+    if (socket && socket.connect) {
+      socket.off(PenConstants.UpdateData);
+      socket.on(PenConstants.UpdateData, (data) => {
+        const payload = JSON.parse(data);
 
-    if (current) {
-      window.history.pushState(current, current.filename, `/${current.relative}`);
+        dispatch({
+          type: PenConstants.UpdateData,
+          payload,
+        });
+
+        initMermaid(theme.palette.type === 'dark');
+      });
     }
-  }, [files]);
+  }, [socket, theme]);
 
   return (
     <main className={classes.root}>
       <Drawer open={open} toggleDrawer={toggleDrawer} files={files} />
       <div className={classes.markdown}>
-        <BreadCrumbRoutes stack={stack} />
+        <BreadCrumbRoutes toggleDrawer={toggleDrawer} />
         <Markdown html={content} />
       </div>
-      <BottomNavigation toggleMenu={toggleDrawer} />
+      <BottomNavigation />
     </main>
   );
 };

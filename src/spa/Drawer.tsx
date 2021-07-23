@@ -37,7 +37,7 @@ const Drawer = ({
       <ListItem
         className={`list-item ripple ${currentItemClassName}`}
         onClick={() => {
-          history.push(each.relative);
+          history.push(`/${each.relative}`);
         }}
       >
         <ListItemAvatar>

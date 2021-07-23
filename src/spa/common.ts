@@ -1,9 +1,8 @@
 /* eslint-disable import/no-extraneous-dependencies */
 import {
-  Reducer, useCallback, useEffect, useState,
+  Reducer, useCallback,
 } from 'react';
 import { Socket } from 'socket.io-client';
-import { useLocation } from 'react-router';
 
 import mermaid from 'mermaid';
 
@@ -56,7 +55,7 @@ export const reducer: Reducer<PenState, any> = (state: PenState, action: any) =>
     case PenConstants.ToggleOpen:
       return {
         ...state,
-        open: action.payload ? action.payload : !state.open,
+        open: typeof action.payload === 'boolean' ? action.payload : !state.open,
       };
     default:
       return state;
@@ -65,7 +64,7 @@ export const reducer: Reducer<PenState, any> = (state: PenState, action: any) =>
 
 export const useToggleHandler = (dispatch) => {
   return useCallback((value?: boolean) => (
-    event: React.KeyboardEvent | React.MouseEvent,
+    event?: React.KeyboardEvent | React.MouseEvent,
   ) => {
     if (
       event
@@ -77,37 +76,9 @@ export const useToggleHandler = (dispatch) => {
     }
     dispatch({
       type: PenConstants.ToggleOpen,
-      payload: typeof value === 'boolean' ? value : undefined,
+      payload: value,
     });
   }, [dispatch]);
-};
-
-export const usePathname = (socket: Socket) => {
-  const { pathname } = useLocation();
-  const [stack, setStack] = useState<{ relative: string, name: string }[]>([]);
-
-  useEffect(() => {
-    window.scrollTo(0, 0);
-
-    const split = pathname.split('/').slice(1);
-    const result = [];
-    for (let i = 0; i < split.length; ++i) {
-      result.push({
-        relative: split.slice(0, i).join('/'),
-        name: split[i],
-      });
-    }
-    setStack(result);
-  }, [pathname]);
-
-  useEffect(() => {
-    if (socket && socket.connect) {
-      console.log(pathname);
-      socket.emit(PenConstants.EmitFile, pathname.substr(1));
-    }
-  }, [pathname, socket]);
-
-  return stack;
 };
 
 export const initMermaid = (darkMode: boolean) => {

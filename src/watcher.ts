@@ -125,7 +125,7 @@ const readMarkdownFiles = (option: Pick<PenWatcher, 'path'|'root'|'ignores'>): M
     root,
     path,
     ignores,
-  });
+  }).filter((each) => each.type !== 'other');
 
   return {
     files: files.sort(sort),
@@ -161,6 +161,7 @@ export default class Watcher implements Omit<PenWatcher, 'socket'> {
       socket.emit('penerror', JSON.stringify(e.stack ?? e.message ?? 'internal pen server error'));
     };
     this.ondata = (data: MdContent) => {
+      console.log(data.files);
       socket.emit('pendata', JSON.stringify(data));
     };
   }

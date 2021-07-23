@@ -1,10 +1,10 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { makeStyles, Theme, createStyles } from '@material-ui/core/styles';
 import Breadcrumbs from '@material-ui/core/Breadcrumbs';
 import Link from '@material-ui/core/Link';
 import HomeIcon from '@material-ui/icons/Home';
-import { useHistory } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 
 const useStyles = makeStyles((theme: Theme) => createStyles({
   root: {
@@ -22,9 +22,24 @@ const useStyles = makeStyles((theme: Theme) => createStyles({
   },
 }));
 
-const BreadCrumbRoutes = ({ stack }: {stack: { relative: string, name: string }[]}) => {
+const BreadCrumbRoutes = ({ toggleDrawer }: any) => {
   const classes = useStyles();
   const history = useHistory();
+  const { pathname } = useLocation();
+  const [stack, setStack] = useState<{ relative: string, name: string }[]>([]);
+
+  useEffect(() => {
+    const split = pathname.split('/').slice(1);
+    const result = [];
+
+    for (let i = 0; i < split.length; ++i) {
+      result.push({
+        relative: split.slice(0, i + 1).join('/'),
+        name: split[i],
+      });
+    }
+    setStack(result);
+  }, [pathname]);
 
   return (
     <Breadcrumbs
@@ -37,7 +52,12 @@ const BreadCrumbRoutes = ({ stack }: {stack: { relative: string, name: string }[
       >
         <HomeIcon
           className={classes.icon}
-          onClick={() => history.push('/')}
+          onClick={() => {
+            toggleDrawer(true)();
+            if (pathname !== '/') {
+              history.push('/');
+            }
+          }}
         />
       </Link>
       {stack.map((link) => {
@@ -46,8 +66,11 @@ const BreadCrumbRoutes = ({ stack }: {stack: { relative: string, name: string }[
             component="button"
             color="inherit"
             onClick={() => {
-              console.log(link);
-              history.push(link.relative);
+              const path = `/${link.relative}`;
+              toggleDrawer(!/\.(md|markdown)$/.test(path))();
+              if (pathname !== path) {
+                history.push(path);
+              }
             }}
           >
             {link.name}
