@@ -10,7 +10,7 @@
 yarn add @everseenflash/pen-middleware
 ```
 
-## Embedded markdown-it plugin examples
+## Embedded markdown-it plugins
 
 默认集成了一些markdown-it插件：
 
@@ -84,13 +84,11 @@ Just check [pen.js](./pen.js) as an example.
 /\.(?:css(\.map)?|js(\.map)?|jpe?g|png|gif|ico|cur|heic|webp|tiff?|mp3|m4a|aac|ogg|midi?|wav|mp4|mov|webm|mpe?g|avi|ogv|flv|wmv)$/
 ```
 
-可以使用`createPenMiddleware`指定静态资源文件目录.
-
-```js
-const middleware = createPenMiddleware('../docs');
-```
-
 ## Q&A
+
++ Diffrent namespaces?
+
+Pen force to use default namespace `'/'` (`app.get(new RegExp('/(.*)?$'), pen);`), different namespace is not support.
 
 + Custom UI?
 
