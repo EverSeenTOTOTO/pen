@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 import { resolve, relative, basename } from 'path';
 import fs, { FSWatcher } from 'fs';
+import slash from 'slash';
 import { Socket } from 'socket.io';
 import mdrender from './markdown';
 import * as logger from './logger';
@@ -62,7 +63,7 @@ const readFiles = (option: Pick<PenWatcher, 'path'|'root'|'ignores'>): FileInfo[
     })
     .map((filename: string) => {
       const filepath = resolve(path, filename);
-      const relativePath = relative(root, filepath);
+      const relativePath = slash(relative(root, filepath));
 
       if (/\.(md|markdown)$/.test(filename)) {
         return {
