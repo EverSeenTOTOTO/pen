@@ -4,35 +4,6 @@
 
 <image src="./demo.gif" width="800">
 
-## Install
-
-```bash
-yarn add @everseenflash/pen-middleware
-```
-
-## Embedded markdown-it plugins
-
-默认集成了一些markdown-it插件：
-
-+ markdown-it-anchor
-+ markdown-it-container
-
-> include three containers: `Warn|Error|Info`, vuepress style like
-
-```md
-::: Warn
-balabala
-:::
-```
-
-+ markdown-it-highlightjs
-+ markdown-it-include
-+ markdown-it-footnote
-+ markdown-it-toc-done-right
-+ markdown-it-katex (forked, update to katex@0.13.11)
-+ markdown-it-mermaid (forked, update to mermaid@8.10.2)
-+ markdown-it-copy
-
 ## Usage
 
 ### Use with CLI
@@ -75,6 +46,29 @@ help.
 ### Use with Node.js API
 
 Just check [pen.js](./pen.js) as an example.
+
+## Embedded markdown-it plugins
+
+默认集成了一些markdown-it插件：
+
++ markdown-it-anchor
++ markdown-it-container
+
+> include three containers: `Warn|Error|Info`, vuepress style like
+
+```md
+::: Warn
+balabala
+:::
+```
+
++ markdown-it-highlightjs
++ markdown-it-include
++ markdown-it-footnote
++ markdown-it-toc-done-right
++ markdown-it-katex (forked, update to katex@0.13.11)
++ markdown-it-mermaid (forked, update to mermaid@8.10.2)
++ markdown-it-copy
 
 ## Serve static files
 

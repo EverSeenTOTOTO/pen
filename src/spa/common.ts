@@ -28,6 +28,7 @@ export type PenState = {
   socket: Socket | null,
   files: PenDirInfo[] | undefined,
   content: string,
+  current: string,
   open: boolean
 };
 
@@ -35,6 +36,7 @@ export const initialState: PenState = {
   socket: null,
   files: [],
   content: '<h1>Pen socket not connected.</p>',
+  current: '',
   open: false,
 };
 
@@ -55,6 +57,7 @@ export const reducer: Reducer<PenState, any> = (state: PenState, action: any) =>
         ...state,
         content: action.payload.content,
         files: action.payload.files,
+        current: action.payload.current,
       };
     case PenConstants.ToggleOpen:
       return {

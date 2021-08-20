@@ -6,6 +6,7 @@ const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 const safePostCssParser = require('postcss-safe-parser');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
+const AssetPlugin = require('./asset-plugin');
 
 const { paths } = require('./utils');
 
@@ -79,7 +80,6 @@ module.exports = {
   plugins: [
     new HtmlWebPackPlugin({
       title: 'Pen',
-      inject: false,
       template: './public/index.html',
       favicon: './public/favicon.ico',
     }),
@@ -96,10 +96,12 @@ module.exports = {
       },
     }),
     new BundleAnalyzerPlugin({
-      analyzerMode: 'disabled',
+      analyzerMode: 'server',
       generateStatsFile: false,
     }),
+    new AssetPlugin(), // 生成一个assets.json
   ],
+  externals: /^mermaid$/,
   resolve: {
     modules: [paths.nodeModules],
     mainFields: ['jsnext:main', 'browser', 'main'],

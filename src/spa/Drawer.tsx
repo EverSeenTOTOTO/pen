@@ -23,15 +23,16 @@ type DrawerProps = {
   open: boolean,
   toggleDrawer: (value?: boolean)=> (e: React.KeyboardEvent | React.MouseEvent) => void,
   files: PenDirInfo[],
+  current: string
 };
 
 const Drawer = ({
-  open, toggleDrawer, files,
+  open, toggleDrawer, files, current,
 }: DrawerProps) => {
   const classes = useStyles();
   const history = useHistory();
   const items = files.map((each: PenDirInfo) => {
-    const currentItemClassName = each.current ? 'list-item--current' : '';
+    const currentItemClassName = each.filename === current ? 'list-item--current' : '';
 
     return (
       <ListItem

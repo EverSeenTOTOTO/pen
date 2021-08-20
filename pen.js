@@ -48,6 +48,7 @@ const pen = createPenMiddleware({
 });
 
 app.get(new RegExp('/(.*)?$'), pen);
+
 (async function main() {
   const avaliablePort = await getPort({
     port,

@@ -18,21 +18,14 @@
     <!-- To automatically render math in text elements, include the auto-render extension: -->
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.13.11/dist/contrib/auto-render.min.js" integrity="sha384-vZTG03m+2yp6N6BNi5iM4rW4oIwk5DfcNdFfxkk9ZWpDriOkXX8voJBFrAO7MpVl" crossorigin="anonymous"
         onload="renderMathInElement(document.body);"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
     <% if (htmlWebpackPlugin.files.favicon) { %>
       <link rel="shortcut icon" href="<%= htmlWebpackPlugin.files.favicon%>">
     <% } %>
-    <% for (var css in htmlWebpackPlugin.files.css) { %>
-      <style>
-        <%= compilation.assets[htmlWebpackPlugin.files.css[css]].source() %>
-      </style>
-    <% } %>
+
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
   </body>
-  <% for (var js in htmlWebpackPlugin.files.js) { %>
-    <script>
-      <%= compilation.assets[htmlWebpackPlugin.files.js[js]].source() %>
-    </script>
-  <% } %>
+
 </html>

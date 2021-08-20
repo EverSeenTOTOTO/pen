@@ -1,6 +1,6 @@
 /* eslint-disable max-len */
-import { resolve } from 'path';
-import { existsSync, createReadStream } from 'fs';
+import { resolve, basename } from 'path';
+import { existsSync, createReadStream, readFileSync } from 'fs';
 import { Server as HttpServer } from 'http';
 import { Server as IOBase, Socket } from 'socket.io';
 import type { IncomingMessage, ServerResponse } from 'http';
@@ -117,14 +117,25 @@ class Pen {
 
 export default (opts: PenCreateOptions) => {
   const assets = opts?.assets ?? opts?.root ?? '.';
+  const SPA_ASSETS = JSON.parse(readFileSync(resolve(__dirname, './spa/assets.json')).toString());
 
   function middleware<Req extends IncomingMessage, Res extends ServerResponse>(req: Req, res: Res) {
     const url = new URL(req.url ?? '/', `http://${req.headers.host}`);
+    const filename = basename(url.pathname);
 
     logger?.info(`Pen got request: ${url.pathname}`);
 
-    if (AssetsPattern.test(url.pathname)) {
-      const asset = resolve(assets, `.${url.pathname}`);
+    if (AssetsPattern.test(filename)) {
+      // spa的静态资源
+      if (SPA_ASSETS.indexOf(filename) !== -1) {
+        const spaAsset = resolve(__dirname, `./spa/${filename}`);
+        if (existsSync(spaAsset)) {
+          createReadStream(spaAsset).pipe(res);
+          return;
+        }
+      }
+
+      const asset = resolve(assets, `./${filename}`);
       if (existsSync(asset)) {
         logger?.info(`Pen found asset: ${asset}`);
         createReadStream(asset).pipe(res);

@@ -15,7 +15,8 @@ type FileInfo = {
 
 export type MdContent = {
   files: FileInfo[],
-  content: string
+  content: string,
+  current: string
 };
 
 interface PenWatcher {
@@ -101,6 +102,7 @@ const readMarkdownFiles = (option: Pick<PenWatcher, 'path'|'root'|'ignores'>): M
   checkPermission(option);
 
   const { root, path, ignores } = option;
+  let current = '';
   // 是一个md
   if (!isDir(option.path)) {
     const { files } = readMarkdownFiles({
@@ -110,15 +112,14 @@ const readMarkdownFiles = (option: Pick<PenWatcher, 'path'|'root'|'ignores'>): M
 
     for (const each of files) {
       if (basename(path) === basename(each.filename)) {
-        each.current = true;
-      } else {
-        each.current = false;
+        current = each.filename;
       }
     }
 
     return {
       files,
       content: mdrender(fs.readFileSync(path).toString(), root),
+      current,
     };
   }
 
@@ -131,6 +132,7 @@ const readMarkdownFiles = (option: Pick<PenWatcher, 'path'|'root'|'ignores'>): M
   return {
     files: files.sort(sort),
     content: '',
+    current,
   };
 };
 

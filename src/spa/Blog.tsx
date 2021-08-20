@@ -31,7 +31,7 @@ const Blog = () => {
   const { pathname } = useLocation();
   const [
     {
-      files, content, open, socket,
+      files, content, open, socket, current,
     },
     dispatch,
   ] = React.useReducer(reducer, initialState);
@@ -91,7 +91,7 @@ const Blog = () => {
 
   return (
     <main className={classes.root}>
-      <Drawer open={open} toggleDrawer={toggleDrawer} files={files} />
+      <Drawer open={open} toggleDrawer={toggleDrawer} files={files} current={current} />
       <div className={classes.markdown}>
         <BreadCrumbRoutes toggleDrawer={toggleDrawer} />
         <Markdown html={content} />
