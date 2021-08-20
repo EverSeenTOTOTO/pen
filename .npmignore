@@ -7,6 +7,3 @@ scripts
 babel.config.js
 webpack.config.js
 tsconfig.*
-dist/spa/*.css
-dist/spa/*.js
-dist/spa/*.txt
