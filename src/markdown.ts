@@ -33,7 +33,7 @@ const md = (root: string) => mdit({
     extraHtmlBeforeBtn: '', // '' | a html-fragment before <button>
     extraHtmlAfterBtn: '', // '' | a html-fragment after <button>
     // eslint-disable-next-line max-len
-    showCodeLanguage: false, // false | show code language before [btn || extraHtmlBeforeBtn] | [add-after-1.1.0]
+    showCodeLanguage: true, // false | show code language before [btn || extraHtmlBeforeBtn] | [add-after-1.1.0]
     attachText: '', // '' | some text append copyText， Such as: copyright | [add-after-1.2.0]
   })
   .use(mditContainer, 'Warn', {

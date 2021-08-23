@@ -82,6 +82,7 @@ module.exports = {
       title: 'Pen',
       template: './public/index.html',
       favicon: './public/favicon.ico',
+      inject: false,
     }),
     new MiniCssExtractPlugin({
       filename: 'pen.[contenthash:8].css',
@@ -96,12 +97,14 @@ module.exports = {
       },
     }),
     new BundleAnalyzerPlugin({
-      analyzerMode: 'server',
+      analyzerMode: 'disabled',
       generateStatsFile: false,
     }),
     new AssetPlugin(), // 生成一个assets.json
   ],
-  externals: /^mermaid$/,
+  externals: {
+    mermaid: 'mermaid',
+  },
   resolve: {
     modules: [paths.nodeModules],
     mainFields: ['jsnext:main', 'browser', 'main'],

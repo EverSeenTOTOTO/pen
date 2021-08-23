@@ -11,7 +11,6 @@ pre {
   top: 3px;
   right: calc(100% + 4px);
   font-size: 12px;
-  line-height: 18px;
   opacity: 0.6;
 }
 .m-mdic-copy-wrapper div.u-mdic-copy-notify {
@@ -24,7 +23,6 @@ pre {
   border-radius: 3px;
   background: none;
   font-size: 12px;
-  line-height: 18px;
   opacity: 0.3;
   outline: none;
   opacity: 1;
@@ -40,7 +38,6 @@ pre {
   border-radius: 3px;
   background: none;
   font-size: 12px;
-  line-height: 18px;
   opacity: 0.6;
   outline: none;
   cursor: pointer;

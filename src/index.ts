@@ -1,6 +1,6 @@
 /* eslint-disable max-len */
-import { resolve, basename } from 'path';
-import { existsSync, createReadStream, readFileSync } from 'fs';
+import { resolve, basename, extname } from 'path';
+import { existsSync, createReadStream } from 'fs';
 import { Server as HttpServer } from 'http';
 import { Server as IOBase, Socket } from 'socket.io';
 import type { IncomingMessage, ServerResponse } from 'http';
@@ -115,9 +115,21 @@ class Pen {
   }
 }
 
+const getContentType = (ext: string) => {
+  return new Map([
+    ['js', 'application/javascript'],
+    ['css', 'text/css'],
+    ['svg', 'image/svg+xml'],
+    ['jpg', 'image/jpeg'],
+    ['jpeg', 'image/jpeg'],
+    ['png', 'image/png'],
+    ['gif', 'image/gif'],
+    ['ico', 'image/x-icon'],
+  ]).get(ext);
+};
+
 export default (opts: PenCreateOptions) => {
   const assets = opts?.assets ?? opts?.root ?? '.';
-  const SPA_ASSETS = JSON.parse(readFileSync(resolve(__dirname, './spa/assets.json')).toString());
 
   function middleware<Req extends IncomingMessage, Res extends ServerResponse>(req: Req, res: Res) {
     const url = new URL(req.url ?? '/', `http://${req.headers.host}`);
@@ -126,18 +138,14 @@ export default (opts: PenCreateOptions) => {
     logger?.info(`Pen got request: ${url.pathname}`);
 
     if (AssetsPattern.test(filename)) {
-      // spa的静态资源
-      if (SPA_ASSETS.indexOf(filename) !== -1) {
-        const spaAsset = resolve(__dirname, `./spa/${filename}`);
-        if (existsSync(spaAsset)) {
-          createReadStream(spaAsset).pipe(res);
-          return;
-        }
-      }
-
       const asset = resolve(assets, `./${filename}`);
+
       if (existsSync(asset)) {
         logger?.info(`Pen found asset: ${asset}`);
+        const contentType = getContentType(extname(asset));
+        if (contentType) {
+          res.setHeader('Content-Type', contentType);
+        }
         createReadStream(asset).pipe(res);
       } else {
         logger?.error(`Pen asset not founded: ${asset}`);

@@ -10,8 +10,8 @@ import BottomNavigation from './BottomNavigation';
 import BreadCrumbRoutes from './Breadcrumbs';
 import {
   reducer,
-  initMermaid,
   initialState,
+  initMermaid,
   useToggleHandler,
   PenConstants,
 } from './common';
@@ -19,6 +19,7 @@ import {
 const useStyles = makeStyles(() => ({
   root: {
     display: 'flex',
+    flexDirection: 'column',
   },
   markdown: {
     flexGrow: 1,

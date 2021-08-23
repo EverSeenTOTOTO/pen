@@ -13,7 +13,6 @@ const useStyles = makeStyles((theme) => ({
     paddingTop: theme.spacing(2),
     paddingBottom: theme.spacing(2),
     height: '100%',
-    overflowY: 'scroll',
   },
   paper: {
     padding: theme.spacing(2),
