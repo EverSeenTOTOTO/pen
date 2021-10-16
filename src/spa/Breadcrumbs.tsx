@@ -67,7 +67,9 @@ const BreadCrumbRoutes = ({ toggleDrawer }: any) => {
             color="inherit"
             onClick={() => {
               const path = `/${link.relative}`;
+
               toggleDrawer(!/\.(md|markdown)$/.test(path))();
+
               if (pathname !== path) {
                 history.push(path);
               }

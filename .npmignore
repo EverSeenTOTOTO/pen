@@ -7,3 +7,5 @@ scripts
 babel.config.js
 webpack.config.js
 tsconfig.*
+demo.gif
+makefile

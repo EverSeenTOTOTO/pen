@@ -4,7 +4,7 @@ const { paths } = require('./utils');
 
 module.exports = {
   mode: process.env.NODE_ENV,
-  externals: /socket\.io|markdown-it/,
+  externals: /^(socket\.io|markdown-it)/,
   devtool: 'source-map',
   entry: {
     server: paths.serverEntry,
@@ -38,6 +38,6 @@ module.exports = {
     extensions: ['.js', '.ts'],
   },
   optimization: {
-    minimize: process.env.NODE_ENV === 'production',
+    minimize: process.env.NODE_ENV !== 'production',
   },
 };

@@ -2,7 +2,7 @@ import mditHighlightjs from 'markdown-it-highlightjs';
 import mditAnchor from 'markdown-it-anchor';
 import mditToc from 'markdown-it-toc-done-right';
 import mditFootnote from 'markdown-it-footnote';
-import mditCopy from 'markdown-it-code-copy';
+import mditCopy from 'markdown-it-copy';
 import mditContainer from 'markdown-it-container';
 import mditKatex from './plugins/katex';
 import mditMermaid from './plugins/mermaid';

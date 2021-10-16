@@ -12,11 +12,9 @@ export { logger };
 
 export type PenCreateOptions = {
   root?: string,
-  assets?: string,
   namespace?: string,
   ignores?: RegExp|RegExp[],
   logger?: typeof logger,
-  server: HttpServer
   mditPlugins?: any[]
 };
 
@@ -38,8 +36,10 @@ export class Pen {
     this.ignores = opts.ignores;
     this.logger = opts.logger;
     this.render = createRender(opts.mditPlugins);
+  }
 
-    const iobase = new IOBase(opts.server, {
+  attach(server: HttpServer) {
+    const iobase = new IOBase(server, {
       path: '/pensocket.io',
     });
 
@@ -72,7 +72,7 @@ export class Pen {
       });
     });
 
-    this.logger?.info(`Pen intialized with root: ${this.root}`);
+    this.logger?.info(`Pen watching root: ${this.root}`);
     this.iobase = iobase;
   }
 
@@ -127,7 +127,8 @@ export default (options: PenCreateOptions) => {
   const pen = new Pen(options);
   const middleware = createMiddleware(options);
 
-  middleware.prototype.pen = pen;
+  // @ts-ignore
+  middleware.pen = pen;
 
   return middleware;
 };

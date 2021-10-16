@@ -1,17 +1,64 @@
-import finalHandler from 'finalhandler';
+import fs from 'fs';
 import { IncomingMessage, ServerResponse } from 'http';
-import path from 'path';
-import serveStatic from 'serve-static';
+import { basename, extname, resolve } from 'path';
+import * as logger from './logger';
 
-export default (options: { assets?: string, root?: string }) => {
-  const PenAssets = path.resolve(__dirname, '../spa');
-  const assets = options?.assets ?? options?.root ?? '.';
+const getContentType = (ext: string) => {
+  return new Map([
+    ['.js', 'application/javascript'],
+    ['.css', 'text/css'],
+    ['.svg', 'image/svg+xml'],
+    ['.jpg', 'image/jpeg'],
+    ['.jpeg', 'image/jpeg'],
+    ['.png', 'image/png'],
+    ['.gif', 'image/gif'],
+    ['.ico', 'image/x-icon'],
+  ]).get(ext);
+};
 
-  const servePenAssets = serveStatic(path.join(PenAssets));
-  const serveUserAssets = serveStatic(path.join(assets));
+const serveStatic = (assets: string, options: { root?: string, logger?: typeof logger }) => {
+  options.logger?.info(`Pen serving assets: ${assets}`);
 
   return function middleware(req: IncomingMessage, res: ServerResponse) {
-    servePenAssets(req, res, finalHandler(req, res));
-    serveUserAssets(req, res, finalHandler(req, res));
+    const url = new URL(req.url ?? '/', `http://${req.headers.host}`);
+    const filename = basename(url.pathname);
+
+    if (/\.(?:css(\.map)?|js(\.map)?|jpe?g|png|gif|ico)$/.test(filename)) {
+      const asset = resolve(assets, filename);
+
+      if (fs.existsSync(asset)) {
+        const contentType = getContentType(extname(asset));
+
+        if (contentType) {
+          res.setHeader('Content-Type', contentType);
+        }
+
+        fs.createReadStream(asset).pipe(res);
+
+        return true;
+      }
+    }
+
+    return false;
+  };
+};
+
+export default (options: { logger?: typeof logger, root?: string }) => {
+  const assets = resolve(__dirname, '../spa');
+  const middlewares = [
+    serveStatic(assets, options),
+    serveStatic(resolve(options.root ?? '.'), options),
+  ];
+
+  return (req: IncomingMessage, res: ServerResponse) => {
+    for (const middleware of middlewares) {
+      if (middleware(req, res)) {
+        return;
+      }
+    }
+
+    res.setHeader('Content-Type', 'text/html');
+    fs.createReadStream(resolve(assets, 'index.html'))
+      .pipe(res);
   };
 };

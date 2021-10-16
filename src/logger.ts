@@ -4,19 +4,11 @@
 import chalk from 'chalk';
 import readline from 'readline';
 
-function stripAnsi(string) {
-  if (typeof string !== 'string') {
-    throw new TypeError(`Expected a \`string\`, got \`${typeof string}\``);
-  }
-
-  return string.replace(ansiRegex(), '');
-}
-
 const format = (label, msg) => {
   return msg.split('\n').map((line, i) => {
     return i === 0
       ? `${label} ${line}`
-      : line.padStart(stripAnsi(label).length + line.length + 1);
+      : line.padStart(label.length + line.length + 1);
   }).join('\n');
 };
 

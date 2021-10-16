@@ -3,10 +3,9 @@
 /* eslint-disable import/order */
 /* eslint-disable @typescript-eslint/no-var-requires */
 const { createServer } = require('http');
-const express = require('express');
 const getPort = require('get-port');
 const open = require('open');
-const { default: createPenMiddleware, logger: defaultLogger, mditPlugins } = require('./dist/server/lib');
+const { default: createPenMiddleware, logger: defaultLogger } = require('./dist/server/lib');
 
 const argv = require('minimist')(process.argv.slice(2));
 
@@ -30,25 +29,23 @@ Options:
 }
 
 const port = argv.port || argv.p || 3000;
-const root = argv.root || argv.r || '.';
+const root = argv._[0] || argv.root || argv.r || '.';
 const assets = argv.assets || argv.a;
 const ignores = argv.i && /[\\/]\./;
 const logger = argv.s ? undefined : defaultLogger;
 
 logger && logger.clearConsole();
 
-const app = express();
-const server = createServer(app);
-const pen = createPenMiddleware({
+const middleware = createPenMiddleware({
   root,
   assets,
-  server,
   logger,
   ignores,
-  mditPlugins,
 });
+const server = createServer(middleware);
 
-app.get(new RegExp('/(.*)?$'), pen);
+// attach socketio
+middleware.pen.attach(server);
 
 (async function main() {
   const avaliablePort = await getPort({

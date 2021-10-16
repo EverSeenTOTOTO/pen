@@ -1,6 +1,6 @@
 import fs, { FSWatcher } from 'fs';
 import {
-  basename, extname, relative, resolve,
+  basename, dirname, extname, relative, resolve,
 } from 'path';
 import { Socket } from 'socket.io';
 import * as logger from './logger';
@@ -49,14 +49,14 @@ const checkPermission = (option: Pick<PenWatcher, 'path'|'root'|'ignores'>) => {
   const { path, root, ignores } = option;
 
   if (!resolve(path).startsWith(resolve(root)) || !fs.existsSync(path)) {
-    throw new Error(`Opps, pen not permitted to watch this file, or maybe file not exist? ${path}`);
+    throw new Error(`Opps, pen not permitted to watch this file, or maybe file not exist: ${path}?`);
   }
 
   if (ignores !== undefined) {
     if (Array.isArray(ignores)) {
-      return ignores.filter((regex) => regex.test(path)).length > 0;
+      return ignores.filter((regex) => regex.test(path)).length === 0;
     }
-    return ignores.test(path);
+    return !ignores.test(path);
   }
 
   return true;
@@ -129,7 +129,7 @@ ${e.stack ?? e.message ?? 'internal pen server error'}
 
   trigger(): Watcher {
     try {
-      const content = this.readMarkdownFiles();
+      const content = this.readMarkdownFiles(this.path);
       this.ondata(content);
     } catch (e) {
       this.onerror(e as Error);
@@ -142,28 +142,29 @@ ${e.stack ?? e.message ?? 'internal pen server error'}
     return this;
   }
 
-  readMarkdownFiles(): MdContent {
+  readMarkdownFiles(path: string): MdContent {
     let current = '';
 
     // 是一个md
-    if (!isDir(this.path)) {
-      const { files } = this.readMarkdownFiles();
+    if (!isDir(path)) {
+      const { files } = this.readMarkdownFiles(dirname(this.path));
 
       for (const each of files) {
-        if (basename(this.path) === basename(each.filename)
-         && extname(each.filename) === extname(this.path)) {
+        if (basename(path) === basename(each.filename)
+         && extname(each.filename) === extname(path)) {
           current = each.filename;
         }
       }
 
       return {
         files,
-        content: this.render(fs.readFileSync(this.path).toString()),
+        content: this.render(fs.readFileSync(path).toString()),
         current,
       };
     }
 
-    const files = this.readFiles().filter((each) => each.type !== 'other');
+    const stats = fs.statSync(path);
+    const files = this.readFiles(path).filter((each) => each.type !== 'other');
 
     return {
       files: files.sort((a: FileInfo, b: FileInfo) => {
@@ -172,24 +173,32 @@ ${e.stack ?? e.message ?? 'internal pen server error'}
         }
         return 0;
       }),
-      content: '',
+      content: this.render(`
+::: Info
+
+### ${basename(path)} 
+
++ **创建于:** ${stats.ctime}.
++ **最后修改于:** ${stats.mtime}
+:::
+`),
       current,
     };
   }
 
-  readFiles() {
-    const files = fs.readdirSync(this.path);
+  readFiles(path: string) {
+    const files = fs.readdirSync(path);
 
     return files
       .filter((filename: string) => {
         return checkPermission({
-          path: resolve(this.path, filename),
+          path: resolve(path, filename),
           root: this.root,
           ignores: this.ignores,
         });
       })
       .map((filename: string) => {
-        const filepath = resolve(this.path, filename);
+        const filepath = resolve(path, filename);
         const relativePath = slash(relative(this.root, filepath));
 
         if (/\.(md|markdown)$/.test(filename)) {

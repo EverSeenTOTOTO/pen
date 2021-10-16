@@ -11,7 +11,7 @@ import CssBaseline from '@material-ui/core/CssBaseline';
 
 import 'github-markdown-css/github-markdown.css';
 import 'highlight.js/styles/github.css';
-import './style/mdit-copy.css';
+import 'markdown-it-copy/theme/default.css';
 import './style/style.css';
 
 import useTheme from './theme';

@@ -39,14 +39,20 @@ const Blog = () => {
   const toggleDrawer = useToggleHandler(dispatch);
 
   React.useEffect(() => {
-    toggleDrawer(!content)();
-  }, [content, toggleDrawer]);
+    const closure = (evt: KeyboardEvent) => {
+      if (evt.code === 'Enter') {
+        toggleDrawer()();
+      }
+    };
+
+    document.addEventListener('keyup', closure);
+
+    return () => document.removeEventListener('keyup', closure);
+  }, [toggleDrawer]);
 
   React.useEffect(() => {
     window.scrollTo(0, 0);
-  }, [pathname]);
 
-  React.useEffect(() => {
     if (socket && socket.connect) {
       socket.emit(PenConstants.EmitFile, pathname.substr(1));
     }

@@ -60,6 +60,12 @@ export const reducer: Reducer<PenState, any> = (state: PenState, action: any) =>
         current: action.payload.current,
       };
     case PenConstants.ToggleOpen:
+      if (typeof action.payload === 'boolean') {
+        if (state.open === action.payload) {
+          return state;
+        }
+      }
+
       return {
         ...state,
         open: typeof action.payload === 'boolean' ? action.payload : !state.open,
@@ -70,17 +76,7 @@ export const reducer: Reducer<PenState, any> = (state: PenState, action: any) =>
 };
 
 export const useToggleHandler = (dispatch) => {
-  return useCallback((value?: boolean) => (
-    event?: React.KeyboardEvent | React.MouseEvent,
-  ) => {
-    if (
-      event
-      && event.type === 'keydown'
-      && ((event as React.KeyboardEvent).key === 'Tab'
-        || (event as React.KeyboardEvent).key === 'Shift')
-    ) {
-      return;
-    }
+  return useCallback((value?: boolean) => () => {
     dispatch({
       type: PenConstants.ToggleOpen,
       payload: value,
@@ -91,6 +87,8 @@ export const useToggleHandler = (dispatch) => {
 export const initMermaid = (darkMode: boolean) => {
   const mermaidThemes = ['default', 'forest'];
   requestAnimationFrame(() => {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     mermaid.initialize({
       // startOnLoad: true,
       theme: darkMode ? 'dark' : mermaidThemes[Math.floor(Math.random() * mermaidThemes.length)],

@@ -14,7 +14,7 @@ npm i -g @everseenflash/pen-middleware
 # default usage
 pen
 # use with simple options
-pen -si -p 8080 -r ~/docs
+pen -si -p 8080 ~/docs
 ```
 
 #### Cli Options
@@ -30,10 +30,6 @@ help.
 + `--root|-r`
 
 设置markdown文件目录，默认'./'。
-
-+ `--assets|-a`
-
-设置静态资源目录，默认与`root`保持一致。
 
 + `-i`
 
@@ -63,26 +59,17 @@ balabala
 ```
 
 + markdown-it-highlightjs
-+ markdown-it-include
 + markdown-it-footnote
 + markdown-it-toc-done-right
 + markdown-it-katex (forked, update to katex@0.13.11)
 + markdown-it-mermaid (forked, update to mermaid@8.10.2)
 + markdown-it-copy
 
-## Serve static files
-
-默认会部署'./'目录下的以下文件:
-
-```js
-/\.(?:css(\.map)?|js(\.map)?|jpe?g|png|gif|ico|cur|heic|webp|tiff?|mp3|m4a|aac|ogg|midi?|wav|mp4|mov|webm|mpe?g|avi|ogv|flv|wmv)$/
-```
-
 ## Q&A
 
 + Diffrent namespaces?
 
-Pen force to use default namespace `'/'` (`app.get(new RegExp('/(.*)?$'), pen);`), different namespace is not support.
+Pen force to use default namespace `'/'`, different namespace is not support yet.
 
 + Custom UI?
 
