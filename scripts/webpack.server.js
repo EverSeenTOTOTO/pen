@@ -1,11 +1,10 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 // eslint-disable-next-line import/no-extraneous-dependencies
-const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 const { paths } = require('./utils');
 
 module.exports = {
   mode: process.env.NODE_ENV,
-  externals: /^@everseenflash\/pen-middleware|socket\.io|markdown-it/,
+  externals: /socket\.io|markdown-it/,
   devtool: 'source-map',
   entry: {
     server: paths.serverEntry,
@@ -38,12 +37,6 @@ module.exports = {
     },
     extensions: ['.js', '.ts'],
   },
-  plugins: [
-    new BundleAnalyzerPlugin({
-      analyzerMode: 'disabled',
-      generateStatsFile: false,
-    }),
-  ],
   optimization: {
     minimize: process.env.NODE_ENV === 'production',
   },

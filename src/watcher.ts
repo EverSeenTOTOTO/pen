@@ -1,10 +1,21 @@
-/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
-import { resolve, relative, basename } from 'path';
 import fs, { FSWatcher } from 'fs';
-import slash from 'slash';
+import {
+  basename, extname, relative, resolve,
+} from 'path';
 import { Socket } from 'socket.io';
-import mdrender from './markdown';
 import * as logger from './logger';
+import createRender from './markdown';
+
+function slash(path: string) {
+  const isExtendedLengthPath = /^\\\\\?\\/.test(path);
+  const hasNonAscii = /[^\u0000-\u0080]+/.test(path); // eslint-disable-line no-control-regex
+
+  if (isExtendedLengthPath || hasNonAscii) {
+    return path;
+  }
+
+  return path.replace(/\\/g, '/');
+}
 
 type FileInfo = {
   filename: string,
@@ -25,6 +36,7 @@ interface PenWatcher {
   ignores?: RegExp|RegExp[],
   logger?: typeof logger,
   socket: Socket
+  render: ReturnType<typeof createRender>
 }
 
 const isDir = (filepath: string) => {
@@ -32,111 +44,25 @@ const isDir = (filepath: string) => {
   return stat.isDirectory();
 };
 
-export const isIgnored = (filepath: string, ignores?: PenWatcher['ignores']) => {
-  if (ignores !== undefined) {
-    if (Array.isArray(ignores)) {
-      return ignores.filter((regex) => regex.test(filepath)).length > 0;
-    }
-    return ignores.test(filepath);
-  }
-  return false;
-};
-
 // check file permission
 const checkPermission = (option: Pick<PenWatcher, 'path'|'root'|'ignores'>) => {
   const { path, root, ignores } = option;
+
   if (!resolve(path).startsWith(resolve(root)) || !fs.existsSync(path)) {
-    throw new Error(`Pen not permitted to watch: ${path}, or maybe file does not exits.`);
+    throw new Error(`Opps, pen not permitted to watch this file, or maybe file not exist? ${path}`);
   }
-  if (isIgnored(path, ignores)) {
-    throw new Error(`Pen ignored ${path} due to your config`);
-  }
-};
 
-const readFiles = (option: Pick<PenWatcher, 'path'|'root'|'ignores'>): FileInfo[] => {
-  const { path, root, ignores } = option;
-  const files = fs.readdirSync(path);
-
-  return files
-    .filter((filename: string) => {
-      const fullpath = resolve(path, filename);
-      return !isIgnored(fullpath, ignores);
-    })
-    .map((filename: string) => {
-      const filepath = resolve(path, filename);
-      const relativePath = slash(relative(root, filepath));
-
-      if (/\.(md|markdown)$/.test(filename)) {
-        return {
-          filename,
-          relative: relativePath,
-          type: 'markdown',
-          current: false,
-        };
-      }
-      if (isDir(filepath)) {
-        return {
-          filename,
-          relative: relativePath,
-          type: 'dir',
-          current: false,
-        };
-      }
-      return {
-        filename: '',
-        relative: '',
-        type: 'other',
-        current: false,
-      };
-    });
-};
-
-const sort = (a: FileInfo, b: FileInfo) => {
-  if (a.filename < b.filename) {
-    return -1;
-  }
-  return 0;
-};
-
-const readMarkdownFiles = (option: Pick<PenWatcher, 'path'|'root'|'ignores'>): MdContent => {
-  checkPermission(option);
-
-  const { root, path, ignores } = option;
-  let current = '';
-  // 是一个md
-  if (!isDir(option.path)) {
-    const { files } = readMarkdownFiles({
-      ...option,
-      path: resolve(path, '..'),
-    });
-
-    for (const each of files) {
-      if (basename(path) === basename(each.filename)) {
-        current = each.filename;
-      }
+  if (ignores !== undefined) {
+    if (Array.isArray(ignores)) {
+      return ignores.filter((regex) => regex.test(path)).length > 0;
     }
-
-    return {
-      files,
-      content: mdrender(fs.readFileSync(path).toString(), root),
-      current,
-    };
+    return ignores.test(path);
   }
 
-  const files = readFiles({
-    root,
-    path,
-    ignores,
-  }).filter((each) => each.type !== 'other');
-
-  return {
-    files: files.sort(sort),
-    content: '',
-    current,
-  };
+  return true;
 };
 
-export default class Watcher implements Omit<PenWatcher, 'socket'> {
+export default class Watcher implements PenWatcher {
   private watcher?: FSWatcher;
 
   root: string;
@@ -147,6 +73,10 @@ export default class Watcher implements Omit<PenWatcher, 'socket'> {
 
   logger?: typeof logger | undefined;
 
+  render: PenWatcher['render'];
+
+  socket: PenWatcher['socket'];
+
   onerror: (e: Error) => void;
 
   ondata: (data: MdContent) => void;
@@ -156,19 +86,19 @@ export default class Watcher implements Omit<PenWatcher, 'socket'> {
     this.root = opts.root;
     this.ignores = opts.ignores;
     this.logger = opts.logger;
-
-    const { socket } = opts;
+    this.render = opts.render;
+    this.socket = opts.socket;
 
     this.onerror = (e: Error) => {
       this.logger?.error(e.stack ?? e.message);
-      socket.emit('penerror', mdrender(`
+      this.socket.emit('penerror', this.render(`
 \`\`\`txt
 ${e.stack ?? e.message ?? 'internal pen server error'}
 \`\`\`
-`, this.root));
+`));
     };
     this.ondata = (data: MdContent) => {
-      socket.emit('pendata', JSON.stringify(data));
+      this.socket.emit('pendata', JSON.stringify(data));
     };
   }
 
@@ -191,7 +121,7 @@ ${e.stack ?? e.message ?? 'internal pen server error'}
 
       this.watcher = watcher;
     } catch (e) {
-      this.onerror(e);
+      this.onerror(e as Error);
     }
 
     return this;
@@ -199,14 +129,10 @@ ${e.stack ?? e.message ?? 'internal pen server error'}
 
   trigger(): Watcher {
     try {
-      const content = readMarkdownFiles({
-        path: this.path,
-        root: this.root,
-        ignores: this.ignores,
-      });
+      const content = this.readMarkdownFiles();
       this.ondata(content);
     } catch (e) {
-      this.onerror(e);
+      this.onerror(e as Error);
     }
     return this;
   }
@@ -214,5 +140,82 @@ ${e.stack ?? e.message ?? 'internal pen server error'}
   stop(): Watcher {
     this.watcher?.close();
     return this;
+  }
+
+  readMarkdownFiles(): MdContent {
+    let current = '';
+
+    // 是一个md
+    if (!isDir(this.path)) {
+      const { files } = this.readMarkdownFiles();
+
+      for (const each of files) {
+        if (basename(this.path) === basename(each.filename)
+         && extname(each.filename) === extname(this.path)) {
+          current = each.filename;
+        }
+      }
+
+      return {
+        files,
+        content: this.render(fs.readFileSync(this.path).toString()),
+        current,
+      };
+    }
+
+    const files = this.readFiles().filter((each) => each.type !== 'other');
+
+    return {
+      files: files.sort((a: FileInfo, b: FileInfo) => {
+        if (a.filename < b.filename) {
+          return -1;
+        }
+        return 0;
+      }),
+      content: '',
+      current,
+    };
+  }
+
+  readFiles() {
+    const files = fs.readdirSync(this.path);
+
+    return files
+      .filter((filename: string) => {
+        return checkPermission({
+          path: resolve(this.path, filename),
+          root: this.root,
+          ignores: this.ignores,
+        });
+      })
+      .map((filename: string) => {
+        const filepath = resolve(this.path, filename);
+        const relativePath = slash(relative(this.root, filepath));
+
+        if (/\.(md|markdown)$/.test(filename)) {
+          return {
+            filename,
+            relative: relativePath,
+            type: 'markdown',
+            current: false,
+          };
+        }
+
+        if (isDir(filepath)) {
+          return {
+            filename,
+            relative: relativePath,
+            type: 'dir',
+            current: false,
+          };
+        }
+
+        return {
+          filename: '',
+          relative: '',
+          type: 'other',
+          current: false,
+        };
+      });
   }
 }

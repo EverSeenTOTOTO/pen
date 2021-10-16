@@ -6,7 +6,7 @@ const { createServer } = require('http');
 const express = require('express');
 const getPort = require('get-port');
 const open = require('open');
-const { default: createPenMiddleware, logger: defaultLogger } = require('./dist/lib');
+const { default: createPenMiddleware, logger: defaultLogger, mditPlugins } = require('./dist/server/lib');
 
 const argv = require('minimist')(process.argv.slice(2));
 
@@ -45,6 +45,7 @@ const pen = createPenMiddleware({
   server,
   logger,
   ignores,
+  mditPlugins,
 });
 
 app.get(new RegExp('/(.*)?$'), pen);

@@ -2,7 +2,10 @@ declare module 'markdown-it-katex' {
   const anything = any;
   export default anything;
 }
-
+declare module 'markdown-it' {
+  const anything = any;
+  export default anything;
+}
 declare module 'markdown-it-copy' {
   const anything = any;
   export default anything;
@@ -24,6 +27,30 @@ declare module 'markdown-it-include' {
   export default anything;
 }
 declare module 'markdown-it-abbr' {
+  const anything = any;
+  export default anything;
+}
+declare module 'markdown-it-highlightjs' {
+  const anything = any;
+  export default anything;
+}
+declare module 'markdown-it-anchor' {
+  const anything = any;
+  export default anything;
+}
+declare module 'markdown-it-toc-done-right' {
+  const anything = any;
+  export default anything;
+}
+declare module 'markdown-it-container' {
+  const anything = any;
+  export default anything;
+}
+declare module 'markdown-it-code-copy' {
+  const anything = any;
+  export default anything;
+}
+declare module 'finalhandler' {
   const anything = any;
   export default anything;
 }

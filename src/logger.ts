@@ -3,7 +3,14 @@
 // @ts-nocheck
 import chalk from 'chalk';
 import readline from 'readline';
-import stripAnsi from 'strip-ansi';
+
+function stripAnsi(string) {
+  if (typeof string !== 'string') {
+    throw new TypeError(`Expected a \`string\`, got \`${typeof string}\``);
+  }
+
+  return string.replace(ansiRegex(), '');
+}
 
 const format = (label, msg) => {
   return msg.split('\n').map((line, i) => {

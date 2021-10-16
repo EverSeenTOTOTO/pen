@@ -3,7 +3,7 @@
 /* eslint-disable no-param-reassign */
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-nocheck
-import mermaid from 'mermaid';
+import mermaid from 'mermaid/dist/mermaid';
 
 const mermaidChart = (code) => {
   try {

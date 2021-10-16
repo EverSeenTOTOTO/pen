@@ -17,30 +17,29 @@
     "url": "https://github.com/EverSeenTOTOTO/pen-middleware/issues"
   },
   "dependencies": {
-    "browserslist": "^4.16.6",
-    "chalk": "^4.1.1",
     "express": "^4.17.1",
     "get-port": "^5.1.1",
     "markdown-it": "^12.0.3",
     "markdown-it-anchor": "^6.0.1",
+    "markdown-it-code-copy": "^0.1.1",
     "markdown-it-container": "^3.0.0",
-    "markdown-it-copy": "^1.2.0",
     "markdown-it-footnote": "^3.0.2",
     "markdown-it-highlightjs": "^3.4.0",
-    "markdown-it-include": "^2.0.0",
     "markdown-it-toc-done-right": "^4.2.0",
     "minimist": "^1.2.5",
     "open": "^8.2.0",
-    "slash": "^4.0.0",
-    "socket.io": "^3.0.4",
-    "strip-ansi": "^7.0.0"
+    "socket.io": "^3.0.4"
   },
   "devDependencies": {
+    "finalhandler": "^1.1.2",
+    "chalk": "^4.1.1",
+    "serve-static": "^1.14.1",
     "@babel/core": "^7.12.9",
     "@babel/preset-env": "^7.12.7",
     "@babel/preset-typescript": "^7.12.7",
     "@material-ui/core": "^4.11.4",
     "@material-ui/icons": "^4.11.2",
+    "@types/express": "^4.17.13",
     "@types/jest": "^26.0.16",
     "@types/markdown-it": "^10.0.3",
     "@types/markdown-it-anchor": "^4.0.4",
@@ -57,7 +56,8 @@
     "babel-loader": "^8.2.2",
     "babel-plugin-import": "^1.13.3",
     "babel-preset-react-app": "^10.0.0",
-    "css-loader": "^5.0.1",
+    "browserslist": "^4.16.6",
+    "css-loader": "^6.4.0",
     "esbuild-loader": "^2.13.1",
     "eslint": "^7.15.0",
     "eslint-config-airbnb-typescript": "^12.0.0",
@@ -87,7 +87,8 @@
     "webpack": "^5.38.1",
     "webpack-bundle-analyzer": "^4.4.2",
     "webpack-cli": "^4.2.0",
-    "webpack-dev-server": "^3.11.2"
+    "webpack-dev-server": "^3.11.2",
+    "webpack-node-externals": "^3.0.0"
   },
   "scripts": {
     "build:server": "tsc && NODE_ENV=production webpack --config scripts/webpack.server.js",

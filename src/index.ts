@@ -1,25 +1,26 @@
 /* eslint-disable max-len */
-import { resolve, basename, extname } from 'path';
-import { existsSync, createReadStream } from 'fs';
+import { existsSync } from 'fs';
 import { Server as HttpServer } from 'http';
+import { resolve } from 'path';
 import { Server as IOBase, Socket } from 'socket.io';
-import type { IncomingMessage, ServerResponse } from 'http';
-import Watcher from './watcher';
 import * as logger from './logger';
+import createRender from './markdown';
+import createMiddleware from './middleware';
+import Watcher from './watcher';
 
 export { logger };
-
-const AssetsPattern = /\.(?:css(\.map)?|js(\.map)?|jpe?g|png|gif|ico|cur|heic|webp|tiff?|mp3|m4a|aac|ogg|midi?|wav|mp4|mov|webm|mpe?g|avi|ogv|flv|wmv)$/;
 
 export type PenCreateOptions = {
   root?: string,
   assets?: string,
+  namespace?: string,
   ignores?: RegExp|RegExp[],
   logger?: typeof logger,
   server: HttpServer
+  mditPlugins?: any[]
 };
 
-class Pen {
+export class Pen {
   private iobase?: IOBase;
 
   public readonly root: string;
@@ -30,20 +31,26 @@ class Pen {
 
   private readonly connectedSockets: { socket: Socket, watcher: Watcher }[] = [];
 
+  private readonly render: ReturnType<typeof createRender>;
+
   constructor(opts: PenCreateOptions) {
     this.root = opts.root ?? '.';
     this.ignores = opts.ignores;
     this.logger = opts.logger;
+    this.render = createRender(opts.mditPlugins);
 
     const iobase = new IOBase(opts.server, {
       path: '/pensocket.io',
     });
+
     iobase.on('connection', (socket: Socket) => {
       socket.on('disconnect', () => {
         socket.disconnect(true);
+
         const id = this.connectedSockets.findIndex(
           ({ socket: s }) => s === socket,
         );
+
         if (id !== -1) {
           const { watcher } = this.connectedSockets.splice(id, 1)[0];
           this.logger?.info(`Pen stopped watching ${watcher.path} due to disconnection`);
@@ -105,6 +112,7 @@ class Pen {
       path: newPath,
       ignores: this.ignores,
       socket,
+      render: this.render,
     });
 
     this.connectedSockets.push({
@@ -115,51 +123,11 @@ class Pen {
   }
 }
 
-const getContentType = (ext: string) => {
-  return new Map([
-    ['js', 'application/javascript'],
-    ['css', 'text/css'],
-    ['svg', 'image/svg+xml'],
-    ['jpg', 'image/jpeg'],
-    ['jpeg', 'image/jpeg'],
-    ['png', 'image/png'],
-    ['gif', 'image/gif'],
-    ['ico', 'image/x-icon'],
-  ]).get(ext);
-};
+export default (options: PenCreateOptions) => {
+  const pen = new Pen(options);
+  const middleware = createMiddleware(options);
 
-export default (opts: PenCreateOptions) => {
-  const assets = opts?.assets ?? opts?.root ?? '.';
+  middleware.prototype.pen = pen;
 
-  function middleware<Req extends IncomingMessage, Res extends ServerResponse>(req: Req, res: Res) {
-    const url = new URL(req.url ?? '/', `http://${req.headers.host}`);
-    const filename = basename(url.pathname);
-
-    logger?.info(`Pen got request: ${url.pathname}`);
-
-    if (AssetsPattern.test(filename)) {
-      const asset = resolve(assets, `./${filename}`);
-
-      if (existsSync(asset)) {
-        logger?.info(`Pen found asset: ${asset}`);
-        const contentType = getContentType(extname(asset));
-        if (contentType) {
-          res.setHeader('Content-Type', contentType);
-        }
-        createReadStream(asset).pipe(res);
-      } else {
-        logger?.error(`Pen asset not founded: ${asset}`);
-        res.statusCode = 404;
-        res.end();
-      }
-    } else {
-      logger?.info('Pen redirect to index.html');
-      res.setHeader('Content-Type', 'text/html');
-      createReadStream(resolve(__dirname, 'spa/index.html'))
-        .pipe(res);
-    }
-  }
-
-  middleware.prototype.pen = new Pen(opts);
   return middleware;
 };

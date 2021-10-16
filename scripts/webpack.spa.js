@@ -2,11 +2,8 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 const { resolve } = require('path');
 const HtmlWebPackPlugin = require('html-webpack-plugin');
-const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
-const safePostCssParser = require('postcss-safe-parser');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
-const AssetPlugin = require('./asset-plugin');
 
 const { paths } = require('./utils');
 
@@ -82,25 +79,15 @@ module.exports = {
       title: 'Pen',
       template: './public/index.html',
       favicon: './public/favicon.ico',
-      inject: false,
     }),
     new MiniCssExtractPlugin({
       filename: 'pen.[contenthash:8].css',
       chunkFilename: 'pen.[contenthash:8].css',
     }),
-    new OptimizeCSSAssetsPlugin({
-      cssProcessorOptions: {
-        parser: safePostCssParser,
-      },
-      cssProcessorPluginOptions: {
-        preset: ['default', { minifyFontValues: { removeQuotes: false } }],
-      },
-    }),
     new BundleAnalyzerPlugin({
       analyzerMode: 'disabled',
       generateStatsFile: false,
     }),
-    new AssetPlugin(), // 生成一个assets.json
   ],
   externals: {
     mermaid: 'mermaid',

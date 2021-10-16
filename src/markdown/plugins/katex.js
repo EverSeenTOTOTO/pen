@@ -12,7 +12,7 @@ for rendering output.
 /* eslint-disable */
 // @ts-nocheck
 
-const katex = require('katex');
+import katex from 'katex'
 
 // Test if potential opening or closing delimieter
 // Assumes that there is a "$" at state.src[pos]
@@ -153,7 +153,7 @@ function math_block(state, start, end, silent) {
   return true;
 }
 
-module.exports = function math_plugin(md, options) {
+export default function math_plugin(md, options) {
   // Default options
 
   options = options || {};

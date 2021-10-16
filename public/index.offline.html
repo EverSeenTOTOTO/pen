@@ -22,9 +22,19 @@
     <% if (htmlWebpackPlugin.files.favicon) { %>
       <link rel="shortcut icon" href="<%= htmlWebpackPlugin.files.favicon%>">
     <% } %>
+    <% for (var css in htmlWebpackPlugin.files.css) { %>
+      <style>
+        <%= compilation.assets[htmlWebpackPlugin.files.css[css]].source() %>
+      </style>
+    <% } %>
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
+    <% for (var js in htmlWebpackPlugin.files.js) { %>
+      <script>
+        <%= compilation.assets[htmlWebpackPlugin.files.js[js]].source() %>
+      </script>
+    <% } %>
   </body>
 
 </html>

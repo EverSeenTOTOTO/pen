@@ -8,6 +8,6 @@ module.exports.paths = {
   spa: resolve(__dirname, '../src/spa'),
   serverEntry: resolve(__dirname, '../src/index.ts'),
   spaEntry: resolve(__dirname, '../src/spa/index.tsx'),
-  serverDist: resolve(__dirname, '../dist/'),
+  serverDist: resolve(__dirname, '../dist/server/'),
   spaDist: resolve(__dirname, '../dist/spa/'),
 };
