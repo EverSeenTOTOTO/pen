@@ -4,6 +4,7 @@ import { makeStyles, useTheme } from '@material-ui/core/styles';
 import { io } from 'socket.io-client';
 import { useLocation } from 'react-router';
 
+import { useHistory } from 'react-router-dom';
 import Markdown from './Markdown';
 import Drawer from './Drawer';
 import BottomNavigation from './BottomNavigation';
@@ -29,6 +30,7 @@ const useStyles = makeStyles(() => ({
 const Blog = () => {
   const classes = useStyles();
   const theme = useTheme();
+  const history = useHistory();
   const { pathname } = useLocation();
   const [
     {
@@ -40,8 +42,15 @@ const Blog = () => {
 
   React.useEffect(() => {
     const closure = (evt: KeyboardEvent) => {
-      if (evt.code === 'Enter') {
-        toggleDrawer()();
+      switch (evt.code) {
+        case 'Enter':
+          toggleDrawer()();
+          break;
+        case 'Backspace':
+          history.goBack();
+          break;
+        default:
+          break;
       }
     };
 
@@ -50,6 +59,13 @@ const Blog = () => {
     return () => document.removeEventListener('keyup', closure);
   }, [toggleDrawer]);
 
+  React.useEffect(() => {
+    if (/\.(md|markdown)($|\?)/.test(pathname)) {
+      toggleDrawer(false)();
+    } else {
+      toggleDrawer(true)();
+    }
+  }, [toggleDrawer, pathname]);
   React.useEffect(() => {
     window.scrollTo(0, 0);
 
@@ -100,7 +116,7 @@ const Blog = () => {
     <main className={classes.root}>
       <Drawer open={open} toggleDrawer={toggleDrawer} files={files} current={current} />
       <div className={classes.markdown}>
-        <BreadCrumbRoutes toggleDrawer={toggleDrawer} />
+        <BreadCrumbRoutes />
         <Markdown html={content} />
       </div>
       <BottomNavigation />

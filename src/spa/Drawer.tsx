@@ -31,8 +31,72 @@ const Drawer = ({
 }: DrawerProps) => {
   const classes = useStyles();
   const history = useHistory();
+  const [localCurrent, setLocalCurrent] = React.useState(-1);
+
+  React.useEffect(() => {
+    const idx = files.findIndex((each) => each.filename === current);
+
+    setLocalCurrent(idx >= files.length ? 0 : idx);
+  }, [files, current]);
+  React.useEffect(() => {
+    const closure = (evt: KeyboardEvent) => {
+      switch (evt.code) {
+        case 'Enter':
+          if (localCurrent >= 0) {
+            history.push(`/${files[localCurrent].relative}`);
+          }
+          break;
+        default:
+          break;
+      }
+    };
+
+    document.addEventListener('keyup', closure);
+
+    return () => document.removeEventListener('keyup', closure);
+  }, [localCurrent, history, files]);
+  React.useEffect(() => {
+    const closure = (evt: KeyboardEvent) => {
+      switch (evt.code) {
+        case 'Tab': {
+          if (evt.shiftKey) {
+            setLocalCurrent((c) => {
+              const idx = c - 1;
+              const next = Number.isNaN(idx)
+                ? 0
+                : idx < 0
+                  ? files.length - 1
+                  : idx;
+
+              return next;
+            });
+            break;
+          } else {
+            setLocalCurrent((c) => {
+              const idx = c + 1;
+              const next = Number.isNaN(idx)
+                ? 0
+                : idx >= files.length
+                  ? 0
+                  : idx;
+
+              return next;
+            });
+          }
+          break;
+        }
+        default:
+          break;
+      }
+    };
+
+    document.addEventListener('keyup', closure);
+
+    return () => document.removeEventListener('keyup', closure);
+  }, [files, current]);
+
   const items = files.map((each: PenDirInfo) => {
-    const currentItemClassName = each.filename === current ? 'list-item--current' : '';
+    const currentItemClassName = files.indexOf(each) === localCurrent ? 'list-item--current' : '';
 
     return (
       <ListItem

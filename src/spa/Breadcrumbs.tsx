@@ -22,7 +22,7 @@ const useStyles = makeStyles((theme: Theme) => createStyles({
   },
 }));
 
-const BreadCrumbRoutes = ({ toggleDrawer }: any) => {
+const BreadCrumbRoutes = () => {
   const classes = useStyles();
   const history = useHistory();
   const { pathname } = useLocation();
@@ -41,6 +41,14 @@ const BreadCrumbRoutes = ({ toggleDrawer }: any) => {
     setStack(result);
   }, [pathname]);
 
+  const push = (path: string) => {
+    document.activeElement?.blur?.();
+
+    if (pathname !== path) {
+      history.push(path);
+    }
+  };
+
   return (
     <Breadcrumbs
       aria-label="breadcrumb"
@@ -52,12 +60,7 @@ const BreadCrumbRoutes = ({ toggleDrawer }: any) => {
       >
         <HomeIcon
           className={classes.icon}
-          onClick={() => {
-            toggleDrawer(true)();
-            if (pathname !== '/') {
-              history.push('/');
-            }
-          }}
+          onClick={() => push('/')}
         />
       </Link>
       {stack.map((link) => {
@@ -65,15 +68,7 @@ const BreadCrumbRoutes = ({ toggleDrawer }: any) => {
           <Link
             component="button"
             color="inherit"
-            onClick={() => {
-              const path = `/${link.relative}`;
-
-              toggleDrawer(!/\.(md|markdown)$/.test(path))();
-
-              if (pathname !== path) {
-                history.push(path);
-              }
-            }}
+            onClick={() => push(`/${link.relative}`)}
           >
             {link.name}
           </Link>
