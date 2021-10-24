@@ -4,7 +4,7 @@
   "bin": {
     "pen": "pen.js"
   },
-  "version": "3.1.1",
+  "version": "3.1.2",
   "types": "dist/index.d.ts",
   "license": "MIT",
   "author": "EverSeenTOTOTO <jialiuniu@gmail.com>",
