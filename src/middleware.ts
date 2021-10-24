@@ -1,6 +1,6 @@
 import fs from 'fs';
 import { IncomingMessage, ServerResponse } from 'http';
-import { basename, extname, resolve } from 'path';
+import { extname, join } from 'path';
 import * as logger from './logger';
 
 const getContentType = (ext: string) => {
@@ -21,10 +21,9 @@ const serveStatic = (assets: string, options: { root?: string, logger?: typeof l
 
   return function middleware(req: IncomingMessage, res: ServerResponse) {
     const url = new URL(req.url ?? '/', `http://${req.headers.host}`);
-    const filename = basename(url.pathname);
 
-    if (/\.(?:css(\.map)?|js(\.map)?|jpe?g|png|gif|ico)$/.test(filename)) {
-      const asset = resolve(assets, filename);
+    if (/\.(?:css(\.map)?|js(\.map)?|jpe?g|png|gif|ico)$/.test(url.pathname)) {
+      const asset = join(assets, url.pathname);
 
       if (fs.existsSync(asset)) {
         const contentType = getContentType(extname(asset));
@@ -44,10 +43,10 @@ const serveStatic = (assets: string, options: { root?: string, logger?: typeof l
 };
 
 export default (options: { logger?: typeof logger, root?: string }) => {
-  const assets = resolve(__dirname, '../spa');
+  const assets = join(__dirname, '../spa');
   const middlewares = [
     serveStatic(assets, options),
-    serveStatic(resolve(options.root ?? '.'), options),
+    serveStatic(join(options.root ?? '.'), options),
   ];
 
   return (req: IncomingMessage, res: ServerResponse) => {
@@ -58,7 +57,7 @@ export default (options: { logger?: typeof logger, root?: string }) => {
     }
 
     res.setHeader('Content-Type', 'text/html');
-    fs.createReadStream(resolve(assets, 'index.html'))
+    fs.createReadStream(join(assets, 'index.html'))
       .pipe(res);
   };
 };

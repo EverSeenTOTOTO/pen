@@ -3,7 +3,6 @@ import React from 'react';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
 import { io } from 'socket.io-client';
 import { useLocation } from 'react-router';
-
 import { useHistory } from 'react-router-dom';
 import Markdown from './Markdown';
 import Drawer from './Drawer';
@@ -13,6 +12,7 @@ import {
   reducer,
   initialState,
   initMermaid,
+  getUpdir,
   useToggleHandler,
   PenConstants,
 } from './common';
@@ -47,7 +47,8 @@ const Blog = () => {
           toggleDrawer()();
           break;
         case 'Backspace':
-          history.goBack();
+          console.log(getUpdir(pathname));
+          history.push(getUpdir(pathname));
           break;
         default:
           break;
@@ -57,7 +58,7 @@ const Blog = () => {
     document.addEventListener('keyup', closure);
 
     return () => document.removeEventListener('keyup', closure);
-  }, [toggleDrawer]);
+  }, [history, pathname, toggleDrawer]);
 
   React.useEffect(() => {
     if (/\.(md|markdown)($|\?)/.test(pathname)) {

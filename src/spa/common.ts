@@ -22,6 +22,7 @@ export enum PenConstants {
   ErrorOccured = 'penerror',
   UpdateData = 'pendata',
   EmitFile = 'peninit',
+  GoUpDir = 'penupdir',
 }
 
 export type PenState = {
@@ -105,4 +106,14 @@ export const initMermaid = (darkMode: boolean) => {
     });
     mermaid.init();
   });
+};
+
+export const getUpdir = (pathname: string) => {
+  const match = /(.*?\/[^/]*)\/[^/]*\/?$/.exec(pathname);
+
+  if (match) {
+    return match[1];
+  }
+
+  return '/';
 };
