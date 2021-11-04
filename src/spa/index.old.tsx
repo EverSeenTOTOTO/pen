@@ -5,9 +5,7 @@ import {
   Switch,
   Route,
 } from 'react-router-dom';
-import {
-  observer, useLocalObservable,
-} from 'mobx-react-lite';
+
 import { ThemeProvider } from '@material-ui/core/styles';
 import CssBaseline from '@material-ui/core/CssBaseline';
 
@@ -15,23 +13,9 @@ import 'github-markdown-css/github-markdown.css';
 import 'highlight.js/styles/github.css';
 import 'markdown-it-copy/theme/default.css';
 import './style/style.css';
-import useTheme from './theme';
 
-const TimerView = observer(() => {
-  const timer = useLocalObservable(() => ({
-    secondsPassed: 0,
-    increaseTimer() {
-      this.secondsPassed++;
-    },
-  }));
-  return (
-    <span>
-      Seconds passed:
-      {' '}
-      {timer.secondsPassed}
-    </span>
-  );
-});
+import useTheme from './theme';
+import Blog from './Blog';
 
 const App = () => {
   const theme = useTheme();
@@ -43,7 +27,7 @@ const App = () => {
         <BrowserRouter>
           <Switch>
             <Route path="/*">
-              <TimerView />
+              <Blog />
             </Route>
           </Switch>
         </BrowserRouter>

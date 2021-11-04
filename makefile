@@ -10,14 +10,14 @@ clean:
 	-rm -r ${DIST}
 
 dev:
-	npx webpack serve --config scripts/webpack.spa.js
+	npx webpack serve --config scripts/webpack.spa.dev.js
 
 build\:server:
 	npx tsc
 	npx webpack --config scripts/webpack.server.js
 
 build\:spa:
-	npx webpack --config scripts/webpack.spa.js
+	npx webpack --config scripts/webpack.spa.prod.js
 
 build: clean build\:server build\:spa
 

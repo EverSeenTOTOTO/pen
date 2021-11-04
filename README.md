@@ -1,6 +1,6 @@
 # @everseenflash/pen-middleware
 
-一个http server中间件，提供对markdown文件的预览能力，基于[**socket.io**](https://socket.io/)。灵感来源自[**pen**](https://github.com/utatti/pen)。
+一个cli工具，提供对markdown文件的预览能力。也可用作http中间件。基于[**socket.io**](https://socket.io/)。灵感来源自[**pen**](https://github.com/utatti/pen)。
 
 <image src="./demo.gif" width="800">
 
