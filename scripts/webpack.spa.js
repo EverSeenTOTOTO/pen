@@ -1,8 +1,9 @@
+/* eslint-disable global-require */
 /* eslint-disable import/no-extraneous-dependencies */
 /* eslint-disable @typescript-eslint/no-var-requires */
 const { resolve } = require('path');
 const HtmlWebPackPlugin = require('html-webpack-plugin');
-const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const postcssNormalize = require('postcss-normalize');
 const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 
 const { paths } = require('./utils');
@@ -20,51 +21,33 @@ module.exports = {
   },
   target: ['web', 'es5'],
   module: {
-    strictExportPresence: true,
     rules: [
-      // Disable require.ensure as it's not a standard language feature.
-      { parser: { requireEnsure: false } },
-      {
-        test: /\.(j|t)sx?$/,
-        include: paths.spa,
-        use: [
-          {
-            loader: require.resolve('babel-loader'),
-            options: {
-              cacheDirectory: true,
-              cacheCompression: false,
-              customize: require.resolve(
-                'babel-preset-react-app/webpack-overrides',
-              ),
-              presets: [
-                [
-                  require.resolve('babel-preset-react-app'),
-                  {
-                    runtime: 'classic',
-                  },
-                ],
-              ],
-            },
-          },
-        ],
-      },
-      {
-        test: /\.(js|mjs)$/,
-        exclude: /@babel(?:\/|\\{1,2})runtime/,
-        loader: require.resolve('babel-loader'),
-        options: {
-          cacheDirectory: true,
-          cacheCompression: false,
-        },
-      },
       {
         test: /.css$/,
         use: [
           {
-            loader: MiniCssExtractPlugin.loader,
+            loader: require.resolve('css-loader'),
           },
           {
-            loader: require.resolve('css-loader'),
+            loader: require.resolve('postcss-loader'),
+            options: {
+              postcssOptions: {
+                plugins: [
+                  require('postcss-flexbugs-fixes'),
+                  require('postcss-preset-env')({
+                    autoprefixer: {
+                      flexbox: 'no-2009',
+                    },
+                    stage: 3,
+                  }),
+                  postcssNormalize(),
+                  require('cssnano')({
+                    preset: 'default',
+                  }),
+                ],
+              },
+              sourceMap: process.env.NODE_ENV === 'development',
+            },
           },
         ],
       },
@@ -77,12 +60,8 @@ module.exports = {
   plugins: [
     new HtmlWebPackPlugin({
       title: 'Pen',
-      template: './public/index.html',
-      favicon: './public/favicon.ico',
-    }),
-    new MiniCssExtractPlugin({
-      filename: 'pen.[contenthash:8].css',
-      chunkFilename: 'pen.[contenthash:8].css',
+      template: resolve(paths.public, 'index.html'),
+      favicon: resolve(paths.public, 'favicon.ico'),
     }),
     new BundleAnalyzerPlugin({
       analyzerMode: 'disabled',
@@ -96,7 +75,6 @@ module.exports = {
     modules: [paths.nodeModules],
     mainFields: ['jsnext:main', 'browser', 'main'],
     alias: {
-      fonts: resolve(__dirname, '../node_modules/katex/dist/fonts'),
       react: 'preact/compat',
       'react-dom/test-utils': 'preact/test-utils',
       'react-dom': 'preact/compat',
