@@ -21,7 +21,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const Markdown = ({ html }: { html: string }) => {
+const Markdown = ({ html, loading }: { html: string, loading: boolean }) => {
   const classes = useStyles();
 
   return (
@@ -32,7 +32,7 @@ const Markdown = ({ html }: { html: string }) => {
         root: classes.root,
       }}
     >
-      {html.length > 0
+      {!loading
         ? (
           <Paper
             classes={{

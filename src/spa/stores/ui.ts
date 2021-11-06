@@ -40,6 +40,12 @@ export default class UIStore {
       : !this.drawerOpened;
   }
 
+  toggleDarkMode(mode?: boolean) {
+    this.darkMode = mode !== undefined
+      ? mode
+      : !this.darkMode;
+  }
+
   get theme() {
     return createTheme({
       ...defaultTheme,

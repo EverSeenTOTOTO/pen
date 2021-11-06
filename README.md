@@ -63,7 +63,6 @@ balabala
 + markdown-it-toc-done-right
 + markdown-it-katex (forked, update to katex@0.13.11)
 + markdown-it-mermaid (forked, update to mermaid@8.10.2)
-+ markdown-it-copy
 
 ## Q&A
 

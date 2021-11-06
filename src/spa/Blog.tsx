@@ -2,8 +2,9 @@ import { makeStyles } from '@material-ui/core/styles';
 import Alert from '@material-ui/lab/Alert';
 import Snackbar from '@material-ui/core/Snackbar';
 import { observer } from 'mobx-react-lite';
-import React, { useContext, useEffect } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
+import { autorun } from 'mobx';
 import BottomNavigation from './BottomNavigation';
 import BreadCrumbRoutes from './Breadcrumbs';
 import { getUpdir } from './common';
@@ -26,7 +27,18 @@ const Blog = observer(() => {
   const history = useHistory();
   const { pathname } = useLocation();
   const root = useContext(RootContext);
+  const [open, setOpen] = useState(false);
+  const closeSnackBar = (_event?: React.SyntheticEvent, reason?: string) => {
+    if (reason === 'clickaway') {
+      return;
+    }
 
+    setOpen(false);
+  };
+
+  useEffect(() => autorun(() => {
+    setOpen(root.uiStore.errorMessage !== '');
+  }), []);
   useEffect(() => {
     window.scrollTo(0, 0);
     root.blogStore.reset();
@@ -54,15 +66,16 @@ const Blog = observer(() => {
       <Drawer />
       <div className={classes.markdown}>
         <BreadCrumbRoutes pathname={pathname} />
-        <Markdown html={root.blogStore.content} />
+        <Markdown html={root.blogStore.content} loading={root.socketStore.loading} />
       </div>
       <BottomNavigation />
       <Snackbar
-        open={root.uiStore.errorMessage !== ''}
-        autoHideDuration={2000}
+        open={open}
+        autoHideDuration={3000}
         anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+        onClose={closeSnackBar}
       >
-        <Alert elevation={6} variant="filled">
+        <Alert severity="error">
           {root.uiStore.errorMessage}
         </Alert>
       </Snackbar>

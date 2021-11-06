@@ -7068,11 +7068,6 @@ markdown-it-container@^3.0.0:
   resolved "https://registry.npm.taobao.org/markdown-it-container/download/markdown-it-container-3.0.0.tgz"
   integrity sha1-HRmwYECgIPmoJ1d7t9v2eqXemls=
 
-markdown-it-copy@^1.2.0:
-  version "1.2.0"
-  resolved "https://registry.npmmirror.com/markdown-it-copy/download/markdown-it-copy-1.2.0.tgz#6fcaae495e23a0060013d1344acdee929d1fcac5"
-  integrity sha1-b8quSV4joAYAE9E0Ss3ukp0fysU=
-
 markdown-it-footnote@^3.0.2:
   version "3.0.2"
   resolved "https://registry.npm.taobao.org/markdown-it-footnote/download/markdown-it-footnote-3.0.2.tgz#1575ee7a093648d4e096aa33386b058d92ac8bc1"

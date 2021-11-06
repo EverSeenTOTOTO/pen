@@ -14,6 +14,8 @@ export enum PenSocketRecvEvents {
 export default class PenSocketStore {
   socket: Socket;
 
+  loading = false;
+
   rootStore: RootStore;
 
   constructor(rootStore: RootStore) {
@@ -23,9 +25,9 @@ export default class PenSocketStore {
       path: '/pensocket.io',
     });
 
-    this.socket.on('reconnect_error', (error: Error) => this.onReconnectError(error));
-    this.socket.on('reconnect_failed', () => this.onReconnectError(new Error('reconnect attemped failed')));
-    this.socket.on('error', (error: Error) => this.onSocketError(error));
+    this.socket.on('disconnect', (reason: string) => this.onError(new Error(reason)));
+    this.socket.on('connect_error', (error: Error) => this.onError(error));
+    this.socket.on('error', (error: Error) => this.onError(error));
     this.socket.on(PenSocketRecvEvents.ErrorOccured, (data: string) => this.onUpdatePenError(data));
     this.socket.on(PenSocketRecvEvents.UpdateData, (data: string) => this.onUpdatePenData(data));
   }
@@ -34,23 +36,23 @@ export default class PenSocketStore {
     return this.socket.connected;
   }
 
-  onReconnectError(error: Error) {
-    this.rootStore.uiStore.notifyError(error);
-  }
-
-  onSocketError(error: Error) {
+  onError(error: Error) {
+    this.loading = false;
     this.rootStore.uiStore.notifyError(error);
   }
 
   onUpdatePenError(data: string) {
+    this.loading = false;
     this.rootStore.blogStore.updatePenError(data);
   }
 
   onUpdatePenData(data: string) {
+    this.loading = false;
     this.rootStore.blogStore.updatePenData(data);
   }
 
   fetchData(pathname: string) {
+    this.loading = true;
     this.socket.emit(PenSocketSendEvents.Init, pathname.slice(1));
   }
 }

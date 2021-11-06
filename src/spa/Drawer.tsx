@@ -51,13 +51,10 @@ const Drawer = observer(() => {
   const callback = useRef<(evt: KeyboardEvent) => void>();
 
   useEffect(() => autorun(() => {
-    const cleanup = () => {
-      if (callback.current) {
-        document.removeEventListener('keyup', callback.current);
-      }
-    };
+    if (callback.current) {
+      document.removeEventListener('keyup', callback.current);
+    }
 
-    cleanup();
     callback.current = (evt: KeyboardEvent) => {
       const { localCurrent } = root.blogStore;
 
@@ -67,7 +64,6 @@ const Drawer = observer(() => {
     };
 
     window.addEventListener('keyup', callback.current);
-    return cleanup;
   }), []);
   useEffect(() => {
     const closure = (evt: KeyboardEvent) => {
