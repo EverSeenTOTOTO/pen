@@ -24,6 +24,7 @@ module.exports = {
     'consistent-return': 'off',
     'arrow-body-style': 'off',
     'max-len': 'off',
+    'import/no-cycle': 'off',
     'no-console': 'off',
     'no-plusplus': 'off',
     'no-continue': 'off',

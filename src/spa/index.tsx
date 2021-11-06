@@ -1,53 +1,45 @@
-import React from 'react';
+import CssBaseline from '@material-ui/core/CssBaseline';
+import { ThemeProvider } from '@material-ui/core/styles';
+import useMediaQuery from '@material-ui/core/useMediaQuery';
+import { runInAction } from 'mobx';
+import React, { useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import {
-  BrowserRouter,
-  Switch,
-  Route,
+  BrowserRouter, Route, Switch,
 } from 'react-router-dom';
-import {
-  observer, useLocalObservable,
-} from 'mobx-react-lite';
-import { ThemeProvider } from '@material-ui/core/styles';
-import CssBaseline from '@material-ui/core/CssBaseline';
+import Blog from './Blog';
+import RootContext from './stores/index';
+import RootStore from './stores/root';
 
 import 'github-markdown-css/github-markdown.css';
 import 'highlight.js/styles/github.css';
 import 'markdown-it-copy/theme/default.css';
 import './style/style.css';
-import useTheme from './theme';
-
-const TimerView = observer(() => {
-  const timer = useLocalObservable(() => ({
-    secondsPassed: 0,
-    increaseTimer() {
-      this.secondsPassed++;
-    },
-  }));
-  return (
-    <span>
-      Seconds passed:
-      {' '}
-      {timer.secondsPassed}
-    </span>
-  );
-});
 
 const App = () => {
-  const theme = useTheme();
+  const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
+  const root = new RootStore();
+
+  useEffect(() => {
+    runInAction(() => {
+      root.uiStore.darkMode = prefersDarkMode;
+    });
+  }, [prefersDarkMode]);
 
   return (
     <div id="app">
-      <ThemeProvider theme={theme}>
-        <CssBaseline />
-        <BrowserRouter>
-          <Switch>
-            <Route path="/*">
-              <TimerView />
-            </Route>
-          </Switch>
-        </BrowserRouter>
-      </ThemeProvider>
+      <RootContext.Provider value={root}>
+        <ThemeProvider theme={root.uiStore.theme}>
+          <CssBaseline />
+          <BrowserRouter>
+            <Switch>
+              <Route path="/*">
+                <Blog />
+              </Route>
+            </Switch>
+          </BrowserRouter>
+        </ThemeProvider>
+      </RootContext.Provider>
     </div>
   );
 };

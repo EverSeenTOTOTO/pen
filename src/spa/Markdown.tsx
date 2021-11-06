@@ -1,6 +1,8 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 import React from 'react';
 import Paper from '@material-ui/core/Paper';
+import Typography from '@material-ui/core/Typography';
+import Skeleton from '@material-ui/lab/Skeleton';
 import { makeStyles } from '@material-ui/core/styles';
 
 import { Container } from '@material-ui/core';
@@ -30,12 +32,39 @@ const Markdown = ({ html }: { html: string }) => {
         root: classes.root,
       }}
     >
-      <Paper
-        classes={{
-          root: classes.paper,
-        }}
-        dangerouslySetInnerHTML={createMarkup(html)}
-      />
+      {html.length > 0
+        ? (
+          <Paper
+            classes={{
+              root: classes.paper,
+            }}
+            dangerouslySetInnerHTML={createMarkup(html)}
+          />
+        )
+
+        : (
+          <Paper
+            classes={{
+              root: classes.paper,
+            }}
+          >
+            <Typography component="div" variant="h1">
+              <Skeleton animation="wave" />
+            </Typography>
+            <Typography component="div" variant="caption">
+              <Skeleton animation="wave" />
+            </Typography>
+            <Typography component="div" variant="body1">
+              <Skeleton animation="wave" />
+            </Typography>
+            <Typography component="div" variant="body1">
+              <Skeleton animation="wave" />
+            </Typography>
+            <Typography component="div" variant="body1">
+              <Skeleton animation="wave" />
+            </Typography>
+          </Paper>
+        )}
     </Container>
   );
 };

@@ -21,13 +21,13 @@ type FileInfo = {
   filename: string,
   relative: string,
   type: string,
-  current: boolean
 };
 
 export type MdContent = {
   files: FileInfo[],
   content: string,
   current: string
+  type: 'markdown' | 'dir'
 };
 
 interface PenWatcher {
@@ -130,6 +130,7 @@ ${e.stack ?? e.message ?? 'internal pen server error'}
   trigger(): Watcher {
     try {
       const content = this.readMarkdownFiles(this.path);
+
       this.ondata(content);
     } catch (e) {
       this.onerror(e as Error);
@@ -160,6 +161,7 @@ ${e.stack ?? e.message ?? 'internal pen server error'}
         files,
         content: this.render(fs.readFileSync(path).toString()),
         current,
+        type: 'markdown',
       };
     }
 
@@ -183,6 +185,7 @@ ${e.stack ?? e.message ?? 'internal pen server error'}
 :::
 `),
       current,
+      type: 'dir',
     };
   }
 
@@ -206,7 +209,6 @@ ${e.stack ?? e.message ?? 'internal pen server error'}
             filename,
             relative: relativePath,
             type: 'markdown',
-            current: false,
           };
         }
 
@@ -215,7 +217,6 @@ ${e.stack ?? e.message ?? 'internal pen server error'}
             filename,
             relative: relativePath,
             type: 'dir',
-            current: false,
           };
         }
 
@@ -223,7 +224,6 @@ ${e.stack ?? e.message ?? 'internal pen server error'}
           filename: '',
           relative: '',
           type: 'other',
-          current: false,
         };
       });
   }

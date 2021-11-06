@@ -1,21 +1,15 @@
-/* eslint-disable max-len */
-import React from 'react';
-import { makeStyles, useTheme } from '@material-ui/core/styles';
-import { io } from 'socket.io-client';
-import { useLocation } from 'react-router';
-import { useHistory } from 'react-router-dom';
-import Markdown from './Markdown';
-import Drawer from './Drawer';
+import { makeStyles } from '@material-ui/core/styles';
+import Alert from '@material-ui/lab/Alert';
+import Snackbar from '@material-ui/core/Snackbar';
+import { observer } from 'mobx-react-lite';
+import React, { useContext, useEffect } from 'react';
+import { useHistory, useLocation } from 'react-router-dom';
 import BottomNavigation from './BottomNavigation';
 import BreadCrumbRoutes from './Breadcrumbs';
-import {
-  reducer,
-  initialState,
-  initMermaid,
-  getUpdir,
-  useToggleHandler,
-  PenConstants,
-} from './common';
+import { getUpdir } from './common';
+import Drawer from './Drawer';
+import Markdown from './Markdown';
+import RootContext from './stores/index';
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -27,27 +21,23 @@ const useStyles = makeStyles(() => ({
   },
 }));
 
-const Blog = () => {
+const Blog = observer(() => {
   const classes = useStyles();
-  const theme = useTheme();
   const history = useHistory();
   const { pathname } = useLocation();
-  const [
-    {
-      files, content, open, socket, current,
-    },
-    dispatch,
-  ] = React.useReducer(reducer, initialState);
-  const toggleDrawer = useToggleHandler(dispatch);
+  const root = useContext(RootContext);
 
-  React.useEffect(() => {
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    root.blogStore.reset();
+    root.socketStore.fetchData(pathname);
+
     const closure = (evt: KeyboardEvent) => {
       switch (evt.code) {
         case 'Enter':
-          toggleDrawer()();
+          root.uiStore.toggleDrawer();
           break;
         case 'Backspace':
-          console.log(getUpdir(pathname));
           history.push(getUpdir(pathname));
           break;
         default:
@@ -56,73 +46,28 @@ const Blog = () => {
     };
 
     document.addEventListener('keyup', closure);
-
     return () => document.removeEventListener('keyup', closure);
-  }, [history, pathname, toggleDrawer]);
-
-  React.useEffect(() => {
-    if (/\.(md|markdown)($|\?)/.test(pathname)) {
-      toggleDrawer(false)();
-    } else {
-      toggleDrawer(true)();
-    }
-  }, [toggleDrawer, pathname]);
-  React.useEffect(() => {
-    window.scrollTo(0, 0);
-
-    if (socket && socket.connect) {
-      socket.emit(PenConstants.EmitFile, pathname.substr(1));
-    }
-  }, [pathname, socket]);
-
-  React.useEffect(() => {
-    const sock = io({
-      path: '/pensocket.io',
-    });
-
-    sock.on(PenConstants.ErrorOccured, (data) => {
-      dispatch({
-        type: PenConstants.ErrorOccured,
-        payload: data,
-      });
-    });
-
-    dispatch({
-      type: PenConstants.CreateSocket,
-      payload: sock,
-    });
-
-    return () => {
-      sock.close();
-    };
-  }, [theme]);
-
-  React.useEffect(() => {
-    if (socket && socket.connect) {
-      socket.off(PenConstants.UpdateData);
-      socket.on(PenConstants.UpdateData, (data) => {
-        const payload = JSON.parse(data);
-
-        dispatch({
-          type: PenConstants.UpdateData,
-          payload,
-        });
-
-        initMermaid(theme.palette.type === 'dark');
-      });
-    }
-  }, [socket, theme]);
+  }, [pathname]);
 
   return (
     <main className={classes.root}>
-      <Drawer open={open} toggleDrawer={toggleDrawer} files={files} current={current} />
+      <Drawer />
       <div className={classes.markdown}>
-        <BreadCrumbRoutes />
-        <Markdown html={content} />
+        <BreadCrumbRoutes pathname={pathname} />
+        <Markdown html={root.blogStore.content} />
       </div>
       <BottomNavigation />
+      <Snackbar
+        open={root.uiStore.errorMessage !== ''}
+        autoHideDuration={2000}
+        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+      >
+        <Alert elevation={6} variant="filled">
+          {root.uiStore.errorMessage}
+        </Alert>
+      </Snackbar>
     </main>
   );
-};
+});
 
 export default Blog;

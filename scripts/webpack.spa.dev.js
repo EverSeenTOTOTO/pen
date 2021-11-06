@@ -24,6 +24,7 @@ module.exports = merge(base, {
     ],
   },
   optimization: {
+    minimize: false,
     minimizer: [
       new ESBuildMinifyPlugin({
         target: 'es2015',

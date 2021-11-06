@@ -27,7 +27,7 @@ const backTop = (destination = 0) => {
     }
   };
 
-  requestAnimationFrame(step);
+  step();
 };
 
 const BottomNav = () => {

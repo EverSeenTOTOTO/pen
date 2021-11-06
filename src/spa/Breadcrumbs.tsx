@@ -1,10 +1,13 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
-import React, { useEffect, useState } from 'react';
-import { makeStyles, Theme, createStyles } from '@material-ui/core/styles';
 import Breadcrumbs from '@material-ui/core/Breadcrumbs';
 import Link from '@material-ui/core/Link';
+import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
 import HomeIcon from '@material-ui/icons/Home';
-import { useHistory, useLocation } from 'react-router-dom';
+import React, { useContext, useEffect, useState } from 'react';
+import { useHistory } from 'react-router-dom';
+import { observer } from 'mobx-react-lite';
+
+import RootContext from './stores/index';
 
 const useStyles = makeStyles((theme: Theme) => createStyles({
   root: {
@@ -22,10 +25,10 @@ const useStyles = makeStyles((theme: Theme) => createStyles({
   },
 }));
 
-const BreadCrumbRoutes = () => {
+const BreadCrumbRoutes = observer(({ pathname }: { pathname: string }) => {
   const classes = useStyles();
   const history = useHistory();
-  const { pathname } = useLocation();
+  const root = useContext(RootContext);
   const [stack, setStack] = useState<{ relative: string, name: string }[]>([]);
 
   useEffect(() => {
@@ -44,8 +47,10 @@ const BreadCrumbRoutes = () => {
   const push = (path: string) => {
     document.activeElement?.blur?.();
 
-    if (pathname !== path) {
+    if (path !== pathname) {
       history.push(path);
+    } else {
+      root.uiStore.toggleDrawer();
     }
   };
 
@@ -76,6 +81,6 @@ const BreadCrumbRoutes = () => {
       })}
     </Breadcrumbs>
   );
-};
+});
 
 export default BreadCrumbRoutes;

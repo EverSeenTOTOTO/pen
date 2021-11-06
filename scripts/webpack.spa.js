@@ -4,6 +4,7 @@
 const { resolve } = require('path');
 const HtmlWebPackPlugin = require('html-webpack-plugin');
 const postcssNormalize = require('postcss-normalize');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 
 const { paths } = require('./utils');
@@ -25,8 +26,17 @@ module.exports = {
       {
         test: /.css$/,
         use: [
+          process.env.NODE_ENV === 'development'
+            ? {
+              loader: require.resolve('style-loader'),
+            }
+            : MiniCssExtractPlugin.loader,
           {
             loader: require.resolve('css-loader'),
+            options: {
+              importLoaders: 1,
+              sourceMap: process.env.NODE_ENV === 'development',
+            },
           },
           {
             loader: require.resolve('postcss-loader'),
@@ -58,6 +68,9 @@ module.exports = {
     ],
   },
   plugins: [
+    new MiniCssExtractPlugin({
+      filename: 'pen.[contenthash:8].css',
+    }),
     new HtmlWebPackPlugin({
       title: 'Pen',
       template: resolve(paths.public, 'index.html'),

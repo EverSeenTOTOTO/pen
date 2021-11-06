@@ -1,17 +1,18 @@
-import React from 'react';
-import SwipeableDrawer from '@material-ui/core/SwipeableDrawer';
 import {
-  List,
+  Avatar, List,
   ListItem,
   ListItemAvatar,
   ListItemText,
-  Avatar,
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
+import SwipeableDrawer from '@material-ui/core/SwipeableDrawer';
 import { Folder, TextFields } from '@material-ui/icons';
+import { autorun } from 'mobx';
+import { observer } from 'mobx-react-lite';
+import React, { useContext, useEffect, useRef } from 'react';
 import { useHistory } from 'react-router';
-
-import { PenDirInfo } from './common';
+import { PenDirInfo } from './stores/blog';
+import RootContext from './stores/index';
 
 const useStyles = makeStyles({
   drawerPaper: {
@@ -19,83 +20,10 @@ const useStyles = makeStyles({
   },
 });
 
-type DrawerProps = {
-  open: boolean,
-  toggleDrawer: (value?: boolean)=> (e: React.KeyboardEvent | React.MouseEvent) => void,
-  files: PenDirInfo[],
-  current: string
-};
-
-const Drawer = ({
-  open, toggleDrawer, files, current,
-}: DrawerProps) => {
-  const classes = useStyles();
+const DrawerListItem = ({ files, localCurrent }) => {
   const history = useHistory();
-  const [localCurrent, setLocalCurrent] = React.useState(-1);
 
-  React.useEffect(() => {
-    const idx = files.findIndex((each) => each.filename === current);
-
-    setLocalCurrent(idx >= files.length ? 0 : idx);
-  }, [files, current]);
-  React.useEffect(() => {
-    const closure = (evt: KeyboardEvent) => {
-      switch (evt.code) {
-        case 'Enter':
-          if (localCurrent >= 0) {
-            history.push(`/${files[localCurrent].relative}`);
-          }
-          break;
-        default:
-          break;
-      }
-    };
-
-    document.addEventListener('keyup', closure);
-
-    return () => document.removeEventListener('keyup', closure);
-  }, [localCurrent, history, files]);
-  React.useEffect(() => {
-    const closure = (evt: KeyboardEvent) => {
-      switch (evt.code) {
-        case 'Tab': {
-          if (evt.shiftKey) {
-            setLocalCurrent((c) => {
-              const idx = c - 1;
-              const next = Number.isNaN(idx)
-                ? 0
-                : idx < 0
-                  ? files.length - 1
-                  : idx;
-
-              return next;
-            });
-            break;
-          } else {
-            setLocalCurrent((c) => {
-              const idx = c + 1;
-              const next = Number.isNaN(idx)
-                ? 0
-                : idx >= files.length
-                  ? 0
-                  : idx;
-
-              return next;
-            });
-          }
-          break;
-        }
-        default:
-          break;
-      }
-    };
-
-    document.addEventListener('keyup', closure);
-
-    return () => document.removeEventListener('keyup', closure);
-  }, [files, current]);
-
-  const items = files.map((each: PenDirInfo) => {
+  return files.map((each: PenDirInfo) => {
     const currentItemClassName = files.indexOf(each) === localCurrent ? 'list-item--current' : '';
 
     return (
@@ -114,13 +42,59 @@ const Drawer = ({
       </ListItem>
     );
   });
+};
+
+const Drawer = observer(() => {
+  const classes = useStyles();
+  const history = useHistory();
+  const root = useContext(RootContext);
+  const callback = useRef<(evt: KeyboardEvent) => void>();
+
+  useEffect(() => autorun(() => {
+    const cleanup = () => {
+      if (callback.current) {
+        document.removeEventListener('keyup', callback.current);
+      }
+    };
+
+    cleanup();
+    callback.current = (evt: KeyboardEvent) => {
+      const { localCurrent } = root.blogStore;
+
+      if (evt.code === 'Enter' && localCurrent >= 0) {
+        history.push(`/${root.blogStore.files[localCurrent].relative}`);
+      }
+    };
+
+    window.addEventListener('keyup', callback.current);
+    return cleanup;
+  }), []);
+  useEffect(() => {
+    const closure = (evt: KeyboardEvent) => {
+      switch (evt.code) {
+        case 'Tab': {
+          if (evt.shiftKey) {
+            root.blogStore.decreaseLocalCurrent();
+          } else {
+            root.blogStore.increaseLocalCurrent();
+          }
+          break;
+        }
+        default:
+          break;
+      }
+    };
+
+    document.addEventListener('keyup', closure);
+    return () => document.removeEventListener('keyup', closure);
+  }, []);
 
   return (
     <SwipeableDrawer
       anchor="left"
-      open={open}
-      onClose={toggleDrawer(false)}
-      onOpen={toggleDrawer(true)}
+      open={root.uiStore.drawerOpened}
+      onClose={() => root.uiStore.toggleDrawer(false)}
+      onOpen={() => root.uiStore.toggleDrawer(true)}
       classes={{
         paper: classes.drawerPaper,
       }}
@@ -129,10 +103,13 @@ const Drawer = ({
         component="nav"
         aria-labelledby="nested-list-subheader"
       >
-        {items}
+        <DrawerListItem
+          files={root.blogStore.files}
+          localCurrent={root.blogStore.localCurrent}
+        />
       </List>
     </SwipeableDrawer>
   );
-};
+});
 
 export default Drawer;
