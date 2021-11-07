@@ -11,7 +11,7 @@ const { paths } = require('./utils');
 
 module.exports = {
   mode: process.env.NODE_ENV,
-  devtool: 'source-map',
+  devtool: process.env.NODE_ENV === 'development' ? 'source-map' : undefined,
   entry: {
     app: paths.spaEntry,
   },
