@@ -7,11 +7,13 @@ import React, { useContext, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { observer } from 'mobx-react-lite';
 
+import { Switch } from '@material-ui/core';
 import RootContext from './stores/index';
 
 const useStyles = makeStyles((theme: Theme) => createStyles({
   root: {
     paddingTop: theme.spacing(2),
+    paddingBottom: theme.spacing(1),
     paddingLeft: theme.spacing(4),
   },
   link: {
@@ -22,6 +24,11 @@ const useStyles = makeStyles((theme: Theme) => createStyles({
     width: 20,
     height: 20,
     cursor: 'pointer',
+  },
+  switch: {
+    position: 'absolute',
+    top: theme.spacing(1),
+    right: theme.spacing(2),
   },
 }));
 
@@ -55,31 +62,40 @@ const BreadCrumbRoutes = observer(({ pathname }: { pathname: string }) => {
   };
 
   return (
-    <Breadcrumbs
-      aria-label="breadcrumb"
-      className={classes.root}
-    >
-      <Link
-        color="inherit"
-        className={classes.link}
+    <>
+      <Breadcrumbs
+        aria-label="breadcrumb"
+        className={classes.root}
       >
-        <HomeIcon
-          className={classes.icon}
-          onClick={() => push('/')}
-        />
-      </Link>
-      {stack.map((link) => {
-        return (
-          <Link
-            component="button"
-            color="inherit"
-            onClick={() => push(`/${link.relative}`)}
-          >
-            {link.name}
-          </Link>
-        );
-      })}
-    </Breadcrumbs>
+        <Link
+          color="inherit"
+          className={classes.link}
+        >
+          <HomeIcon
+            className={classes.icon}
+            onClick={() => push('/')}
+          />
+        </Link>
+        {stack.map((link) => {
+          return (
+            <Link
+              component="button"
+              color="inherit"
+              onClick={() => push(`/${link.relative}`)}
+            >
+              {link.name}
+            </Link>
+          );
+        })}
+      </Breadcrumbs>
+      <Switch
+        className={classes.switch}
+        checked={root.uiStore.darkMode}
+        onChange={(event: React.ChangeEvent<HTMLInputElement>) => root.uiStore.toggleDarkMode(event.target.checked)}
+        name="checkedB"
+        color="primary"
+      />
+    </>
   );
 });
 

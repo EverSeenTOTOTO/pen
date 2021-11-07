@@ -7,6 +7,7 @@ import * as logger from './logger';
 import createRender from './markdown';
 import createMiddleware from './middleware';
 import Watcher from './watcher';
+import ThemeProvider, { Theme } from './ThemeProvider';
 
 export { logger };
 
@@ -29,13 +30,18 @@ export class Pen {
 
   private readonly connectedSockets: { socket: Socket, watcher: Watcher }[] = [];
 
-  private readonly render: ReturnType<typeof createRender>;
+  private readonly markdownRender: ReturnType<typeof createRender>;
+
+  private readonly themeProvider: ThemeProvider;
 
   constructor(opts: PenCreateOptions) {
     this.root = opts.root ?? '.';
     this.ignores = opts.ignores;
     this.logger = opts.logger;
-    this.render = createRender(opts.mditPlugins);
+    this.markdownRender = createRender(opts.mditPlugins);
+    this.themeProvider = new ThemeProvider({
+      logger: this.logger,
+    });
   }
 
   attach(server: HttpServer) {
@@ -69,6 +75,11 @@ export class Pen {
           socket,
           filepath,
         });
+      });
+      socket.on('penchangeTheme', (theme: Theme) => {
+        const themeStyleScript = this.themeProvider.getTheme(theme);
+
+        socket.emit('pentheme', themeStyleScript);
       });
     });
 
@@ -112,7 +123,7 @@ export class Pen {
       path: newPath,
       ignores: this.ignores,
       socket,
-      render: this.render,
+      render: this.markdownRender,
     });
 
     this.connectedSockets.push({

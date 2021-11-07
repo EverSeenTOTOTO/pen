@@ -1,0 +1,35 @@
+body {
+  background-color: #0d1117;
+}
+
+.markdown-body a {
+  color: skyblue
+}
+
+.markdown-body table {
+  background-color: #333;
+  color: white;
+}
+
+.markdown-body pre {
+  background-color: #333;
+}
+
+.container-warn {
+  background-color: #ecdca6;
+  color: rgba(0, 0, 0, 0.87);
+  border-color: darkorange;
+}
+
+.container-info {
+  background-color: #9acde2;
+  color: rgba(0, 0, 0, 0.87);
+  border-color: royalblue;
+}
+
+.container-error {
+  color: rgba(0, 0, 0, 0.87);
+  background-color: rgb(240, 188, 188);
+  border-color: red;
+}
+

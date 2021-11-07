@@ -5,7 +5,6 @@ const { paths } = require('./utils');
 module.exports = {
   mode: process.env.NODE_ENV,
   externals: /^(socket\.io|markdown-it|serve-static)/,
-  devtool: 'source-map',
   entry: {
     server: paths.serverEntry,
   },

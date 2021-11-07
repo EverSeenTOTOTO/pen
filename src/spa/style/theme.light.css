@@ -1,0 +1,19 @@
+body {
+  background-color: initial;
+}
+
+.container-warn {
+  background-color: rgba(255,229,100,.3);
+  border-color: #e7c000;
+  color: #6b5900;
+}
+
+.container-info {
+  background-color: #f0fffd;
+  border-color: #51b6e3;
+}
+
+.container-error {
+  background-color: #fbefef;
+  border-color: red;
+}

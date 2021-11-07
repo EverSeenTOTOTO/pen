@@ -5246,10 +5246,10 @@ getpass@^0.1.1:
   dependencies:
     assert-plus "^1.0.0"
 
-github-markdown-css@^4.0.0:
-  version "4.0.0"
-  resolved "https://registry.npmjs.org/github-markdown-css/-/github-markdown-css-4.0.0.tgz"
-  integrity sha512-mH0bcIKv4XAN0mQVokfTdKo2OD5K8WJE9+lbMdM32/q0Ie5tXgVN/2o+zvToRMxSTUuiTRcLg5hzkFfOyBYreg==
+github-markdown-css@^5.0.0:
+  version "5.0.0"
+  resolved "https://registry.npmmirror.com/github-markdown-css/download/github-markdown-css-5.0.0.tgz?cache=0&sync_timestamp=1634473914537&other_urls=https%3A%2F%2Fregistry.npmmirror.com%2Fgithub-markdown-css%2Fdownload%2Fgithub-markdown-css-5.0.0.tgz#829966927643426f0a43aabee9991a3ed532280d"
+  integrity sha1-gplmknZDQm8KQ6q+6ZkaPtUyKA0=
 
 glob-parent@^3.1.0:
   version "3.1.0"
@@ -5455,10 +5455,15 @@ hex-color-regex@^1.1.0:
   resolved "https://registry.npm.taobao.org/hex-color-regex/download/hex-color-regex-1.1.0.tgz"
   integrity sha1-TAb8y0YC/iYCs8k9+C1+fb8aio4=
 
-highlight.js@^10.1.0, highlight.js@^10.2.0, highlight.js@^10.4.1:
+highlight.js@^10.1.0, highlight.js@^10.2.0:
   version "10.4.1"
   resolved "https://registry.npmjs.org/highlight.js/-/highlight.js-10.4.1.tgz"
   integrity sha512-yR5lWvNz7c85OhVAEAeFhVCc/GV4C30Fjzc/rCP0aCWzc1UUOPUk55dK/qdwTZHBvMZo+eZ2jpk62ndX/xMFlg==
+
+highlight.js@^11.3.1:
+  version "11.3.1"
+  resolved "https://registry.npmmirror.com/highlight.js/download/highlight.js-11.3.1.tgz#813078ef3aa519c61700f84fe9047231c5dc3291"
+  integrity sha1-gTB47zqlGcYXAPhP6QRyMcXcMpE=
 
 highlight.js@^9.7.0:
   version "9.18.5"

@@ -1,6 +1,5 @@
-import { autorun, makeAutoObservable, reaction } from 'mobx';
 import mermaid from 'mermaid';
-
+import { makeAutoObservable, reaction } from 'mobx';
 import RootStore from './root';
 
 export type PenDirInfo = {
@@ -80,7 +79,7 @@ export default class BlogStore {
         : idx;
   }
 
-  private initMermaid() {
+  initMermaid() {
     const { darkMode } = this.rootStore.uiStore;
 
     const mermaidThemes = ['default', 'forest'];

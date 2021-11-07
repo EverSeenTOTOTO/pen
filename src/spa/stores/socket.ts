@@ -1,14 +1,15 @@
-import { io, Socket } from 'socket.io-client';
 import { makeAutoObservable } from 'mobx';
-
+import { io, Socket } from 'socket.io-client';
 import RootStore from './root';
 
 export enum PenSocketSendEvents {
   Init = 'peninit',
+  ChangeTheme= 'penchangeTheme',
 }
 export enum PenSocketRecvEvents {
   ErrorOccured = 'penerror',
   UpdateData = 'pendata',
+  UpdateTheme = 'pentheme',
 }
 
 export default class PenSocketStore {
@@ -30,6 +31,7 @@ export default class PenSocketStore {
     this.socket.on('error', (error: Error) => this.onError(error));
     this.socket.on(PenSocketRecvEvents.ErrorOccured, (data: string) => this.onUpdatePenError(data));
     this.socket.on(PenSocketRecvEvents.UpdateData, (data: string) => this.onUpdatePenData(data));
+    this.socket.on(PenSocketRecvEvents.UpdateTheme, (theme: string) => this.onUpdatePenTheme(theme));
   }
 
   get connected() {
@@ -51,8 +53,18 @@ export default class PenSocketStore {
     this.rootStore.blogStore.updatePenData(data);
   }
 
+  onUpdatePenTheme(theme: string) {
+    this.loading = false;
+    this.rootStore.uiStore.updateTheme(theme);
+  }
+
   fetchData(pathname: string) {
     this.loading = true;
     this.socket.emit(PenSocketSendEvents.Init, pathname.slice(1));
+  }
+
+  fetchTheme(theme: any) {
+    this.loading = true;
+    this.socket.emit(PenSocketSendEvents.ChangeTheme, theme);
   }
 }

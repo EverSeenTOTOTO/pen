@@ -1,11 +1,10 @@
+import Snackbar from '@material-ui/core/Snackbar';
 import { makeStyles } from '@material-ui/core/styles';
 import Alert from '@material-ui/lab/Alert';
-import Snackbar from '@material-ui/core/Snackbar';
+import { autorun } from 'mobx';
 import { observer } from 'mobx-react-lite';
 import React, { useContext, useEffect, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
-import { autorun } from 'mobx';
-import BottomNavigation from './BottomNavigation';
 import BreadCrumbRoutes from './Breadcrumbs';
 import { getUpdir } from './common';
 import Drawer from './Drawer';
@@ -68,7 +67,6 @@ const Blog = observer(() => {
         <BreadCrumbRoutes pathname={pathname} />
         <Markdown html={root.blogStore.content} loading={root.socketStore.loading} />
       </div>
-      <BottomNavigation />
       <Snackbar
         open={open}
         autoHideDuration={3000}
