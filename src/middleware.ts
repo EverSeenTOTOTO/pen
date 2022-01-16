@@ -4,17 +4,46 @@ import { join, extname, basename } from 'path';
 import serveStatic from 'serve-static';
 import * as logger from './logger';
 
+const MimeTypes = new Map([
+  [/\.s?html?$/, 'text/html'],
+  [/\.css$/, 'text/css'],
+  [/\.xml$/, 'text/xml'],
+  [/\.gif$/, 'image/gif'],
+  [/\.jpe?g$/, 'image/jpeg'],
+  [/\.js$/, 'application/javascript'],
+  [/\.txt$/, 'text/plain'],
+  [/\.png$/, 'image/png'],
+  [/\.ico$/, 'image/x-icon'],
+  [/\.svgz?$/, 'image/svg+xml'],
+  [/\.webp$/, 'image/webp'],
+  [/\.woff$/, 'application/font-woff'],
+  [/\.json$/, 'application/json'],
+  [/\.pdf$/, 'application/pdf'],
+  [/\.zip$/, 'application/zip'],
+  [/\.7z$/, 'application/x-7z-compressed'],
+  [/\.(j|w|e)ar$/, 'application/java-archive'],
+  [/\.mp3$/, 'audio/mpeg'],
+  [/\.ogg$/, 'audio/ogg'],
+  [/\.m4a$/, 'audio/x-m4a'],
+  [/\.mp4$/, 'video/mp4'],
+  [/\.3gpp?$/, 'video/3gpp'],
+  [/\.mpe?g$/, 'video/mpeg'],
+  [/\.mov$/, 'video/quicktime'],
+  [/\.flv$/, 'video/x-flv'],
+  [/\.m4v?$/, 'video/x-m4v'],
+  [/\.wmv?$/, 'video/x-ms-wmv'],
+  [/\.avi?$/, 'video/x-msvideo'],
+  [/\.(bin|exe|dll|deb|dmg|iso|img)$/, 'application/octet-stream'],
+]);
+
 const getContentType = (ext: string) => {
-  return new Map([
-    ['.js', 'application/javascript'],
-    ['.css', 'text/css'],
-    ['.svg', 'image/svg+xml'],
-    ['.jpg', 'image/jpeg'],
-    ['.jpeg', 'image/jpeg'],
-    ['.png', 'image/png'],
-    ['.gif', 'image/gif'],
-    ['.ico', 'image/x-icon'],
-  ]).get(ext);
+  for (const [key, value] of MimeTypes) {
+    if (key.test(ext)) {
+      return value;
+    }
+  }
+
+  return undefined;
 };
 
 export default (options: { logger?: typeof logger, root?: string }) => {

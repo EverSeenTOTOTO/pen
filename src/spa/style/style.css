@@ -2,6 +2,11 @@ html, body {
   scroll-behavior: smooth;
 }
 
+*, *::before, *::after {
+  margin: 0;
+  box-sizing: border-box;
+}
+
 :root {
   --penListItemHover: rgba(0, 0, 0, 0.04);
   --penListItemCurrent: rgba(0, 0, 0, 0.08);
@@ -30,3 +35,6 @@ html, body {
   margin: 1rem 0;
 }
 
+.markdown-body .container p {
+  margin: 0;
+}

@@ -18,7 +18,10 @@ export default [
   [mditFootnote],
   [mditAnchor],
   [mditToc],
-  [mditKatex],
+  [mditKatex, {
+    throwOnError: false,
+    strict: false,
+  }],
   [mditMermaid],
   [mditContainer, 'Warn', {
     render: createRender('warn'),

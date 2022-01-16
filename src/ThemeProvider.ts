@@ -47,11 +47,11 @@ export default class ThemeProvider {
     if (theme.darkMode) {
       themeStyleFiles.push(path.resolve(__dirname, '../../src/spa/style/theme.dark.css'));
       themeStyleFiles.push(path.resolve(__dirname, '../../node_modules/github-markdown-css/github-markdown-dark.css'));
-    }
-    if (!theme.darkMode) {
+    } else {
       themeStyleFiles.push(path.resolve(__dirname, '../../src/spa/style/theme.light.css'));
       themeStyleFiles.push(path.resolve(__dirname, '../../node_modules/github-markdown-css/github-markdown-light.css'));
     }
+
     if (theme.codeStyle) {
       themeStyleFiles.push(path.resolve(__dirname, `../../node_modules/highlight.js/styles/${theme.codeStyle}.css`));
     }
