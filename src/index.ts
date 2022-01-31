@@ -6,14 +6,13 @@ import { Server as IOBase, Socket } from 'socket.io';
 import * as logger from './logger';
 import createRender from './markdown';
 import createMiddleware from './middleware';
-import Watcher from './watcher';
 import ThemeProvider, { Theme } from './ThemeProvider';
+import Watcher from './watcher';
 
 export { logger };
 
 export type PenCreateOptions = {
   root?: string,
-  namespace?: string,
   ignores?: RegExp|RegExp[],
   logger?: typeof logger,
   mditPlugins?: any[]
@@ -76,10 +75,10 @@ export class Pen {
           filepath,
         });
       });
-      socket.on('penchangeTheme', (theme: Theme) => {
+      socket.on('penChangeTheme', (theme: Theme) => {
         const themeStyleScript = this.themeProvider.getTheme(theme);
 
-        socket.emit('pentheme', themeStyleScript);
+        socket.emit('penUpdateTheme', themeStyleScript);
       });
     });
 
@@ -130,6 +129,7 @@ export class Pen {
       socket,
       watcher: newWatcher,
     });
+
     newWatcher.start().trigger();
   }
 }
@@ -138,8 +138,9 @@ export default (options: PenCreateOptions) => {
   const pen = new Pen(options);
   const middleware = createMiddleware(options);
 
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
-  middleware.pen = pen;
+  middleware.attach = pen.attach.bind(pen);
 
   return middleware;
 };

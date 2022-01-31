@@ -4,7 +4,7 @@ const { paths } = require('./utils');
 
 module.exports = {
   mode: process.env.NODE_ENV,
-  externals: /^(socket\.io|markdown-it|serve-static)/,
+  externals: /^(socket\.io|markdown-it|serve-static|chokidar|express|commander|chalk)/,
   entry: {
     server: paths.serverEntry,
   },

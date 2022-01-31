@@ -1,5 +1,6 @@
-// eslint-disable-next-line import/no-extraneous-dependencies
+/* eslint-disable import/no-extraneous-dependencies */
 import { createTheme, ThemeOptions } from '@material-ui/core/styles';
+import { Color } from '@material-ui/lab/Alert';
 import { makeAutoObservable, reaction } from 'mobx';
 import RootStore from './root';
 
@@ -23,11 +24,9 @@ const defaultTheme: ThemeOptions = {
 export const DefaultThemeConfig = {
   dark: {
     darkMode: true,
-    codeStyle: 'github-dark',
   },
   light: {
     darkMode: false,
-    codeStyle: 'github',
   },
 };
 
@@ -38,7 +37,9 @@ export default class UIStore {
 
   darkMode = false;
 
-  errorMessage = '';
+  severity: Color = 'info';
+
+  message = '';
 
   themeStyleScript = '';
 
@@ -90,11 +91,13 @@ export default class UIStore {
     this.rootStore.blogStore.initMermaid();
   }
 
-  notifyError(error: Error) {
-    this.errorMessage = error.message;
+  notify(severity: Color, message: string) {
+    this.severity = severity;
+    this.message = message;
   }
 
-  resetError() {
-    this.errorMessage = '';
+  reset() {
+    this.severity = 'info';
+    this.message = '';
   }
 }

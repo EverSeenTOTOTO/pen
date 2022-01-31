@@ -1,32 +1,23 @@
 import path from 'path';
 import fs from 'fs';
+import chalk from 'chalk';
 import * as logger from './logger';
-
-export type Theme = {
-  darkMode: boolean;
-  codeStyle: string
-};
 
 export type ThemeProviderOptions = {
   logger?: typeof logger
-} & Partial<Theme>;
+};
+
+export type Theme = { darkMode?: boolean };
 
 export default class ThemeProvider {
   readonly logger?: typeof logger;
 
-  readonly theme: Theme;
-
   constructor(opts: ThemeProviderOptions) {
     this.logger = opts.logger;
-    this.theme = {
-      darkMode: false,
-      codeStyle: 'github',
-      ...opts,
-    };
   }
 
   getTheme(theme: Theme) {
-    const themStyleFiles = ThemeProvider.getThemeFiles(theme);
+    const themStyleFiles = this.getThemeFiles(theme);
     const themeStyleScript = themStyleFiles.reduce((prev, curr) => {
       try {
         const content = fs.readFileSync(curr).toString();
@@ -41,20 +32,22 @@ export default class ThemeProvider {
     return themeStyleScript;
   }
 
-  static getThemeFiles(theme: Theme) {
+  getThemeFiles(theme: Theme) {
     const themeStyleFiles = [];
 
     if (theme.darkMode) {
+      this.logger?.info(`Pen changed to ${chalk.bold(chalk.blue('dark'))} mode.`);
+
       themeStyleFiles.push(path.resolve(__dirname, '../../src/spa/style/theme.dark.css'));
       themeStyleFiles.push(path.resolve(__dirname, '../../node_modules/github-markdown-css/github-markdown-dark.css'));
     } else {
+      this.logger?.info(`Pen changed to ${chalk.bold(chalk.yellowBright('light'))} mode.`);
+
       themeStyleFiles.push(path.resolve(__dirname, '../../src/spa/style/theme.light.css'));
       themeStyleFiles.push(path.resolve(__dirname, '../../node_modules/github-markdown-css/github-markdown-light.css'));
     }
 
-    if (theme.codeStyle) {
-      themeStyleFiles.push(path.resolve(__dirname, `../../node_modules/highlight.js/styles/${theme.codeStyle}.css`));
-    }
+    themeStyleFiles.push(path.resolve(__dirname, `../../node_modules/highlight.js/styles/${theme.darkMode ? 'github-dark' : 'github'}.css`));
 
     return themeStyleFiles;
   }

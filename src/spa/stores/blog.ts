@@ -45,7 +45,7 @@ export default class BlogStore {
       this.rootStore.uiStore.toggleDrawer(result.type === 'dir');
       this.initMermaid();
     } catch (error) {
-      this.rootStore.uiStore.notifyError(error);
+      this.rootStore.uiStore.notify('error', error.message);
     }
   }
 

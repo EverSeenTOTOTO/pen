@@ -6,26 +6,12 @@ html, body {
   margin: 0;
   box-sizing: border-box;
 }
-
-:root {
-  --penListItemHover: rgba(0, 0, 0, 0.04);
-  --penListItemCurrent: rgba(0, 0, 0, 0.08);
+.hljs {
+  border-radius: 2px;
 }
 
 .list-item {
   cursor: pointer
-}
-
-.list-item--current {
-  background-color: var(--penListItemCurrent);
-}
-
-.list-item:hover {
-  background-color: var(--penListItemHover);
-}
-
-.hljs {
-  border-radius: 2px;
 }
 
 .container {

@@ -1,4 +1,6 @@
-import fs, { FSWatcher } from 'fs';
+import chokidar from 'chokidar';
+import chalk from 'chalk';
+import fs from 'fs';
 import {
   basename, dirname, extname, relative, resolve,
 } from 'path';
@@ -63,7 +65,7 @@ const checkPermission = (option: Pick<PenWatcher, 'path'|'root'|'ignores'>) => {
 };
 
 export default class Watcher implements PenWatcher {
-  private watcher?: FSWatcher;
+  private watcher?: chokidar.FSWatcher;
 
   root: string;
 
@@ -105,18 +107,20 @@ ${e.stack ?? e.message ?? 'internal pen server error'}
   start(): Watcher {
     this.stop();
     try {
-      const watcher = fs.watch(
+      const watcher = chokidar.watch(
         this.path,
         {
-          recursive: false,
-        },
-        (event) => {
-          this.logger?.info(`Pen detected ${basename(this.path)} -> ${event}`);
-
-          this.trigger();
+          depth: 1,
+          ignored: this.ignores,
         },
       );
 
+      watcher.on('change', (path) => {
+        if (path === this.path) {
+          this.logger?.info(`Pen detected change on ${chalk.green(chalk.bold(path))}`);
+          this.trigger();
+        }
+      });
       watcher.on('error', this.onerror);
 
       this.watcher = watcher;
@@ -167,6 +171,11 @@ ${e.stack ?? e.message ?? 'internal pen server error'}
 
     const stats = fs.statSync(path);
     const files = this.readFiles(path).filter((each) => each.type !== 'other');
+    const dirCount = files.filter((each) => each.type === 'dir').length;
+    const fileCount = files.filter((each) => each.type === 'markdown').length;
+
+    const dirInfo = dirCount > 0 ? `+ **子目录数量:** ${dirCount}` : '';
+    const fileInfo = fileCount > 0 ? `+ **文档数量:** ${fileCount}` : '';
 
     return {
       files: files.sort((a: FileInfo, b: FileInfo) => {
@@ -180,8 +189,10 @@ ${e.stack ?? e.message ?? 'internal pen server error'}
 
 ### ${basename(path)} 
 
+${fileInfo}.
+${dirInfo}.
 + **创建于:** ${stats.ctime}.
-+ **最后修改于:** ${stats.mtime}
++ **最后修改于:** ${stats.mtime}.
 :::
 `),
       current,

@@ -2,6 +2,18 @@ body {
   background-color: initial;
 }
 
+:root {
+  --penListItemHover: rgba(0, 0, 0, 0.04);
+  --penListItemCurrent: rgba(0, 0, 0, 0.08);
+}
+.list-item--current {
+  background-color: var(--penListItemCurrent);
+}
+
+.list-item:hover {
+  background-color: var(--penListItemHover);
+}
+
 .container-warn {
   background-color: rgba(255,229,100,.3);
   border-color: #e7c000;

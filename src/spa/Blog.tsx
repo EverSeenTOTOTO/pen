@@ -33,10 +33,11 @@ const Blog = observer(() => {
     }
 
     setOpen(false);
+    root.uiStore.reset();
   };
 
   useEffect(() => autorun(() => {
-    setOpen(root.uiStore.errorMessage !== '');
+    setOpen(root.uiStore.message !== '');
   }), []);
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -73,8 +74,8 @@ const Blog = observer(() => {
         anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
         onClose={closeSnackBar}
       >
-        <Alert severity="error">
-          {root.uiStore.errorMessage}
+        <Alert severity={root.uiStore.severity}>
+          {root.uiStore.message}
         </Alert>
       </Snackbar>
     </main>

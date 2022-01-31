@@ -1,7 +1,6 @@
-import { IncomingMessage, ServerResponse } from 'http';
+import express, { Request, Response } from 'express';
 import fs from 'fs';
-import { join, extname, basename } from 'path';
-import serveStatic from 'serve-static';
+import { basename, extname, join } from 'path';
 import * as logger from './logger';
 
 const MimeTypes = new Map([
@@ -46,14 +45,14 @@ const getContentType = (ext: string) => {
   return undefined;
 };
 
-export default (options: { logger?: typeof logger, root?: string }) => {
+export default (options: { logger?: typeof logger, root?: string, namespace?: string }) => {
   const assets = join(__dirname, '../spa');
-  const serveAssets = serveStatic(join(options.root ?? '.'), {
+  const serveAssets = express.static(join(options.root ?? '.'), {
     index: false,
     dotfiles: 'allow',
   });
 
-  return (req: IncomingMessage, res: ServerResponse) => {
+  return (req: Request, res: Response) => {
     const url = new URL(req.url ?? '/', `http://${req.headers.host}`);
     const fallback = () => {
       const asset = join(assets, basename(url.pathname));

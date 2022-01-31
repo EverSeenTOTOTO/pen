@@ -1,4 +1,6 @@
-# @everseenflash/pen-middleware
+# @everseen/pen
+
+> used to be @everseenflash/pen-middleware
 
 一个cli工具，提供对markdown文件的预览能力。也可用作http中间件。基于[**socket.io**](https://socket.io/)。灵感来源自[**pen**](https://github.com/utatti/pen)。
 
@@ -10,11 +12,11 @@
 
 ```bash
 # install globally
-npm i -g @everseenflash/pen-middleware
+npm i -g @everseen/pen
 # default usage
 pen
 # use with simple options
-pen -si -p 8080 ~/docs
+pen -H -p 8080 -r ~/docs
 ```
 
 #### Cli Options
@@ -23,19 +25,28 @@ pen -si -p 8080 ~/docs
 
 help.
 
-+ `--port|-p`
-
-设置port，默认3000。
-
 + `--root|-r`
 
 设置markdown文件目录，默认'./'。
 
-+ `-i`
 
-是否显示隐藏文件，默认不显示。
++ `--port|-p`
 
-+ `-s`
+设置port，默认3000。
+
++ `--open`
+
+是否自动打开浏览器，默认否。
+
++ `-i, --ignores`
+
+设置隐藏文件。
+
++ `-H, --hidden`
+
+是否显示dotFile，默认不显示。
+
++ `-s, --silence`
 
 是否输出日志，默认输出。
 

@@ -1,52 +1,61 @@
 #!/usr/bin/env node
 
-/* eslint-disable import/order */
-/* eslint-disable @typescript-eslint/no-var-requires */
 const { createServer } = require('http');
+const express = require('express');
 const getPort = require('get-port');
 const open = require('open');
+const chalk = require('chalk');
+const { program } = require('commander');
 const { default: createPenMiddleware, logger: defaultLogger } = require('./dist/server/lib');
+const pkg = require('./package.json');
 
-const argv = require('minimist')(process.argv.slice(2));
+program
+  .version(pkg.version)
+  .option('-r, --root <root>', 'root directory to watch', '.')
+  .option('-p, --port <port>', 'port of markdown server', 3000)
+  .option('-i, --ignores <ignores...>', 'files to ignore', [])
+  .option('-H, --hidden', 'ignore hidden files', false)
+  .option('-s, --silence', 'show logger outputs', false)
+  .option('-o, --open', 'open browser automatically', false)
+  .parse();
 
-const help = argv.help || argv.h;
+const options = program.opts();
+const { port } = options;
+const ignores = Array.isArray(options.ignores) ? options.ignores : [options.ignores];
 
-if (help) {
-  console.log(
-    `
-Usage: pen [options] [directory]
-
-Options:
-    --root, -r        select which directory to watch, default './'
-    --port, -p        select which port to bind, if port already in use, will select a random port
-    --assets, -a      select which directory as assets dir, default use root dir
-    --help, -h        print this help message
-    -i, --ignore-hidden      ignore hidden files
-    -s, --silence     keep silence, do not logging
-`,
-  );
-  return;
+if (!options.hidden) {
+  ignores.push(/[\\/]\./);
 }
 
-const port = argv.port || argv.p || 3000;
-const root = argv._[0] || argv.root || argv.r || '.';
-const assets = argv.assets || argv.a;
-const ignores = (argv.i || argv['ignore-hidden']) && /[\\/]\./;
-const logger = (argv.s || argv.silence) || defaultLogger;
-const openBrowser = Boolean(argv.open);
+const logger = options.silence ? undefined : defaultLogger;
 
 logger && logger.clearConsole();
 
 const middleware = createPenMiddleware({
-  root,
-  assets,
   logger,
-  ignores,
-});
-const server = createServer(middleware);
+  root: options.root,
+  ignores: ignores
+    .map((each) => {
+      if (typeof each === 'string') {
+        return new RegExp(each);
+      }
 
-// attach socketio
-middleware.pen.attach(server);
+      if (each instanceof RegExp) {
+        return each;
+      }
+
+      return undefined;
+    })
+    .filter((_) => _),
+});
+
+const app = express();
+
+app.use(middleware);
+
+const server = createServer(app);
+
+middleware.attach(server);
 
 (async function main() {
   const avaliablePort = await getPort({
@@ -54,12 +63,13 @@ middleware.pen.attach(server);
   });
 
   if (avaliablePort !== port) {
-    logger && logger.warn(`Pen found port ${port} is not avaliable, use random port ${avaliablePort} instead`);
+    logger && logger.warn(`Pen found port ${port} unavaliable, use random port ${avaliablePort} instead`);
   }
 
   server.listen(avaliablePort, () => {
     const url = `http://localhost:${avaliablePort}/`;
-    logger && logger.done(`Pen listening on ${url}`);
-    openBrowser && open(url);
+
+    logger && logger.done(`Pen listening on ${chalk.bold(chalk.cyan(url))}`);
+    options.open && open(url);
   });
 }());

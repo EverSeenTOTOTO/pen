@@ -1,15 +1,16 @@
 import { makeAutoObservable } from 'mobx';
 import { io, Socket } from 'socket.io-client';
 import RootStore from './root';
+import type { Theme } from '../../ThemeProvider';
 
 export enum PenSocketSendEvents {
   Init = 'peninit',
-  ChangeTheme= 'penchangeTheme',
+  ChangeTheme= 'penChangeTheme',
 }
 export enum PenSocketRecvEvents {
   ErrorOccured = 'penerror',
   UpdateData = 'pendata',
-  UpdateTheme = 'pentheme',
+  UpdateTheme = 'penUpdateTheme',
 }
 
 export default class PenSocketStore {
@@ -40,7 +41,7 @@ export default class PenSocketStore {
 
   onError(error: Error) {
     this.loading = false;
-    this.rootStore.uiStore.notifyError(error);
+    this.rootStore.uiStore.notify('error', error.message);
   }
 
   onUpdatePenError(data: string) {
@@ -59,11 +60,11 @@ export default class PenSocketStore {
   }
 
   fetchData(pathname: string) {
-    this.loading = true;
+    this.loading = false;
     this.socket.emit(PenSocketSendEvents.Init, pathname.slice(1));
   }
 
-  fetchTheme(theme: any) {
+  fetchTheme(theme: Theme) {
     this.loading = true;
     this.socket.emit(PenSocketSendEvents.ChangeTheme, theme);
   }
