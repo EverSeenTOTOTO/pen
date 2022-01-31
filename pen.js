@@ -20,7 +20,7 @@ program
   .parse();
 
 const options = program.opts();
-const { port } = options;
+const port = parseInt(options.port, 10);
 const ignores = Array.isArray(options.ignores) ? options.ignores : [options.ignores];
 
 if (!options.hidden) {
