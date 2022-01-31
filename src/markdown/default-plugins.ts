@@ -5,6 +5,7 @@ import mditFootnote from 'markdown-it-footnote';
 import mditContainer from 'markdown-it-container';
 import mditKatex from './plugins/katex';
 import mditMermaid from './plugins/mermaid';
+import mditCopy from './plugins/copy';
 
 const createRender = (color: string) => (tokens: any, index: number) => {
   // const info = tokens[index].info.trim().slice(color.length).trim();
@@ -23,6 +24,7 @@ export default [
     strict: false,
   }],
   [mditMermaid],
+  [mditCopy],
   [mditContainer, 'Warn', {
     render: createRender('warn'),
   }],

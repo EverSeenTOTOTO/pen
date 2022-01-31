@@ -8,11 +8,16 @@ import ReactDOM from 'react-dom';
 import {
   BrowserRouter, Route, Switch,
 } from 'react-router-dom';
+import Clipboard from 'clipboard';
 import Blog from './Blog';
 import RootContext from './stores/index';
 import RootStore from './stores/root';
 import { DefaultThemeConfig } from './stores/ui';
 import './style/style.css';
+
+// clipboard
+// eslint-disable-next-line no-new
+new Clipboard('.markdown-it-copy-btn');
 
 const Home = observer(() => {
   const prefersDarkMode = useMediaQuery('(prefers-color-scheme: light)');

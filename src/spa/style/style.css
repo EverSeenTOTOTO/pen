@@ -38,3 +38,26 @@ html, body {
 .markdown-body .container p {
   margin: 0;
 }
+
+.markdown-it-copy {
+  position: relative;
+}
+
+.markdown-it-copy-btn {
+  position: absolute;
+  top: 0.5rem;
+  right: 1rem;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+}
+
+.markdown-it-copy-btn:active {
+  opacity: .5;
+}
+
+.markdown-body-copy-text {
+  width: 100%;
+  height: 100%;
+  line-height: 100%;
+}

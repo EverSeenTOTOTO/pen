@@ -1,11 +1,6 @@
 {
-  "name": "@everseenflash/pen-middleware",
-  "main": "dist/lib.js",
-  "bin": {
-    "pen": "pen.js"
-  },
+  "name": "@everseen/pen",
   "version": "3.4.0",
-  "types": "dist/index.d.ts",
   "license": "MIT",
   "author": "EverSeenTOTOTO <jialiuniu@gmail.com>",
   "homepage": "https://github.com/EverSeenTOTOTO/pen-middleware",
@@ -16,19 +11,22 @@
   "bugs": {
     "url": "https://github.com/EverSeenTOTOTO/pen-middleware/issues"
   },
+  "main": "dist/lib.js",
+  "bin": {
+    "pen": "pen.js"
+  },
+  "types": "dist/index.d.ts",
   "dependencies": {
     "get-port": "^5.1.1",
     "github-markdown-css": "^5.0.0",
     "highlight.js": "^11.3.1",
-    "markdown-it": "^12.0.3",
+    "markdown-it": "^12.3.2",
     "markdown-it-anchor": "^6.0.1",
     "markdown-it-container": "^3.0.0",
     "markdown-it-footnote": "^3.0.2",
     "markdown-it-highlightjs": "^3.4.0",
     "markdown-it-toc-done-right": "^4.2.0",
     "minimist": "^1.2.5",
-    "mobx": "^6.3.6",
-    "mobx-react-lite": "^3.2.2",
     "open": "^8.2.0",
     "serve-static": "^1.14.1",
     "socket.io": "^3.0.4"
@@ -59,6 +57,7 @@
     "babel-preset-react-app": "^10.0.0",
     "browserslist": "^4.16.6",
     "chalk": "^4.1.1",
+    "clipboard": "^2.0.9",
     "css-loader": "^6.4.0",
     "cssnano": "^5.0.9",
     "esbuild-loader": "^2.16.0",
@@ -74,6 +73,8 @@
     "katex": "^0.13.11",
     "mermaid": "^8.10.2",
     "mini-css-extract-plugin": "^2.4.4",
+    "mobx": "^6.3.6",
+    "mobx-react-lite": "^3.2.2",
     "npm-run-all": "^4.1.5",
     "optimize-css-assets-webpack-plugin": "^5.0.4",
     "postcss": "^8.3.11",
