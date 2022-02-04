@@ -1,4 +1,5 @@
 import chokidar from 'chokidar';
+import sort from 'alphanum-sort';
 import chalk from 'chalk';
 import fs from 'fs';
 import {
@@ -176,10 +177,11 @@ ${e.stack ?? e.message ?? 'internal pen server error'}
 
     const dirInfo = dirCount > 0 ? `+ **子目录数量:** ${dirCount}` : '';
     const fileInfo = fileCount > 0 ? `+ **文档数量:** ${fileCount}` : '';
+    const sortInfo = sort(files.map((each) => each.relative.toLowerCase()));
 
     return {
       files: files.sort((a: FileInfo, b: FileInfo) => {
-        if (a.filename < b.filename) {
+        if (sortInfo.indexOf(a.relative.toLowerCase()) < sortInfo.indexOf(b.relative.toLowerCase())) {
           return -1;
         }
         return 0;

@@ -54,7 +54,7 @@ declare module 'markdown-it-todo' {
   const anything = any;
   export default anything;
 }
-declare module 'finalhandler' {
+declare module 'alphanum-sort' {
   const anything = any;
   export default anything;
 }
