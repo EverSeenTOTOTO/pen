@@ -1,6 +1,10 @@
 #!/usr/bin/env node
+/* eslint-disable @typescript-eslint/no-var-requires */
 
-const { createServer } = require('http');
+const { createServer: createHttpServer } = require('http');
+const { createServer: createHttpsServer } = require('https');
+const path = require('path');
+const fs = require('fs');
 const express = require('express');
 const getPort = require('get-port');
 const open = require('open');
@@ -17,6 +21,8 @@ program
   .option('-H, --hidden', 'ignore hidden files', false)
   .option('-s, --silence', 'show logger outputs', false)
   .option('-o, --open', 'open browser automatically', false)
+  .option('-K, --key [key]', 'key for https server')
+  .option('-C, --cert [cert]', 'certificate for https server')
   .parse();
 
 const options = program.opts();
@@ -30,6 +36,20 @@ if (!options.hidden) {
 const logger = options.silence ? undefined : defaultLogger;
 
 logger && logger.clearConsole();
+
+let key;
+let cert;
+
+if (options.key && options.cert) {
+  try {
+    key = fs.readFileSync(path.resolve(options.key));
+    cert = fs.readFileSync(path.resolve(options.cert));
+  } catch (e) {
+    logger.error(`Pen failed to read ${options.key} or ${options.cert}`);
+  }
+}
+
+const useHttps = !!((key && cert));
 
 const middleware = createPenMiddleware({
   logger,
@@ -53,7 +73,9 @@ const app = express();
 
 app.use(middleware);
 
-const server = createServer(app);
+const server = useHttps
+  ? createHttpsServer({ key, cert }, app)
+  : createHttpServer(app);
 
 middleware.attach(server);
 
@@ -67,7 +89,7 @@ middleware.attach(server);
   }
 
   server.listen(avaliablePort, () => {
-    const url = `http://localhost:${avaliablePort}/`;
+    const url = `${useHttps ? 'https' : 'http'}://localhost:${avaliablePort}/`;
 
     logger && logger.done(`Pen listening on ${chalk.bold(chalk.cyan(url))}`);
     options.open && open(url);

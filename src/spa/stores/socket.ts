@@ -25,6 +25,7 @@ export default class PenSocketStore {
     this.rootStore = rootStore;
     this.socket = io({
       path: '/pensocket.io',
+      transports: ['websocket', 'polling'],
     });
 
     this.socket.on('disconnect', (reason: string) => this.onError(new Error(reason)));

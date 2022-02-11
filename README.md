@@ -50,6 +50,14 @@ help.
 
 是否输出日志，默认输出。
 
++ `-K, --key`
+
+https服务器证书的key文件。
+
++ `-C, --cert`
+
+https服务器证书的cert文件。
+
 ### Use with Node.js API
 
 Just check [pen.js](./pen.js) as an example.
@@ -74,12 +82,17 @@ balabala
 + markdown-it-toc-done-right
 + markdown-it-katex (forked, update to katex@0.13.11)
 + markdown-it-mermaid (forked, update to mermaid@8.10.2)
++ markdown-it-copy （forked）
 
 ## Q&A
 
 + Diffrent namespaces?
 
 Pen force to use default namespace `'/'`, different namespace is not support yet.
+
++ Default [path](https://socket.io/docs/v4/client-options/#path) is not `/socket.io` ?
+
+Pen use `/pensocket.io` as default path.
 
 + Custom UI?
 

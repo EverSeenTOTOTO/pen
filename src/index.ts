@@ -46,6 +46,7 @@ export class Pen {
   attach(server: HttpServer) {
     const iobase = new IOBase(server, {
       path: '/pensocket.io',
+      transports: ['websocket', 'polling'],
     });
 
     iobase.on('connection', (socket: Socket) => {
