@@ -61,7 +61,7 @@ export default class PenSocketStore {
   }
 
   fetchData(pathname: string) {
-    this.loading = false;
+    this.loading = true;
     this.socket.emit(PenSocketSendEvents.Init, pathname.slice(1));
   }
 

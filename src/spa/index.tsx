@@ -1,6 +1,5 @@
 import CssBaseline from '@material-ui/core/CssBaseline';
 import { ThemeProvider } from '@material-ui/core/styles';
-import useMediaQuery from '@material-ui/core/useMediaQuery';
 import { autorun } from 'mobx';
 import { observer } from 'mobx-react-lite';
 import React, { useContext, useEffect, useRef } from 'react';
@@ -15,7 +14,6 @@ import RootStore from './stores/root';
 import './style/style.css';
 
 const Home = observer(() => {
-  const prefersDarkMode = useMediaQuery('(prefers-color-scheme: light)');
   const root = useContext(RootContext);
   const themeStyleElementRef = useRef<HTMLStyleElement>();
 
@@ -28,12 +26,9 @@ const Home = observer(() => {
 
     return () => clipboard.destroy();
   }, []);
-  useEffect(() => {
-    root.uiStore.toggleDarkMode(prefersDarkMode);
-  }, [prefersDarkMode]);
   useEffect(() => autorun(() => {
     if (themeStyleElementRef.current) {
-      document.body.removeChild(themeStyleElementRef.current);
+      document.head.removeChild(themeStyleElementRef.current);
     }
 
     if (root.uiStore.themeStyleScript) {
@@ -42,7 +37,7 @@ const Home = observer(() => {
       styleElement.setAttribute('type', 'text/css');
 
       themeStyleElementRef.current = styleElement;
-      document.body.appendChild(styleElement);
+      document.head.appendChild(styleElement);
     }
   }), []);
 

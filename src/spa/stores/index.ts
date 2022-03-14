@@ -1,4 +1,4 @@
 import { createContext } from 'react';
 import RootStore from './root';
 
-export default createContext<RootStore>();
+export default createContext<RootStore>(null);

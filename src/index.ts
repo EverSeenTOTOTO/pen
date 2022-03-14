@@ -13,9 +13,10 @@ export { logger };
 
 export type PenCreateOptions = {
   root?: string,
-  ignores?: RegExp|RegExp[],
+  ignores: RegExp[],
   logger?: typeof logger,
-  mditPlugins?: any[]
+  filetypes: RegExp,
+  mditPlugins?: any[],
 };
 
 export class Pen {
@@ -23,7 +24,9 @@ export class Pen {
 
   public readonly root: string;
 
-  public readonly ignores?: RegExp|RegExp[];
+  public readonly ignores: RegExp[];
+
+  public readonly filetypes: RegExp;
 
   public readonly logger?: typeof logger;
 
@@ -36,6 +39,7 @@ export class Pen {
   constructor(opts: PenCreateOptions) {
     this.root = opts.root ?? '.';
     this.ignores = opts.ignores;
+    this.filetypes = opts.filetypes;
     this.logger = opts.logger;
     this.markdownRender = createRender(opts.mditPlugins);
     this.themeProvider = new ThemeProvider({
@@ -76,6 +80,7 @@ export class Pen {
           filepath,
         });
       });
+      socket.emit('penUpdateTheme', this.themeProvider.getTheme({ darkMode: false }));
       socket.on('penChangeTheme', (theme: Theme) => {
         const themeStyleScript = this.themeProvider.getTheme(theme);
 
@@ -83,7 +88,6 @@ export class Pen {
       });
     });
 
-    this.logger?.info(`Pen watching root: ${this.root}`);
     this.iobase = iobase;
   }
 
@@ -118,11 +122,12 @@ export class Pen {
     }
 
     const newWatcher = new Watcher({
+      socket,
       root: this.root,
       logger: this.logger,
       path: newPath,
+      filetypes: this.filetypes,
       ignores: this.ignores,
-      socket,
       render: this.markdownRender,
     });
 

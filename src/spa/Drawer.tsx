@@ -11,7 +11,7 @@ import { autorun } from 'mobx';
 import { observer } from 'mobx-react-lite';
 import React, { useContext, useEffect, useRef } from 'react';
 import { useHistory } from 'react-router';
-import { PenDirInfo } from './stores/blog';
+import type { FileInfo } from '../watcher';
 import RootContext from './stores/index';
 
 const useStyles = makeStyles({
@@ -23,19 +23,25 @@ const useStyles = makeStyles({
 const DrawerListItem = ({ files, localCurrent }) => {
   const history = useHistory();
 
-  return files.map((each: PenDirInfo) => {
+  return files.map((each: FileInfo) => {
     const currentItemClassName = files.indexOf(each) === localCurrent ? 'list-item--current' : '';
 
     return (
       <ListItem
         className={`list-item ripple ${currentItemClassName}`}
         onClick={() => {
-          history.push(`/${each.relative}`);
+          const href = `/${each.relative}`;
+          if (each.type === 'pdf') {
+            // use browser native, not pdfjs
+            location.href = href;
+          } else {
+            history.push(href);
+          }
         }}
       >
         <ListItemAvatar>
           <Avatar>
-            { each.type === 'markdown' ? <TextFields /> : <Folder />}
+            { each.type !== 'dir' ? <TextFields /> : <Folder />}
           </Avatar>
         </ListItemAvatar>
         <ListItemText primary={each.filename} />

@@ -1,4 +1,5 @@
 import chokidar from 'chokidar';
+// eslint-disable-next-line import/no-extraneous-dependencies
 import sort from 'alphanum-sort';
 import chalk from 'chalk';
 import fs from 'fs';
@@ -20,26 +21,29 @@ function slash(path: string) {
   return path.replace(/\\/g, '/');
 }
 
-type FileInfo = {
+export type FileType = 'markdown' | 'dir' | 'pdf' | 'other';
+
+export type FileInfo = {
   filename: string,
   relative: string,
-  type: string,
+  type: FileType,
 };
 
 export type MdContent = {
   files: FileInfo[],
   content: string,
   current: string
-  type: 'markdown' | 'dir'
+  type: FileType
 };
 
 interface PenWatcher {
   path: string,
   root: string,
-  ignores?: RegExp|RegExp[],
-  logger?: typeof logger,
+  filetypes: RegExp,
+  ignores: RegExp[],
   socket: Socket
   render: ReturnType<typeof createRender>
+  logger?: typeof logger,
 }
 
 const isDir = (filepath: string) => {
@@ -47,22 +51,24 @@ const isDir = (filepath: string) => {
   return stat.isDirectory();
 };
 
-// check file permission
-const checkPermission = (option: Pick<PenWatcher, 'path'|'root'|'ignores'>) => {
-  const { path, root, ignores } = option;
+const getFileType = (filename: string): FileType => {
+  return /\.(md|markdown)$/.test(filename)
+    ? 'markdown'
+    : /\.pdf$/.test(filename)
+      ? 'pdf'
+      : 'other';
+};
+
+const checkPermission = (option: Pick<PenWatcher, 'path'|'root'|'filetypes'|'ignores'>) => {
+  const {
+    path, root, filetypes, ignores,
+  } = option;
 
   if (!resolve(path).startsWith(resolve(root)) || !fs.existsSync(path)) {
     throw new Error(`Opps, pen not permitted to watch this file, or maybe file not exist: ${path}?`);
   }
 
-  if (ignores !== undefined) {
-    if (Array.isArray(ignores)) {
-      return ignores.filter((regex) => regex.test(path)).length === 0;
-    }
-    return !ignores.test(path);
-  }
-
-  return true;
+  return (isDir(path) || filetypes.test(path)) && ignores.filter((regex) => regex.test(path)).length === 0;
 };
 
 export default class Watcher implements PenWatcher {
@@ -72,9 +78,11 @@ export default class Watcher implements PenWatcher {
 
   path: string;
 
-  ignores?: RegExp | RegExp[] | undefined;
+  filetypes: RegExp;
 
-  logger?: typeof logger | undefined;
+  ignores: RegExp[];
+
+  logger?: typeof logger;
 
   render: PenWatcher['render'];
 
@@ -87,6 +95,7 @@ export default class Watcher implements PenWatcher {
   constructor(opts: PenWatcher) {
     this.path = opts.path;
     this.root = opts.root;
+    this.filetypes = opts.filetypes;
     this.ignores = opts.ignores;
     this.logger = opts.logger;
     this.render = opts.render;
@@ -134,7 +143,7 @@ ${e.stack ?? e.message ?? 'internal pen server error'}
 
   trigger(): Watcher {
     try {
-      const content = this.readMarkdownFiles(this.path);
+      const content = this.readContent(this.path);
 
       this.ondata(content);
     } catch (e) {
@@ -148,12 +157,20 @@ ${e.stack ?? e.message ?? 'internal pen server error'}
     return this;
   }
 
-  readMarkdownFiles(path: string): MdContent {
+  renderContent(path: string, type: FileType): string {
+    if (type === 'pdf') {
+      return slash(relative(this.root, path));
+    }
+    return this.render(fs.readFileSync(path, 'utf8').toString());
+  }
+
+  // 读取正文内容
+  readContent(path: string): MdContent {
     let current = '';
 
-    // 是一个md
+    // 是一个文件
     if (!isDir(path)) {
-      const { files } = this.readMarkdownFiles(dirname(this.path));
+      const { files } = this.readContent(dirname(this.path));
 
       for (const each of files) {
         if (basename(path) === basename(each.filename)
@@ -162,21 +179,26 @@ ${e.stack ?? e.message ?? 'internal pen server error'}
         }
       }
 
+      const type = getFileType(path);
+
       return {
         files,
-        content: this.render(fs.readFileSync(path).toString()),
+        content: this.renderContent(path, type),
         current,
-        type: 'markdown',
+        type,
       };
     }
 
     const stats = fs.statSync(path);
     const files = this.readFiles(path).filter((each) => each.type !== 'other');
+    // looooooooop
     const dirCount = files.filter((each) => each.type === 'dir').length;
     const fileCount = files.filter((each) => each.type === 'markdown').length;
+    const pdfCount = files.filter((each) => each.type === 'pdf').length;
 
     const dirInfo = dirCount > 0 ? `+ **子目录数量:** ${dirCount}` : '';
-    const fileInfo = fileCount > 0 ? `+ **文档数量:** ${fileCount}` : '';
+    const markdownInfo = fileCount > 0 ? `+ **Markdown 文档数量:** ${fileCount}` : '';
+    const pdfInfo = pdfCount > 0 ? `+ **PDF 文档数量:** ${pdfCount}` : '';
     const sortInfo = sort(files.map((each) => each.relative.toLowerCase()));
 
     return {
@@ -191,10 +213,11 @@ ${e.stack ?? e.message ?? 'internal pen server error'}
 
 ### ${basename(path)} 
 
-${fileInfo}.
-${dirInfo}.
-+ **创建于:** ${stats.ctime}.
-+ **最后修改于:** ${stats.mtime}.
+${dirInfo}
+${pdfInfo}
+${markdownInfo}
++ **创建于:** ${stats.ctime}
++ **最后修改于:** ${stats.mtime}
 :::
 `),
       current,
@@ -202,7 +225,8 @@ ${dirInfo}.
     };
   }
 
-  readFiles(path: string) {
+  // 读取侧边栏目录：如果当前是文件，读取同级；如果是目录，读取子级
+  readFiles(path: string): FileInfo[] {
     const files = fs.readdirSync(path);
 
     return files
@@ -210,20 +234,13 @@ ${dirInfo}.
         return checkPermission({
           path: resolve(path, filename),
           root: this.root,
+          filetypes: this.filetypes,
           ignores: this.ignores,
         });
       })
       .map((filename: string) => {
         const filepath = resolve(path, filename);
         const relativePath = slash(relative(this.root, filepath));
-
-        if (/\.(md|markdown)$/.test(filename)) {
-          return {
-            filename,
-            relative: relativePath,
-            type: 'markdown',
-          };
-        }
 
         if (isDir(filepath)) {
           return {
@@ -234,9 +251,9 @@ ${dirInfo}.
         }
 
         return {
-          filename: '',
-          relative: '',
-          type: 'other',
+          filename,
+          relative: relativePath,
+          type: getFileType(filename),
         };
       });
   }

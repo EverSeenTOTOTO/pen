@@ -36,7 +36,7 @@ module.exports = {
   },
   overrides: [
     {
-      files: ['src/spa/**/*.tsx'],
+      files: ['src/spa/**/*'],
       rules: {
         'import/no-extraneous-dependencies': 'off',
       },

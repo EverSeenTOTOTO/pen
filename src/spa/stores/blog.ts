@@ -1,17 +1,12 @@
 import mermaid from 'mermaid';
 import { makeAutoObservable, reaction } from 'mobx';
+import type { FileInfo } from '../../watcher';
 import RootStore from './root';
-
-export type PenDirInfo = {
-  filename?: string,
-  relative: string,
-  type: 'dir' | 'markdown',
-};
 
 export default class BlogStore {
   rootStore: RootStore;
 
-  files: PenDirInfo[] = [];
+  files: FileInfo[] = [];
 
   content = '';
 
@@ -82,7 +77,7 @@ export default class BlogStore {
   initMermaid() {
     const { darkMode } = this.rootStore.uiStore;
 
-    const mermaidThemes = ['default', 'forest'];
+    const mermaidThemes = ['default'];
     requestAnimationFrame(() => {
       mermaid.initialize({
       // startOnLoad: true,
