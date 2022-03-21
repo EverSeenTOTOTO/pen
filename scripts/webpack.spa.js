@@ -72,6 +72,10 @@ module.exports = {
     new CopyWebpackPlugin({
       patterns: [
         {
+          from: resolve(paths.nodeModules, 'katex/dist/katex.min.css'),
+          to: resolve(paths.spaDist, 'katex.min.4ff918ea.css'),
+        },
+        {
           from: resolve(paths.nodeModules, 'katex/dist/katex.min.js'),
           to: resolve(paths.spaDist, 'katex.min.6ec44b58.js'),
         },

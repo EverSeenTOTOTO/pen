@@ -12,7 +12,7 @@ export default class BlogStore {
 
   current = '';
 
-  localCurrent = -1;
+  localCurrent = 0;
 
   constructor(rootStore: RootStore) {
     makeAutoObservable(this);
@@ -26,7 +26,7 @@ export default class BlogStore {
     this.current = '';
     this.content = '';
     this.files = [];
-    this.localCurrent = -1;
+    this.localCurrent = 0;
   }
 
   updatePenData(data: string) {

@@ -16,7 +16,12 @@ import RootContext from './stores/index';
 
 const useStyles = makeStyles({
   drawerPaper: {
-    width: 320,
+    width: '24vw',
+  },
+  '@media (max-width: 750px)': {
+    drawerPaper: {
+      width: '80vw',
+    },
   },
 });
 
@@ -62,11 +67,17 @@ const Drawer = observer(() => {
     }
 
     callback.current = (evt: KeyboardEvent) => {
-      if (evt.code === 'Enter' && root.blogStore.localCurrent >= 0) {
-        history.push(`/${root.blogStore.files[root.blogStore.localCurrent].relative}`);
-        return;
-      }
+      const { localCurrent } = root.blogStore;
 
+      if (evt.code === 'Enter' && localCurrent >= 0) {
+        history.push(`/${root.blogStore.files[localCurrent].relative}`);
+      }
+    };
+
+    window.addEventListener('keyup', callback.current);
+  }), []);
+  useEffect(() => {
+    const closure = (evt: KeyboardEvent) => {
       if (evt.code === 'Tab') {
         if (evt.shiftKey) {
           root.blogStore.decreaseLocalCurrent();
@@ -75,9 +86,22 @@ const Drawer = observer(() => {
         }
       }
     };
+    let timeout: NodeJS.Timeout|null = null;
+    const debounced = (evt: KeyboardEvent) => {
+      if (!timeout) {
+        closure(evt);
+        timeout = setTimeout(() => {
+          timeout = null;
+        }, 150);
+      }
+    };
 
-    window.addEventListener('keyup', callback.current);
-  }), []);
+    document.addEventListener('keydown', debounced);
+    return () => {
+      clearTimeout(timeout);
+      document.removeEventListener('keydown', debounced);
+    };
+  }, []);
 
   return (
     <SwipeableDrawer

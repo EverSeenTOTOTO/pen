@@ -12,8 +12,9 @@
       content="Web site for PenMiddleware"
     />
     <title><%= htmlWebpackPlugin.options.title %></title>
-    <script defer src="./katex.min.6ec44b58.js" integrity="sha384-YNHdsYkH6gMx9y3mRkmcJ2mFUjTd0qNQQvY9VYZgQd7DcN7env35GzlmFaZ23JGp"></script>
-    <script defer src="./auto-render.min.163583b1.js" integrity="sha384-vZTG03m+2yp6N6BNi5iM4rW4oIwk5DfcNdFfxkk9ZWpDriOkXX8voJBFrAO7MpVl" onload="renderMathInElement(document.body);"></script>
+  <link rel="stylesheet" href="./katex.min.4ff918ea.css">
+    <script defer src="./katex.min.6ec44b58.js"></script>
+    <script defer src="./auto-render.min.163583b1.js" onload="renderMathInElement(document.body);"></script>
     <script src="./mermaid.min.6ec44b58.js"></script>
     <% if (htmlWebpackPlugin.files.favicon) { %>
       <link rel="shortcut icon" href="<%= htmlWebpackPlugin.files.favicon%>">
