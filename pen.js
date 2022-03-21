@@ -35,11 +35,13 @@ if (filetypes.length === 0) {
   filetypes.push('md');
 }
 
-const ignores = Array.isArray(options.ignores) ? options.ignores : [options.ignores];
+let ignores = Array.isArray(options.ignores) ? options.ignores : [options.ignores];
 
 if (!options.hidden) {
   ignores.push(/[\\/]\./);
 }
+
+ignores = ignores.filter((_) => _).map((p) => new RegExp(p, 'g'));
 
 const logger = options.silence ? undefined : defaultLogger;
 
@@ -67,19 +69,7 @@ const middleware = createPenMiddleware({
   logger,
   root: options.root,
   filetypes: new RegExp(`\\.(${filetypes.filter((t) => ['md', 'markdown', 'pdf'].indexOf(t) !== -1).join('|')})$`),
-  ignores: ignores
-    .map((each) => {
-      if (typeof each === 'string') {
-        return new RegExp(each);
-      }
-
-      if (each instanceof RegExp) {
-        return each;
-      }
-
-      return undefined;
-    })
-    .filter((_) => _),
+  ignores,
 });
 
 const app = express();

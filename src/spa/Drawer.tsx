@@ -62,34 +62,22 @@ const Drawer = observer(() => {
     }
 
     callback.current = (evt: KeyboardEvent) => {
-      const { localCurrent } = root.blogStore;
+      if (evt.code === 'Enter' && root.blogStore.localCurrent >= 0) {
+        history.push(`/${root.blogStore.files[root.blogStore.localCurrent].relative}`);
+        return;
+      }
 
-      if (evt.code === 'Enter' && localCurrent >= 0) {
-        history.push(`/${root.blogStore.files[localCurrent].relative}`);
+      if (evt.code === 'Tab') {
+        if (evt.shiftKey) {
+          root.blogStore.decreaseLocalCurrent();
+        } else {
+          root.blogStore.increaseLocalCurrent();
+        }
       }
     };
 
     window.addEventListener('keyup', callback.current);
   }), []);
-  useEffect(() => {
-    const closure = (evt: KeyboardEvent) => {
-      switch (evt.code) {
-        case 'Tab': {
-          if (evt.shiftKey) {
-            root.blogStore.decreaseLocalCurrent();
-          } else {
-            root.blogStore.increaseLocalCurrent();
-          }
-          break;
-        }
-        default:
-          break;
-      }
-    };
-
-    document.addEventListener('keyup', closure);
-    return () => document.removeEventListener('keyup', closure);
-  }, []);
 
   return (
     <SwipeableDrawer

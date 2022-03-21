@@ -5,6 +5,7 @@ const { resolve } = require('path');
 const HtmlWebPackPlugin = require('html-webpack-plugin');
 const postcssNormalize = require('postcss-normalize');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
 const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 
 const { paths } = require('./utils');
@@ -68,6 +69,22 @@ module.exports = {
     ],
   },
   plugins: [
+    new CopyWebpackPlugin({
+      patterns: [
+        {
+          from: resolve(paths.nodeModules, 'katex/dist/katex.min.js'),
+          to: resolve(paths.spaDist, 'katex.min.6ec44b58.js'),
+        },
+        {
+          from: resolve(paths.nodeModules, 'katex/dist/contrib/auto-render.min.js'),
+          to: resolve(paths.spaDist, 'auto-render.min.163583b1.js'),
+        },
+        {
+          from: resolve(paths.nodeModules, 'mermaid/dist/mermaid.min.js'),
+          to: resolve(paths.spaDist, 'mermaid.min.6ec44b58.js'),
+        },
+      ],
+    }),
     new MiniCssExtractPlugin({
       filename: 'pen.[contenthash:8].css',
     }),

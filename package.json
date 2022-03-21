@@ -1,6 +1,6 @@
 {
   "name": "@everseen/pen",
-  "version": "4.2.0",
+  "version": "4.3.0",
   "license": "MIT",
   "author": "EverSeenTOTOTO <jialiuniu@gmail.com>",
   "homepage": "https://github.com/EverSeenTOTOTO/pen-middleware",
@@ -60,6 +60,7 @@
     "babel-preset-react-app": "^10.0.0",
     "browserslist": "^4.16.6",
     "clipboard": "^2.0.9",
+    "copy-webpack-plugin": "9",
     "css-loader": "^6.4.0",
     "cssnano": "^5.0.9",
     "esbuild-loader": "^2.16.0",
