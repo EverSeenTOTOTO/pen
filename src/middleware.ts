@@ -15,7 +15,9 @@ const MimeTypes = new Map([
   [/\.ico$/, 'image/x-icon'],
   [/\.svgz?$/, 'image/svg+xml'],
   [/\.webp$/, 'image/webp'],
+  [/\.ttf$/, 'application/ttf'],
   [/\.woff$/, 'application/font-woff'],
+  [/\.woff2$/, 'application/font-woff2'],
   [/\.json$/, 'application/json'],
   [/\.pdf$/, 'application/pdf'],
   [/\.zip$/, 'application/zip'],
@@ -64,8 +66,11 @@ export default (options: { logger?: typeof logger, root?: string, namespace?: st
           res.setHeader('Content-Type', contentType);
         }
 
+        options.logger?.warn(`Serving ${url.pathname}`);
+
         fs.createReadStream(asset).pipe(res);
       } else {
+        options.logger?.warn(`Not found ${url.pathname} or is markdown request, fallback to html`);
         res.setHeader('Content-Type', 'text/html');
         fs.createReadStream(join(assets, 'index.html'))
           .pipe(res);

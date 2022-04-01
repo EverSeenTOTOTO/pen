@@ -72,20 +72,24 @@ module.exports = {
     new CopyWebpackPlugin({
       patterns: [
         {
+          from: resolve(paths.nodeModules, 'katex/dist/contrib/auto-render.min.js'),
+          to: resolve(paths.spaDist, 'auto-render.min.js'),
+        },
+        {
+          from: resolve(paths.nodeModules, 'katex/dist/fonts'),
+          to: resolve(paths.spaDist),
+        },
+        {
           from: resolve(paths.nodeModules, 'katex/dist/katex.min.css'),
-          to: resolve(paths.spaDist, 'katex.min.4ff918ea.css'),
+          to: resolve(paths.spaDist, 'katex.min.css'),
         },
         {
           from: resolve(paths.nodeModules, 'katex/dist/katex.min.js'),
-          to: resolve(paths.spaDist, 'katex.min.6ec44b58.js'),
-        },
-        {
-          from: resolve(paths.nodeModules, 'katex/dist/contrib/auto-render.min.js'),
-          to: resolve(paths.spaDist, 'auto-render.min.163583b1.js'),
+          to: resolve(paths.spaDist, 'katex.min.js'),
         },
         {
           from: resolve(paths.nodeModules, 'mermaid/dist/mermaid.min.js'),
-          to: resolve(paths.spaDist, 'mermaid.min.6ec44b58.js'),
+          to: resolve(paths.spaDist, 'mermaid.min.js'),
         },
       ],
     }),

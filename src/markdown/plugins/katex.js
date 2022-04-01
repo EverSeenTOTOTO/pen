@@ -12,7 +12,7 @@ for rendering output.
 /* eslint-disable */
 // @ts-nocheck
 
-import katex from 'katex'
+import katex from './katex.js'
 
 // Test if potential opening or closing delimieter
 // Assumes that there is a "$" at state.src[pos]

@@ -1,10 +1,12 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 // eslint-disable-next-line import/no-extraneous-dependencies
+const { resolve } = require('path');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
 const { paths } = require('./utils');
 
 module.exports = {
   mode: process.env.NODE_ENV,
-  externals: /^(socket\.io|markdown-it|serve-static|chokidar|express|commander|chalk|get-port)/,
+  externals: /^(socket\.io|markdown-it|serve-static|chokidar|express|commander|chalk|get-port|\.\/katex\.js)/,
   entry: {
     server: paths.serverEntry,
   },
@@ -36,6 +38,16 @@ module.exports = {
     },
     extensions: ['.js', '.ts'],
   },
+  plugins: [
+    new CopyWebpackPlugin({
+      patterns: [
+        {
+          from: resolve(paths.nodeModules, 'katex/dist/katex.js'),
+          to: resolve(paths.serverDist, 'katex.js'),
+        },
+      ],
+    }),
+  ],
   optimization: {
     minimize: process.env.NODE_ENV !== 'production',
   },
