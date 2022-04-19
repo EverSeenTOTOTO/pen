@@ -43,9 +43,18 @@ if (!options.hidden) {
 
 ignores = ignores.filter((_) => _).map((p) => new RegExp(p, 'g'));
 
-const logger = options.silence ? undefined : defaultLogger;
+const PASS = () => {};
+const logger = options.silence
+  ? {
+    info: PASS,
+    error: PASS,
+    warn: PASS,
+    done: PASS,
+    clearConsole: PASS,
+  }
+  : defaultLogger;
 
-logger && logger.clearConsole();
+logger.clearConsole();
 
 logger.info(`Pen watching ${chalk.cyan(options.root)}`);
 logger.info(`Pen enabled filetypes: ${filetypes.map((t) => chalk.cyan(t)).join(', ')}`);
@@ -88,13 +97,13 @@ middleware.attach(server);
   });
 
   if (avaliablePort !== port) {
-    logger && logger.warn(`Pen found port ${port} unavaliable, use random port ${avaliablePort} instead`);
+    logger.warn(`Pen found port ${port} unavaliable, use random port ${avaliablePort} instead`);
   }
 
   server.listen(avaliablePort, () => {
     const url = `${useHttps ? 'https' : 'http'}://localhost:${avaliablePort}/`;
 
-    logger && logger.done(`Pen listening on ${chalk.bold(chalk.cyan(url))}`);
+    logger.done(`Pen listening on ${chalk.bold(chalk.cyan(url))}`);
     options.open && open(url);
   });
 }());

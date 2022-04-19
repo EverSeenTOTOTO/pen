@@ -52,8 +52,6 @@ const BreadCrumbRoutes = observer(({ pathname }: { pathname: string }) => {
   }, [pathname]);
 
   const push = (path: string) => {
-    document.activeElement?.blur?.();
-
     if (path !== pathname) {
       history.push(path);
     } else {

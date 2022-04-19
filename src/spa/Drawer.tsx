@@ -92,7 +92,7 @@ const Drawer = observer(() => {
         closure(evt);
         timeout = setTimeout(() => {
           timeout = null;
-        }, 150);
+        }, 100);
       }
     };
 

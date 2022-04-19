@@ -9,6 +9,7 @@ import BreadCrumbRoutes from './Breadcrumbs';
 import { getUpdir } from './common';
 import Drawer from './Drawer';
 import Markdown from './Markdown';
+import BottomNav from './BottomNavigation';
 import RootContext from './stores/index';
 
 const useStyles = makeStyles(() => ({
@@ -26,21 +27,20 @@ const Blog = observer(() => {
   const history = useHistory();
   const { pathname } = useLocation();
   const root = useContext(RootContext);
-  const [open, setOpen] = useState(false);
+  const [messageBar, setMessageBar] = useState(false);
   const closeSnackBar = (_event?: React.SyntheticEvent, reason?: string) => {
     if (reason === 'clickaway') {
       return;
     }
 
-    setOpen(false);
+    setMessageBar(false);
     root.uiStore.reset();
   };
 
   useEffect(() => autorun(() => {
-    setOpen(root.uiStore.message !== '');
+    setMessageBar(root.uiStore.message !== '');
   }), []);
   useEffect(() => {
-    window.scrollTo(0, 0);
     root.blogStore.reset();
     root.socketStore.fetchData(pathname);
 
@@ -64,12 +64,13 @@ const Blog = observer(() => {
   return (
     <main className={classes.root}>
       <Drawer />
+      <BottomNav />
       <div className={classes.markdown}>
         <BreadCrumbRoutes pathname={pathname} />
         <Markdown html={root.blogStore.content} loading={root.socketStore.loading} />
       </div>
       <Snackbar
-        open={open}
+        open={messageBar}
         autoHideDuration={3000}
         anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
         onClose={closeSnackBar}

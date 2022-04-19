@@ -6,6 +6,7 @@ import ExpandLessTwoToneIcon from '@material-ui/icons/ExpandLessTwoTone';
 const useStyles = makeStyles((theme) => ({
   fab: {
     position: 'fixed',
+    zIndex: 999,
     bottom: theme.spacing(4),
     right: theme.spacing(2),
   },
