@@ -230,6 +230,7 @@ ${markdownInfo}
     const files = fs.readdirSync(path);
 
     return files
+      .map((filename) => filename.replace(/~$/, '')) // It's weird sometimes got xxx.md~
       .filter((filename: string) => {
         return checkPermission({
           path: resolve(path, filename),

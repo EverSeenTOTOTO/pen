@@ -12,6 +12,7 @@ import { observer } from 'mobx-react-lite';
 import React, { useContext, useEffect, useRef } from 'react';
 import { useHistory } from 'react-router';
 import type { FileInfo } from '../watcher';
+import { useDebouncedEvent } from './common';
 import RootContext from './stores/index';
 
 const useStyles = makeStyles({
@@ -75,33 +76,19 @@ const Drawer = observer(() => {
     };
 
     window.addEventListener('keyup', callback.current);
-  }), []);
-  useEffect(() => {
-    const closure = (evt: KeyboardEvent) => {
-      if (evt.code === 'Tab') {
-        if (evt.shiftKey) {
-          root.blogStore.decreaseLocalCurrent();
-        } else {
-          root.blogStore.increaseLocalCurrent();
-        }
-      }
-    };
-    let timeout: NodeJS.Timeout|null = null;
-    const debounced = (evt: KeyboardEvent) => {
-      if (!timeout) {
-        closure(evt);
-        timeout = setTimeout(() => {
-          timeout = null;
-        }, 100);
-      }
-    };
 
-    document.addEventListener('keydown', debounced);
-    return () => {
-      clearTimeout(timeout);
-      document.removeEventListener('keydown', debounced);
-    };
-  }, []);
+    return () => window.removeEventListener('keyup', callback.current);
+  }), []);
+
+  useDebouncedEvent('keydown', (evt: KeyboardEvent) => {
+    if (evt.code === 'Tab') {
+      if (evt.shiftKey) {
+        root.blogStore.decreaseLocalCurrent();
+      } else {
+        root.blogStore.increaseLocalCurrent();
+      }
+    }
+  });
 
   return (
     <SwipeableDrawer

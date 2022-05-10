@@ -1,45 +1,22 @@
 import CssBaseline from '@material-ui/core/CssBaseline';
 import { ThemeProvider } from '@material-ui/core/styles';
-import { autorun } from 'mobx';
 import { observer } from 'mobx-react-lite';
-import React, { useContext, useEffect, useRef } from 'react';
+import React, { useContext } from 'react';
 import ReactDOM from 'react-dom';
 import {
   BrowserRouter, Route, Switch,
 } from 'react-router-dom';
-import Clipboard from 'clipboard';
 import Blog from './Blog';
 import RootContext from './stores/index';
 import RootStore from './stores/root';
 import './style/style.css';
+import { useClipboard, useTheme } from './common';
 
 const Home = observer(() => {
   const root = useContext(RootContext);
-  const themeStyleElementRef = useRef<HTMLStyleElement>();
 
-  useEffect(() => {
-    // clipboard
-    const clipboard = new Clipboard('.markdown-it-copy-btn');
-
-    clipboard.on('success', () => root.uiStore.notify('success', 'Copied.'));
-    clipboard.on('error', () => root.uiStore.notify('error', 'Copy failed.'));
-
-    return () => clipboard.destroy();
-  }, []);
-  useEffect(() => autorun(() => {
-    if (themeStyleElementRef.current) {
-      document.head.removeChild(themeStyleElementRef.current);
-    }
-
-    if (root.uiStore.themeStyleScript) {
-      const styleElement = document.createElement('style');
-      styleElement.innerHTML = root.uiStore.themeStyleScript;
-      styleElement.setAttribute('type', 'text/css');
-
-      themeStyleElementRef.current = styleElement;
-      document.head.appendChild(styleElement);
-    }
-  }), []);
+  useClipboard();
+  useTheme();
 
   return (
     <ThemeProvider theme={root.uiStore.theme}>

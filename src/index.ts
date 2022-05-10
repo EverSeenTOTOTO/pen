@@ -1,5 +1,4 @@
 /* eslint-disable max-len */
-import { existsSync } from 'fs';
 import { Server as HttpServer } from 'http';
 import { resolve } from 'path';
 import { Server as IOBase, Socket } from 'socket.io';
@@ -70,14 +69,9 @@ export class Pen {
 
       // change watch file
       socket.on('peninit', (param: string) => {
-        const resolvedFilePath = resolve(this.root, param);
-        const filepath = existsSync(resolvedFilePath)
-          ? resolvedFilePath
-          : resolve(this.root, './');
-
         this.startWatch({
           socket,
-          filepath,
+          filepath: resolve(this.root, param),
         });
       });
       socket.emit('penUpdateTheme', this.themeProvider.getTheme({ darkMode: false }));
