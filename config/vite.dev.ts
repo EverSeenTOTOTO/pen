@@ -2,26 +2,44 @@ import fs from 'fs';
 import { defineConfig, ViteDevServer } from 'vite';
 import base, { paths } from './vite.common';
 
-const devMock = () => ({
-  name: 'dev-api-mock',
-  configureServer(vite: ViteDevServer) {
-    const { logger } = vite.config;
-
-    vite.middlewares.use((req, res, next) => {
-      if (/^\/api\//.test(req.originalUrl)) {
-        logger.info(`mock ${req.originalUrl}`);
-
-        res.end('vite dev');
-      } else {
-        next();
-      }
-    });
-  },
-});
+const mockData = (url: string) => {
+  switch (url) {
+    case '/':
+      return {
+        type: 'directory',
+        children: ['1.md', '10.md', '2.md', '20.md', 'aaa', 'bbb', 'very-longlonglonglonglonglonglong-filename.md'],
+        relativePath: '/',
+        readme: {
+          type: 'markdown',
+          content: '# README',
+        },
+      };
+    case '/10.md':
+      return {
+        type: 'directory',
+        children: ['1.md', '10.md', '2.md', '20.md', 'aaa', 'bbb', 'very-longlonglonglonglonglonglong-filename.md'],
+        relativePath: '/',
+        reading: {
+          type: 'markdown',
+          content: '# 10.md',
+        },
+      };
+    case '/2.md':
+      return {
+        type: 'markdown',
+        content: '# 2.md',
+      };
+    default:
+      return {
+        type: 'error',
+        message: 'mock error',
+      };
+  }
+};
 
 const devSSR = () => ({
   name: 'dev-ssr',
-  configureServer(vite: ViteDevServer) {
+  async configureServer(vite: ViteDevServer) {
     const { logger } = vite.config;
     const templateHtml = fs.readFileSync(paths.template, 'utf-8');
 
@@ -30,7 +48,12 @@ const devSSR = () => ({
       try {
         const { render } = await vite.ssrLoadModule(paths.serverEntry);
         const template = await vite.transformIndexHtml(req.originalUrl, templateHtml);
-        const { html } = await render({ req, res, template });
+        const { html } = await render({
+          req,
+          res,
+          template,
+          markdownData: mockData(req.originalUrl),
+        });
 
         res.end(html);
       } catch (e) {
@@ -48,7 +71,6 @@ export default defineConfig((c) => {
     ...config,
     plugins: [
       ...(config.plugins || []),
-      devMock(),
       devSSR(),
     ],
   };

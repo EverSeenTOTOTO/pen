@@ -16,6 +16,11 @@ export default defineConfig(({ mode }) => ({
       },
     },
   },
+  resolve: {
+    alias: {
+      '@': paths.src,
+    },
+  },
   ssr: {
     external: Object.keys(pkg.dependencies),
   },

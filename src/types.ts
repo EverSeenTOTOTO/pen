@@ -46,11 +46,7 @@ export type PenDirectoryData = {
   children: string[],
   relativePath: string,
   reading?: PenMarkdownData
-};
-
-export type PenChangeData = {
-  type: 'add' | 'addDir' | 'change' | 'unlink' | 'unlinkDir',
-  detail: string[]
+  readme?: PenMarkdownData
 };
 
 export type PenErrorData = {
@@ -60,8 +56,7 @@ export type PenErrorData = {
 
 export type PenData = PenMarkdownData
 | PenDirectoryData
-| PenErrorData
-| PenChangeData;
+| PenErrorData;
 
 export type PenStyle = {
   type: StyleReq,

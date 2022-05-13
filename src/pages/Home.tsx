@@ -1,19 +1,41 @@
 import { observer } from 'mobx-react-lite';
 import { useStore } from '@/store';
-import { PrefetchContext } from '@/App';
-import { useNavigate } from 'react-router-dom';
+import Paper from '@material-ui/core/Paper';
+import { makeStyles } from '@material-ui/core/styles';
+import { createMarkup } from '@/utils';
+import { Container } from '@material-ui/core';
 
-export const prefetch = (ctx: PrefetchContext) => ctx.store.home.fetchName();
+const useStyles = makeStyles((theme) => ({
+  root: {
+    paddingLeft: theme.spacing(4),
+    paddingRight: theme.spacing(4),
+    paddingTop: theme.spacing(2),
+    paddingBottom: theme.spacing(2),
+    height: '100%',
+  },
+  paper: {
+    padding: theme.spacing(2),
+  },
+}));
 
 const Home = observer(() => {
-  const store = useStore('home');
-  const hello = `hello ${store.name}`;
-  const navigate = useNavigate();
+  const classes = useStyles();
+  const home = useStore('home');
 
-  return <div>
-    <button onClick={() => navigate('/about')}>about</button>
-    <div>{hello}</div>
-  </div>;
+  return <Container
+      maxWidth={false}
+      className="markdown-body"
+      classes={{
+        root: classes.root,
+      }}
+    >
+    <Paper
+      classes={{
+        root: classes.paper,
+      }}
+      dangerouslySetInnerHTML={createMarkup(home.html)}
+    />
+  </Container>;
 });
 
 export default Home;

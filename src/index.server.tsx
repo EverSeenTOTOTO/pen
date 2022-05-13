@@ -1,15 +1,27 @@
+import type { Request, Response } from 'express';
 import serializeJavascript from 'serialize-javascript';
 import ReactDOMServer from 'react-dom/server';
 import { StaticRouter } from 'react-router-dom/server';
-import { App, RenderContext, prefetch } from './App';
-import { createStore } from './store';
-import { createRoutes } from './routes';
+import { App } from './App';
+import { createStore, AppStore } from './store';
+import { createRoutes, AppRoutes } from './routes';
+import { PenData } from './types';
 
 // see index.html
 const APP_HTML = '<!--app-html-->';
 const APP_STATE = '<!--app-state-->';
 
 const serialize = (state: Record<string, unknown>) => `<script>;window.__PREFETCHED_STATE__=${serializeJavascript(state)};</script>`;
+
+export type RenderContext = {
+  req: Request;
+  res: Response;
+  template: string;
+  html?: string;
+  routes?: AppRoutes;
+  store?: AppStore;
+  markdownData?: PenData
+};
 
 export async function render(context: RenderContext) {
   const ctx = context as Required<RenderContext>;
@@ -21,7 +33,12 @@ export async function render(context: RenderContext) {
   ctx.store = store;
   ctx.routes = routes;
 
-  await prefetch(ctx).catch(console.error); // better nothrow
+  // prefetch markdown content for ssr
+  store.hydrate({
+    home: {
+      data: ctx.markdownData,
+    },
+  });
 
   const html = ReactDOMServer.renderToString(
     <StaticRouter location={req.originalUrl}>

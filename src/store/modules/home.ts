@@ -1,13 +1,13 @@
-import fetch from 'isomorphic-fetch';
 import { makeAutoObservable } from 'mobx';
+import { PenData } from '@/types';
 import type { AppStore, PrefetchStore } from '..';
 
 export type HomeState = {
-  name: string
+  data?: PenData
 };
 
 export class HomeStore implements PrefetchStore<HomeState> {
-  name = '';
+  data?: PenData;
 
   root: AppStore;
 
@@ -16,19 +16,27 @@ export class HomeStore implements PrefetchStore<HomeState> {
     this.root = root;
   }
 
-  async fetchName() {
-    const res = await fetch(`${import.meta.env.VITE_SERVER_URL}/api/name`);
-
-    this.name = await res.text();
+  get html() {
+    if (this.data?.type === 'directory') {
+      if (this.data.reading !== undefined) {
+        return this.data.reading.content;
+      } if (this.data.readme !== undefined) {
+        return this.data.readme.content;
+      }
+      return '';
+    } if (this.data?.type === 'markdown') {
+      return this.data.content;
+    }
+    return this.data?.message ?? '';
   }
 
   hydrate(state: HomeState): void {
-    this.name = state.name;
+    this.data = state.data;
   }
 
   dehydra(): HomeState {
     return {
-      name: this.name,
+      data: this.data,
     };
   }
 }

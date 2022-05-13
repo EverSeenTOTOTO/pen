@@ -41,6 +41,12 @@ module.exports = {
         'global-require': 'off',
       },
     },
+    {
+      files: '**/*.tsx',
+      rules: {
+        'import/no-extraneous-dependencies': 'off',
+      },
+    },
   ],
   settings: {
     'import/parsers': {
