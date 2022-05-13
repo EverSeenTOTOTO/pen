@@ -42,7 +42,7 @@ module.exports = {
       },
     },
     {
-      files: '**/*.tsx',
+      files: '**/*.{ts,tsx}',
       rules: {
         'import/no-extraneous-dependencies': 'off',
       },

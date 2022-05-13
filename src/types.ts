@@ -27,24 +27,32 @@ export enum ServerEvents {
 }
 
 export type PenInitData = {
-  type: 'info',
   availableThemes: string[];
-  currentTheme: string;
-  darkMode: boolean;
+  theme: string;
+  dark: boolean;
   watchRoot: string;
   socketNamespace: string;
+};
+
+export type PathInfo = {
+  type: 'directory' | 'markdown' | 'other',
+  fullpath: string,
+  filename: string,
+  relativePath: string,
 };
 
 export type PenMarkdownData = {
   type: 'markdown',
   content: string,
+  filename: string,
   relativePath: string
 };
 
 export type PenDirectoryData = {
   type: 'directory',
-  children: string[],
+  filename: string,
   relativePath: string,
+  children: PathInfo[],
   reading?: PenMarkdownData
   readme?: PenMarkdownData
 };

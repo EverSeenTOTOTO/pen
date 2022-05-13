@@ -1,6 +1,7 @@
 import { createContext, useContext } from 'react';
 import { HomeStore } from './modules/home';
-import { AboutStore } from './modules/about';
+import { DrawerStore } from './modules/drawer';
+import { ThemeStore } from './modules/theme';
 
 export type PrefetchStore<State> = {
   // merge ssr prefetched data
@@ -16,11 +17,14 @@ type PickKeys<T> = {
 export class AppStore {
   home: HomeStore;
 
-  about: AboutStore;
+  drawer: DrawerStore;
+
+  theme: ThemeStore;
 
   constructor() {
     this.home = new HomeStore(this);
-    this.about = new AboutStore(this);
+    this.drawer = new DrawerStore(this);
+    this.theme = new ThemeStore(this);
   }
 
   hydrate(data: Record<string, unknown>) {

@@ -1,26 +1,45 @@
+import path from 'path';
 import fs from 'fs';
 import { defineConfig, ViteDevServer } from 'vite';
 import base, { paths } from './vite.common';
+
+const children = [
+  '1.md',
+  '10.md',
+  '2.md',
+  '20.md',
+  'aaa',
+  'bbb',
+  'very-longlonglonglonglonglonglong-filename.md',
+].map((each) => ({
+  filename: each,
+  relativePath: each,
+  type: each.endsWith('md') ? 'markdown' : 'directory',
+}));
 
 const mockData = (url: string) => {
   switch (url) {
     case '/':
       return {
         type: 'directory',
-        children: ['1.md', '10.md', '2.md', '20.md', 'aaa', 'bbb', 'very-longlonglonglonglonglonglong-filename.md'],
+        children,
+        filename: 'demo',
         relativePath: '/',
         readme: {
           type: 'markdown',
+          filename: 'README',
           content: '# README',
         },
       };
     case '/10.md':
       return {
         type: 'directory',
-        children: ['1.md', '10.md', '2.md', '20.md', 'aaa', 'bbb', 'very-longlonglonglonglonglonglong-filename.md'],
+        children,
         relativePath: '/',
+        filename: 'demo',
         reading: {
           type: 'markdown',
+          filename: '10.md',
           content: '# 10.md',
         },
       };
@@ -28,6 +47,7 @@ const mockData = (url: string) => {
       return {
         type: 'markdown',
         content: '# 2.md',
+        filename: '2.md',
       };
     default:
       return {
@@ -42,6 +62,14 @@ const devSSR = () => ({
   async configureServer(vite: ViteDevServer) {
     const { logger } = vite.config;
     const templateHtml = fs.readFileSync(paths.template, 'utf-8');
+    const info = {
+      availableThemes: [],
+      theme: '',
+      dark: true,
+      watchRoot: process.cwd(),
+      socketNamespace: '/',
+    };
+    const theme = fs.readFileSync(path.join(__dirname, `../src/styles/theme.${info.dark ? 'dark' : 'light'}.css`), 'utf8');
 
     // 缺点是不能调试完整服务端代码，只能调试服务端同构应用的部分
     return () => vite.middlewares.use(async (req, res, next) => {
@@ -51,7 +79,9 @@ const devSSR = () => ({
         const { html } = await render({
           req,
           res,
+          info,
           template,
+          style: `<style>${theme}</style>`,
           markdownData: mockData(req.originalUrl),
         });
 

@@ -66,7 +66,7 @@ it('test init setupWatching dir', async () => {
   await watcher.setupWatching('.');
 
   expect(watcher.current?.type).toBe('directory');
-  expect((watcher.current as PenDirectoryData)?.children).toEqual([
+  expect((watcher.current as PenDirectoryData)?.children.map((c) => c.relativePath)).toEqual([
     '/a',
     '/a.md',
   ]);
@@ -248,12 +248,12 @@ it('test change children', async () => {
   await watcher.setupWatching('a/b');
 
   expect(watcher.current?.type).toBe('directory');
-  expect((watcher.current as PenDirectoryData).children).toEqual([
+  expect((watcher.current as PenDirectoryData).children.map((c) => c.relativePath)).toEqual([
     '/a/b/b.markdown',
   ]);
 
   expect(emit).toHaveBeenCalledTimes(1);
-  expect((data[0] as PenDirectoryData).children).toEqual([
+  expect((data[0] as PenDirectoryData).children.map((c) => c.relativePath)).toEqual([
     '/a/b/b.markdown',
   ]);
 
@@ -261,7 +261,7 @@ it('test change children', async () => {
   // wait for event
   await watcher.isReady();
   expect(emit).toHaveBeenCalledTimes(2);
-  expect((data[1] as PenDirectoryData).children).toEqual([
+  expect((data[1] as PenDirectoryData).children.map((c) => c.relativePath)).toEqual([
     '/a/b/b.markdown',
     '/a/b/c.md',
   ]);

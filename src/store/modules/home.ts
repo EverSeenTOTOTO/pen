@@ -1,15 +1,20 @@
 import { makeAutoObservable } from 'mobx';
-import { PenData } from '@/types';
+import { Color } from '@material-ui/lab/Alert';
+import { PenDirectoryData, PenMarkdownData } from '@/types';
 import type { AppStore, PrefetchStore } from '..';
 
 export type HomeState = {
-  data?: PenData
+  data?: PenDirectoryData | PenMarkdownData;
 };
 
 export class HomeStore implements PrefetchStore<HomeState> {
-  data?: PenData;
+  data?: PenDirectoryData | PenMarkdownData;
 
   root: AppStore;
+
+  severity: Color = 'info';
+
+  message = '';
 
   constructor(root: AppStore) {
     makeAutoObservable(this);
@@ -20,14 +25,23 @@ export class HomeStore implements PrefetchStore<HomeState> {
     if (this.data?.type === 'directory') {
       if (this.data.reading !== undefined) {
         return this.data.reading.content;
-      } if (this.data.readme !== undefined) {
+      }
+
+      if (this.data.readme !== undefined) {
         return this.data.readme.content;
       }
-      return '';
-    } if (this.data?.type === 'markdown') {
+    }
+
+    if (this.data?.type === 'markdown') {
       return this.data.content;
     }
-    return this.data?.message ?? '';
+
+    return '';
+  }
+
+  notify(severity: Color, message: string) {
+    this.severity = severity;
+    this.message = message;
   }
 
   hydrate(state: HomeState): void {

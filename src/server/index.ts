@@ -24,7 +24,8 @@ export const normalizeOptions = async (opts?: ServerOptions): Promise<Required<S
   return {
     silent,
     port: avaliablePort,
-    assets: opts?.assets ? formatPath(opts?.assets) : path.join(__dirname),
+    dark: opts?.dark ?? false,
+    dist: opts?.dist ? formatPath(opts?.dist) : path.join(__dirname),
     namespace: opts?.namespace ? formatPath(opts?.namespace) : '/',
     logger: silent ? emptyLogger : logger,
     ignores: opts?.ignores ?? [],

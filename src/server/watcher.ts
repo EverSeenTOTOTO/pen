@@ -1,8 +1,8 @@
 import fs from 'fs';
-import sort from 'alphanum-sort';
 import {
   PenData,
   ServerEvents,
+  PathInfo,
   PenMarkdownData,
   PenDirectoryData,
 } from '@/types';
@@ -13,12 +13,6 @@ import {
 import { Logger } from './logger';
 import { renderError } from './render';
 
-type PathInfo = {
-  type: 'directory' | 'markdown' | 'other',
-  fullpath: string,
-  relativePath: string,
-};
-
 function fullPath(watchRoot: string, switchTo: string) {
   return path.join(watchRoot, switchTo.replace(/~$/, '')); //  It's weird sometimes got xxx.md~
 }
@@ -26,9 +20,11 @@ function fullPath(watchRoot: string, switchTo: string) {
 function resolvePathInfo(watcher: Watcher, switchTo: string):PathInfo {
   const { watchRoot } = watcher;
   const fullpath = fullPath(watchRoot, switchTo); //  It's weird sometimes got xxx.md~
+  const filename = path.basename(fullpath);
 
   return {
     fullpath,
+    filename,
     relativePath: path.relative(watcher.watchRoot, fullpath),
     // eslint-disable-next-line no-nested-ternary
     type: isDir(fullpath) ? 'directory' : isMarkdown(fullpath) ? 'markdown' : 'other',
@@ -51,11 +47,17 @@ function validatePath(watcher: Watcher, pathInfo: PathInfo) {
   }
 }
 
+function sortChildren(a: PathInfo, b: PathInfo) {
+  if (a.type !== b.type && a.type === 'directory') return -1;
+  return 0;
+}
+
 async function readMarkdown(pathInfo: PathInfo): Promise<PenMarkdownData> {
   const content = await fs.promises.readFile(pathInfo.fullpath, 'utf8');
 
   return {
     content,
+    filename: pathInfo.filename,
     relativePath: pathInfo.relativePath,
     type: 'markdown',
   };
@@ -126,7 +128,7 @@ export class Watcher {
   protected async setupWatcher(pathInfo: PathInfo) {
     if (this.current) {
     // already watching parent dir
-      if (this.current.type === 'directory' && this.current.children.includes(pathInfo.relativePath)) return;
+      if (this.current.type === 'directory' && this.current.children.find((c) => c.relativePath === pathInfo.relativePath)) return;
 
       this.logger?.warn(`Pen stopped watching ${this.current.relativePath}`);
     }
@@ -154,11 +156,11 @@ export class Watcher {
       const dirs = await fs.promises.readdir(pathInfo.fullpath);
       const infos = dirs
         .map((dir) => path.join(pathInfo.fullpath, dir))
-        .map((dir_1) => resolvePathInfo(this, path.relative(this.watchRoot, dir_1)))
+        .map((dir) => resolvePathInfo(this, path.relative(this.watchRoot, dir)))
         .filter((info) => info.type !== 'other')
-        .filter((info_1) => {
+        .filter((info) => {
           try {
-            validatePath(this, info_1);
+            validatePath(this, info);
             return true;
           } catch {
             return false;
@@ -168,8 +170,9 @@ export class Watcher {
 
       return {
         type: 'directory',
-        children: sort(infos.map((each_1) => each_1.relativePath)),
+        filename: pathInfo.filename,
         relativePath: pathInfo.relativePath,
+        children: infos.sort(sortChildren),
         readme: readme.length > 0
           ? await this.readReadme(readme[0].relativePath)
           : undefined,

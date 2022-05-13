@@ -5,11 +5,12 @@ import { StaticRouter } from 'react-router-dom/server';
 import { App } from './App';
 import { createStore, AppStore } from './store';
 import { createRoutes, AppRoutes } from './routes';
-import { PenData } from './types';
+import { PenInitData, PenData } from './types';
 
 // see index.html
 const APP_HTML = '<!--app-html-->';
 const APP_STATE = '<!--app-state-->';
+const APP_STYLE = '<!--app-style-->';
 
 const serialize = (state: Record<string, unknown>) => `<script>;window.__PREFETCHED_STATE__=${serializeJavascript(state)};</script>`;
 
@@ -17,6 +18,8 @@ export type RenderContext = {
   req: Request;
   res: Response;
   template: string;
+  info: PenInitData;
+  style?: string;
   html?: string;
   routes?: AppRoutes;
   store?: AppStore;
@@ -38,6 +41,9 @@ export async function render(context: RenderContext) {
     home: {
       data: ctx.markdownData,
     },
+    theme: {
+      dark: ctx.info.dark,
+    },
   });
 
   const html = ReactDOMServer.renderToString(
@@ -50,6 +56,7 @@ export async function render(context: RenderContext) {
 
   ctx.html = ctx.template
     .replace(APP_HTML, html)
+    .replace(APP_STYLE, ctx.style ?? '')
     .replace(APP_STATE, serialize(state));
 
   return ctx;
