@@ -1,4 +1,3 @@
-import fs from 'fs';
 import {
   PenData,
   ServerEvents,
@@ -8,60 +7,13 @@ import {
 } from '@/types';
 import chokidar from 'chokidar';
 import {
-  path, isDir, isMarkdown, isReadme,
+  path, isReadme,
 } from '@/utils';
 import { Logger } from './logger';
-import { renderError } from './render';
-
-function fullPath(root: string, switchTo: string) {
-  return path.join(root, switchTo.replace(/~$/, '')); //  It's weird sometimes got xxx.md~
-}
-
-function resolvePathInfo(watcher: Watcher, switchTo: string):PathInfo {
-  const { root } = watcher;
-  const fullpath = fullPath(root, switchTo); //  It's weird sometimes got xxx.md~
-  const filename = path.basename(fullpath);
-
-  return {
-    fullpath,
-    filename,
-    relativePath: path.relative(watcher.root, fullpath),
-    // eslint-disable-next-line no-nested-ternary
-    type: isDir(fullpath) ? 'directory' : isMarkdown(fullpath) ? 'markdown' : 'other',
-  };
-}
-
-function validatePath(watcher: Watcher, pathInfo: PathInfo) {
-  const { ignores } = watcher;
-
-  if (ignores.some((re) => re.test(pathInfo.relativePath))) {
-    throw new Error(`Pen not permitted to watch: ${pathInfo.fullpath}, it's ignored by settings.`);
-  }
-
-  if (!fs.existsSync(pathInfo.fullpath)) {
-    throw new Error(`Pen not permitted to watch: ${pathInfo.fullpath}, no such file or directory.`);
-  }
-
-  if (!(isDir(pathInfo.fullpath) || isMarkdown(pathInfo.fullpath))) {
-    throw new Error(`Pen unable to watch: ${pathInfo.fullpath}, it's not a markdown file.`);
-  }
-}
-
-function sortChildren(a: PathInfo, b: PathInfo) {
-  if (a.type !== b.type && a.type === 'directory') return -1;
-  return 0;
-}
-
-async function readMarkdown(pathInfo: PathInfo): Promise<PenMarkdownData> {
-  const content = await fs.promises.readFile(pathInfo.fullpath, 'utf8');
-
-  return {
-    content,
-    filename: pathInfo.filename,
-    relativePath: pathInfo.relativePath,
-    type: 'markdown',
-  };
-}
+import { renderError } from './rehype';
+import {
+  resolvePathInfo, readDirectory, readMarkdown, validatePath,
+} from './reader';
 
 export type WatcherOptions = {
   root: string;
@@ -105,9 +57,9 @@ export class Watcher {
     }
 
     try {
-      const pathInfo = resolvePathInfo(this, switchTo);
+      const pathInfo = resolvePathInfo(this.root, switchTo);
 
-      validatePath(this, pathInfo);
+      validatePath(pathInfo, this.ignores);
 
       await this.setupWatcher(pathInfo);
 
@@ -148,64 +100,6 @@ export class Watcher {
         resolve();
       });
     });
-  }
-
-  protected async readDirectory(pathInfo: PathInfo): Promise<PenDirectoryData | undefined> {
-    this.ready = false;
-    try {
-      const dirs = await fs.promises.readdir(pathInfo.fullpath);
-      const infos = dirs
-        .map((dir) => path.join(pathInfo.fullpath, dir))
-        .map((dir) => resolvePathInfo(this, path.relative(this.root, dir)))
-        .filter((info) => info.type !== 'other')
-        .filter((info) => {
-          try {
-            validatePath(this, info);
-            return true;
-          } catch {
-            return false;
-          }
-        });
-      const readme = infos.filter((each) => isReadme(each.relativePath));
-
-      return {
-        type: 'directory',
-        filename: pathInfo.filename,
-        relativePath: pathInfo.relativePath,
-        children: infos.sort(sortChildren),
-        readme: readme.length > 0
-          ? await this.readReadme(readme[0].relativePath)
-          : undefined,
-      };
-    } catch (e) {
-      const err = e as Error;
-      return this.onError(new Error(`Error on readDirectory: ${err.message}`, { cause: err }));
-    } finally {
-      this.ready = true;
-    }
-  }
-
-  protected async readMarkdown(pathInfo: PathInfo): Promise<PenMarkdownData | undefined> {
-    this.ready = false;
-
-    try {
-      return await readMarkdown(pathInfo);
-    } catch (e) {
-      const err = e as Error;
-      return this.onError(new Error(`Error on readMarkdown: ${err.message}`, { cause: err }));
-    } finally {
-      this.ready = true;
-    }
-  }
-
-  protected async readReadme(relative: string) { // nothrow
-    try {
-      const pathInfo = resolvePathInfo(this, relative);
-      validatePath(this, pathInfo);
-      return await readMarkdown(pathInfo);
-    } catch (e) {
-      return undefined;
-    }
   }
 
   protected async onChange(event: string, detail: string) {
@@ -255,9 +149,21 @@ export class Watcher {
     this.sendData();
   }
 
+  protected async readReadme(relative: string) {
+    try {
+      const pathInfo = resolvePathInfo(this.root, relative);
+      validatePath(pathInfo, this.ignores);
+      return await readMarkdown(pathInfo);
+    } catch (e) {
+      this.logger?.warn(`Pen ignored README file: ${relative}`);
+      return undefined;
+    }
+  }
+
   protected async onDirChange(relative: string) {
     try {
-      this.current = await this.readDirectory(resolvePathInfo(this, relative));
+      const pathInfo = resolvePathInfo(this.root, relative);
+      this.current = await readDirectory(pathInfo, this.root, this.ignores);
     } catch (e) {
       const err = e as Error;
       this.onError(new Error(`Error on DirChange: ${err.message}`, { cause: err }));
@@ -266,7 +172,8 @@ export class Watcher {
 
   protected async onFileChange(relative: string) {
     try {
-      const markdown = await this.readMarkdown(resolvePathInfo(this, relative));
+      const pathInfo = resolvePathInfo(this.root, relative);
+      const markdown = await readMarkdown(pathInfo);
 
       if (this.current?.type === 'directory') {
         this.current.reading = markdown;

@@ -1,9 +1,9 @@
 import { formatPath, path } from '@/utils';
-import express, { Express } from 'express';
+import express from 'express';
 import getPort from 'detect-port';
-import { RenderOptions, bindRender } from './ssr';
+import { RenderOptions, bindRender } from './render';
 import { logger as builtInLogger, emptyLogger } from './logger';
-import { WatcherOptions, Watcher } from './watcher';
+import { WatcherOptions } from './watcher';
 import { themes } from './theme';
 
 export type PenOptions = Partial<Omit<RenderOptions, 'watcher'>> & Partial<Omit<WatcherOptions, 'emit'>>
@@ -26,15 +26,6 @@ export const normalizeOptions = (opts?: PenOptions): Required<PenOptions> => {
   };
 };
 
-export const bindMiddleware = async (server: Express, options: Required<PenOptions>) => {
-  const watcher = new Watcher({ ...options, emit: console.log });
-
-  await watcher.setupWatching('.');
-  bindRender(server, { ...options, watcher });
-
-  server.on('close', () => watcher.close());
-};
-
 export type ServerOptions = PenOptions & {
   port?: number;
 };
@@ -44,12 +35,12 @@ export const createServer = async (opts?: ServerOptions) => {
   const server = express();
   const options = normalizeOptions(opts);
 
-  await bindMiddleware(server, options);
+  bindRender(server, options);
 
   const avaliablePort = await getPort(opts?.port ?? 3000);
 
   if (avaliablePort !== opts?.port) {
-    options.logger.warn(`Pen found port ${opts?.port} unavaliable, use random port ${avaliablePort} instead`);
+    options.logger.warn(`Pen found port ${opts?.port} unavaliable, use port ${avaliablePort} instead`);
   }
 
   server.listen(avaliablePort, () => {

@@ -3,60 +3,7 @@ import fs from 'fs';
 import { defineConfig, ViteDevServer } from 'vite';
 import base, { paths } from './vite.common';
 import { themes } from '../src/server/theme';
-
-const children = [
-  '1.md',
-  '10.md',
-  '2.md',
-  '20.md',
-  'aaa',
-  'bbb',
-  'very-longlonglonglonglonglonglong-filename.md',
-].map((each) => ({
-  filename: each,
-  relativePath: each,
-  type: each.endsWith('md') ? 'markdown' : 'directory',
-}));
-
-const mockData = (url: string) => {
-  switch (url) {
-    case '/':
-      return {
-        type: 'directory',
-        children,
-        filename: 'demo',
-        relativePath: '/',
-        readme: {
-          type: 'markdown',
-          filename: 'README',
-          content: '# README',
-        },
-      };
-    case '/10.md':
-      return {
-        type: 'directory',
-        children,
-        relativePath: '/',
-        filename: 'demo',
-        reading: {
-          type: 'markdown',
-          filename: '10.md',
-          content: '# 10.md',
-        },
-      };
-    case '/2.md':
-      return {
-        type: 'markdown',
-        content: '# 2.md',
-        filename: '2.md',
-      };
-    default:
-      return {
-        type: 'error',
-        message: 'mock error',
-      };
-  }
-};
+import { readUnknown } from '../src/server/reader';
 
 const devSSR = () => ({
   name: 'dev-ssr',
@@ -73,8 +20,10 @@ const devSSR = () => ({
     // 缺点是不能调试完整服务端代码，只能调试服务端同构应用的部分
     return () => vite.middlewares.use(async (req, res, next) => {
       try {
+        const current = await readUnknown('.', process.cwd(), []);
         const { render } = await vite.ssrLoadModule(paths.serverEntry);
         const template = await vite.transformIndexHtml(req.originalUrl, templateHtml);
+
         const { html } = await render({
           req,
           res,
@@ -82,7 +31,7 @@ const devSSR = () => ({
           theme,
           template,
           style: `<style>${css}</style>`,
-          data: mockData(req.originalUrl),
+          data: current,
         });
 
         res.end(html);
