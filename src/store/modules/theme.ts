@@ -1,67 +1,51 @@
-import { makeAutoObservable } from 'mobx';
+import { makeAutoObservable, reaction } from 'mobx';
 import { createTheme, ThemeOptions } from '@material-ui/core/styles';
+import { PenTheme } from '@/types';
+// TODO: socket
+import { themes } from '@/server/theme';
 import type { AppStore, PrefetchStore } from '..';
 
-const defaultTheme: ThemeOptions = {
-  palette: {
-    primary: {
-      light: '#d3b8ae',
-      main: '#a1887f',
-      dark: '#725b53',
-      contrastText: '#fafafa',
-    },
-    secondary: {
-      light: '#c1d5e0',
-      main: '#90a4ae',
-      dark: '#62757f',
-      contrastText: '#e3f2fd',
-    },
-  },
-};
+export class ThemeStore implements PrefetchStore<PenTheme> {
+  name: string = ''
 
-export type ThemeState = {
-  dark: boolean
-};
+  avaliable: string[] = []
 
-export class ThemeStore implements PrefetchStore<ThemeState> {
-  dark = false;
+  options:ThemeOptions = {};
 
   root: AppStore;
 
   constructor(root: AppStore) {
     makeAutoObservable(this);
     this.root = root;
-  }
-
-  toggleDark(value?: boolean) {
-    this.dark = value ?? !this.dark;
-  }
-
-  get theme() {
-    return createTheme({
-      ...defaultTheme,
-      palette: {
-        ...defaultTheme.palette,
-        type: this.dark ? 'dark' : 'light',
-        background: this.dark
-          ? {
-            paper: '#0d1117',
-            default: '#0d1117',
-          } : {
-            paper: '#fff',
-            default: '#fff',
-          },
-      },
+    reaction(() => this.name, () => {
+      // TODO: fetch theme
     });
   }
 
-  hydrate(state: ThemeState): void {
-    this.dark = state.dark;
+  changeTheme(value: string) {
+    this.name = value;
+    this.options = themes[value];
   }
 
-  dehydra(): ThemeState {
+  get theme() {
+    return createTheme(this.options);
+  }
+
+  get dark() {
+    return this.options.palette?.type === 'dark';
+  }
+
+  hydrate(state: PenTheme): void {
+    this.name = state.name;
+    this.options = state.options;
+    this.avaliable = state.avaliable;
+  }
+
+  dehydra(): PenTheme {
     return {
-      dark: this.dark,
+      name: this.name,
+      options: this.options,
+      avaliable: this.avaliable,
     };
   }
 }

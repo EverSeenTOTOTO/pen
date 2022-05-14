@@ -13,19 +13,19 @@ import {
 import { Logger } from './logger';
 import { renderError } from './render';
 
-function fullPath(watchRoot: string, switchTo: string) {
-  return path.join(watchRoot, switchTo.replace(/~$/, '')); //  It's weird sometimes got xxx.md~
+function fullPath(root: string, switchTo: string) {
+  return path.join(root, switchTo.replace(/~$/, '')); //  It's weird sometimes got xxx.md~
 }
 
 function resolvePathInfo(watcher: Watcher, switchTo: string):PathInfo {
-  const { watchRoot } = watcher;
-  const fullpath = fullPath(watchRoot, switchTo); //  It's weird sometimes got xxx.md~
+  const { root } = watcher;
+  const fullpath = fullPath(root, switchTo); //  It's weird sometimes got xxx.md~
   const filename = path.basename(fullpath);
 
   return {
     fullpath,
     filename,
-    relativePath: path.relative(watcher.watchRoot, fullpath),
+    relativePath: path.relative(watcher.root, fullpath),
     // eslint-disable-next-line no-nested-ternary
     type: isDir(fullpath) ? 'directory' : isMarkdown(fullpath) ? 'markdown' : 'other',
   };
@@ -64,14 +64,14 @@ async function readMarkdown(pathInfo: PathInfo): Promise<PenMarkdownData> {
 }
 
 export type WatcherOptions = {
-  watchRoot: string;
+  root: string;
   ignores: RegExp[];
   logger?: Logger;
   emit: (event: ServerEvents, data: PenData) => void;
 };
 
 export class Watcher {
-  watchRoot: string;
+  root: string;
 
   current?: PenMarkdownData | PenDirectoryData;
 
@@ -87,7 +87,7 @@ export class Watcher {
   ready: boolean = true;
 
   constructor(options: WatcherOptions) {
-    this.watchRoot = options.watchRoot;
+    this.root = options.root;
     this.ignores = options.ignores;
     this.logger = options.logger;
     this.emit = options.emit;
@@ -156,7 +156,7 @@ export class Watcher {
       const dirs = await fs.promises.readdir(pathInfo.fullpath);
       const infos = dirs
         .map((dir) => path.join(pathInfo.fullpath, dir))
-        .map((dir) => resolvePathInfo(this, path.relative(this.watchRoot, dir)))
+        .map((dir) => resolvePathInfo(this, path.relative(this.root, dir)))
         .filter((info) => info.type !== 'other')
         .filter((info) => {
           try {
@@ -209,12 +209,12 @@ export class Watcher {
   }
 
   protected async onChange(event: string, detail: string) {
-    const relative = path.relative(this.watchRoot, detail);
+    const relative = path.relative(this.root, detail);
 
     this.logger?.info(`Pen detected ${event}: ${relative}`);
 
     const isSelf = this.current?.relativePath === relative;
-    const isChild = this.current?.type === 'directory' && path.dirname(detail) === path.join(this.watchRoot, this.current.relativePath);
+    const isChild = this.current?.type === 'directory' && path.dirname(detail) === path.join(this.root, this.current.relativePath);
 
     switch (event) {
       case 'addDir':

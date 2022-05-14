@@ -4,60 +4,56 @@ import getPort from 'detect-port';
 import { RenderOptions, bindRender } from './ssr';
 import { logger as builtInLogger, emptyLogger } from './logger';
 import { WatcherOptions, Watcher } from './watcher';
+import { themes } from './theme';
 
-export type ServerOptions = Partial<Omit<RenderOptions, 'watcher'>>
-& Partial<Omit<WatcherOptions, 'emit'>>
+export type PenOptions = Partial<Omit<RenderOptions, 'watcher'>> & Partial<Omit<WatcherOptions, 'emit'>>
 & {
-  port?: number,
   silent?: boolean,
 };
 
-export const normalizeOptions = async (opts?: ServerOptions): Promise<Required<ServerOptions>> => {
+export const normalizeOptions = (opts?: PenOptions): Required<PenOptions> => {
   const silent = opts?.silent ?? false;
   const logger = silent ? emptyLogger : builtInLogger;
-  const avaliablePort = await getPort(opts?.port ?? 3000);
-
-  if (avaliablePort !== opts?.port) {
-    logger.warn(`Pen found port ${opts?.port} unavaliable, use random port ${avaliablePort} instead`);
-  }
 
   return {
     silent,
-    port: avaliablePort,
-    dark: opts?.dark ?? false,
-    dist: opts?.dist ? formatPath(opts?.dist) : path.join(__dirname),
-    namespace: opts?.namespace ? formatPath(opts?.namespace) : '/',
-    logger: silent ? emptyLogger : logger,
     ignores: opts?.ignores ?? [],
-    watchRoot: opts?.watchRoot ? formatPath(opts?.watchRoot) : process.cwd(),
+    logger: silent ? emptyLogger : logger,
+    theme: opts?.theme ?? { name: 'light', options: themes.light, avaliable: [] },
+    root: opts?.root ? formatPath(opts?.root) : process.cwd(),
+    namespace: opts?.namespace ? formatPath(opts?.namespace) : '/',
+    dist: opts?.dist ? formatPath(opts?.dist) : path.join(__dirname),
   };
 };
 
-export const bindMiddleware = async (server: Express, options: Required<ServerOptions>) => {
-  const watcher = new Watcher({
-    ...options,
-    emit: console.log,
-  });
+export const bindMiddleware = async (server: Express, options: Required<PenOptions>) => {
+  const watcher = new Watcher({ ...options, emit: console.log });
 
   await watcher.setupWatching('.');
+  bindRender(server, { ...options, watcher });
 
-  bindRender(server, {
-    ...options,
-    watcher,
-  });
+  server.on('close', () => watcher.close());
+};
 
-  return () => watcher.close();
+export type ServerOptions = PenOptions & {
+  port?: number;
 };
 
 // hypothesis: client assets to be in the same directory
 export const createServer = async (opts?: ServerOptions) => {
   const server = express();
-  const options = await normalizeOptions(opts);
-  const close = await bindMiddleware(server, options);
+  const options = normalizeOptions(opts);
 
-  server.on('close', close);
-  server.listen(options.port, () => {
-    console.log(`server listening on ${options.port}`);
+  await bindMiddleware(server, options);
+
+  const avaliablePort = await getPort(opts?.port ?? 3000);
+
+  if (avaliablePort !== opts?.port) {
+    options.logger.warn(`Pen found port ${opts?.port} unavaliable, use random port ${avaliablePort} instead`);
+  }
+
+  server.listen(avaliablePort, () => {
+    console.log(`server listening on ${avaliablePort}`);
   });
 };
 

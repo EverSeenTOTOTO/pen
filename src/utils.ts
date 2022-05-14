@@ -27,11 +27,12 @@ export function isReadme(filepath: string) {
   return /README\.md$/i.test(filepath);
 }
 
-// '' -> '/'
 // '/a/' -> '/a'
 // '/a/b/' -> '/a/b'
 // '\\' -> '/'
 // '\\\\' -> '/'
+// '//' -> '/'
+// '' -> '/'
 export function formatPath(p: string) {
   return slash(p)
     .replace(/^(.*?)\/*$/g, '$1')

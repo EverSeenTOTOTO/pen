@@ -2,6 +2,7 @@ import path from 'path';
 import fs from 'fs';
 import { defineConfig, ViteDevServer } from 'vite';
 import base, { paths } from './vite.common';
+import { themes } from '../src/server/theme';
 
 const children = [
   '1.md',
@@ -62,14 +63,12 @@ const devSSR = () => ({
   async configureServer(vite: ViteDevServer) {
     const { logger } = vite.config;
     const templateHtml = fs.readFileSync(paths.template, 'utf-8');
+    const theme = { name: 'dark', options: themes.dark };
+    const css = fs.readFileSync(path.join(__dirname, `../src/styles/theme.${theme.name}.css`), 'utf8');
     const info = {
-      availableThemes: [],
-      theme: '',
-      dark: true,
-      watchRoot: process.cwd(),
-      socketNamespace: '/',
+      root: process.cwd(),
+      namespace: '/',
     };
-    const theme = fs.readFileSync(path.join(__dirname, `../src/styles/theme.${info.dark ? 'dark' : 'light'}.css`), 'utf8');
 
     // 缺点是不能调试完整服务端代码，只能调试服务端同构应用的部分
     return () => vite.middlewares.use(async (req, res, next) => {
@@ -80,9 +79,10 @@ const devSSR = () => ({
           req,
           res,
           info,
+          theme,
           template,
-          style: `<style>${theme}</style>`,
-          markdownData: mockData(req.originalUrl),
+          style: `<style>${css}</style>`,
+          data: mockData(req.originalUrl),
         });
 
         res.end(html);

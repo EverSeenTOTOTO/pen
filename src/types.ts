@@ -1,3 +1,5 @@
+import { ThemeOptions } from '@material-ui/core/styles';
+
 // client fetch
 export enum ClientEvents {
   FetchStyle = 'fetchstyle',
@@ -26,12 +28,15 @@ export enum ServerEvents {
   PenStyle = 'penstyle',
 }
 
+export type PenTheme = {
+  name: string;
+  options: ThemeOptions;
+  avaliable: string[];
+};
+
 export type PenInitData = {
-  availableThemes: string[];
-  theme: string;
-  dark: boolean;
-  watchRoot: string;
-  socketNamespace: string;
+  root: string;
+  namespace: string;
 };
 
 export type PathInfo = {

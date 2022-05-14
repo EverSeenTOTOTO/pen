@@ -3,9 +3,9 @@ import serializeJavascript from 'serialize-javascript';
 import ReactDOMServer from 'react-dom/server';
 import { StaticRouter } from 'react-router-dom/server';
 import { App } from './App';
-import { createStore, AppStore } from './store';
-import { createRoutes, AppRoutes } from './routes';
-import { PenInitData, PenData } from './types';
+import { createStore } from './store';
+import { createRoutes } from './routes';
+import { PenInitData, PenData, PenTheme } from './types';
 
 // see index.html
 const APP_HTML = '<!--app-html-->';
@@ -17,13 +17,12 @@ const serialize = (state: Record<string, unknown>) => `<script>;window.__PREFETC
 export type RenderContext = {
   req: Request;
   res: Response;
-  template: string;
+  data: PenData;
   info: PenInitData;
+  theme: PenTheme;
   style?: string;
+  template: string;
   html?: string;
-  routes?: AppRoutes;
-  store?: AppStore;
-  markdownData?: PenData
 };
 
 export async function render(context: RenderContext) {
@@ -33,17 +32,11 @@ export async function render(context: RenderContext) {
   const store = createStore();
   const routes = createRoutes();
 
-  ctx.store = store;
-  ctx.routes = routes;
-
-  // prefetch markdown content for ssr
+  // ssr prefetch
   store.hydrate({
-    home: {
-      data: ctx.markdownData,
-    },
-    theme: {
-      dark: ctx.info.dark,
-    },
+    home: { data: ctx.data },
+    theme: ctx.theme,
+    server: ctx.info,
   });
 
   const html = ReactDOMServer.renderToString(

@@ -6,5 +6,8 @@
   "plugins": [
     "stylelint-order",
     "stylelint-scss"
-  ]
+  ],
+  "rules": {
+    "no-empty-source": null
+  }
 }

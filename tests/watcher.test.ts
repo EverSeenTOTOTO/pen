@@ -47,7 +47,7 @@ afterEach(() => {
 
 it('test ctor', async () => {
   watcher = new Watcher({
-    watchRoot: root,
+    root,
     ignores: [],
     emit: () => {},
   });
@@ -61,7 +61,7 @@ it('test init setupWatching dir', async () => {
     emit,
     logger,
     ignores: [],
-    watchRoot: root,
+    root,
   });
   await watcher.setupWatching('.');
 
@@ -79,7 +79,7 @@ it('test init setupWatching md', async () => {
     emit,
     logger,
     ignores: [],
-    watchRoot: root,
+    root,
   });
   await watcher.setupWatching('a/b/b.markdown');
 
@@ -97,7 +97,7 @@ it('test init setupWatching not exist', async () => {
     emit,
     logger,
     ignores: [],
-    watchRoot: root,
+    root,
   });
   await watcher.setupWatching('a/b/b.md');
 });
@@ -117,7 +117,7 @@ it('test switchTo not exist', async () => {
     emit,
     logger,
     ignores: [],
-    watchRoot: root,
+    root,
   });
 
   await watcher.setupWatching('a');
@@ -134,7 +134,7 @@ it('test init setupWatching not md', async () => {
     emit,
     logger,
     ignores: [],
-    watchRoot: root,
+    root,
   });
   await watcher.setupWatching('a/b/b.txt');
 });
@@ -154,7 +154,7 @@ it('test switchTo not md', async () => {
     emit,
     logger,
     ignores: [],
-    watchRoot: root,
+    root,
   });
 
   await watcher.setupWatching('a/b/b.markdown');
@@ -171,7 +171,7 @@ it('test init setupWatching ignored', async () => {
     emit,
     logger,
     ignores: [/^\/a/, /^\/b/],
-    watchRoot: root,
+    root,
   });
   await watcher.setupWatching('a');
 });
@@ -191,7 +191,7 @@ it('test switchTo ignored', async () => {
     emit,
     logger,
     ignores: [/^\/a\.md/],
-    watchRoot: root,
+    root,
   });
 
   await watcher.setupWatching('a');
@@ -208,7 +208,7 @@ it('test change content', async () => {
     emit,
     logger,
     ignores: [],
-    watchRoot: root,
+    root,
   });
   await watcher.setupWatching('a.md');
 
@@ -243,7 +243,7 @@ it('test change children', async () => {
     emit,
     logger,
     ignores: [],
-    watchRoot: root,
+    root,
   });
   await watcher.setupWatching('a/b');
 
@@ -281,7 +281,7 @@ it('test change nested', async () => {
     emit,
     logger,
     ignores: [],
-    watchRoot: root,
+    root,
   });
   await watcher.setupWatching('a');
   expect(emit).toHaveBeenCalledTimes(1);
@@ -302,7 +302,7 @@ it('test change reading', async () => {
     emit,
     logger,
     ignores: [],
-    watchRoot: root,
+    root,
   });
 
   await watcher.setupWatching('a');
@@ -345,7 +345,7 @@ it('test watch markdown error', async () => {
     emit,
     logger,
     ignores: [],
-    watchRoot: root,
+    root,
   });
   await watcher.setupWatching('a.md');
 
@@ -371,7 +371,7 @@ it('test watch dir error', async () => {
     emit,
     logger,
     ignores: [/b\.markdown$/],
-    watchRoot: root,
+    root,
   });
   await watcher.setupWatching('a/b');
   await watcher.setupWatching('a/b/b.markdown');
@@ -403,7 +403,7 @@ it('test change readme', async () => {
     emit,
     logger,
     ignores: [/b\.markdown$/],
-    watchRoot: root,
+    root,
   });
   await watcher.setupWatching('.');
 
@@ -435,7 +435,7 @@ it('test ignore readme', async () => {
     emit,
     logger,
     ignores: [/README/i],
-    watchRoot: root,
+    root,
   });
   await watcher.setupWatching('.');
 
