@@ -12,12 +12,12 @@ const devSSR = () => ({
     const namespace = '/';
     const ignores = [/^\/\./];
     const root = process.cwd();
-    const transports = ['websocket'] as ('websocket' | 'polling')[];
     const socketPath = '/pensocket.io';
-    const templateHtml = fs.readFileSync(paths.template, 'utf-8');
     const dist = path.join(__dirname, '../src/styles/');
     const theme = createTheme('dark', dist);
     const style = `<style id="${theme.id}">${theme.css}</style>`;
+    const templateHtml = fs.readFileSync(paths.template, 'utf-8');
+    const transports = ['websocket'] as ('websocket' | 'polling')[];
 
     bindSocket(vite.httpServer, {
       root,
@@ -63,6 +63,11 @@ export default defineConfig((c) => {
   const config = base(c);
   return {
     ...config,
+    server: {
+      watch: {
+        ignored: ['**/server/*.ts', 'coverage/*'],
+      },
+    },
     plugins: [
       ...(config.plugins || []),
       devSSR(),

@@ -1,6 +1,6 @@
 import { makeAutoObservable } from 'mobx';
 import { Color } from '@material-ui/lab/Alert';
-import { PenDirectoryData, PenMarkdownData } from '@/types';
+import { ClientEvents, PenDirectoryData, PenMarkdownData } from '@/types';
 import type { AppStore, PrefetchStore } from '..';
 
 export type HomeState = {
@@ -37,6 +37,10 @@ export class HomeStore implements PrefetchStore<HomeState> {
     }
 
     return '';
+  }
+
+  fetchData(relative: string) {
+    this.root.socket.emit(ClientEvents.FetchData, relative);
   }
 
   notify(severity: Color, message: string) {

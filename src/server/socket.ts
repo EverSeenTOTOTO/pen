@@ -1,21 +1,16 @@
 import http from 'http';
 import https from 'https';
 import { Server, Socket } from 'socket.io';
+import { stripNamespace } from '../utils';
 import {
   ClientEvents,
   ServerEvents,
   ClientToServerEvents,
   ServerToClientEvents,
-  PenSocketInfo,
+  SocketOptions,
 } from '../types';
-import { Watcher, WatcherOptions } from './watcher';
+import { Watcher } from './watcher';
 import { createTheme } from './theme';
-
-export type SocketOptions = Omit<WatcherOptions, 'emit'> & PenSocketInfo & {
-  dist: string;
-  namespace: string;
-  connectTimeout: number;
-};
 
 type PenSocket = Socket<ClientToServerEvents, ServerToClientEvents>;
 
@@ -27,10 +22,10 @@ const setupWatcher = (socket: PenSocket, options: SocketOptions) => {
 
   watcher.setupWatching('.').catch((e) => socket.emit(ServerEvents.PenError, e));
 
+  socket.on('disconnect', () => watcher.close());
   socket.on(ClientEvents.BackRoot, () => watcher.setupWatching('.'));
   socket.on(ClientEvents.BackUpdir, () => watcher.goUpdir());
-  socket.on(ClientEvents.FetchData, (relative: string) => watcher.setupWatching(relative));
-  socket.on('disconnect', () => watcher.close());
+  socket.on(ClientEvents.FetchData, (relative: string) => watcher.setupWatching(stripNamespace(options.namespace, relative)));
 };
 
 const setupThemeProvider = (socket: PenSocket, options: SocketOptions) => {

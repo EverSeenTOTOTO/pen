@@ -1,3 +1,4 @@
+import { useLocation } from 'react-router';
 import { useEffect, useRef } from 'react';
 import { useStore } from '.';
 
@@ -13,4 +14,13 @@ export const useTheme = () => {
       styleElement.current = window && window.document.querySelector(`#${theme.id}`);
     }
   }, [theme.css, theme.id]);
+};
+
+export const useAutoFetch = () => {
+  const home = useStore('home');
+  const location = useLocation();
+
+  useEffect(() => {
+    home.fetchData(location.pathname);
+  }, [location]);
 };

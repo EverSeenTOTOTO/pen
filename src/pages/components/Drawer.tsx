@@ -1,7 +1,5 @@
 import { observer } from 'mobx-react-lite';
-import {
-  alpha, makeStyles, withStyles, Theme, createStyles,
-} from '@material-ui/core/styles';
+import { makeStyles, createStyles } from '@material-ui/core/styles';
 import MuiDrawer from '@material-ui/core/Drawer';
 import List from '@material-ui/core/List';
 import Divider from '@material-ui/core/Divider';
@@ -11,11 +9,11 @@ import ListItemText from '@material-ui/core/ListItemText';
 import TreeView from '@material-ui/lab/TreeView';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ChevronRightIcon from '@material-ui/icons/ChevronRight';
-import TreeItem, { TreeItemProps } from '@material-ui/lab/TreeItem';
 import { useStore } from '@/store';
 import { Folder, Description } from '@material-ui/icons';
 import { NoSsr } from '@material-ui/core';
-import { DocToc } from '@/types';
+import { useNavigate } from 'react-router';
+import Toc from './Toc';
 
 export const drawerWidth = 280;
 
@@ -52,27 +50,10 @@ const useStyles = makeStyles((theme) => createStyles({
   },
 }));
 
-const StyledTreeItem = withStyles((theme: Theme) => createStyles({
-  group: {
-    marginLeft: 7,
-    paddingLeft: 18,
-    borderLeft: `1px dashed ${alpha(theme.palette.text.primary, 0.4)}`,
-  },
-}))((props: TreeItemProps) => <TreeItem {...props} />);
-
-// TODO: disable ssr for icons
-const Toc = ({ toc }: { toc: DocToc }) => (toc.children.length > 0
-  ? <StyledTreeItem nodeId={toc.name} label={toc.name}>
-    {
-      toc.children.map((child) => <Toc key={child.name} toc={child} />)
-    }
-  </StyledTreeItem>
-  : <StyledTreeItem nodeId={toc.name} label={toc.name} />
-);
-
 const Drawer = observer(() => {
   const classes = useStyles();
   const drawer = useStore('drawer');
+  const navigate = useNavigate();
 
   return (
       <MuiDrawer
@@ -94,7 +75,7 @@ const Drawer = observer(() => {
           <Divider />
           <List dense>
             {drawer.childDocs.map((doc) => (
-              <ListItem button key={doc.filename}>
+              <ListItem button key={doc.filename} onClick={() => navigate(doc.relativePath)}>
                 <NoSsr>
                   <ListItemIcon className={classes.icon}>{
                     doc.type === 'directory'

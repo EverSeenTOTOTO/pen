@@ -2,15 +2,11 @@ import { formatPath, path } from '@/utils';
 import http from 'http';
 import express from 'express';
 import getPort from 'detect-port';
-import { RenderOptions, bindRender } from './render';
-import { SocketOptions, bindSocket } from './socket';
+import { PenOptions, PenCliOptions } from '@/types';
 import { logger as builtInLogger, emptyLogger } from './logger';
 import { createTheme } from './theme';
-
-export type PenOptions = Partial<SocketOptions> & Partial<RenderOptions>
-& {
-  silent?: boolean,
-};
+import { bindRender } from './render';
+import { bindSocket } from './socket';
 
 export const normalizeOptions = (opts?: PenOptions): Required<PenOptions> => {
   const silent = opts?.silent ?? false;
@@ -31,12 +27,8 @@ export const normalizeOptions = (opts?: PenOptions): Required<PenOptions> => {
   };
 };
 
-export type ServerOptions = PenOptions & {
-  port?: number;
-};
-
 // hypothesis: client assets to be in the same directory
-export const createServer = async (opts?: ServerOptions) => {
+export const createServer = async (opts?: PenCliOptions) => {
   const app = express();
   const server = http.createServer(app);
   const options = normalizeOptions(opts);

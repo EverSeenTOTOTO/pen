@@ -1,3 +1,4 @@
+/* eslint-disable no-param-reassign */
 import fs from 'fs';
 import {
   PathInfo,
@@ -81,10 +82,15 @@ export async function readDirectory(pathInfo: PathInfo, root: string, ignores: R
     type: 'directory',
     filename: pathInfo.filename,
     relativePath: pathInfo.relativePath,
-    children: infos.sort(sortChildren),
     readme: readme.length > 0
       ? await readMarkdown(readme[0])
       : undefined,
+    children: infos.sort(sortChildren).map((c) => {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      delete c.fullpath;
+      return c;
+    }),
   };
 }
 
@@ -94,4 +100,9 @@ export async function readUnknown(relative: string, root: string, ignores: RegEx
   return isDir(pathInfo.fullpath)
     ? readDirectory(pathInfo, root, ignores)
     : readMarkdown(pathInfo);
+}
+
+export function readTemplate(dist: string, html = 'index.html') {
+  const index = path.join(dist, html);
+  return fs.readFileSync(index, 'utf8');
 }

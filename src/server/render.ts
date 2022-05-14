@@ -1,32 +1,22 @@
-import fs from 'fs';
 import express, { Express, Request, Response } from 'express';
 import { path, stripNamespace } from '@/utils';
-import { PenSocketInfo, PenTheme } from '@/types';
-import { Logger } from './logger';
-import { readUnknown } from './reader';
+import { PenOptions } from '@/types';
+import { readUnknown, readTemplate } from './reader';
 
-export type RenderOptions = PenSocketInfo & {
-  root: string,
-  namespace: string,
-  dist: string,
-  theme: PenTheme,
-  ignores: RegExp[]
-  logger?: Logger,
-};
+export function loadRender(entry = path.join(__dirname, 'index.server.js')) {
+  // eslint-disable-next-line import/no-dynamic-require, @typescript-eslint/no-var-requires, global-require
+  const { render } = require(entry);
+  return render;
+}
 
 // extract for dev and test
-export const bindRender = (app: Express, options: RenderOptions) => {
+export const bindRender = (app: Express, options: PenOptions) => {
   const {
     dist, namespace, theme, logger, root, ignores,
   } = options;
-  const index = path.join(dist, 'index.html');
-  const entry = path.join(__dirname, 'index.server.js');
-
-  // eslint-disable-next-line import/no-dynamic-require, @typescript-eslint/no-var-requires, global-require
-  const { render } = require(entry);
-  const template = fs.readFileSync(index, 'utf8');
+  const template = readTemplate(dist);
+  const render = loadRender();
   const style = `<style id="${theme.id}">${theme.css}</style>`;
-
   const serve = express.static(dist, { index: false, dotfiles: 'allow' });
   const ssr = async (req: Request, res: Response, next: () => void) => {
     try {

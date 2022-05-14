@@ -6,11 +6,11 @@ import {
   EmitFunction,
   PenErrorData,
   ServerEvents,
+  PenSocketInfo,
   PenMarkdownData,
   PenDirectoryData,
   ClientToServerEvents,
   ServerToClientEvents,
-  PenSocketInfo,
 } from '@/types';
 import type { AppStore, PrefetchStore } from '..';
 

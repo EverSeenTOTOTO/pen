@@ -54,10 +54,12 @@ const readThemeCss = (dist: string, name: keyof typeof themes) => {
   }
 };
 
+const globalId: string = uuid();
+
 export const createTheme = (name: keyof typeof themes, dist?: string): PenTheme => ({
   name,
   options: themes[name],
   avaliable: Object.keys(themes),
-  id: uuid(),
+  id: globalId,
   css: dist ? readThemeCss(dist, name) : '',
 });

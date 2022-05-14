@@ -4,7 +4,7 @@ import { useStore } from '@/store';
 import Snackbar from '@material-ui/core/Snackbar';
 import Alert from '@material-ui/lab/Alert';
 import { makeStyles, ThemeProvider } from '@material-ui/core/styles';
-import { useTheme } from '@/store/hooks';
+import { useAutoFetch, useTheme } from '@/store/hooks';
 import Markdown from './components/Markdown';
 import Drawer, { drawerWidth } from './components/Drawer';
 import Header from './components/Header';
@@ -38,6 +38,7 @@ const Home = observer(() => {
   const theme = useStore('theme');
 
   useTheme();
+  useAutoFetch();
 
   return <ThemeProvider theme={theme.theme}>
     <div className={classes.root}>

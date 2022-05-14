@@ -1,4 +1,5 @@
 import { ThemeOptions } from '@material-ui/core/styles';
+import { Logger } from './server/logger';
 
 // client fetch
 export enum ClientEvents {
@@ -28,9 +29,12 @@ export type ServerToClientEvents = {
   [ServerEvents.PenStyle]: (theme: PenTheme) => void;
 };
 
-export type EmitFunction<Evts extends { [k in string]: (...args: any[]) => void }, Evt extends keyof Evts> = (evt: Evt, ...args: Parameters<Evts[Evt]>) => void;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type EmitFunction<Evts extends { [k in string]: (...args: any[]) => void }, Evt extends keyof Evts> =
+  (evt: Evt, ...args: Parameters<Evts[Evt]>) => void;
 
 export type PenSocketInfo = {
+  namespace: string;
   socketPath: string;
   transports: ('websocket' | 'polling')[]
 };
@@ -66,7 +70,7 @@ export type PenDirectoryData = {
   type: 'directory',
   filename: string,
   relativePath: string,
-  children: PathInfo[],
+  children: Omit<PathInfo, 'fullpath'>[],
   reading?: PenMarkdownData
   readme?: PenMarkdownData
 };
@@ -74,4 +78,25 @@ export type PenDirectoryData = {
 export type PenErrorData = {
   type: 'error',
   message: string
+};
+
+export type WatcherOptions = {
+  root: string;
+  ignores: RegExp[]
+  logger?: Logger;
+  emit: EmitFunction<ServerToClientEvents, ServerEvents>
+};
+
+export type SocketOptions = Omit<WatcherOptions, 'emit'> & PenSocketInfo & {
+  dist: string;
+  connectTimeout: number;
+};
+
+export type PenOptions = Omit<WatcherOptions & SocketOptions & {
+  theme: PenTheme
+  silent: boolean;
+}, 'emit'>;
+
+export type PenCliOptions = PenOptions & {
+  port?: number
 };
