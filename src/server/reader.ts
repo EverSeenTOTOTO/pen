@@ -13,7 +13,7 @@ function fullPath(root: string, switchTo: string) {
 }
 
 export function resolvePathInfo(root: string, switchTo: string):PathInfo {
-  const fullpath = fullPath(root, switchTo); //  It's weird sometimes got xxx.md~
+  const fullpath = fullPath(root, switchTo);
   const filename = path.basename(fullpath);
 
   return {
@@ -41,7 +41,13 @@ export function validatePath(pathInfo: PathInfo, ignores: RegExp[]) {
 
 function sortChildren(a: PathInfo, b: PathInfo) {
   if (a.type !== b.type && a.type === 'directory') return -1;
-  return 0;
+  if (a.filename.startsWith('.') && b.filename.startsWith('.')) {
+    return a.filename < b.filename ? -1 : 0;
+  }
+  if (a.filename.startsWith('.')) return -1;
+  if (b.filename.startsWith('.')) return 1;
+
+  return a.filename < b.filename ? -1 : 0;
 }
 
 export async function readMarkdown(pathInfo: PathInfo): Promise<PenMarkdownData> {

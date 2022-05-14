@@ -1,12 +1,13 @@
 import { formatPath, path } from '@/utils';
+import http from 'http';
 import express from 'express';
 import getPort from 'detect-port';
 import { RenderOptions, bindRender } from './render';
+import { SocketOptions, bindSocket } from './socket';
 import { logger as builtInLogger, emptyLogger } from './logger';
-import { WatcherOptions } from './watcher';
 import { themes } from './theme';
 
-export type PenOptions = Partial<Omit<RenderOptions, 'watcher'>> & Partial<Omit<WatcherOptions, 'emit'>>
+export type PenOptions = Partial<SocketOptions> & Partial<RenderOptions>
 & {
   silent?: boolean,
 };
@@ -19,10 +20,13 @@ export const normalizeOptions = (opts?: PenOptions): Required<PenOptions> => {
     silent,
     ignores: opts?.ignores ?? [],
     logger: silent ? emptyLogger : logger,
-    theme: opts?.theme ?? { name: 'light', options: themes.light, avaliable: [] },
+    connectTimeout: opts?.connectTimeout ?? 10000,
+    socketPath: opts?.socketPath ?? '/pensocket.io',
+    transports: opts?.transports ?? ['websocket', 'polling'],
     root: opts?.root ? formatPath(opts?.root) : process.cwd(),
     namespace: opts?.namespace ? formatPath(opts?.namespace) : '/',
     dist: opts?.dist ? formatPath(opts?.dist) : path.join(__dirname),
+    theme: opts?.theme ?? { name: 'light', options: themes.light, avaliable: [] },
   };
 };
 
@@ -32,10 +36,12 @@ export type ServerOptions = PenOptions & {
 
 // hypothesis: client assets to be in the same directory
 export const createServer = async (opts?: ServerOptions) => {
-  const server = express();
+  const app = express();
+  const server = http.createServer(app);
   const options = normalizeOptions(opts);
 
-  bindRender(server, options);
+  bindSocket(server, options);
+  bindRender(app, options);
 
   const avaliablePort = await getPort(opts?.port ?? 3000);
 

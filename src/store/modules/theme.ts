@@ -1,8 +1,6 @@
-import { makeAutoObservable, reaction } from 'mobx';
+import { makeAutoObservable } from 'mobx';
 import { createTheme, ThemeOptions } from '@material-ui/core/styles';
-import { PenTheme } from '@/types';
-// TODO: socket
-import { themes } from '@/server/theme';
+import { ClientEvents, PenTheme } from '@/types';
 import type { AppStore, PrefetchStore } from '..';
 
 export class ThemeStore implements PrefetchStore<PenTheme> {
@@ -17,14 +15,6 @@ export class ThemeStore implements PrefetchStore<PenTheme> {
   constructor(root: AppStore) {
     makeAutoObservable(this);
     this.root = root;
-    reaction(() => this.name, () => {
-      // TODO: fetch theme
-    });
-  }
-
-  changeTheme(value: string) {
-    this.name = value;
-    this.options = themes[value];
   }
 
   get theme() {
@@ -33,6 +23,10 @@ export class ThemeStore implements PrefetchStore<PenTheme> {
 
   get dark() {
     return this.options.palette?.type === 'dark';
+  }
+
+  changeTheme(name: string) {
+    this.root.socket.emit(ClientEvents.FetchStyle, name);
   }
 
   hydrate(state: PenTheme): void {

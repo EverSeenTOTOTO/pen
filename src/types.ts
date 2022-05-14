@@ -8,25 +8,32 @@ export enum ClientEvents {
   BackRoot = 'backroot',
 }
 
-export type StyleReq = 'mode' | 'theme';
-
-export type PenStyleRequest = {
-  type: StyleReq,
-  name: string
-};
-
-export type PenFetchRequest = {
-  relative: string
+export type ClientToServerEvents = {
+  [ClientEvents.FetchStyle]: (name: string) => void;
+  [ClientEvents.FetchData]: (relative: string) => void;
+  [ClientEvents.BackRoot ]: () => void;
+  [ClientEvents.BackUpdir]: () => void
 };
 
 // server push
 export enum ServerEvents {
-  PenInit = 'peninit',
   PenError = 'penerror',
   PenData = 'pendata',
-  PenChange = 'penchange',
   PenStyle = 'penstyle',
 }
+
+export type ServerToClientEvents = {
+  [ServerEvents.PenData]: (data: PenMarkdownData | PenDirectoryData) => void;
+  [ServerEvents.PenError]: (error: PenErrorData) => void;
+  [ServerEvents.PenStyle]: (theme: PenTheme) => void;
+};
+
+export type EmitFunction<Evts extends { [k in string]: (...args: any[]) => void }, Evt extends keyof Evts> = (evt: Evt, ...args: Parameters<Evts[Evt]>) => void;
+
+export type PenSocketInfo = {
+  socketPath: string;
+  transports: ('websocket' | 'polling')[]
+};
 
 export type PenTheme = {
   name: string;
@@ -34,16 +41,16 @@ export type PenTheme = {
   avaliable: string[];
 };
 
-export type PenInitData = {
-  root: string;
-  namespace: string;
-};
-
 export type PathInfo = {
   type: 'directory' | 'markdown' | 'other',
   fullpath: string,
   filename: string,
   relativePath: string,
+};
+
+export type DocToc = {
+  name: string,
+  children: DocToc[]
 };
 
 export type PenMarkdownData = {
@@ -65,14 +72,4 @@ export type PenDirectoryData = {
 export type PenErrorData = {
   type: 'error',
   message: string
-};
-
-export type PenData = PenMarkdownData
-| PenDirectoryData
-| PenErrorData;
-
-export type PenStyle = {
-  type: StyleReq,
-  name: string,
-  cssFiles: string[]
 };

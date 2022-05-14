@@ -2,7 +2,7 @@ import { createContext, useContext } from 'react';
 import { HomeStore } from './modules/home';
 import { DrawerStore } from './modules/drawer';
 import { ThemeStore } from './modules/theme';
-import { ServerInfoStore } from './modules/server';
+import { SocketStore } from './modules/socket';
 
 export type PrefetchStore<State> = State & {
   // merge ssr prefetched data
@@ -22,13 +22,13 @@ export class AppStore {
 
   theme: ThemeStore;
 
-  server: ServerInfoStore;
+  socket: SocketStore;
 
   constructor() {
     this.home = new HomeStore(this);
     this.drawer = new DrawerStore(this);
     this.theme = new ThemeStore(this);
-    this.server = new ServerInfoStore(this);
+    this.socket = new SocketStore(this);
   }
 
   hydrate(data: Record<string, unknown>) {

@@ -5,8 +5,6 @@ import { StaticRouter } from 'react-router-dom/server';
 import { App } from './App';
 import { createStore } from './store';
 import { createRoutes } from './routes';
-import { PenInitData, PenData, PenTheme } from './types';
-
 // see index.html
 const APP_HTML = '<!--app-html-->';
 const APP_STATE = '<!--app-state-->';
@@ -17,12 +15,10 @@ const serialize = (state: Record<string, unknown>) => `<script>;window.__PREFETC
 export type RenderContext = {
   req: Request;
   res: Response;
-  data: PenData;
-  info: PenInitData;
-  theme: PenTheme;
   style?: string;
   template: string;
   html?: string;
+  prefetch: Record<string, unknown>
 };
 
 export async function render(context: RenderContext) {
@@ -33,11 +29,7 @@ export async function render(context: RenderContext) {
   const routes = createRoutes();
 
   // ssr prefetch
-  store.hydrate({
-    home: { data: ctx.data },
-    theme: ctx.theme,
-    server: ctx.info,
-  });
+  store.hydrate(ctx.prefetch);
 
   const html = ReactDOMServer.renderToString(
     <StaticRouter location={req.originalUrl}>
@@ -54,3 +46,5 @@ export async function render(context: RenderContext) {
 
   return ctx;
 }
+
+export type RenderFunction = typeof render;

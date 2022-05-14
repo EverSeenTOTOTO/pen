@@ -1,14 +1,15 @@
-import {
-  PenData,
-  ServerEvents,
-  PathInfo,
-  PenMarkdownData,
-  PenDirectoryData,
-} from '@/types';
 import chokidar from 'chokidar';
 import {
+  PathInfo,
+  EmitFunction,
+  ServerEvents,
+  PenMarkdownData,
+  PenDirectoryData,
+  ServerToClientEvents,
+} from '../types';
+import {
   path, isReadme,
-} from '@/utils';
+} from '../utils';
 import { Logger } from './logger';
 import { renderError } from './rehype';
 import {
@@ -19,7 +20,7 @@ export type WatcherOptions = {
   root: string;
   ignores: RegExp[];
   logger?: Logger;
-  emit: (event: ServerEvents, data: PenData) => void;
+  emit: EmitFunction<ServerToClientEvents, ServerEvents>
 };
 
 export class Watcher {
@@ -203,8 +204,24 @@ export class Watcher {
   protected sendData() {
     // trigger server push
     if (this.current) {
-      this.emit(ServerEvents.PenChange, this.current);
+      this.emit(ServerEvents.PenData, this.current);
     }
+  }
+
+  goUpdir() {
+    if (this.current) {
+      try {
+        const relative = path.dirname(this.current.relativePath);
+        const updir = resolvePathInfo(this.root, relative);
+
+        validatePath(updir, this.ignores);
+
+        return this.setupWatching(updir.relativePath);
+      } catch (e) {
+        this.onError(e as Error);
+      }
+    }
+    return Promise.resolve();
   }
 
   isReady() {

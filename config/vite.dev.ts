@@ -4,34 +4,48 @@ import { defineConfig, ViteDevServer } from 'vite';
 import base, { paths } from './vite.common';
 import { themes } from '../src/server/theme';
 import { readUnknown } from '../src/server/reader';
+import { bindSocket } from '../src/server/socket';
 
 const devSSR = () => ({
   name: 'dev-ssr',
   async configureServer(vite: ViteDevServer) {
+    const transports = ['websocket'];
+    const socketPath = '/pensocket.io';
+    const namespace = '/';
+    const ignores = [/^\/\./];
+    const root = process.cwd();
     const { logger } = vite.config;
+    const theme = { name: 'dark', options: themes.dark, avaliable: Object.keys(themes) };
     const templateHtml = fs.readFileSync(paths.template, 'utf-8');
-    const theme = { name: 'dark', options: themes.dark };
-    const css = fs.readFileSync(path.join(__dirname, `../src/styles/theme.${theme.name}.css`), 'utf8');
-    const info = {
-      root: process.cwd(),
-      namespace: '/',
-    };
+    const style = `<style>${fs.readFileSync(path.join(__dirname, `../src/styles/theme.${theme.name}.css`), 'utf8')}</style>`;
+
+    bindSocket(vite.httpServer, {
+      root,
+      ignores,
+      namespace,
+      socketPath,
+      transports,
+      connectTimeout: 5000,
+    });
 
     // 缺点是不能调试完整服务端代码，只能调试服务端同构应用的部分
     return () => vite.middlewares.use(async (req, res, next) => {
       try {
-        const current = await readUnknown('.', process.cwd(), []);
+        const current = await readUnknown('.', process.cwd(), ignores);
         const { render } = await vite.ssrLoadModule(paths.serverEntry);
         const template = await vite.transformIndexHtml(req.originalUrl, templateHtml);
 
         const { html } = await render({
           req,
           res,
-          info,
           theme,
+          style,
           template,
-          style: `<style>${css}</style>`,
-          data: current,
+          prefetch: {
+            theme,
+            home: { data: current },
+            socket: { socketPath, transports },
+          },
         });
 
         res.end(html);
