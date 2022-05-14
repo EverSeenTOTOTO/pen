@@ -9,9 +9,10 @@ import {
   PenSocketInfo,
 } from '../types';
 import { Watcher, WatcherOptions } from './watcher';
-import { themes } from './theme';
+import { createTheme } from './theme';
 
 export type SocketOptions = Omit<WatcherOptions, 'emit'> & PenSocketInfo & {
+  dist: string;
   namespace: string;
   connectTimeout: number;
 };
@@ -32,15 +33,9 @@ const setupWatcher = (socket: PenSocket, options: SocketOptions) => {
   socket.on('disconnect', () => watcher.close());
 };
 
-const setupThemeProvider = (socket: PenSocket) => {
+const setupThemeProvider = (socket: PenSocket, options: SocketOptions) => {
   socket.on(ClientEvents.FetchStyle, (name: string) => {
-    if (themes[name]) {
-      socket.emit(ServerEvents.PenStyle, {
-        name,
-        options: themes[name],
-        avaliable: Object.keys(themes),
-      });
-    }
+    socket.emit(ServerEvents.PenStyle, createTheme(name, options.dist));
   });
 };
 
@@ -59,7 +54,7 @@ export const bindSocket = (server: http.Server | https.Server, options: SocketOp
     options.logger?.done(`Pen connected with ${socket.id}`);
 
     setupWatcher(socket, options);
-    setupThemeProvider(socket);
+    setupThemeProvider(socket, options);
   });
 
   server.on('close', () => {

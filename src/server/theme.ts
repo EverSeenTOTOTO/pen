@@ -1,4 +1,8 @@
+import path from 'path';
+import fs from 'fs';
 import { ThemeOptions } from '@material-ui/core';
+import { uuid } from '../utils';
+import { PenTheme } from '../types';
 
 const defaultTheme = {
   palette: {
@@ -17,7 +21,7 @@ const defaultTheme = {
   },
 };
 
-export const themes: { [k in string]: ThemeOptions } = {
+const themes: { [k in string]: ThemeOptions } = {
   dark: {
     ...defaultTheme,
     palette: {
@@ -41,3 +45,19 @@ export const themes: { [k in string]: ThemeOptions } = {
     },
   },
 };
+
+const readThemeCss = (dist: string, name: keyof typeof themes) => {
+  try {
+    return fs.readFileSync(path.join(dist, `theme.${name}.css`), 'utf8');
+  } catch (e) {
+    return '';
+  }
+};
+
+export const createTheme = (name: keyof typeof themes, dist?: string): PenTheme => ({
+  name,
+  options: themes[name],
+  avaliable: Object.keys(themes),
+  id: uuid(),
+  css: dist ? readThemeCss(dist, name) : '',
+});

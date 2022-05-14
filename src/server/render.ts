@@ -1,7 +1,7 @@
 import fs from 'fs';
 import express, { Express, Request, Response } from 'express';
-import { path, stripNamespace } from '../utils';
-import { PenSocketInfo, PenTheme } from '../types';
+import { path, stripNamespace } from '@/utils';
+import { PenSocketInfo, PenTheme } from '@/types';
 import { Logger } from './logger';
 import { readUnknown } from './reader';
 
@@ -17,46 +17,44 @@ export type RenderOptions = PenSocketInfo & {
 // extract for dev and test
 export const bindRender = (app: Express, options: RenderOptions) => {
   const {
-    dist, namespace,
+    dist, namespace, theme, logger, root, ignores,
   } = options;
   const index = path.join(dist, 'index.html');
-  const theme = path.join(dist, `assets/theme.${options.theme.name}.css`);
   const entry = path.join(__dirname, 'index.server.js');
 
   // eslint-disable-next-line import/no-dynamic-require, @typescript-eslint/no-var-requires, global-require
   const { render } = require(entry);
   const template = fs.readFileSync(index, 'utf8');
-  const style = `<style>${fs.readFileSync(theme, 'utf8')}</style>`;
+  const style = `<style id="${theme.id}">${theme.css}</style>`;
 
   const serve = express.static(dist, { index: false, dotfiles: 'allow' });
   const ssr = async (req: Request, res: Response, next: () => void) => {
     try {
       const current = await readUnknown(
-        stripNamespace(options.namespace, req.originalUrl),
-        options.root,
-        options.ignores,
+        stripNamespace(namespace, req.originalUrl),
+        root,
+        ignores,
       );
 
       const { html } = await render({
         req,
         res,
         style,
+        theme,
         template,
-        data: current,
-        theme: options.theme,
         prefetch: {
           socket: options,
-          theme: options.theme,
+          theme,
           home: { data: current },
         },
       });
 
-      options.logger?.done(`Pen rendered page: ${req.originalUrl}`);
+      logger?.done(`Pen rendered page: ${req.originalUrl}`);
 
       res.setHeader('Content-Type', 'text/html');
       res.end(html);
     } catch (e) {
-      options.logger?.error(`Pen ssr error: ${(e as Error).message}`);
+      logger?.error(`Pen ssr error: ${(e as Error).message}`);
       next();
     }
   };

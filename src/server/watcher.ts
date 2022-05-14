@@ -1,3 +1,4 @@
+/* eslint-disable no-param-reassign */
 import chokidar from 'chokidar';
 import {
   PathInfo,
@@ -204,7 +205,19 @@ export class Watcher {
   protected sendData() {
     // trigger server push
     if (this.current) {
-      this.emit(ServerEvents.PenData, this.current);
+      if (this.current.type === 'directory') {
+        const { children } = this.current;
+
+        children.forEach((c) => {
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
+          delete c.fullpath;
+        });
+
+        this.emit(ServerEvents.PenData, { ...this.current, children });
+      } else {
+        this.emit(ServerEvents.PenData, this.current);
+      }
     }
   }
 

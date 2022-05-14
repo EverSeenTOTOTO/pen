@@ -57,3 +57,5 @@ export const path = {
 };
 
 export const createMarkup = (__html: string) => ({ __html });
+
+export const uuid = () => `UUID${String(Math.random()).replace(/0?\./, '').slice(0, 8)}`;

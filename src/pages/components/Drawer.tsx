@@ -60,6 +60,7 @@ const StyledTreeItem = withStyles((theme: Theme) => createStyles({
   },
 }))((props: TreeItemProps) => <TreeItem {...props} />);
 
+// TODO: disable ssr for icons
 const Toc = ({ toc }: { toc: DocToc }) => (toc.children.length > 0
   ? <StyledTreeItem nodeId={toc.name} label={toc.name}>
     {
@@ -85,8 +86,8 @@ const Drawer = observer(() => {
         <div className={classes.drawerContainer}>
         <TreeView
           className={classes.toc}
-          defaultCollapseIcon={<ExpandMoreIcon />}
-          defaultExpandIcon={<ChevronRightIcon />}
+          defaultCollapseIcon={<NoSsr><ExpandMoreIcon /></NoSsr>}
+          defaultExpandIcon={<NoSsr><ChevronRightIcon /></NoSsr>}
         >
           <Toc toc={drawer.toc} />
         </TreeView>

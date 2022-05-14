@@ -55,6 +55,9 @@ export class SocketStore implements PrefetchStore<PenSocketInfo> {
   }
 
   onStyle(style: PenTheme) {
+    if (import.meta.env.DEV) {
+      console.warn(style);
+    }
     this.root.theme.hydrate(style);
   }
 

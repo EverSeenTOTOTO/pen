@@ -37,15 +37,17 @@ export type PenSocketInfo = {
 
 export type PenTheme = {
   name: string;
+  id: string;
+  css: string;
   options: ThemeOptions;
   avaliable: string[];
 };
 
 export type PathInfo = {
   type: 'directory' | 'markdown' | 'other',
-  fullpath: string,
   filename: string,
   relativePath: string,
+  fullpath: string,
 };
 
 export type DocToc = {
@@ -55,9 +57,9 @@ export type DocToc = {
 
 export type PenMarkdownData = {
   type: 'markdown',
-  content: string,
   filename: string,
   relativePath: string
+  content: string,
 };
 
 export type PenDirectoryData = {

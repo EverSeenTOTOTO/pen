@@ -6,6 +6,10 @@ import type { AppStore, PrefetchStore } from '..';
 export class ThemeStore implements PrefetchStore<PenTheme> {
   name: string = ''
 
+  id: string = ''
+
+  css: string = ''
+
   avaliable: string[] = []
 
   options:ThemeOptions = {};
@@ -30,13 +34,17 @@ export class ThemeStore implements PrefetchStore<PenTheme> {
   }
 
   hydrate(state: PenTheme): void {
+    this.id = state.id;
+    this.css = state.css;
     this.name = state.name;
     this.options = state.options;
     this.avaliable = state.avaliable;
   }
 
-  dehydra(): PenTheme {
+  dehydra() {
     return {
+      id: this.id,
+      css: this.css,
       name: this.name,
       options: this.options,
       avaliable: this.avaliable,

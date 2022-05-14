@@ -2,25 +2,26 @@ import path from 'path';
 import fs from 'fs';
 import { defineConfig, ViteDevServer } from 'vite';
 import base, { paths } from './vite.common';
-import { themes } from '../src/server/theme';
+import { createTheme } from '../src/server/theme';
 import { readUnknown } from '../src/server/reader';
 import { bindSocket } from '../src/server/socket';
 
 const devSSR = () => ({
   name: 'dev-ssr',
   async configureServer(vite: ViteDevServer) {
-    const transports = ['websocket'];
-    const socketPath = '/pensocket.io';
     const namespace = '/';
     const ignores = [/^\/\./];
     const root = process.cwd();
-    const { logger } = vite.config;
-    const theme = { name: 'dark', options: themes.dark, avaliable: Object.keys(themes) };
+    const transports = ['websocket'] as ('websocket' | 'polling')[];
+    const socketPath = '/pensocket.io';
     const templateHtml = fs.readFileSync(paths.template, 'utf-8');
-    const style = `<style>${fs.readFileSync(path.join(__dirname, `../src/styles/theme.${theme.name}.css`), 'utf8')}</style>`;
+    const dist = path.join(__dirname, '../src/styles/');
+    const theme = createTheme('dark', dist);
+    const style = `<style id="${theme.id}">${theme.css}</style>`;
 
     bindSocket(vite.httpServer, {
       root,
+      dist,
       ignores,
       namespace,
       socketPath,
@@ -51,7 +52,7 @@ const devSSR = () => ({
         res.end(html);
       } catch (e) {
         vite.ssrFixStacktrace(e);
-        logger.error(e.stack ?? e.message);
+        console.error(e.stack ?? e.message);
         next();
       }
     });

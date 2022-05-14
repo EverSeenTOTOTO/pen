@@ -5,7 +5,7 @@ import getPort from 'detect-port';
 import { RenderOptions, bindRender } from './render';
 import { SocketOptions, bindSocket } from './socket';
 import { logger as builtInLogger, emptyLogger } from './logger';
-import { themes } from './theme';
+import { createTheme } from './theme';
 
 export type PenOptions = Partial<SocketOptions> & Partial<RenderOptions>
 & {
@@ -15,8 +15,10 @@ export type PenOptions = Partial<SocketOptions> & Partial<RenderOptions>
 export const normalizeOptions = (opts?: PenOptions): Required<PenOptions> => {
   const silent = opts?.silent ?? false;
   const logger = silent ? emptyLogger : builtInLogger;
+  const dist = opts?.dist ? formatPath(opts?.dist) : path.join(__dirname);
 
   return {
+    dist,
     silent,
     ignores: opts?.ignores ?? [],
     logger: silent ? emptyLogger : logger,
@@ -25,8 +27,7 @@ export const normalizeOptions = (opts?: PenOptions): Required<PenOptions> => {
     transports: opts?.transports ?? ['websocket', 'polling'],
     root: opts?.root ? formatPath(opts?.root) : process.cwd(),
     namespace: opts?.namespace ? formatPath(opts?.namespace) : '/',
-    dist: opts?.dist ? formatPath(opts?.dist) : path.join(__dirname),
-    theme: opts?.theme ?? { name: 'light', options: themes.light, avaliable: [] },
+    theme: opts?.theme ?? createTheme('light', dist),
   };
 };
 
