@@ -28,11 +28,7 @@ build: clean
 
 .PHONY: start
 start: build
-	make server
-
-.PHONY: server
-server:
-	DEBUG=engine,socket.io* node ${DIST}/server.js
+	DEBUG=socket.io:* node ${DIST}/server.js
 
 .PHONY: test 
 test:

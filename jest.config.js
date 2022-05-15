@@ -14,7 +14,6 @@ module.exports = {
     '/node_modules/',
   ],
   transformIgnorePatterns: [
-    '/node_modules/',
     '\\.pnp\\.[^\\/]+$',
   ],
 };

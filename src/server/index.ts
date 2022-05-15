@@ -7,6 +7,8 @@ import { logger as builtInLogger, emptyLogger } from './logger';
 import { createTheme } from './theme';
 import { bindRender } from './render';
 import { bindSocket } from './socket';
+import { Watcher } from './watcher';
+import { RemarkRehype } from './rehype';
 
 export const normalizeOptions = (opts?: PenOptions): Required<PenOptions> => {
   const silent = opts?.silent ?? false;
@@ -24,6 +26,7 @@ export const normalizeOptions = (opts?: PenOptions): Required<PenOptions> => {
     root: opts?.root ? formatPath(opts?.root) : process.cwd(),
     namespace: opts?.namespace ? formatPath(opts?.namespace) : '/',
     theme: opts?.theme ?? createTheme('light', dist),
+    plugins: opts?.plugins ?? [],
   };
 };
 
@@ -32,9 +35,11 @@ export const createServer = async (opts?: PenCliOptions) => {
   const app = express();
   const server = http.createServer(app);
   const options = normalizeOptions(opts);
+  const remark = new RemarkRehype(options);
+  const watcher = new Watcher({ ...options, remark });
 
-  bindSocket(server, options);
   bindRender(app, options);
+  bindSocket(server, { ...options, watcher, remark });
 
   const avaliablePort = await getPort(opts?.port ?? 3000);
 

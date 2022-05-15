@@ -67,6 +67,7 @@ const Drawer = observer(() => {
         <div className={classes.drawerContainer}>
         <TreeView
           className={classes.toc}
+          defaultExpanded={drawer.expandedToc}
           defaultCollapseIcon={<NoSsr><ExpandMoreIcon /></NoSsr>}
           defaultExpandIcon={<NoSsr><ChevronRightIcon /></NoSsr>}
         >

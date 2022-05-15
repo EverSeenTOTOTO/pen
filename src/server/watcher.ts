@@ -6,14 +6,18 @@ import {
   WatcherOptions,
   PenMarkdownData,
   PenDirectoryData,
+  EmitFunction,
+  ServerToClientEvents,
 } from '../types';
 import {
   path, isReadme,
 } from '../utils';
 import { Logger } from './logger';
-import { renderError } from './rehype';
 import {
-  resolvePathInfo, readDirectory, readMarkdown, validatePath,
+  readMarkdown,
+  validatePath,
+  readDirectory,
+  resolvePathInfo,
 } from './reader';
 
 export class Watcher {
@@ -27,7 +31,9 @@ export class Watcher {
 
   protected watcher?: chokidar.FSWatcher;
 
-  emit: WatcherOptions['emit']
+  remark: WatcherOptions['remark'];
+
+  emit?: EmitFunction<ServerToClientEvents, ServerEvents>
 
   // for test
   ready: boolean = true;
@@ -36,7 +42,11 @@ export class Watcher {
     this.root = options.root;
     this.ignores = options.ignores;
     this.logger = options.logger;
-    this.emit = options.emit;
+    this.remark = options.remark;
+  }
+
+  setupEmit(emit: Watcher['emit']) {
+    this.emit = emit;
   }
 
   async setupWatching(switchTo: string) {
@@ -63,11 +73,11 @@ export class Watcher {
         await this.onFileChange(pathInfo.relativePath);
       }
 
-      this.logger?.done(`Pen switched to watch ${pathInfo.relativePath}`);
+      this.logger?.done(`Pen switched to ${pathInfo.relativePath}`);
       this.sendData();
     } catch (e) {
       const err = e as Error;
-      this.onError(new Error(`Error on setupWatching: ${err.message}`, { cause: err }));
+      await this.onError(new Error(`Error on setupWatching: ${err.message}`, { cause: err }));
     }
   }
 
@@ -119,9 +129,7 @@ export class Watcher {
         } else if (this.current?.type === 'directory' && isChild) {
           await this.onDirChange(this.current.relativePath); // not onDirChange(relative)
 
-          if (isReadme(relative)) {
-            this.current.readme = await this.readReadme(relative);
-          } else if (this.current.reading?.relativePath === relative) { // isReading
+          if (isReadme(relative) || this.current.reading?.relativePath === relative) { // isReading
             await this.onFileChange(relative);
           }
         }
@@ -130,9 +138,7 @@ export class Watcher {
         if (isSelf) {
           await this.onFileChange(relative);
         } else if (this.current?.type === 'directory' && isChild) {
-          if (isReadme(relative)) {
-            this.current.readme = await this.readReadme(relative);
-          } else if (this.current.reading?.relativePath === relative) {
+          if (isReadme(relative) || this.current.reading?.relativePath === relative) {
             await this.onFileChange(relative);
           }
         }
@@ -143,24 +149,22 @@ export class Watcher {
     this.sendData();
   }
 
-  protected async readReadme(relative: string) {
-    try {
-      const pathInfo = resolvePathInfo(this.root, relative);
-      validatePath(pathInfo, this.ignores);
-      return await readMarkdown(pathInfo);
-    } catch (e) {
-      this.logger?.warn(`Pen ignored README file: ${relative}`);
-      return undefined;
-    }
-  }
-
   protected async onDirChange(relative: string) {
     try {
       const pathInfo = resolvePathInfo(this.root, relative);
-      this.current = await readDirectory(pathInfo, this.root, this.ignores);
+      const current = await readDirectory(pathInfo, this.root, this.ignores);
+
+      if (current?.readme) {
+        current.readme = {
+          ...current.readme,
+          content: await this.remark.process(current.readme.content),
+        };
+      }
+
+      this.current = current;
     } catch (e) {
       const err = e as Error;
-      this.onError(new Error(`Error on DirChange: ${err.message}`, { cause: err }));
+      await this.onError(new Error(`Error on DirChange: ${err.message}`, { cause: err }));
     }
   }
 
@@ -169,24 +173,33 @@ export class Watcher {
       const pathInfo = resolvePathInfo(this.root, relative);
       const markdown = await readMarkdown(pathInfo);
 
+      const current = {
+        ...markdown,
+        content: await this.remark.process(markdown.content),
+      };
+
       if (this.current?.type === 'directory') {
-        this.current.reading = markdown;
+        this.current.reading = current;
+
+        if (isReadme(relative)) {
+          this.current.readme = current;
+        }
       } else {
-        this.current = markdown;
+        this.current = current;
       }
     } catch (e) {
       const err = e as Error;
-      this.onError(new Error(`Error on FileChange: ${err.message}`, { cause: err }));
+      await this.onError(new Error(`Error on FileChange: ${err.message}`, { cause: err }));
     }
   }
 
-  protected onError(e?: Error) {
-    const error = e ?? new Error('An unexpect error has occured, but pen is unable to determine why...');
-    const message = renderError(error);
+  protected async onError(e?: Error) {
+    const error = e ?? new Error('An unexpect error has occured when watching files');
+    const message = await this.remark.processError(error);
 
     this.current = undefined;
     this.logger?.error(error.message);
-    this.emit(ServerEvents.PenError, {
+    this.emit?.(ServerEvents.PenError, {
       type: 'error',
       message,
     });
@@ -197,7 +210,7 @@ export class Watcher {
   protected sendData() {
     // trigger server push
     if (this.current) {
-      this.emit(ServerEvents.PenData, this.current);
+      this.emit?.(ServerEvents.PenData, this.current);
     }
   }
 
@@ -211,7 +224,7 @@ export class Watcher {
 
         return this.setupWatching(updir.relativePath);
       } catch (e) {
-        this.onError(e as Error);
+        return this.onError(e as Error);
       }
     }
     return Promise.resolve();

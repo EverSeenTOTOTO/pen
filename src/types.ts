@@ -1,5 +1,9 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { ThemeOptions } from '@material-ui/core/styles';
+import { Plugin } from 'unified';
 import { Logger } from './server/logger';
+import type { RemarkRehype } from './server/rehype';
+import type { Watcher } from './server/watcher';
 
 // client fetch
 export enum ClientEvents {
@@ -29,7 +33,6 @@ export type ServerToClientEvents = {
   [ServerEvents.PenStyle]: (theme: PenTheme) => void;
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type EmitFunction<Evts extends { [k in string]: (...args: any[]) => void }, Evt extends keyof Evts> =
   (evt: Evt, ...args: Parameters<Evts[Evt]>) => void;
 
@@ -82,20 +85,27 @@ export type PenErrorData = {
 
 export type WatcherOptions = {
   root: string;
-  ignores: RegExp[]
+  ignores: RegExp[];
+  remark: RemarkRehype;
   logger?: Logger;
-  emit: EmitFunction<ServerToClientEvents, ServerEvents>
 };
 
-export type SocketOptions = Omit<WatcherOptions, 'emit'> & PenSocketInfo & {
+export type RemarkOptions = {
+  logger?: Logger;
+  plugins: [string, Plugin, ...any][]
+};
+
+export type SocketOptions = PenSocketInfo & {
   dist: string;
   connectTimeout: number;
+  watcher: Watcher;
+  logger?: Logger;
 };
 
-export type PenOptions = Omit<WatcherOptions & SocketOptions & {
+export type PenOptions = Omit<WatcherOptions & SocketOptions & RemarkOptions & {
   theme: PenTheme
   silent: boolean;
-}, 'emit'>;
+}, 'remark' | 'watcher'>;
 
 export type PenCliOptions = PenOptions & {
   port?: number

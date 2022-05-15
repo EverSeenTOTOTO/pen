@@ -1,3 +1,4 @@
+import { DocToc } from '@/types';
 import { makeAutoObservable } from 'mobx';
 import type { AppStore } from '..';
 
@@ -45,6 +46,21 @@ export class DrawerStore {
         },
       ],
     };
+  }
+
+  get expandedToc() {
+    const tocs: string[] = [];
+
+    const push = (toc: DocToc) => {
+      if (toc.children.length > 0) {
+        tocs.push(toc.name);
+        toc.children.forEach(push);
+      }
+    };
+
+    push(this.toc);
+
+    return tocs;
   }
 
   get childDocs() {

@@ -23,5 +23,8 @@ export default defineConfig(({ mode }) => ({
   },
   ssr: {
     external: Object.keys(pkg.dependencies),
+    noExternal: [
+      /^(unified|(remark|rehype)-(\w+))/,
+    ],
   },
 }));

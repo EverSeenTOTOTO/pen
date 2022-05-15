@@ -9,17 +9,14 @@ import {
   ServerToClientEvents,
   SocketOptions,
 } from '../types';
-import { Watcher } from './watcher';
 import { createTheme } from './theme';
 
 type PenSocket = Socket<ClientToServerEvents, ServerToClientEvents>;
 
 const setupWatcher = (socket: PenSocket, options: SocketOptions) => {
-  const watcher = new Watcher({
-    ...options,
-    emit: socket.emit.bind(socket),
-  });
+  const { watcher } = options;
 
+  watcher.setupEmit(socket.emit.bind(socket));
   watcher.setupWatching('.').catch((e) => socket.emit(ServerEvents.PenError, e));
 
   socket.on('disconnect', () => watcher.close());

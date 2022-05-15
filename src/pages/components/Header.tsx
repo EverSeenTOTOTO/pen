@@ -5,6 +5,7 @@ import HomeIcon from '@material-ui/icons/Home';
 import { observer } from 'mobx-react-lite';
 import { useStore } from '@/store';
 import { NoSsr, Switch } from '@material-ui/core';
+import { useNavigate } from 'react-router';
 
 const useStyles = makeStyles((theme: Theme) => createStyles({
   root: {
@@ -29,12 +30,12 @@ const useStyles = makeStyles((theme: Theme) => createStyles({
 const BreadCrumbRoutes = observer(() => {
   const classes = useStyles();
   const theme = useStore('theme');
-  const drawer = useStore('drawer');
+  const navigate = useNavigate();
 
   return (
     <div className={classes.root}>
       <Breadcrumbs aria-label="breadcrumb" className={classes.breadcrumb}>
-        <Link onClick={() => drawer.toggle()}>
+        <Link onClick={() => navigate('/')}>
           <NoSsr>
             <HomeIcon className={classes.icon} />
           </NoSsr>

@@ -2,17 +2,22 @@ import fs from 'fs';
 import { path } from '@/utils';
 import { Watcher } from '@/server/watcher';
 import {
-  PenData,
-  PenErrorData,
   ServerEvents,
+  PenErrorData,
   PenMarkdownData,
   PenDirectoryData,
 } from '@/types';
+import { RemarkRehype } from '@/server/rehype';
+
+type PenData = PenMarkdownData | PenDirectoryData | PenErrorData;
 
 jest.setTimeout(60000);
 
 let watcher: Watcher;
 
+const remark = new RemarkRehype({
+  plugins: [],
+});
 const root = path.join(__dirname, 'test_temp');
 const logger = {
   ...console,
@@ -48,9 +53,10 @@ afterEach(() => {
 it('test ctor', async () => {
   watcher = new Watcher({
     root,
+    remark,
     ignores: [],
-    emit: () => {},
   });
+  watcher.setupEmit(() => {});
   expect(watcher.current).toBe(undefined);
 });
 
@@ -58,11 +64,12 @@ it('test init setupWatching dir', async () => {
   const emit = jest.fn();
 
   watcher = new Watcher({
-    emit,
     logger,
+    remark,
     ignores: [],
     root,
   });
+  watcher.setupEmit(emit);
   await watcher.setupWatching('.');
 
   expect(watcher.current?.type).toBe('directory');
@@ -76,15 +83,16 @@ it('test init setupWatching md', async () => {
   const emit = jest.fn();
 
   watcher = new Watcher({
-    emit,
+    remark,
     logger,
     ignores: [],
     root,
   });
+  watcher.setupEmit(emit);
   await watcher.setupWatching('a/b/b.markdown');
 
   expect(watcher.current?.type).toBe('markdown');
-  expect((watcher.current as PenMarkdownData).content).toMatch(/# B/);
+  expect((watcher.current as PenMarkdownData).content).toMatch(/B/);
 });
 
 it('test init setupWatching not exist', async () => {
@@ -94,11 +102,12 @@ it('test init setupWatching not exist', async () => {
   });
 
   watcher = new Watcher({
-    emit,
     logger,
+    remark,
     ignores: [],
     root,
   });
+  watcher.setupEmit(emit);
   await watcher.setupWatching('a/b/b.md');
 });
 
@@ -114,11 +123,12 @@ it('test switchTo not exist', async () => {
   });
 
   watcher = new Watcher({
-    emit,
+    remark,
     logger,
     ignores: [],
     root,
   });
+  watcher.setupEmit(emit);
 
   await watcher.setupWatching('a');
   await watcher.setupWatching('a/b/b.md');
@@ -131,11 +141,12 @@ it('test init setupWatching not md', async () => {
   });
 
   watcher = new Watcher({
-    emit,
+    remark,
     logger,
     ignores: [],
     root,
   });
+  watcher.setupEmit(emit);
   await watcher.setupWatching('a/b/b.txt');
 });
 
@@ -151,11 +162,12 @@ it('test switchTo not md', async () => {
   });
 
   watcher = new Watcher({
-    emit,
+    remark,
     logger,
     ignores: [],
     root,
   });
+  watcher.setupEmit(emit);
 
   await watcher.setupWatching('a/b/b.markdown');
   await watcher.setupWatching('a.txt');
@@ -168,11 +180,12 @@ it('test init setupWatching ignored', async () => {
   });
 
   watcher = new Watcher({
-    emit,
+    remark,
     logger,
     ignores: [/^\/a/, /^\/b/],
     root,
   });
+  watcher.setupEmit(emit);
   await watcher.setupWatching('a');
 });
 
@@ -188,11 +201,12 @@ it('test switchTo ignored', async () => {
   });
 
   watcher = new Watcher({
-    emit,
+    remark,
     logger,
     ignores: [/^\/a\.md/],
     root,
   });
+  watcher.setupEmit(emit);
 
   await watcher.setupWatching('a');
   await watcher.setupWatching('a.md');
@@ -205,32 +219,33 @@ it('test change content', async () => {
   });
 
   watcher = new Watcher({
-    emit,
+    remark,
     logger,
     ignores: [],
     root,
   });
+  watcher.setupEmit(emit);
   await watcher.setupWatching('a.md');
 
   expect(watcher.current?.type).toBe('markdown');
-  expect((watcher.current as PenMarkdownData).content).toMatch(/# A/);
+  expect((watcher.current as PenMarkdownData).content).toMatch(/A/);
 
   expect(emit).toHaveBeenCalledTimes(1);
-  expect((data[0] as PenMarkdownData).content).toMatch(/# A/);
+  expect((data[0] as PenMarkdownData).content).toMatch(/A/);
 
   fs.writeFileSync(path.join(root, 'a.md'), '# AAA');
   // wait for event
   await watcher.isReady();
 
   expect(emit).toHaveBeenCalledTimes(2);
-  expect((data[1] as PenMarkdownData).content).toMatch(/# AAA/);
+  expect((data[1] as PenMarkdownData).content).toMatch(/AAA/);
 
   fs.writeFileSync(path.join(root, 'a.md'), '# BBB');
   // wait for event
   await watcher.isReady();
 
   expect(emit).toHaveBeenCalledTimes(3);
-  expect((data[2] as PenMarkdownData).content).toMatch(/# BBB/);
+  expect((data[2] as PenMarkdownData).content).toMatch(/BBB/);
 });
 
 it('test change children', async () => {
@@ -240,11 +255,12 @@ it('test change children', async () => {
   });
 
   watcher = new Watcher({
-    emit,
+    remark,
     logger,
     ignores: [],
     root,
   });
+  watcher.setupEmit(emit);
   await watcher.setupWatching('a/b');
 
   expect(watcher.current?.type).toBe('directory');
@@ -278,11 +294,12 @@ it('test change nested', async () => {
   });
 
   watcher = new Watcher({
-    emit,
+    remark,
     logger,
     ignores: [],
     root,
   });
+  watcher.setupEmit(emit);
   await watcher.setupWatching('a');
   expect(emit).toHaveBeenCalledTimes(1);
 
@@ -299,11 +316,12 @@ it('test change reading', async () => {
   });
 
   watcher = new Watcher({
-    emit,
+    remark,
     logger,
     ignores: [],
     root,
   });
+  watcher.setupEmit(emit);
 
   await watcher.setupWatching('a');
   await watcher.setupWatching('a/b/b.markdown');
@@ -315,7 +333,7 @@ it('test change reading', async () => {
 
   await watcher.setupWatching('a/b/b.markdown');
   expect(watcher.current?.relativePath).toBe('/a/b'); // watch target will not change if reading a child doc
-  expect((watcher.current as PenDirectoryData).reading?.content).toMatch(/# B/);
+  expect((watcher.current as PenDirectoryData).reading?.content).toMatch(/B/);
 
   await watcher.setupWatching('a/b');
   expect((watcher.current as PenDirectoryData).reading).toBeUndefined(); // back to parent, clear reading
@@ -327,7 +345,7 @@ it('test change reading', async () => {
 
   expect(watcher.current?.relativePath).toBe('/a/b'); // watch target will not change if reading a child doc
   expect(emit).toHaveBeenCalledTimes(7);
-  expect((data[6] as PenDirectoryData).reading?.content).toMatch(/# BBB/);
+  expect((data[6] as PenDirectoryData).reading?.content).toMatch(/BBB/);
 
   fs.unlinkSync(path.join(root, 'a/b/b.markdown'));
   await watcher.isReady();
@@ -342,23 +360,25 @@ it('test watch markdown error', async () => {
   });
 
   watcher = new Watcher({
-    emit,
+    remark,
     logger,
     ignores: [],
     root,
   });
+  watcher.setupEmit(emit);
   await watcher.setupWatching('a.md');
 
   // remove current watching
   fs.unlinkSync(path.join(root, 'a.md'));
   await watcher.isReady();
+  console.log(data);
   expect((data[1] as PenErrorData).message).toMatch(/no such file or directory/);
 
   fs.writeFileSync(path.join(root, 'd.md'), '# D');
   await watcher.isReady();
   await watcher.setupWatching('d.md');
   expect(emit).toHaveBeenCalledTimes(3);
-  expect((data[2] as PenMarkdownData).content).toMatch(/# D/);
+  expect((data[2] as PenMarkdownData).content).toMatch(/D/);
 });
 
 it('test watch dir error', async () => {
@@ -368,11 +388,11 @@ it('test watch dir error', async () => {
   });
 
   watcher = new Watcher({
-    emit,
-    logger,
+    remark,
     ignores: [/b\.markdown$/],
     root,
   });
+  watcher.setupEmit(emit);
   await watcher.setupWatching('a/b');
   await watcher.setupWatching('a/b/b.markdown');
 
@@ -386,25 +406,26 @@ it('test watch dir error', async () => {
   await watcher.setupWatching('a/b');
   expect(watcher.current).not.toBeUndefined();
   await watcher.setupWatching('a/b/e.md');
-  expect((watcher.current as PenDirectoryData).reading?.content).toMatch(/# E/);
+  expect((watcher.current as PenDirectoryData).reading?.content).toMatch(/E/);
 
   fs.writeFileSync(path.join(root, 'a/b/e.md'), '# EEE');
   await watcher.isReady();
-  expect((watcher.current as PenDirectoryData).reading?.content).toMatch(/# EEE/);
+  expect((watcher.current as PenDirectoryData).reading?.content).toMatch(/EEE/);
 });
 
 it('test change readme', async () => {
-  const data: PenData[] = [];
+  const data: (PenDirectoryData | PenMarkdownData)[] = [];
   const emit = jest.fn().mockImplementation((_, x) => {
     data.push(x);
   });
 
   watcher = new Watcher({
-    emit,
+    remark,
     logger,
     ignores: [/b\.markdown$/],
     root,
   });
+  watcher.setupEmit(emit);
   await watcher.setupWatching('.');
 
   const readme = path.join(root, 'Readme.md');
@@ -412,31 +433,34 @@ it('test change readme', async () => {
   fs.writeFileSync(readme, '# README');
   await watcher.isReady();
   expect(emit).toHaveReturnedTimes(2);
-  expect((data[1] as PenDirectoryData).readme?.content).toMatch(/# README/);
+  expect((data[1] as PenDirectoryData).readme?.content).toMatch(/README/);
 
+  // reading === readme
+  await watcher.setupWatching('/Readme.md');
   fs.writeFileSync(readme, '# aaa');
   await watcher.isReady();
-  expect(emit).toHaveReturnedTimes(3);
-  expect((data[2] as PenDirectoryData).readme?.content).toMatch(/# aaa/);
+  expect((data[3] as PenDirectoryData).readme?.content).toMatch(/aaa/);
+  expect((data[3] as PenDirectoryData).reading?.content).toMatch(/aaa/);
 
   fs.unlinkSync(readme);
   await watcher.isReady();
-  expect(emit).toHaveReturnedTimes(4);
-  expect((data[3] as PenDirectoryData).readme).toBeUndefined();
+  expect((data[4] as PenDirectoryData).readme).toBeUndefined();
+  console.log(data);
 });
 
 it('test ignore readme', async () => {
-  const data: PenData[] = [];
+  const data: PenMarkdownData | PenDirectoryData[] = [];
   const emit = jest.fn().mockImplementation((_, x) => {
     data.push(x);
   });
 
   watcher = new Watcher({
-    emit,
+    remark,
     logger,
     ignores: [/README/i],
     root,
   });
+  watcher.setupEmit(emit);
   await watcher.setupWatching('.');
 
   const readme = path.join(root, 'Readme.md');

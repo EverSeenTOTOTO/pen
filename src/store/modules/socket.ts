@@ -17,6 +17,8 @@ import type { AppStore, PrefetchStore } from '..';
 export class SocketStore implements PrefetchStore<PenSocketInfo> {
   root: AppStore;
 
+  namespace: string = '/';
+
   socketPath: string = '/pensocket.io';
 
   transports: PenSocketInfo['transports'] = ['websocket', 'polling']
@@ -75,10 +77,12 @@ export class SocketStore implements PrefetchStore<PenSocketInfo> {
   hydrate(opts: PenSocketInfo) {
     this.socketPath = opts.socketPath;
     this.transports = opts.transports;
+    this.namespace = opts.namespace;
   }
 
   dehydra() {
     return {
+      namespace: this.namespace,
       socketPath: this.socketPath,
       transports: this.transports,
     };

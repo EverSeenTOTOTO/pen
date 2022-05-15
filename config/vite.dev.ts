@@ -5,6 +5,7 @@ import base, { paths } from './vite.common';
 import { createTheme } from '../src/server/theme';
 import { readUnknown } from '../src/server/reader';
 import { bindSocket } from '../src/server/socket';
+import { Watcher } from '../src/server/watcher';
 
 const devSSR = () => ({
   name: 'dev-ssr',
@@ -18,11 +19,21 @@ const devSSR = () => ({
     const style = `<style id="${theme.id}">${theme.css}</style>`;
     const templateHtml = fs.readFileSync(paths.template, 'utf-8');
     const transports = ['websocket'] as ('websocket' | 'polling')[];
+    const watcher = new Watcher({
+      root,
+      ignores,
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      remark: { // FIXME: unified is a mjs module which cannot be when in vite dev
+        use: () => {},
+        process: (s: string) => Promise.resolve(s),
+        processError: (s: string) => Promise.resolve(s),
+      },
+    });
 
     bindSocket(vite.httpServer, {
-      root,
       dist,
-      ignores,
+      watcher,
       namespace,
       socketPath,
       transports,
@@ -72,5 +83,10 @@ export default defineConfig((c) => {
       ...(config.plugins || []),
       devSSR(),
     ],
+    ssr: {
+      noExternal: [
+        /^(unified|(remark|rehype)-(\w+))/,
+      ],
+    },
   };
 });

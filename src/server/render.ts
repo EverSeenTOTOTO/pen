@@ -3,9 +3,9 @@ import { path, stripNamespace } from '@/utils';
 import { PenOptions } from '@/types';
 import { readUnknown, readTemplate } from './reader';
 
-export function loadRender(entry = path.join(__dirname, 'index.server.js')) {
+export function loadRender() {
   // eslint-disable-next-line import/no-dynamic-require, @typescript-eslint/no-var-requires, global-require
-  const { render } = require(entry);
+  const { render } = require(path.join(__dirname, 'index.server.js'));
   return render;
 }
 
