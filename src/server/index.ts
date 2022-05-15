@@ -11,7 +11,7 @@ import { bindSocket } from './socket';
 import { createWatcher } from './watcher';
 import { RemarkRehype } from './rehype';
 
-export const normalizeOptions = (opts?: PenOptions): Required<PenOptions> => {
+export const normalizeOptions = async (opts?: PenOptions): Promise<Required<PenOptions>> => {
   const silent = opts?.silent ?? false;
   const logger = silent ? emptyLogger : builtInLogger;
   const dist = opts?.dist ? path.join(opts?.dist) : path.join(__dirname);
@@ -26,7 +26,7 @@ export const normalizeOptions = (opts?: PenOptions): Required<PenOptions> => {
     transports: opts?.transports ?? ['websocket', 'polling'],
     root: opts?.root ? formatPath(opts?.root) : process.cwd(),
     namespace: opts?.namespace ? formatPath(opts?.namespace) : '/',
-    theme: opts?.theme ?? createTheme('light', dist),
+    theme: opts?.theme ?? await createTheme('light', dist),
     plugins: opts?.plugins ?? [],
   };
 };
@@ -35,7 +35,7 @@ export const normalizeOptions = (opts?: PenOptions): Required<PenOptions> => {
 export const createServer = async (opts?: PenCliOptions) => {
   const app = express();
   const server = http.createServer(app);
-  const options = normalizeOptions(opts);
+  const options = await normalizeOptions(opts);
   const remark = new RemarkRehype(options);
   const watcher = createWatcher({ ...options, remark });
 

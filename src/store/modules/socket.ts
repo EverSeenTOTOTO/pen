@@ -12,6 +12,7 @@ import {
   ClientToServerEvents,
   ServerToClientEvents,
 } from '@/types';
+import { stripNamespace } from '@/utils';
 import type { AppStore, PrefetchStore } from '..';
 
 export class SocketStore implements PrefetchStore<PenSocketInfo> {
@@ -72,6 +73,10 @@ export class SocketStore implements PrefetchStore<PenSocketInfo> {
 
   onDisconnect() {
     this.root.home.notify('warning', 'socket disconnect');
+  }
+
+  get pathname() {
+    return stripNamespace(this.namespace, window.location.pathname);
   }
 
   hydrate(opts: PenSocketInfo) {

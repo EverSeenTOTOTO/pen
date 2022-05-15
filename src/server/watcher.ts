@@ -117,10 +117,12 @@ class DirectoryWatcher extends Watcher {
   current?: PenDirectoryData;
 
   async setupWatching(switchTo: string) {
+    this.logger?.info(`Pen requested: ${formatPath(switchTo)}`);
+
     if (formatPath(switchTo) === this.current?.relativePath) {
       // back from child doc to self, clear reading
       this.current.reading = undefined;
-      this.logger?.info(`Pen use cache, still watching ${this.current.relativePath}`);
+      this.logger?.info(`Pen switched to ${this.current.relativePath}`);
       this.sendData();
       return;
     }
@@ -134,9 +136,15 @@ class DirectoryWatcher extends Watcher {
         await this.setupWatcher(pathInfo);
         await this.onDirChange(pathInfo.relativePath);
       } else {
+        if (this.current?.reading?.relativePath === pathInfo.relativePath) {
+          this.logger?.info(`Pen use cache, still watching ${this.current.relativePath}`);
+          this.sendData();
+          return;
+        }
+
         const parent = formatPath(path.relative(this.root, path.dirname(pathInfo.fullpath)));
 
-        // jump
+        // jump to nested child doc, change watch dir to its parent
         if (parent !== this.current?.relativePath) {
           const parentInfo = resolvePathInfo(this.root, parent);
 
@@ -148,6 +156,7 @@ class DirectoryWatcher extends Watcher {
         await this.onFileChange(pathInfo.relativePath);
       }
 
+      this.logger?.info(`Pen switched to ${pathInfo.fullpath}`);
       this.sendData();
     } catch (e) {
       const err = e as Error;
@@ -162,7 +171,7 @@ class DirectoryWatcher extends Watcher {
     const isSelf = this.current?.relativePath === relative;
     const isChild = formatPath(path.dirname(detail)) === formatPath(path.join(this.root, this.current?.relativePath ?? ''));
 
-    if (!(isSelf || isChild)) { return; }
+    if (!(isSelf || isChild)) return;
 
     this.logger?.info(`Pen detected ${event}: ${relative}`);
 
@@ -213,7 +222,6 @@ class DirectoryWatcher extends Watcher {
         };
       }
 
-      // change current
       this.current = current;
     } catch (e) {
       this.current = undefined;
@@ -222,28 +230,28 @@ class DirectoryWatcher extends Watcher {
   }
 
   protected async onFileChange(relative: string) {
-    if (this.current) {
-      try {
-        const pathInfo = resolvePathInfo(this.root, relative);
-        const markdown = await readMarkdown(pathInfo);
+    if (!this.current) return;
 
-        const reading = {
-          ...markdown,
-          content: await this.remark.process(markdown.content),
-        };
+    try {
+      const pathInfo = resolvePathInfo(this.root, relative);
+      const markdown = await readMarkdown(pathInfo);
 
-        if (isReadme(relative)) {
-          this.current.readme = reading;
-        }
-        this.current.reading = reading;
-      } catch (e) {
-        if (isReadme(relative)) {
-          this.current.readme = undefined;
-        }
-        this.current.reading = undefined;
+      const reading = {
+        ...markdown,
+        content: await this.remark.process(markdown.content),
+      };
 
-        await this.onError(e as Error);
+      if (isReadme(relative)) {
+        this.current.readme = reading;
       }
+      this.current.reading = reading;
+    } catch (e) {
+      if (isReadme(relative)) {
+        this.current.readme = undefined;
+      }
+      this.current.reading = undefined;
+
+      await this.onError(e as Error);
     }
   }
 
@@ -275,6 +283,7 @@ class MarkdownWatcher extends Watcher {
   current?: PenMarkdownData;
 
   async setupWatching(switchTo: string) {
+    this.logger?.info(`Pen requested: ${formatPath(switchTo)}`);
     if (this.current) {
       if (this.current.relativePath !== formatPath(switchTo)) {
         this.onError(new Error(`Pen not permit to watch ${switchTo}`));
@@ -296,6 +305,7 @@ class MarkdownWatcher extends Watcher {
       await this.setupWatcher(pathInfo);
       await this.onFileChange();
 
+      this.logger?.info(`Pen switched to ${pathInfo.fullpath}`);
       this.sendData();
     } catch (e) {
       await this.onError(e as Error);
@@ -307,7 +317,7 @@ class MarkdownWatcher extends Watcher {
     const relative = formatPath(path.relative(this.root, detail));
     const isSelf = this.current?.relativePath === relative;
 
-    if (!isSelf) { return; }
+    if (!isSelf) return;
 
     this.logger?.info(`Pen detected ${event}: ${this.current?.filename}`);
 

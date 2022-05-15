@@ -7,7 +7,9 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import TreeView from '@material-ui/lab/TreeView';
+import IconButton from '@material-ui/core/IconButton';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import ChevronRightIcon from '@material-ui/icons/ChevronRight';
 import { useStore } from '@/store';
 import { Folder, Description } from '@material-ui/icons';
@@ -15,7 +17,7 @@ import { NoSsr } from '@material-ui/core';
 import { useNavigate } from 'react-router';
 import Toc from './Toc';
 
-export const drawerWidth = 280;
+export const drawerWidth = 240;
 
 const useStyles = makeStyles((theme) => createStyles({
   drawer: {
@@ -26,14 +28,19 @@ const useStyles = makeStyles((theme) => createStyles({
     width: drawerWidth,
   },
   drawerContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+    height: '100%',
     overflow: 'auto',
   },
   toc: {
-    flexGrow: 1,
     padding: theme.spacing(2),
     '& .MuiTypography-body1': {
       fontSize: '0.875rem',
     },
+  },
+  dir: {
+    flexGrow: 1,
   },
   icon: {
     minWidth: theme.spacing(4),
@@ -47,6 +54,14 @@ const useStyles = makeStyles((theme) => createStyles({
       whiteSpace: 'nowrap',
       textOverflow: 'ellipsis',
     },
+  },
+  btn: {
+    display: 'flex',
+    alignItems: 'center',
+    padding: theme.spacing(0, 1),
+    // necessary for content to be below app bar
+    ...theme.mixins.toolbar,
+    justifyContent: 'flex-end',
   },
 }));
 
@@ -65,16 +80,16 @@ const Drawer = observer(() => {
         }}
       >
         <div className={classes.drawerContainer}>
-        <TreeView
-          className={classes.toc}
-          defaultExpanded={drawer.expandedToc}
-          defaultCollapseIcon={<NoSsr><ExpandMoreIcon /></NoSsr>}
-          defaultExpandIcon={<NoSsr><ChevronRightIcon /></NoSsr>}
-        >
-          <Toc toc={drawer.toc} />
-        </TreeView>
+          <TreeView
+            className={classes.toc}
+            defaultExpanded={drawer.expandedToc}
+            defaultCollapseIcon={<NoSsr><ExpandMoreIcon /></NoSsr>}
+            defaultExpandIcon={<NoSsr><ChevronRightIcon /></NoSsr>}
+          >
+            <Toc toc={drawer.toc} />
+          </TreeView>
           <Divider />
-          <List dense>
+          <List dense className={classes.dir}>
             {drawer.childDocs.map((doc) => (
               <ListItem button key={doc.filename} onClick={() => navigate(doc.relativePath)}>
                 <NoSsr>
@@ -88,6 +103,12 @@ const Drawer = observer(() => {
               </ListItem>
             ))}
           </List>
+          <Divider />
+          <div className={classes.btn}>
+            <IconButton onClick={() => drawer.toggle(false)}>
+              {<ChevronLeftIcon />}
+            </IconButton>
+          </div>
         </div>
       </MuiDrawer>);
 });

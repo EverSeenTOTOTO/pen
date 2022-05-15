@@ -20,6 +20,7 @@ const Markdown = observer(() => {
 
   return <Container
       maxWidth={false}
+      // required for github-markdown-css
       className="markdown-body"
       classes={{
         root: classes.root,

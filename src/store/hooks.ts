@@ -18,9 +18,11 @@ export const useTheme = () => {
 
 export const useAutoFetch = () => {
   const home = useStore('home');
+  const socket = useStore('socket');
   const location = useLocation();
 
   useEffect(() => {
-    home.fetchData(location.pathname);
+    console.log(`fetch ${socket.pathname}`);
+    home.fetchData(socket.pathname);
   }, [location]);
 };

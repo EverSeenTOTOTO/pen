@@ -9,5 +9,6 @@
   ],
   "rules": {
     "no-empty-source": null
-  }
+  },
+"ignoreFiles": ["dist/**", "src/assets/github-markdown-*.css"]
 }

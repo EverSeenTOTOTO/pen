@@ -1,7 +1,6 @@
 import http from 'http';
 import https from 'https';
 import { Server, Socket } from 'socket.io';
-import { stripNamespace } from '../utils';
 import {
   ClientEvents,
   ServerEvents,
@@ -14,21 +13,19 @@ import { createTheme } from './theme';
 type PenSocket = Socket<ClientToServerEvents, ServerToClientEvents>;
 
 const setupWatcher = (socket: PenSocket, options: SocketOptions) => {
-  const { watcher } = options;
+  const { watcher, namespace } = options;
 
-  // order matters
   watcher.setupEmit(socket.emit.bind(socket));
-  watcher.setupWatching('.');
 
   socket.on('disconnect', () => watcher.close());
-  socket.on(ClientEvents.BackRoot, () => watcher.setupWatching('.'));
+  socket.on(ClientEvents.BackRoot, () => watcher.setupWatching(namespace));
   socket.on(ClientEvents.BackUpdir, () => watcher.goUpdir());
-  socket.on(ClientEvents.FetchData, (relative: string) => watcher.setupWatching(stripNamespace(options.namespace, relative)));
+  socket.on(ClientEvents.FetchData, (relative) => watcher.setupWatching(relative)); // already stripNamespace in clientside
 };
 
 const setupThemeProvider = (socket: PenSocket, options: SocketOptions) => {
-  socket.on(ClientEvents.FetchStyle, (name: string) => {
-    socket.emit(ServerEvents.PenStyle, createTheme(name, options.dist));
+  socket.on(ClientEvents.FetchStyle, async (name) => {
+    socket.emit(ServerEvents.PenStyle, await createTheme(name, options.dist));
   });
 };
 
@@ -50,7 +47,9 @@ export const bindSocket = (server: http.Server | https.Server, options: SocketOp
     setupThemeProvider(socket, options);
   });
 
-  server.on('close', () => {
-    io.close();
+  server.once('close', () => {
+    io.close(() => {
+      options.logger?.info('Pen socket closed');
+    });
   });
 };

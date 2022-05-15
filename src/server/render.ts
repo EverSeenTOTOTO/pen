@@ -31,7 +31,6 @@ export const bindRender = (app: Express, options: PenOptions) => {
         req,
         res,
         style,
-        theme,
         template,
         prefetch: {
           socket: options,

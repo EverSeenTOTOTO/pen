@@ -14,8 +14,12 @@ export default defineConfig((c) => {
       copy({
         targets: [
           {
-            src: path.join(__dirname, '../src/styles/theme.*.css'),
-            dest: '.', // relate to dist
+            src: path.join(__dirname, '../src/assets/theme.*.css'),
+            dest: 'assets/', // relate to dist
+          },
+          {
+            src: path.join(__dirname, '../node_modules/github-markdown-css/github-markdown-*.css'),
+            dest: 'assets/', // relate to dist
           },
         ],
       }),
