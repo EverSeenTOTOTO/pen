@@ -1,4 +1,3 @@
-import _path from 'path';
 import fs from 'fs';
 
 function slash(p: string) {
@@ -42,19 +41,6 @@ export function formatPath(p: string) {
 }
 
 export const stripNamespace = (namespace: string, pathname: string) => formatPath(pathname.replace(new RegExp(`^${namespace}`), ''));
-
-export const path = {
-  ..._path,
-  relative(from: string, to: string) {
-    return formatPath(_path.relative(from, to));
-  },
-  join(...paths: string[]) {
-    return formatPath(_path.join(...paths));
-  },
-  dirname(p: string) {
-    return formatPath(_path.dirname(p));
-  },
-};
 
 export const createMarkup = (__html: string) => ({ __html });
 

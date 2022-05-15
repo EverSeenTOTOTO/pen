@@ -1,5 +1,6 @@
+import path from 'path';
 import express, { Express, Request, Response } from 'express';
-import { path, stripNamespace } from '@/utils';
+import { stripNamespace } from '@/utils';
 import { PenOptions } from '@/types';
 import { readUnknown, readTemplate } from './reader';
 

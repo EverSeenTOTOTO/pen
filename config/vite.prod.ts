@@ -15,7 +15,7 @@ export default defineConfig((c) => {
         targets: [
           {
             src: path.join(__dirname, '../src/styles/theme.*.css'),
-            dest: '.',
+            dest: '.', // relate to dist
           },
         ],
       }),

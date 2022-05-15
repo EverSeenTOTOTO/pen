@@ -36,7 +36,7 @@ export class SocketStore implements PrefetchStore<PenSocketInfo> {
         path: this.socketPath,
         transports: this.transports,
       });
-      this._socket.on(ServerEvents.PenData, (data: PenMarkdownData | PenDirectoryData) => this.onData(data));
+      this._socket.on(ServerEvents.PenData, (data) => this.onData(data));
       this._socket.on(ServerEvents.PenStyle, (style) => this.onStyle(style));
       this._socket.on(ServerEvents.PenError, (error) => this.onError(error));
       this._socket.on('disconnect', () => this.onDisconnect());

@@ -49,8 +49,8 @@ export class RemarkRehype {
       .catch(this.processError.bind(this));
   }
 
-  processError(e: unknown) {
-    const error = e instanceof Error ? e : new Error('An unexpect error has occured when processing markdown');
+  processError(e?: Error) {
+    const error = e?.message ? e : new Error('An unexpect error has occured when processing markdown');
 
     this.logger?.error(error.message);
 

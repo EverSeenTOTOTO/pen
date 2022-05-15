@@ -1,12 +1,13 @@
 /* eslint-disable no-param-reassign */
 import fs from 'fs';
+import path from 'path';
 import {
   PathInfo,
   PenMarkdownData,
   PenDirectoryData,
 } from '../types';
 import {
-  path, isDir, isMarkdown, isReadme,
+  formatPath, isDir, isMarkdown, isReadme,
 } from '../utils';
 
 function fullPath(root: string, switchTo: string) {
@@ -20,14 +21,14 @@ export function resolvePathInfo(root: string, switchTo: string):PathInfo {
   return {
     fullpath,
     filename,
-    relativePath: path.relative(root, fullpath),
+    relativePath: formatPath(path.relative(root, fullpath)),
     // eslint-disable-next-line no-nested-ternary
     type: isDir(fullpath) ? 'directory' : isMarkdown(fullpath) ? 'markdown' : 'other',
   };
 }
 
 export function validatePath(pathInfo: PathInfo, ignores: RegExp[]) {
-  if (ignores.some((re) => re.test(pathInfo.relativePath))) {
+  if (ignores.some((re) => re.test(pathInfo.filename))) {
     throw new Error(`Pen not permitted to watch: ${pathInfo.fullpath}, it's ignored by settings.`);
   }
 
@@ -35,13 +36,14 @@ export function validatePath(pathInfo: PathInfo, ignores: RegExp[]) {
     throw new Error(`Pen not permitted to watch: ${pathInfo.fullpath}, no such file or directory.`);
   }
 
-  if (!(isDir(pathInfo.fullpath) || isMarkdown(pathInfo.fullpath))) {
+  if (pathInfo.type === 'other') {
     throw new Error(`Pen unable to watch: ${pathInfo.fullpath}, it's not a markdown file.`);
   }
 }
 
 function sortChildren(a: PathInfo, b: PathInfo) {
-  if (a.type !== b.type && a.type === 'directory') return -1;
+  if (a.type !== b.type && a.type === 'directory') return -1; // directory first
+  // dot file first
   if (a.filename.startsWith('.') && b.filename.startsWith('.')) {
     return a.filename < b.filename ? -1 : 0;
   }
@@ -55,10 +57,10 @@ export async function readMarkdown(pathInfo: PathInfo): Promise<PenMarkdownData>
   const content = await fs.promises.readFile(pathInfo.fullpath, 'utf8');
 
   return {
+    type: 'markdown',
     content,
     filename: pathInfo.filename,
     relativePath: pathInfo.relativePath,
-    type: 'markdown',
   };
 }
 

@@ -16,8 +16,9 @@ type PenSocket = Socket<ClientToServerEvents, ServerToClientEvents>;
 const setupWatcher = (socket: PenSocket, options: SocketOptions) => {
   const { watcher } = options;
 
+  // order matters
   watcher.setupEmit(socket.emit.bind(socket));
-  watcher.setupWatching('.').catch((e) => socket.emit(ServerEvents.PenError, e));
+  watcher.setupWatching('.');
 
   socket.on('disconnect', () => watcher.close());
   socket.on(ClientEvents.BackRoot, () => watcher.setupWatching('.'));

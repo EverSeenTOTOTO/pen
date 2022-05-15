@@ -1,28 +1,48 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import path from 'path';
 import fs from 'fs';
-import { path } from '@/utils';
-import { Watcher } from '@/server/watcher';
+import { createWatcher } from '@/server/watcher';
 import {
-  ServerEvents,
   PenErrorData,
   PenMarkdownData,
   PenDirectoryData,
+  WatcherOptions,
 } from '@/types';
 import { RemarkRehype } from '@/server/rehype';
 
-type PenData = PenMarkdownData | PenDirectoryData | PenErrorData;
+jest.setTimeout(600000);
 
-jest.setTimeout(60000);
+let watcher: ReturnType<typeof createWatcher>;
 
-let watcher: Watcher;
-
+const logger = {
+  ...console,
+  done: console.log,
+};
 const remark = new RemarkRehype({
+  logger,
   plugins: [],
 });
 const root = path.join(__dirname, 'test_temp');
-const logger = {
-  ...console,
-  done: () => {},
-  clearConsole: () => {},
+
+const initWatcher = async (options?: Partial<WatcherOptions>, emit?: any) => {
+  watcher = createWatcher({
+    root,
+    logger,
+    remark,
+    ignores: [],
+    ...options,
+  });
+  watcher.setupEmit(emit);
+  await watcher.setupWatching('/');
+};
+const makeEmitFn = (): [any[], jest.Mock<any, any>] => {
+  const data: any[] = [];
+  const emit = jest.fn().mockImplementation((_, x) => {
+    console.log(performance.now(), x);
+    data.push(x);
+  });
+
+  return [data, emit];
 };
 
 beforeAll(() => {
@@ -50,27 +70,8 @@ afterEach(() => {
   watcher?.close();
 });
 
-it('test ctor', async () => {
-  watcher = new Watcher({
-    root,
-    remark,
-    ignores: [],
-  });
-  watcher.setupEmit(() => {});
-  expect(watcher.current).toBe(undefined);
-});
-
 it('test init setupWatching dir', async () => {
-  const emit = jest.fn();
-
-  watcher = new Watcher({
-    logger,
-    remark,
-    ignores: [],
-    root,
-  });
-  watcher.setupEmit(emit);
-  await watcher.setupWatching('.');
+  await initWatcher();
 
   expect(watcher.current?.type).toBe('directory');
   expect((watcher.current as PenDirectoryData)?.children.map((c) => c.relativePath)).toEqual([
@@ -80,152 +81,79 @@ it('test init setupWatching dir', async () => {
 });
 
 it('test init setupWatching md', async () => {
-  const emit = jest.fn();
-
-  watcher = new Watcher({
-    remark,
-    logger,
-    ignores: [],
-    root,
+  await initWatcher({
+    root: path.join(root, './a/b/b.markdown'),
   });
-  watcher.setupEmit(emit);
-  await watcher.setupWatching('a/b/b.markdown');
 
   expect(watcher.current?.type).toBe('markdown');
   expect((watcher.current as PenMarkdownData).content).toMatch(/B/);
 });
 
 it('test init setupWatching not exist', async () => {
-  const emit = jest.fn().mockImplementation((evt, err) => {
-    expect(evt).toBe(ServerEvents.PenError);
-    expect(err.message).toMatch(/no such file or directory/);
-  });
+  const [data, emit] = makeEmitFn();
 
-  watcher = new Watcher({
-    logger,
-    remark,
-    ignores: [],
-    root,
-  });
-  watcher.setupEmit(emit);
-  await watcher.setupWatching('a/b/b.md');
+  await initWatcher({
+    root: path.join(root, 'a/b/b.md'),
+  }, emit);
+
+  expect(data[0].message).toMatch(/no such file or directory/);
 });
 
 it('test switchTo not exist', async () => {
-  let first = true;
-  const emit = jest.fn().mockImplementation((evt, err) => {
-    if (first) {
-      first = false;
-      return; // ignore setup trigger
-    }
-    expect(evt).toBe(ServerEvents.PenError);
-    expect(err.message).toMatch(/no such file or directory/);
-  });
+  const [data, emit] = makeEmitFn();
 
-  watcher = new Watcher({
-    remark,
-    logger,
-    ignores: [],
-    root,
-  });
-  watcher.setupEmit(emit);
-
-  await watcher.setupWatching('a');
-  await watcher.setupWatching('a/b/b.md');
+  await initWatcher({}, emit);
+  await watcher.setupWatching('/a/b/b.md');
+  expect(data[1].message).toMatch(/no such file or directory/);
 });
 
 it('test init setupWatching not md', async () => {
-  const emit = jest.fn().mockImplementation((evt, err) => {
-    expect(evt).toBe(ServerEvents.PenError);
-    expect(err.message).toMatch(/not a markdown file/);
-  });
+  const [data, emit] = makeEmitFn();
 
-  watcher = new Watcher({
-    remark,
-    logger,
-    ignores: [],
-    root,
-  });
-  watcher.setupEmit(emit);
-  await watcher.setupWatching('a/b/b.txt');
+  await initWatcher({}, emit);
+  await watcher.setupWatching('/a/b/b.txt');
+  expect(data[1].message).toMatch(/not a markdown file/);
 });
 
 it('test switchTo not md', async () => {
-  let first = true;
-  const emit = jest.fn().mockImplementation((evt, err) => {
-    if (first) {
-      first = false;
-      return; // ignore setup trigger
-    }
-    expect(evt).toBe(ServerEvents.PenError);
-    expect(err.message).toMatch(/not a markdown/);
-  });
+  const [data, emit] = makeEmitFn();
 
-  watcher = new Watcher({
-    remark,
-    logger,
-    ignores: [],
-    root,
-  });
-  watcher.setupEmit(emit);
+  await initWatcher({}, emit);
+  await watcher.setupWatching('/a/b/b.markdown');
+  await watcher.setupWatching('/a.txt');
 
-  await watcher.setupWatching('a/b/b.markdown');
-  await watcher.setupWatching('a.txt');
+  console.log(data);
+  expect(data[2].message).toMatch(/not a markdown file/);
 });
 
 it('test init setupWatching ignored', async () => {
-  const emit = jest.fn().mockImplementation((evt, err) => {
-    expect(evt).toBe(ServerEvents.PenError);
-    expect(err.message).toMatch(/ignored by settings/);
-  });
+  const [data, emit] = makeEmitFn();
 
-  watcher = new Watcher({
-    remark,
-    logger,
-    ignores: [/^\/a/, /^\/b/],
-    root,
-  });
-  watcher.setupEmit(emit);
-  await watcher.setupWatching('a');
+  await initWatcher({
+    root: path.join(root, 'a'),
+    ignores: [/^a/, /^b/],
+  }, emit);
+
+  expect(data[0].message).toMatch(/ignored by settings/);
 });
 
 it('test switchTo ignored', async () => {
-  let first = true;
-  const emit = jest.fn().mockImplementation((evt, err) => {
-    if (first) {
-      first = false;
-      return; // ignore setup trigger
-    }
-    expect(evt).toBe(ServerEvents.PenError);
-    expect(err.message).toMatch(/ignored by settings/);
-  });
+  const [data, emit] = makeEmitFn();
 
-  watcher = new Watcher({
-    remark,
-    logger,
-    ignores: [/^\/a\.md/],
-    root,
-  });
-  watcher.setupEmit(emit);
+  await initWatcher({
+    ignores: [/^a\.md/],
+  }, emit);
+  await watcher.setupWatching('/a.md');
 
-  await watcher.setupWatching('a');
-  await watcher.setupWatching('a.md');
+  expect(data[1].message).toMatch(/ignored by settings/);
 });
 
 it('test change content', async () => {
-  const data: PenData[] = [];
-  const emit = jest.fn().mockImplementation((_, x) => {
-    data.push(x);
-  });
+  const [data, emit] = makeEmitFn();
 
-  watcher = new Watcher({
-    remark,
-    logger,
-    ignores: [],
-    root,
-  });
-  watcher.setupEmit(emit);
-  await watcher.setupWatching('a.md');
+  await initWatcher({
+    root: path.join(root, 'a.md'),
+  }, emit);
 
   expect(watcher.current?.type).toBe('markdown');
   expect((watcher.current as PenMarkdownData).content).toMatch(/A/);
@@ -249,28 +177,19 @@ it('test change content', async () => {
 });
 
 it('test change children', async () => {
-  const data: PenData[] = [];
-  const emit = jest.fn().mockImplementation((_, x) => {
-    data.push(x);
-  });
+  const [data, emit] = makeEmitFn();
 
-  watcher = new Watcher({
-    remark,
-    logger,
-    ignores: [],
-    root,
-  });
-  watcher.setupEmit(emit);
-  await watcher.setupWatching('a/b');
+  await initWatcher({
+    root: path.join(root, 'a/b'),
+  }, emit);
 
   expect(watcher.current?.type).toBe('directory');
   expect((watcher.current as PenDirectoryData).children.map((c) => c.relativePath)).toEqual([
-    '/a/b/b.markdown',
+    '/b.markdown',
   ]);
-
   expect(emit).toHaveBeenCalledTimes(1);
   expect((data[0] as PenDirectoryData).children.map((c) => c.relativePath)).toEqual([
-    '/a/b/b.markdown',
+    '/b.markdown',
   ]);
 
   fs.writeFileSync(path.join(root, 'a/b/c.md'), '# C');
@@ -278,8 +197,8 @@ it('test change children', async () => {
   await watcher.isReady();
   expect(emit).toHaveBeenCalledTimes(2);
   expect((data[1] as PenDirectoryData).children.map((c) => c.relativePath)).toEqual([
-    '/a/b/b.markdown',
-    '/a/b/c.md',
+    '/b.markdown',
+    '/c.md',
   ]);
 
   fs.writeFileSync(path.join(root, 'a/b/c.md'), '# CCC');
@@ -288,19 +207,11 @@ it('test change children', async () => {
 });
 
 it('test change nested', async () => {
-  const data: PenData[] = [];
-  const emit = jest.fn().mockImplementation((_, x) => {
-    data.push(x);
-  });
+  const [, emit] = makeEmitFn();
 
-  watcher = new Watcher({
-    remark,
-    logger,
-    ignores: [],
-    root,
-  });
-  watcher.setupEmit(emit);
-  await watcher.setupWatching('a');
+  await initWatcher({
+    root: path.join(root, 'a'),
+  }, emit);
   expect(emit).toHaveBeenCalledTimes(1);
 
   fs.writeFileSync(path.join(root, 'a/b/c.md'), '# C');
@@ -310,102 +221,66 @@ it('test change nested', async () => {
 });
 
 it('test change reading', async () => {
-  const data: PenData[] = [];
-  const emit = jest.fn().mockImplementation((_, x) => {
-    data.push(x);
-  });
+  const [data, emit] = makeEmitFn();
 
-  watcher = new Watcher({
-    remark,
-    logger,
-    ignores: [],
-    root,
-  });
-  watcher.setupEmit(emit);
+  await initWatcher({}, emit);
 
-  await watcher.setupWatching('a');
-  await watcher.setupWatching('a/b/b.markdown');
-  expect(watcher.current?.relativePath).toBe('/a/b/b.markdown');
+  await watcher.setupWatching('/a/b/b.markdown');
+  expect(watcher.current?.relativePath).toBe('/a/b');
 
-  await watcher.setupWatching('a/b');
+  await watcher.setupWatching('/a/b');
   expect(watcher.current?.relativePath).toBe('/a/b');
   expect((watcher.current as PenDirectoryData).reading).toBeUndefined(); // select parent
 
-  await watcher.setupWatching('a/b/b.markdown');
+  await watcher.setupWatching('/a/b/b.markdown');
   expect(watcher.current?.relativePath).toBe('/a/b'); // watch target will not change if reading a child doc
   expect((watcher.current as PenDirectoryData).reading?.content).toMatch(/B/);
-
-  await watcher.setupWatching('a/b');
-  expect((watcher.current as PenDirectoryData).reading).toBeUndefined(); // back to parent, clear reading
-
-  await watcher.setupWatching('a/b/b.markdown'); // read child again
 
   fs.writeFileSync(path.join(root, 'a/b/b.markdown'), '# BBB');
   await watcher.isReady();
 
   expect(watcher.current?.relativePath).toBe('/a/b'); // watch target will not change if reading a child doc
-  expect(emit).toHaveBeenCalledTimes(7);
-  expect((data[6] as PenDirectoryData).reading?.content).toMatch(/BBB/);
+  expect((data[4] as PenDirectoryData).reading?.content).toMatch(/BBB/);
 
   fs.unlinkSync(path.join(root, 'a/b/b.markdown'));
   await watcher.isReady();
-  expect(emit).toHaveBeenCalledTimes(8);
-  expect((data[7] as PenDirectoryData).reading).toBeUndefined();
+  expect((data[5] as PenDirectoryData).reading).toBeUndefined();
 });
 
 it('test watch markdown error', async () => {
-  const data: PenData[] = [];
-  const emit = jest.fn().mockImplementation((_, x) => {
-    data.push(x);
-  });
+  const [data, emit] = makeEmitFn();
 
-  watcher = new Watcher({
-    remark,
-    logger,
-    ignores: [],
-    root,
-  });
-  watcher.setupEmit(emit);
-  await watcher.setupWatching('a.md');
+  await initWatcher({
+    root: path.join(root, 'a.md'),
+  }, emit);
 
   // remove current watching
   fs.unlinkSync(path.join(root, 'a.md'));
   await watcher.isReady();
-  console.log(data);
   expect((data[1] as PenErrorData).message).toMatch(/no such file or directory/);
 
   fs.writeFileSync(path.join(root, 'd.md'), '# D');
   await watcher.isReady();
-  await watcher.setupWatching('d.md');
-  expect(emit).toHaveBeenCalledTimes(3);
-  expect((data[2] as PenMarkdownData).content).toMatch(/D/);
+  await watcher.setupWatching('/d.md');
+  expect((data[2] as PenErrorData).message).toMatch(/not permit/);
 });
 
 it('test watch dir error', async () => {
-  const data: PenData[] = [];
-  const emit = jest.fn().mockImplementation((_, x) => {
-    data.push(x);
-  });
+  const [, emit] = makeEmitFn();
 
-  watcher = new Watcher({
-    remark,
+  await initWatcher({
     ignores: [/b\.markdown$/],
-    root,
-  });
-  watcher.setupEmit(emit);
-  await watcher.setupWatching('a/b');
-  await watcher.setupWatching('a/b/b.markdown');
+  }, emit);
+  await watcher.setupWatching('/a/b/b.markdown');
 
   fs.writeFileSync(path.join(root, 'a/b/e.md'), '# E');
   await watcher.isReady();
-  await watcher.setupWatching('a/b/e.md');
-  await watcher.setupWatching('a.txt');
+  await watcher.setupWatching('/a/b/e.md');
+  await watcher.setupWatching('/a.txt');
 
-  expect(watcher.current).toBeUndefined();
-
-  await watcher.setupWatching('a/b');
+  await watcher.setupWatching('/a/b');
   expect(watcher.current).not.toBeUndefined();
-  await watcher.setupWatching('a/b/e.md');
+  await watcher.setupWatching('/a/b/e.md');
   expect((watcher.current as PenDirectoryData).reading?.content).toMatch(/E/);
 
   fs.writeFileSync(path.join(root, 'a/b/e.md'), '# EEE');
@@ -414,19 +289,9 @@ it('test watch dir error', async () => {
 });
 
 it('test change readme', async () => {
-  const data: (PenDirectoryData | PenMarkdownData)[] = [];
-  const emit = jest.fn().mockImplementation((_, x) => {
-    data.push(x);
-  });
+  const [data, emit] = makeEmitFn();
 
-  watcher = new Watcher({
-    remark,
-    logger,
-    ignores: [/b\.markdown$/],
-    root,
-  });
-  watcher.setupEmit(emit);
-  await watcher.setupWatching('.');
+  await initWatcher({ ignores: [/b\.markdown$/] }, emit);
 
   const readme = path.join(root, 'Readme.md');
 
@@ -445,23 +310,12 @@ it('test change readme', async () => {
   fs.unlinkSync(readme);
   await watcher.isReady();
   expect((data[4] as PenDirectoryData).readme).toBeUndefined();
-  console.log(data);
 });
 
 it('test ignore readme', async () => {
-  const data: PenMarkdownData | PenDirectoryData[] = [];
-  const emit = jest.fn().mockImplementation((_, x) => {
-    data.push(x);
-  });
+  const [, emit] = makeEmitFn();
 
-  watcher = new Watcher({
-    remark,
-    logger,
-    ignores: [/README/i],
-    root,
-  });
-  watcher.setupEmit(emit);
-  await watcher.setupWatching('.');
+  await initWatcher({ ignores: [/README/i] }, emit);
 
   const readme = path.join(root, 'Readme.md');
   fs.writeFileSync(readme, '# README');

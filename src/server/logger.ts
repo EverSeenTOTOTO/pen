@@ -4,7 +4,7 @@ export type Logger = {
   warn: Console['warn'],
   error: Console['error'],
   done: Console['log'],
-  clearConsole: Console['clear']
+  clear: Console['clear']
 };
 
 const PASS = () => {};
@@ -14,7 +14,7 @@ export const emptyLogger: Logger = {
   warn: PASS,
   error: PASS,
   done: PASS,
-  clearConsole: PASS,
+  clear: PASS,
 };
 
 export const logger: Logger = {
@@ -23,5 +23,5 @@ export const logger: Logger = {
   warn: console.warn,
   error: console.error,
   done: console.log,
-  clearConsole: console.clear,
+  clear: console.clear,
 };

@@ -1,4 +1,5 @@
-import { formatPath, path } from '@/utils';
+import path from 'path';
+import { formatPath } from '@/utils';
 import http from 'http';
 import express from 'express';
 import getPort from 'detect-port';
@@ -7,13 +8,13 @@ import { logger as builtInLogger, emptyLogger } from './logger';
 import { createTheme } from './theme';
 import { bindRender } from './render';
 import { bindSocket } from './socket';
-import { Watcher } from './watcher';
+import { createWatcher } from './watcher';
 import { RemarkRehype } from './rehype';
 
 export const normalizeOptions = (opts?: PenOptions): Required<PenOptions> => {
   const silent = opts?.silent ?? false;
   const logger = silent ? emptyLogger : builtInLogger;
-  const dist = opts?.dist ? formatPath(opts?.dist) : path.join(__dirname);
+  const dist = opts?.dist ? path.join(opts?.dist) : path.join(__dirname);
 
   return {
     dist,
@@ -30,16 +31,16 @@ export const normalizeOptions = (opts?: PenOptions): Required<PenOptions> => {
   };
 };
 
-// hypothesis: client assets to be in the same directory
+// for test
 export const createServer = async (opts?: PenCliOptions) => {
   const app = express();
   const server = http.createServer(app);
   const options = normalizeOptions(opts);
   const remark = new RemarkRehype(options);
-  const watcher = new Watcher({ ...options, remark });
+  const watcher = createWatcher({ ...options, remark });
 
   bindRender(app, options);
-  bindSocket(server, { ...options, watcher, remark });
+  bindSocket(server, { ...options, watcher });
 
   const avaliablePort = await getPort(opts?.port ?? 3000);
 
