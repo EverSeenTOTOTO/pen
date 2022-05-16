@@ -2,9 +2,12 @@ import type { Request, Response } from 'express';
 import serializeJavascript from 'serialize-javascript';
 import ReactDOMServer from 'react-dom/server';
 import { StaticRouter } from 'react-router-dom/server';
+import { ServerStyleSheets } from '@material-ui/core/styles';
 import { App } from './App';
 import { createStore } from './store';
 import { createRoutes } from './routes';
+import { PenTheme } from './types';
+
 // see index.html
 const APP_HTML = '<!--app-html-->';
 const APP_STATE = '<!--app-state-->';
@@ -15,7 +18,7 @@ const serialize = (state: Record<string, unknown>) => `<script>;window.__PREFETC
 export type RenderContext = {
   req: Request;
   res: Response;
-  style?: string;
+  theme: PenTheme;
   template: string;
   html?: string;
   prefetch: Record<string, unknown>
@@ -23,28 +26,30 @@ export type RenderContext = {
 
 export async function render(context: RenderContext) {
   const ctx = context as Required<RenderContext>;
-  const { req } = ctx;
+  const { req, theme } = ctx;
 
   const store = createStore();
   const routes = createRoutes();
 
   // ssr prefetch
   store.hydrate(ctx.prefetch);
+  const sheets = new ServerStyleSheets();
 
   const html = ReactDOMServer.renderToString(
+    sheets.collect(
     <StaticRouter location={req.originalUrl}>
       <App store={store} routes={routes}/>
     </StaticRouter>,
+    ),
   );
 
   const state = store.dehydra();
+  const style = `<style id="${theme.id}">${theme.css}</style><style id="MUI${theme.id}">${sheets.toString()}</style>`;
 
   ctx.html = ctx.template
     .replace(APP_HTML, html)
-    .replace(APP_STYLE, ctx.style ?? '')
+    .replace(APP_STYLE, style)
     .replace(APP_STATE, serialize(state));
 
   return ctx;
 }
-
-export type RenderFunction = typeof render;

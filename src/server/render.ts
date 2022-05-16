@@ -23,7 +23,6 @@ export const bindRender = (app: Express, options: RenderOptions) => {
   } = options;
   const template = readTemplate(dist);
   const render = loadRender();
-  const style = `<style id="${theme.id}">${theme.css}</style>`;
   const serveAssets = express.static(dist, { index: false, dotfiles: 'allow' });
   const serveRoot = express.static(root, { index: false, dotfiles: 'allow' });
   const ssr = async (req: Request, res: Response, next: () => void) => {
@@ -36,7 +35,7 @@ export const bindRender = (app: Express, options: RenderOptions) => {
       const { html } = await render({
         req,
         res,
-        style,
+        theme,
         template,
         prefetch: {
           socket: options,

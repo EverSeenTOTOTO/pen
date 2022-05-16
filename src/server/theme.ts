@@ -1,11 +1,8 @@
 import path from 'path';
 import fs from 'fs';
-import crypto from 'crypto';
 import { ThemeOptions } from '@material-ui/core';
 import { uuid } from '../utils';
 import { PenTheme } from '../types';
-
-const createHash = (content: string) => crypto.createHash('sha256').update(content).digest('hex');
 
 const defaultTheme = {
   palette: {
@@ -59,12 +56,12 @@ const globalId: string = uuid();
 
 export const createTheme = async (name: keyof typeof themes, dist?: string): Promise<PenTheme> => {
   const css = dist ? await readThemeCss(dist, name) : '';
+
   return {
     css,
     name,
     options: themes[name],
     avaliable: Object.keys(themes),
     id: globalId,
-    hash: createHash(css),
   };
 };

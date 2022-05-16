@@ -15,6 +15,8 @@ export class HomeStore implements PrefetchStore<HomeState> {
 
   loading = false;
 
+  initialLoad = true;
+
   timeoutId?: NodeJS.Timeout | number;
 
   root: AppStore;
@@ -65,9 +67,12 @@ export class HomeStore implements PrefetchStore<HomeState> {
   }
 
   fetchData(relative: string) {
-    this.timeoutId = setTimeout(() => {
-      this.loading = true;
-    }, 100);
+    if (!this.initialLoad) {
+      this.timeoutId = setTimeout(() => {
+        this.loading = true;
+      }, 300);
+    }
+    this.initialLoad = false;
     this.root.socket.emit(ClientEvents.FetchData, relative);
   }
 

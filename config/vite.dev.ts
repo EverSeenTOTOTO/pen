@@ -17,7 +17,6 @@ const devSSR = () => ({
     const dist = path.join(process.cwd(), 'src');
     const root = path.join(process.cwd(), '../../doc');
     const theme = await createTheme('dark', dist);
-    const style = `<style id="${theme.id}">${theme.css}</style>`;
     const templateHtml = fs.readFileSync(paths.template, 'utf-8');
     const transports = ['websocket'] as ('websocket' | 'polling')[];
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -62,7 +61,7 @@ const devSSR = () => ({
         const { html } = await render({
           req,
           res,
-          style,
+          theme,
           template,
           prefetch: {
             theme,

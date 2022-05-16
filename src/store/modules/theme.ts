@@ -10,8 +10,6 @@ export class ThemeStore implements PrefetchStore<ThemeState> {
 
   id: string = ''
 
-  hash: string = ''
-
   avaliable: string[] = []
 
   options:ThemeOptions = {};
@@ -37,7 +35,6 @@ export class ThemeStore implements PrefetchStore<ThemeState> {
 
   hydrate(state: PenTheme): void {
     this.id = state.id;
-    this.hash = state.hash;
     this.name = state.name;
     this.options = state.options;
     this.avaliable = state.avaliable;
@@ -54,7 +51,6 @@ export class ThemeStore implements PrefetchStore<ThemeState> {
   dehydra() {
     return {
       id: this.id,
-      hash: this.hash,
       name: this.name,
       options: this.options,
       avaliable: this.avaliable,

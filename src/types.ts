@@ -46,7 +46,6 @@ export type PenTheme = {
   name: string;
   id: string;
   css: string;
-  hash: string;
   options: ThemeOptions;
   avaliable: string[];
 };

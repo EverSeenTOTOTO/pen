@@ -3,6 +3,19 @@ import { useLocation } from 'react-router';
 import { useEffect } from 'react';
 import { useStore } from '.';
 
+export const useMUIServerStyle = () => {
+  const theme = useStore('theme');
+
+  useEffect(() => {
+    if (theme.id.startsWith('UUID')) {
+      const jssStyles = document.getElementById(`MUI${theme.id}`);
+      if (jssStyles) {
+        jssStyles?.parentElement?.removeChild(jssStyles);
+      }
+    }
+  }, [theme.id]);
+};
+
 export const useClipboard = () => {
   const home = useStore('home');
 
