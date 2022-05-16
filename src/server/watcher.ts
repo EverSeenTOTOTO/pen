@@ -32,12 +32,12 @@ export class Watcher {
 
   protected watcher?: chokidar.FSWatcher;
 
-  remark: WatcherOptions['remark'];
+  protected remark: WatcherOptions['remark'];
 
-  emit?: EmitFunction<ServerToClientEvents, ServerEvents>
+  protected emit?: EmitFunction<ServerToClientEvents, ServerEvents>
 
   // for test
-  ready: boolean = true;
+  protected ready: boolean = true;
 
   constructor(options: WatcherOptions) {
     this.root = options.root;
@@ -55,10 +55,6 @@ export class Watcher {
     throw new Error('setupWatching not implemented');
   }
 
-  goUpdir() {
-    throw new Error('goUpdir not implemented');
-  }
-
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected async onChange(_event: string, _detail: string) {
     throw new Error('onChange not implemented');
@@ -67,14 +63,13 @@ export class Watcher {
   protected async setupWatcher(pathInfo: PathInfo) {
     await this.close();
 
-    // eslint-disable-next-line consistent-return
     return new Promise<void>((resolve) => {
       this.watcher = chokidar.watch(pathInfo.fullpath, {
         depth: 0,
         ignored: this.ignores,
       });
       this.watcher.on('error', (e) => {
-        this.onError(new Error(`Pen watcher error: ${e.message}`, { cause: e }));
+        this.sendError(new Error(`Pen watcher error: ${e.message}`, { cause: e }));
       });
       this.watcher.on('ready', () => {
         this.watcher?.on('all', this.onChange.bind(this));
@@ -83,7 +78,7 @@ export class Watcher {
     });
   }
 
-  protected async onError(e?: Error) {
+  protected async sendError(e?: Error) {
     const error = e?.message ? e : new Error('An unexpect error has occured when watching files');
     const message = await this.remark.processError(error);
 
@@ -159,7 +154,7 @@ class DirectoryWatcher extends Watcher {
       this.sendData();
     } catch (e) {
       const err = e as Error;
-      await this.onError(new Error(`${err.message}`, { cause: err }));
+      await this.sendError(new Error(`${err.message}`, { cause: err }));
     }
   }
 
@@ -178,68 +173,51 @@ class DirectoryWatcher extends Watcher {
       case 'addDir':
       case 'unlinkDir':
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        await this.onDirChange(this.current!.relativePath);
+        await this.onDirChange(this.current!.relativePath)
+          .then(() => this.sendData())
+          .catch((e) => this.sendError(e));
         break;
       case 'add':
       case 'unlink':
         if (this.current && isChild) {
           // not this.onDirChange(relative) because we want to refresh current.chidren, not change current
-          await this.onDirChange(this.current.relativePath);
-
-          if (isReadme(relative) || this.isReading(relative)) {
-            await this.onFileChange(relative);
-          }
+          await this.onDirChange(this.current.relativePath)
+            .then(() => this.onFileChange(relative))
+            .then(() => this.sendData())
+            .catch((e) => this.sendError(e));
         }
         break;
       case 'change':
-        if (this.current && isChild) {
-          if (isReadme(relative) || this.isReading(relative)) {
-            await this.onFileChange(relative);
-          }
-        }
+        await this.onFileChange(relative)
+          .then(() => this.sendData())
+          .catch((e) => this.sendError(e));
         break;
       default:
         break;
     }
-    this.sendData();
     this.ready = true;
   }
 
-  protected isReading(relative: string) {
-    return this.current?.reading?.relativePath === relative;
-  }
-
   protected async onDirChange(relative: string) {
-    try {
-      this.current = await readUnknown({
-        relative,
-        root: this.root,
-        remark: this.remark,
-        ignores: this.ignores,
-      }) as PenDirectoryData;
-    } catch (e) {
-      this.current = undefined;
-      await this.onError(e as Error);
-    }
+    this.current = await readUnknown({
+      relative,
+      root: this.root,
+      remark: this.remark,
+      ignores: this.ignores,
+    }) as PenDirectoryData;
   }
 
   protected async onFileChange(relative: string) {
     if (!this.current) return;
 
-    try {
-      const reading = await readUnknown({
-        relative,
-        root: this.root,
-        remark: this.remark,
-        ignores: this.ignores,
-      }) as PenMarkdownData;
+    const reading = await readUnknown({
+      relative,
+      root: this.root,
+      remark: this.remark,
+      ignores: this.ignores,
+    }) as PenMarkdownData;
 
-      this.changeReading(reading);
-    } catch (e) {
-      this.changeReading(undefined);
-
-      await this.onError(e as Error);
-    }
+    this.changeReading(reading);
   }
 
   protected changeReading(data: PenMarkdownData | undefined) {
@@ -257,22 +235,6 @@ class DirectoryWatcher extends Watcher {
       this.emit?.(ServerEvents.PenData, this.current);
     }
   }
-
-  goUpdir() {
-    if (this.current) {
-      try {
-        const relative = path.dirname(this.current.relativePath);
-        const updir = resolvePathInfo(this.root, relative);
-
-        validatePath(updir, this.ignores);
-
-        return this.setupWatching(updir.relativePath);
-      } catch (e) {
-        return this.onError(e as Error);
-      }
-    }
-    return Promise.resolve();
-  }
 }
 
 class MarkdownWatcher extends Watcher {
@@ -282,7 +244,7 @@ class MarkdownWatcher extends Watcher {
     this.logger.info(`Pen requested: ${formatPath(switchTo)}`);
     if (this.current) {
       if (this.current.relativePath !== formatPath(switchTo)) {
-        this.onError(new Error(`Pen not permit to watch ${switchTo}`));
+        this.sendError(new Error(`Pen not permit to watch ${switchTo}`));
         return;
       }
 
@@ -304,7 +266,7 @@ class MarkdownWatcher extends Watcher {
       this.logger.info(`Pen switched to ${pathInfo.fullpath}`);
       this.sendData();
     } catch (e) {
-      await this.onError(e as Error);
+      await this.sendError(e as Error);
     }
   }
 
@@ -321,27 +283,26 @@ class MarkdownWatcher extends Watcher {
       case 'add':
       case 'unlink':
       case 'change':
-        await this.onFileChange();
+        await this.onFileChange()
+          .then(() => this.sendData())
+          .catch((e) => {
+            this.current = undefined;
+            return this.sendError(e);
+          });
         break;
       default:
         break;
     }
-    this.sendData();
     this.ready = true;
   }
 
   protected async onFileChange() {
-    try {
-      this.current = await readUnknown({
-        relative: '',
-        root: this.root,
-        ignores: this.ignores,
-        remark: this.remark,
-      }) as PenMarkdownData;
-    } catch (e) {
-      this.current = undefined;
-      await this.onError(e as Error);
-    }
+    this.current = await readUnknown({
+      relative: '',
+      root: this.root,
+      ignores: this.ignores,
+      remark: this.remark,
+    }) as PenMarkdownData;
   }
 
   protected sendData() {
@@ -349,10 +310,6 @@ class MarkdownWatcher extends Watcher {
     if (this.current) {
       this.emit?.(ServerEvents.PenData, this.current);
     }
-  }
-
-  goUpdir() {
-    return this.onError(new Error('Pen cannot goUpdir because it\'s in markdown mode'));
   }
 }
 
@@ -362,7 +319,7 @@ export const createWatcher = (options: WatcherOptions) => {
 
   logger.info(`Pen init to watch ${info.type}: ${info.filename}`);
 
-  return info.type === 'markdown'
-    ? new MarkdownWatcher({ ...options, root: info.fullpath })
-    : new DirectoryWatcher({ ...options, root: info.fullpath });
+  return info.type === 'directory'
+    ? new DirectoryWatcher({ ...options, root: info.fullpath })
+    : new MarkdownWatcher({ ...options, root: info.fullpath });
 };

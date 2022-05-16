@@ -13,7 +13,7 @@ import { createTheme } from './theme';
 type PenSocket = Socket<ClientToServerEvents, ServerToClientEvents>;
 
 const setupWatcher = (socket: PenSocket, options: SocketOptions) => {
-  const { watcher, namespace, logger } = options;
+  const { watcher, logger } = options;
 
   watcher.setupEmit(socket.emit.bind(socket));
 
@@ -21,8 +21,6 @@ const setupWatcher = (socket: PenSocket, options: SocketOptions) => {
     logger.warn(`Pen disconnect with ${socket.id}`);
     watcher.close();
   });
-  socket.on(ClientEvents.BackRoot, () => watcher.setupWatching(namespace));
-  socket.on(ClientEvents.BackUpdir, () => watcher.goUpdir());
   socket.on(ClientEvents.FetchData, (relative) => watcher.setupWatching(relative)); // already stripNamespace in clientside
 };
 
@@ -33,18 +31,22 @@ const setupThemeProvider = (socket: PenSocket, options: SocketOptions) => {
 };
 
 export const bindSocket = (server: http.Server | https.Server, options: SocketOptions) => {
+  const {
+    logger, socketPath, connectTimeout, transports, namespace,
+  } = options;
+
   const io = new Server<ClientToServerEvents, ServerToClientEvents>(server, {
-    path: options.socketPath,
-    connectTimeout: options.connectTimeout,
-    transports: options.transports,
+    transports,
+    connectTimeout,
+    path: socketPath,
   });
-  const nsp = io.of(options.namespace);
+  const nsp = io.of(namespace);
 
   nsp.on('error', (e) => {
-    options.logger.error(`Pen socket error: ${e.message}`);
+    logger.error(`Pen socket error: ${e.message}`);
   });
   nsp.on('connection', (socket) => {
-    options.logger.done(`Pen connected with ${socket.id}`);
+    logger.done(`Pen connected with ${socket.id}`);
 
     setupWatcher(socket, options);
     setupThemeProvider(socket, options);
@@ -52,7 +54,7 @@ export const bindSocket = (server: http.Server | https.Server, options: SocketOp
 
   server.once('close', () => {
     io.close(() => {
-      options.logger.info('Pen socket closed');
+      logger.info('Pen socket closed');
     });
   });
 };

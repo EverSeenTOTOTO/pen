@@ -81,8 +81,7 @@ export class RemarkRehype {
 
   async process(markdown: string): Promise<string> {
     try {
-      const f = await this.render
-        .process(markdown);
+      const f = await this.render.process(markdown);
       return f.toString();
     } catch (reason) {
       return String(reason);

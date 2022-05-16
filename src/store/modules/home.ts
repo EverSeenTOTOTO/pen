@@ -83,7 +83,6 @@ export class HomeStore implements PrefetchStore<HomeState> {
 
   hydrate(state: HomeState): void {
     this.data = state.data;
-
     this.loading = false;
     clearTimeout(this.timeoutId as number);
     if (globalThis && globalThis.scrollTo) {

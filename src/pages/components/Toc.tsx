@@ -2,7 +2,7 @@ import {
   alpha, withStyles, Theme, createStyles,
 } from '@material-ui/core/styles';
 import TreeItem, { TreeItemProps } from '@material-ui/lab/TreeItem';
-import { DocToc } from '@/types';
+// import { DocToc } from '@/types';
 
 const StyledTreeItem = withStyles((theme: Theme) => createStyles({
   group: {
@@ -12,7 +12,7 @@ const StyledTreeItem = withStyles((theme: Theme) => createStyles({
   },
 }))((props: TreeItemProps) => <TreeItem {...props} />);
 
-const Toc = ({ toc }: { toc: DocToc }) => (toc.children.length > 0
+const Toc = ({ toc }: { toc: any }) => (toc.children.length > 0
   ? <StyledTreeItem nodeId={toc.name} label={toc.name}>
     {
       toc.children.map((child) => <Toc key={child.name} toc={child} />)

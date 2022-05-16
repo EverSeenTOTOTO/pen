@@ -9,15 +9,11 @@ import type { Watcher } from './server/watcher';
 export enum ClientEvents {
   FetchStyle = 'fetchstyle',
   FetchData = 'fetchdata',
-  BackUpdir = 'backupdir',
-  BackRoot = 'backroot',
 }
 
 export type ClientToServerEvents = {
   [ClientEvents.FetchStyle]: (name: string) => void;
   [ClientEvents.FetchData]: (relative: string) => void;
-  [ClientEvents.BackRoot ]: () => void;
-  [ClientEvents.BackUpdir]: () => void
 };
 
 // server push

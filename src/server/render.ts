@@ -5,14 +5,14 @@ import { isMarkdown, stripNamespace } from '../utils';
 import { RenderOptions } from '../types';
 import { readUnknown } from './reader';
 
-function loadRender() {
+function loadRender(dist: string) {
   // eslint-disable-next-line import/no-dynamic-require, @typescript-eslint/no-var-requires, global-require
-  const { render } = require(path.join(__dirname, 'index.server.js'));
+  const { render } = require(path.join(dist, 'index.server.js'));
   return render;
 }
 
-function readTemplate(dist: string, html = 'index.html') {
-  const index = path.join(dist, html);
+function readTemplate(dist: string) {
+  const index = path.join(dist, 'index.html');
   return fs.readFileSync(index, 'utf8');
 }
 
@@ -22,7 +22,7 @@ export const bindRender = (app: Express, options: RenderOptions) => {
     root, dist, namespace, theme, logger,
   } = options;
   const template = readTemplate(dist);
-  const render = loadRender();
+  const render = loadRender(dist);
   const serveAssets = express.static(dist, { index: false, dotfiles: 'allow' });
   const serveRoot = express.static(root, { index: false, dotfiles: 'allow' });
   const ssr = async (req: Request, res: Response, next: () => void) => {
