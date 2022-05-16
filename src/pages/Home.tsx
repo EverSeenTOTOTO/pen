@@ -11,24 +11,20 @@ import Drawer from './components/Drawer';
 import Header from './components/Header';
 
 const useStyles = makeStyles((theme) => ({
-  root: {
-    display: 'flex',
-  },
   content: {
-    flexGrow: 1,
-    overflow: 'hidden',
     padding: theme.spacing(2),
     transition: theme.transitions.create('margin', {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.leavingScreen,
     }),
+    marginLeft: theme.spacing(8),
   },
   contentShift: {
     transition: theme.transitions.create('margin', {
       easing: theme.transitions.easing.easeOut,
       duration: theme.transitions.duration.enteringScreen,
     }),
-    marginLeft: 0,
+    marginLeft: theme.spacing(30),
   },
 }));
 
@@ -43,25 +39,23 @@ const Home = observer(() => {
 
   return <ThemeProvider theme={theme.theme}>
     <CssBaseline />
-    <div className={classes.root}>
-      <Drawer />
-      <main className={clsx(classes.content, {
-        [classes.contentShift]: drawer.visible,
-      })}>
-        <Header />
-        <Markdown />
-      </main>
-      <Snackbar
-        open={home.message !== ''}
-        autoHideDuration={3000}
-        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-        onClose={() => home.notify('info', '')}
-      >
-        <Alert severity={home.severity}>
-          {home.message}
-        </Alert>
-      </Snackbar>
-    </div>
+    <Drawer />
+    <main className={clsx(classes.content, {
+      [classes.contentShift]: drawer.visible,
+    })}>
+      <Header />
+      <Markdown />
+    </main>
+    <Snackbar
+      open={home.message !== ''}
+      autoHideDuration={3000}
+      anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+      onClose={() => home.notify('info', '')}
+    >
+      <Alert severity={home.severity}>
+        {home.message}
+      </Alert>
+    </Snackbar>
   </ThemeProvider>;
 });
 

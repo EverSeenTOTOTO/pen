@@ -42,7 +42,7 @@ export const createServer = async (opts?: PenCliOptions) => {
   bindRender(app, { ...options, remark });
   bindSocket(server, { ...options, watcher });
 
-  const avaliablePort = await getPort(opts?.port ?? 5000);
+  const avaliablePort = await getPort(opts?.port ?? 3000);
 
   if (opts?.port && avaliablePort !== opts?.port) {
     options.logger.warn(`Pen found port ${opts?.port} unavaliable, use port ${avaliablePort} instead`);

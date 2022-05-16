@@ -11,22 +11,21 @@ import IconButton from '@material-ui/core/IconButton';
 // import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import ChevronRightIcon from '@material-ui/icons/ChevronRight';
+import ExpandLessTwoToneIcon from '@material-ui/icons/ExpandLessTwoTone';
 import { useStore } from '@/store';
 import { Folder, Description } from '@material-ui/icons';
 import { NoSsr } from '@material-ui/core';
 import { useNavigate } from 'react-router';
 import clsx from 'clsx';
 
-const drawerWidth = 240;
-
 const useStyles = makeStyles((theme) => createStyles({
   drawer: {
-    width: drawerWidth,
+    width: theme.spacing(30),
     flexShrink: 0,
     whiteSpace: 'nowrap',
   },
   drawerOpen: {
-    width: drawerWidth,
+    width: theme.spacing(30),
     transition: theme.transitions.create('width', {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.enteringScreen,
@@ -39,9 +38,6 @@ const useStyles = makeStyles((theme) => createStyles({
     }),
     overflowX: 'hidden',
     width: theme.spacing(8),
-  },
-  drawerPaper: {
-    width: drawerWidth,
   },
   drawerContainer: {
     display: 'flex',
@@ -79,6 +75,10 @@ const useStyles = makeStyles((theme) => createStyles({
     // necessary for content to be below app bar
     ...theme.mixins.toolbar,
     justifyContent: 'flex-end',
+  },
+  btnClose: {
+    flexDirection: 'column',
+    justifyContent: 'flex-start',
   },
 }));
 
@@ -126,9 +126,12 @@ const Drawer = observer(() => {
             ))}
           </List>
           <Divider />
-          <div className={classes.btn}>
+          <div className={clsx(classes.btn, { [classes.btnClose]: !drawer.visible })}>
             <IconButton onClick={() => drawer.toggle()}>
               {drawer.visible ? <ChevronLeftIcon /> : <ChevronRightIcon />}
+            </IconButton>
+            <IconButton onClick={() => window.scrollTo(0, 0)}>
+              <ExpandLessTwoToneIcon />
             </IconButton>
           </div>
         </div>
