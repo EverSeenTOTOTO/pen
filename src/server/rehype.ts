@@ -1,35 +1,21 @@
-import { unified, Plugin, Processor } from 'unified';
-import remarkParse from 'remark-parse';
+import rehypeRaw from 'rehype-raw';
 import remarkGFM from 'remark-gfm';
 import remarkToc from 'remark-toc';
-import remarkRehype from 'remark-rehype';
-import rehypeRaw from 'rehype-raw';
 import rehypeSlug from 'rehype-slug';
+import remarkMath from 'remark-math';
+import rehypeKatex from 'rehype-katex';
+import remarkParse from 'remark-parse';
+import remarkRehype from 'remark-rehype';
 import rehypeHighlight from 'rehype-highlight';
-import rehypeAutolinkHeadings from 'rehype-autolink-headings';
 import rehypeStringify from 'rehype-stringify';
+import remarkDirective from 'remark-directive';
+import { unified, Plugin, Processor } from 'unified';
+import rehypeAutolinkHeadings from 'rehype-autolink-headings';
+import { loadLanguages } from './plugins/highlight';
 import { RemarkOptions, RemarkPlugin } from '../types';
+import rehypeCopy from './plugins/rehype-copy';
 import { Logger } from './logger';
-import { loadLanguages } from './lang';
-
-const defaultPlugins = [
-  ['remark-parse', remarkParse],
-  ['remark-gfm', remarkGFM],
-  ['remark-toc', remarkToc, {
-    heading: 'toc|table[ -]of[ -]contents?|目录',
-  }],
-  ['remark-rehype', remarkRehype, { allowDangerousHtml: true }],
-  /* -------- Seperator for remark and rehype -------- */
-  ['rehype-raw', rehypeRaw],
-  ['rehype-slug', rehypeSlug],
-  ['rehype-autolink-headings', rehypeAutolinkHeadings],
-  ['rehype-highlight', rehypeHighlight, {
-    ignoreMissing: true,
-    plainText: ['txt', 'text'],
-    languages: loadLanguages(),
-  }],
-  ['rehype-stringify', rehypeStringify],
-];
+import { makeContainerPlugin } from './plugins/remark-container';
 
 const formatError = (e: Error) => `
 \`\`\`txt
@@ -38,6 +24,32 @@ ${e.message}
 ${e.stack}
 \`\`\`
 `;
+
+const defaultPlugins = [
+  ['remark-parse', remarkParse],
+  ['remark-directive', remarkDirective],
+  ['remark-gfm', remarkGFM],
+  ['remark-toc', remarkToc, {
+    heading: 'toc|table[ -]of[ -]contents?|目录',
+  }],
+  ['remark-container', makeContainerPlugin(['info', 'warn', 'error'])],
+  ['remark-math', remarkMath],
+  ['remark-rehype', remarkRehype, { allowDangerousHtml: true }],
+  /* -------- Seperator for remark and rehype -------- */
+  ['rehype-raw', rehypeRaw],
+  ['rehype-katex', rehypeKatex, {
+    strict: false,
+  }],
+  ['rehype-slug', rehypeSlug],
+  ['rehype-autolink-headings', rehypeAutolinkHeadings],
+  ['rehype-copy', rehypeCopy],
+  ['rehype-highlight', rehypeHighlight, {
+    ignoreMissing: true,
+    plainText: ['txt', 'text'],
+    languages: loadLanguages(),
+  }],
+  ['rehype-stringify', rehypeStringify],
+];
 
 export class RemarkRehype {
   render: Processor;

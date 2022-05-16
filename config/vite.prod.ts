@@ -4,6 +4,15 @@ import legacy from '@vitejs/plugin-legacy';
 import { viteStaticCopy as copy } from 'vite-plugin-static-copy';
 import base from './vite.common';
 
+const injectHtml = () => ({
+  name: 'inject-html',
+  transformIndexHtml(html: string) {
+    return html.replace('<!-- inject -->', `<link rel="stylesheet" href="/assets/katex.min.css">
+    <script defer src="/assets/katex.min.js"></script>
+    <script defer src="/assets/katex-auto-render.min.js" onload="renderMathInElement(document.body);"></script>`);
+  },
+});
+
 export default defineConfig((c) => {
   const config = base(c);
   return {
@@ -11,18 +20,11 @@ export default defineConfig((c) => {
     plugins: [
       ...(config.plugins || []),
       legacy(),
+      injectHtml(),
       copy({
         targets: [
           {
-            src: path.join(__dirname, '../src/assets/theme.*.css'),
-            dest: 'assets/', // relate to dist
-          },
-          {
-            src: path.join(__dirname, '../src/assets/github-markdown-*.css'),
-            dest: 'assets/', // relate to dist
-          },
-          {
-            src: path.join(__dirname, '../src/assets/highlightjs-github-*.css'),
+            src: path.join(__dirname, '../src/assets/*'),
             dest: 'assets/', // relate to dist
           },
         ],

@@ -3,5 +3,7 @@ coverage
 dist
 *.log
 .*cache
-github-markdown-*.css
-highlightjs-*.css
+src/assets/github-markdown-*
+src/assets/highlightjs-*
+src/assets/katex*
+src/assets/fonts

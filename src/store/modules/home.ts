@@ -13,6 +13,10 @@ export type HomeState = {
 export class HomeStore implements PrefetchStore<HomeState> {
   data?: PenDirectoryData | PenMarkdownData | PenErrorData;
 
+  loading = false;
+
+  timeoutId?: NodeJS.Timeout | number;
+
   root: AppStore;
 
   severity: Color = 'info';
@@ -61,6 +65,9 @@ export class HomeStore implements PrefetchStore<HomeState> {
   }
 
   fetchData(relative: string) {
+    this.timeoutId = setTimeout(() => {
+      this.loading = true;
+    }, 100);
     this.root.socket.emit(ClientEvents.FetchData, relative);
   }
 
@@ -71,8 +78,11 @@ export class HomeStore implements PrefetchStore<HomeState> {
 
   hydrate(state: HomeState): void {
     this.data = state.data;
-    if (this.data?.type === 'directory') {
-      this.root.drawer.toggle(true);
+
+    this.loading = false;
+    clearTimeout(this.timeoutId as number);
+    if (globalThis && globalThis.scrollTo) {
+      globalThis.scrollTo(0, 0);
     }
   }
 

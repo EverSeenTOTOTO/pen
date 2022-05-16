@@ -6,6 +6,7 @@ import { observer } from 'mobx-react-lite';
 import { useStore } from '@/store';
 import { NoSsr, Switch } from '@material-ui/core';
 import { useNavigate } from 'react-router';
+import { isMarkdown } from '@/utils';
 
 const useStyles = makeStyles((theme: Theme) => createStyles({
   root: {
@@ -34,12 +35,19 @@ const BreadCrumbRoutes = observer(() => {
   const classes = useStyles();
   const theme = useStore('theme');
   const home = useStore('home');
+  const drawer = useStore('drawer');
   const navigate = useNavigate();
+  const nav = (relative: string) => {
+    navigate(relative);
+    if (!isMarkdown(relative)) {
+      drawer.toggle(true);
+    }
+  };
 
   return (
     <div className={classes.root}>
       <Breadcrumbs aria-label="breadcrumb" className={classes.breadcrumb}>
-        <Link onClick={() => navigate('/')}>
+        <Link onClick={() => nav('/')}>
           <NoSsr>
             <HomeIcon className={classes.icon} />
           </NoSsr>
@@ -49,7 +57,7 @@ const BreadCrumbRoutes = observer(() => {
             key={link.relative}
             component="button"
             color="inherit"
-            onClick={() => navigate(link.relative)}
+            onClick={() => nav(link.relative)}
           >
             {link.filename}
           </Link>

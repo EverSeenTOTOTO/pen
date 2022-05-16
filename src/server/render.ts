@@ -1,7 +1,7 @@
 import path from 'path';
 import fs from 'fs';
 import express, { Express, Request, Response } from 'express';
-import { stripNamespace } from '../utils';
+import { isMarkdown, stripNamespace } from '../utils';
 import { RenderOptions } from '../types';
 import { readUnknown } from './reader';
 
@@ -19,12 +19,13 @@ function readTemplate(dist: string, html = 'index.html') {
 // extract for dev and test
 export const bindRender = (app: Express, options: RenderOptions) => {
   const {
-    dist, namespace, theme, logger,
+    root, dist, namespace, theme, logger,
   } = options;
   const template = readTemplate(dist);
   const render = loadRender();
   const style = `<style id="${theme.id}">${theme.css}</style>`;
-  const serve = express.static(dist, { index: false, dotfiles: 'allow' });
+  const serveAssets = express.static(dist, { index: false, dotfiles: 'allow' });
+  const serveRoot = express.static(root, { index: false, dotfiles: 'allow' });
   const ssr = async (req: Request, res: Response, next: () => void) => {
     try {
       const current = await readUnknown({
@@ -55,6 +56,8 @@ export const bindRender = (app: Express, options: RenderOptions) => {
   };
 
   app.get(new RegExp(`${namespace}/*`), (req: Request, res: Response, next: () => void) => {
-    serve(req, res, () => ssr(req, res, next));
+    serveAssets(req, res, () => (isMarkdown(req.originalUrl)
+      ? ssr(req, res, next)
+      : serveRoot(req, res, () => ssr(req, res, next))));
   });
 };

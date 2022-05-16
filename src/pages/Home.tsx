@@ -5,7 +5,7 @@ import Snackbar from '@material-ui/core/Snackbar';
 import Alert from '@material-ui/lab/Alert';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import { makeStyles, ThemeProvider } from '@material-ui/core/styles';
-import { useAutoFetch, useTheme } from '@/store/hooks';
+import { useAutoFetch, useClipboard } from '@/store/hooks';
 import Markdown from './components/Markdown';
 import Drawer from './components/Drawer';
 import Header from './components/Header';
@@ -34,8 +34,8 @@ const Home = observer(() => {
   const drawer = useStore('drawer');
   const theme = useStore('theme');
 
-  useTheme();
   useAutoFetch();
+  useClipboard();
 
   return <ThemeProvider theme={theme.theme}>
     <CssBaseline />

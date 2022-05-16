@@ -1,0 +1,25 @@
+.markdown-body a {
+  color: skyblue;
+}
+
+.markdown-body pre {
+  color: #fff;
+}
+
+.markdown-body .container-warn {
+  border-color: darkorange;
+  background-color: #ecdca6;
+  color: rgb(0 0 0 / 87%);
+}
+
+.markdown-body .container-info {
+  border-color: royalblue;
+  background-color: #9acde2;
+  color: rgb(0 0 0 / 87%);
+}
+
+.markdown-body .container-error {
+  border-color: red;
+  background-color: rgb(240 188 188);
+  color: rgb(0 0 0 / 87%);
+}

@@ -13,6 +13,7 @@
   "ignoreFiles": [
     "dist/**",
     "src/assets/github-markdown-*.css",
-    "src/assets/highlightjs-*.css"
+    "src/assets/highlightjs-*.css",
+    "src/assets/katex.*.css"
   ]
 }

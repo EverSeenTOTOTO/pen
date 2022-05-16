@@ -1,20 +1,20 @@
+import Clipboard from 'clipboard';
 import { useLocation } from 'react-router';
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import { useStore } from '.';
 
-export const useTheme = () => {
-  const theme = useStore('theme');
-  const styleElement = useRef<Element | null>();
+export const useClipboard = () => {
+  const home = useStore('home');
 
-  // mobx autorun throw "window undefined" in ssr mode
   useEffect(() => {
-    if (styleElement.current) {
-      styleElement.current.innerHTML = theme.css;
-      theme.saveMemory();
-    } else if (theme.id.startsWith('UUID')) {
-      styleElement.current = document.querySelector(`#${theme.id}`);
-    }
-  }, [theme.css, theme.id]);
+    // clipboard
+    const clipboard = new Clipboard('.copy-btn');
+
+    clipboard.on('success', () => home.notify('success', 'Copied.'));
+    clipboard.on('error', () => home.notify('error', 'Copy failed.'));
+
+    return () => clipboard.destroy();
+  }, []);
 };
 
 export const useAutoFetch = () => {

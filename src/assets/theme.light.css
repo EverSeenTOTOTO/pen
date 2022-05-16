@@ -1,0 +1,15 @@
+.markdown-body .container-warn {
+  border-color: #e7c000;
+  background-color: rgb(255 229 100 / 30%);
+  color: #6b5900;
+}
+
+.markdown-body .container-info {
+  border-color: #51b6e3;
+  background-color: #f0fffd;
+}
+
+.markdown-body .container-error {
+  border-color: red;
+  background-color: #fbefef;
+}

@@ -4,6 +4,8 @@ import Paper from '@material-ui/core/Paper';
 import { makeStyles } from '@material-ui/core/styles';
 import { createMarkup } from '@/utils';
 import { Container } from '@material-ui/core';
+import Typography from '@material-ui/core/Typography';
+import Skeleton from '@material-ui/lab/Skeleton';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -26,12 +28,34 @@ const Markdown = observer(() => {
         root: classes.root,
       }}
     >
-    <Paper
-      classes={{
-        root: classes.paper,
-      }}
-      dangerouslySetInnerHTML={createMarkup(home.html)}
-    />
+    {!home.loading
+      ? <Paper
+          classes={{
+            root: classes.paper,
+          }}
+          dangerouslySetInnerHTML={createMarkup(home.html)}
+        />
+      : <Paper
+        classes={{
+          root: classes.paper,
+        }}
+      >
+        <Typography component="div" variant="h1">
+          <Skeleton animation="wave" />
+        </Typography>
+        <Typography component="div" variant="caption">
+          <Skeleton animation="wave" />
+        </Typography>
+        <Typography component="div" variant="body1">
+          <Skeleton animation="wave" />
+        </Typography>
+        <Typography component="div" variant="body1">
+          <Skeleton animation="wave" />
+        </Typography>
+        <Typography component="div" variant="body1">
+          <Skeleton animation="wave" />
+        </Typography>
+      </Paper>}
   </Container>;
 });
 

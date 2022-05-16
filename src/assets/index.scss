@@ -1,0 +1,52 @@
+html,
+body {
+  scroll-behavior: smooth;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+}
+
+.hljs {
+  border-radius: 2px;
+}
+
+.markdown-body {
+  & .container {
+    padding: 0.1rem 1.5rem;
+    border-left-width: 0.5rem;
+    border-left-style: solid;
+    margin: 1rem 0;
+
+    & p {
+      margin: 0;
+    }
+  }
+
+  pre {
+    position: relative;
+  }
+
+  & .copy-btn {
+    position: absolute;
+    top: 0.5rem;
+    right: 1rem;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+
+    &:hover {
+      opacity: 0.5;
+    }
+
+    & span {
+      width: 100%;
+      height: 100%;
+      line-height: 100%;
+      text-align: center;
+    }
+  }
+}
