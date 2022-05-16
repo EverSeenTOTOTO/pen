@@ -1,8 +1,8 @@
 import path from 'path';
 import fs from 'fs';
 import express, { Express, Request, Response } from 'express';
-import { stripNamespace } from '@/utils';
-import { PenOptions } from '@/types';
+import { stripNamespace } from '../utils';
+import { RenderOptions } from '../types';
 import { readUnknown } from './reader';
 
 function loadRender() {
@@ -17,9 +17,9 @@ function readTemplate(dist: string, html = 'index.html') {
 }
 
 // extract for dev and test
-export const bindRender = (app: Express, options: PenOptions) => {
+export const bindRender = (app: Express, options: RenderOptions) => {
   const {
-    dist, namespace, theme, logger, root, ignores,
+    dist, namespace, theme, logger,
   } = options;
   const template = readTemplate(dist);
   const render = loadRender();
@@ -27,11 +27,10 @@ export const bindRender = (app: Express, options: PenOptions) => {
   const serve = express.static(dist, { index: false, dotfiles: 'allow' });
   const ssr = async (req: Request, res: Response, next: () => void) => {
     try {
-      const current = await readUnknown(
-        stripNamespace(namespace, req.originalUrl),
-        root,
-        ignores,
-      ).catch(() => undefined);
+      const current = await readUnknown({
+        ...options,
+        relative: stripNamespace(namespace, req.originalUrl),
+      }).catch(() => undefined);
 
       const { html } = await render({
         req,
@@ -45,12 +44,12 @@ export const bindRender = (app: Express, options: PenOptions) => {
         },
       });
 
-      logger?.done(`Pen rendered page: ${req.originalUrl}`);
+      logger.done(`Pen rendered page: ${req.originalUrl}`);
 
       res.setHeader('Content-Type', 'text/html');
       res.end(html);
     } catch (e) {
-      logger?.error(`Pen ssr error: ${(e as Error).message}`);
+      logger.error(`Pen ssr error: ${(e as Error).message}`);
       next();
     }
   };

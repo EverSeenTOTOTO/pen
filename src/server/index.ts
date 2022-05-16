@@ -39,7 +39,7 @@ export const createServer = async (opts?: PenCliOptions) => {
   const remark = new RemarkRehype(options);
   const watcher = createWatcher({ ...options, remark });
 
-  bindRender(app, options);
+  bindRender(app, { ...options, remark });
   bindSocket(server, { ...options, watcher });
 
   const avaliablePort = await getPort(opts?.port ?? 5000);

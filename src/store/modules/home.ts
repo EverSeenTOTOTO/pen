@@ -71,6 +71,9 @@ export class HomeStore implements PrefetchStore<HomeState> {
 
   hydrate(state: HomeState): void {
     this.data = state.data;
+    if (this.data?.type === 'directory') {
+      this.root.drawer.toggle(true);
+    }
   }
 
   dehydra(): HomeState {

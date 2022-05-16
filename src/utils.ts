@@ -1,4 +1,6 @@
+import path from 'path';
 import fs from 'fs';
+import { PathInfo } from './types';
 
 function slash(p: string) {
   const isExtendedLengthPath = /^\\\\\?\\/.test(p);
@@ -38,6 +40,18 @@ export function formatPath(p: string) {
     .replace(/^(?!\/)(.*)$/g, '/$1')
     .replace(/\/\//g, '/')
     .replace(/^$/, '/');
+}
+
+export function resolvePathInfo(root: string, switchTo: string):PathInfo {
+  const fullpath = path.join(root, switchTo.replace(/~$/, '')); const filename = path.basename(fullpath);
+
+  return {
+    fullpath,
+    filename,
+    relativePath: formatPath(path.relative(root, fullpath)),
+    // eslint-disable-next-line no-nested-ternary
+    type: isDir(fullpath) ? 'directory' : isMarkdown(fullpath) ? 'markdown' : 'other',
+  };
 }
 
 export const stripNamespace = (namespace: string, pathname: string) => decodeURIComponent(formatPath(pathname.replace(new RegExp(`^${namespace}`), '')));

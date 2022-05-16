@@ -42,16 +42,16 @@ ${e.stack}
 export class RemarkRehype {
   render: Processor;
 
-  logger?: Logger;
+  logger: Logger;
 
   constructor(options: RemarkOptions) {
     this.render = unified();
     this.logger = options.logger;
 
-    this.mergePlugins(options.plugins);
+    this.usePlugins(options.plugins);
   }
 
-  protected mergePlugins(userPlugins: RemarkOptions['plugins']) {
+  usePlugins(userPlugins: RemarkOptions['plugins']) {
     const plugins = new Map<string, RemarkPlugin>();
 
     for (const p of [...defaultPlugins, ...userPlugins]) {
@@ -59,14 +59,12 @@ export class RemarkRehype {
     }
 
     for (const [name, plug, ...opts] of [...plugins.values()]) {
-      this.logger?.info(`Pen add remark/rehype plugin: ${name}`);
+      if (plug !== false) {
+        this.logger.info(`Pen add remark/rehype plugin: ${name}`);
 
-      this.render.use(plug as Plugin, ...opts);
+        this.render.use(plug as Plugin, ...opts);
+      }
     }
-  }
-
-  use(plug: Plugin) {
-    this.render.use(plug);
   }
 
   async process(markdown: string): Promise<string> {

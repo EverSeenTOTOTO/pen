@@ -5,27 +5,13 @@ import {
   PathInfo,
   PenMarkdownData,
   PenDirectoryData,
+  ReaderOptions,
 } from '../types';
 import {
-  formatPath, isDir, isMarkdown, isReadme,
+  isReadme,
+  resolvePathInfo,
 } from '../utils';
-
-function fullPath(root: string, switchTo: string) {
-  return path.join(root, switchTo.replace(/~$/, '')); //  It's weird sometimes got xxx.md~
-}
-
-export function resolvePathInfo(root: string, switchTo: string):PathInfo {
-  const fullpath = fullPath(root, switchTo);
-  const filename = path.basename(fullpath);
-
-  return {
-    fullpath,
-    filename,
-    relativePath: formatPath(path.relative(root, fullpath)),
-    // eslint-disable-next-line no-nested-ternary
-    type: isDir(fullpath) ? 'directory' : isMarkdown(fullpath) ? 'markdown' : 'other',
-  };
-}
+import { RemarkRehype } from './rehype';
 
 export function validatePath(pathInfo: PathInfo, ignores: RegExp[]) {
   if (ignores.some((re) => re.test(pathInfo.filename))) {
@@ -53,18 +39,18 @@ function sortChildren(a: PathInfo, b: PathInfo) {
   return a.filename < b.filename ? -1 : 0;
 }
 
-export async function readMarkdown(pathInfo: PathInfo): Promise<PenMarkdownData> {
+async function readMarkdown(render: RemarkRehype, pathInfo: PathInfo): Promise<PenMarkdownData> {
   const content = await fs.promises.readFile(pathInfo.fullpath, 'utf8');
 
   return {
     type: 'markdown',
-    content,
+    content: await render.process(content),
     filename: pathInfo.filename,
     relativePath: pathInfo.relativePath,
   };
 }
 
-export async function readDirectory(pathInfo: PathInfo, root: string, ignores: RegExp[]): Promise<PenDirectoryData | undefined> {
+async function readDirectory(render: RemarkRehype, pathInfo: PathInfo, root: string, ignores: RegExp[]): Promise<PenDirectoryData | undefined> {
   const dirs = await fs.promises.readdir(pathInfo.fullpath);
   const infos = dirs
     .map((dir) => path.join(pathInfo.fullpath, dir))
@@ -85,7 +71,7 @@ export async function readDirectory(pathInfo: PathInfo, root: string, ignores: R
     filename: pathInfo.filename,
     relativePath: pathInfo.relativePath,
     readme: readme.length > 0
-      ? await readMarkdown(readme[0])
+      ? await readMarkdown(render, readme[0])
       : undefined,
     children: infos.sort(sortChildren).map((c) => {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -96,10 +82,13 @@ export async function readDirectory(pathInfo: PathInfo, root: string, ignores: R
   };
 }
 
-export async function readUnknown(relative: string, root: string, ignores: RegExp[]) {
+export async function readUnknown(options: ReaderOptions) {
+  const {
+    root, relative, remark, ignores,
+  } = options;
   const pathInfo = resolvePathInfo(root, relative);
 
   return pathInfo.type === 'directory'
-    ? readDirectory(pathInfo, root, ignores)
-    : readMarkdown(pathInfo);
+    ? readDirectory(remark, pathInfo, root, ignores)
+    : readMarkdown(remark, pathInfo);
 }

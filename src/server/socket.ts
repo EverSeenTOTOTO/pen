@@ -18,7 +18,7 @@ const setupWatcher = (socket: PenSocket, options: SocketOptions) => {
   watcher.setupEmit(socket.emit.bind(socket));
 
   socket.on('disconnect', () => {
-    logger?.warn(`Pen disconnect with ${socket.id}`);
+    logger.warn(`Pen disconnect with ${socket.id}`);
     watcher.close();
   });
   socket.on(ClientEvents.BackRoot, () => watcher.setupWatching(namespace));
@@ -41,10 +41,10 @@ export const bindSocket = (server: http.Server | https.Server, options: SocketOp
   const nsp = io.of(options.namespace);
 
   nsp.on('error', (e) => {
-    options.logger?.error(`Pen socket error: ${e.message}`);
+    options.logger.error(`Pen socket error: ${e.message}`);
   });
   nsp.on('connection', (socket) => {
-    options.logger?.done(`Pen connected with ${socket.id}`);
+    options.logger.done(`Pen connected with ${socket.id}`);
 
     setupWatcher(socket, options);
     setupThemeProvider(socket, options);
@@ -52,7 +52,7 @@ export const bindSocket = (server: http.Server | https.Server, options: SocketOp
 
   server.once('close', () => {
     io.close(() => {
-      options.logger?.info('Pen socket closed');
+      options.logger.info('Pen socket closed');
     });
   });
 };

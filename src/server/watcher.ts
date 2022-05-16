@@ -15,13 +15,12 @@ import {
 import {
   formatPath,
   isReadme,
+  resolvePathInfo,
 } from '../utils';
 import { Logger } from './logger';
 import {
-  readMarkdown,
   validatePath,
-  readDirectory,
-  resolvePathInfo,
+  readUnknown,
 } from './reader';
 
 export class Watcher {
@@ -29,7 +28,7 @@ export class Watcher {
 
   ignores: RegExp[];
 
-  logger?: Logger;
+  logger: Logger;
 
   protected watcher?: chokidar.FSWatcher;
 
@@ -88,7 +87,7 @@ export class Watcher {
     const error = e?.message ? e : new Error('An unexpect error has occured when watching files');
     const message = await this.remark.processError(error);
 
-    this.logger?.error(error.message);
+    this.logger.error(error.message);
     this.emit?.(ServerEvents.PenError, {
       type: 'error',
       message,
@@ -117,12 +116,12 @@ class DirectoryWatcher extends Watcher {
   current?: PenDirectoryData;
 
   async setupWatching(switchTo: string) {
-    this.logger?.info(`Pen requested: ${formatPath(switchTo)}`);
+    this.logger.info(`Pen requested: ${formatPath(switchTo)}`);
 
     if (formatPath(switchTo) === this.current?.relativePath) {
       // back from child doc to self, clear reading
       this.current.reading = undefined;
-      this.logger?.info(`Pen switched to ${this.current.relativePath}`);
+      this.logger.info(`Pen switched to ${this.current.relativePath}`);
       this.sendData();
       return;
     }
@@ -137,7 +136,7 @@ class DirectoryWatcher extends Watcher {
         await this.onDirChange(pathInfo.relativePath);
       } else {
         if (this.current?.reading?.relativePath === pathInfo.relativePath) {
-          this.logger?.info(`Pen use cache, still watching ${this.current.relativePath}`);
+          this.logger.info(`Pen use cache, still watching ${this.current.relativePath}`);
           this.sendData();
           return;
         }
@@ -156,7 +155,7 @@ class DirectoryWatcher extends Watcher {
         await this.onFileChange(pathInfo.relativePath);
       }
 
-      this.logger?.info(`Pen switched to ${pathInfo.fullpath}`);
+      this.logger.info(`Pen switched to ${pathInfo.fullpath}`);
       this.sendData();
     } catch (e) {
       const err = e as Error;
@@ -173,7 +172,7 @@ class DirectoryWatcher extends Watcher {
 
     if (!(isSelf || isChild)) return;
 
-    this.logger?.info(`Pen detected ${event}: ${relative}`);
+    this.logger.info(`Pen detected ${event}: ${relative}`);
 
     switch (event) {
       case 'addDir':
@@ -212,17 +211,12 @@ class DirectoryWatcher extends Watcher {
 
   protected async onDirChange(relative: string) {
     try {
-      const pathInfo = resolvePathInfo(this.root, relative);
-      const current = await readDirectory(pathInfo, this.root, this.ignores);
-
-      if (current?.readme) {
-        current.readme = {
-          ...current.readme,
-          content: await this.remark.process(current.readme.content),
-        };
-      }
-
-      this.current = current;
+      this.current = await readUnknown({
+        relative,
+        root: this.root,
+        remark: this.remark,
+        ignores: this.ignores,
+      }) as PenDirectoryData;
     } catch (e) {
       this.current = undefined;
       await this.onError(e as Error);
@@ -233,25 +227,27 @@ class DirectoryWatcher extends Watcher {
     if (!this.current) return;
 
     try {
-      const pathInfo = resolvePathInfo(this.root, relative);
-      const markdown = await readMarkdown(pathInfo);
+      const reading = await readUnknown({
+        relative,
+        root: this.root,
+        remark: this.remark,
+        ignores: this.ignores,
+      }) as PenMarkdownData;
 
-      const reading = {
-        ...markdown,
-        content: await this.remark.process(markdown.content),
-      };
-
-      if (isReadme(relative)) {
-        this.current.readme = reading;
-      }
-      this.current.reading = reading;
+      this.changeReading(reading);
     } catch (e) {
-      if (isReadme(relative)) {
-        this.current.readme = undefined;
-      }
-      this.current.reading = undefined;
+      this.changeReading(undefined);
 
       await this.onError(e as Error);
+    }
+  }
+
+  protected changeReading(data: PenMarkdownData | undefined) {
+    if (this.current) {
+      this.current.reading = data;
+      if (!data || isReadme(data?.relativePath)) {
+        this.current.readme = data;
+      }
     }
   }
 
@@ -283,7 +279,7 @@ class MarkdownWatcher extends Watcher {
   current?: PenMarkdownData;
 
   async setupWatching(switchTo: string) {
-    this.logger?.info(`Pen requested: ${formatPath(switchTo)}`);
+    this.logger.info(`Pen requested: ${formatPath(switchTo)}`);
     if (this.current) {
       if (this.current.relativePath !== formatPath(switchTo)) {
         this.onError(new Error(`Pen not permit to watch ${switchTo}`));
@@ -291,7 +287,7 @@ class MarkdownWatcher extends Watcher {
       }
 
       if (this.watcher) {
-        this.logger?.info(`Pen use cache, still watching ${this.current.relativePath}`);
+        this.logger.info(`Pen use cache, still watching ${this.current.relativePath}`);
         this.sendData();
         return;
       }
@@ -305,7 +301,7 @@ class MarkdownWatcher extends Watcher {
       await this.setupWatcher(pathInfo);
       await this.onFileChange();
 
-      this.logger?.info(`Pen switched to ${pathInfo.fullpath}`);
+      this.logger.info(`Pen switched to ${pathInfo.fullpath}`);
       this.sendData();
     } catch (e) {
       await this.onError(e as Error);
@@ -319,7 +315,7 @@ class MarkdownWatcher extends Watcher {
 
     if (!isSelf) return;
 
-    this.logger?.info(`Pen detected ${event}: ${this.current?.filename}`);
+    this.logger.info(`Pen detected ${event}: ${this.current?.filename}`);
 
     switch (event) {
       case 'add':
@@ -336,15 +332,12 @@ class MarkdownWatcher extends Watcher {
 
   protected async onFileChange() {
     try {
-      const pathInfo = resolvePathInfo(this.root, '');
-      const markdown = await readMarkdown(pathInfo);
-
-      const reading = {
-        ...markdown,
-        content: await this.remark.process(markdown.content),
-      };
-
-      this.current = reading;
+      this.current = await readUnknown({
+        relative: '',
+        root: this.root,
+        ignores: this.ignores,
+        remark: this.remark,
+      }) as PenMarkdownData;
     } catch (e) {
       this.current = undefined;
       await this.onError(e as Error);
@@ -367,7 +360,7 @@ export const createWatcher = (options: WatcherOptions) => {
   const { root, logger } = options;
   const info = resolvePathInfo(root, '');
 
-  logger?.info(`Pen init to watch ${info.type}: ${info.filename}`);
+  logger.info(`Pen init to watch ${info.type}: ${info.filename}`);
 
   return info.type === 'markdown'
     ? new MarkdownWatcher({ ...options, root: info.fullpath })

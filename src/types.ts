@@ -57,10 +57,10 @@ export type PathInfo = {
   fullpath: string,
 };
 
-export type DocToc = {
-  name: string,
-  children: DocToc[]
-};
+// export type DocToc = {
+//   name: string,
+//   children: DocToc[]
+// };
 
 export type PenMarkdownData = {
   type: 'markdown',
@@ -83,17 +83,24 @@ export type PenErrorData = {
   message: string
 };
 
+export type ReaderOptions = {
+  root: string;
+  relative: string;
+  remark: RemarkRehype;
+  ignores: RegExp[]
+};
+
 export type WatcherOptions = {
   root: string;
   ignores: RegExp[];
   remark: RemarkRehype;
-  logger?: Logger;
+  logger: Logger;
 };
 
-export type RemarkPlugin = [string, Plugin, ...any];
+export type RemarkPlugin = [string, Plugin | false, ...any];
 
 export type RemarkOptions = {
-  logger?: Logger;
+  logger: Logger;
   plugins: RemarkPlugin[]
 };
 
@@ -101,13 +108,23 @@ export type SocketOptions = PenSocketInfo & {
   dist: string;
   connectTimeout: number;
   watcher: Watcher;
-  logger?: Logger;
+  logger: Logger;
 };
 
-export type PenOptions = Omit<WatcherOptions & SocketOptions & RemarkOptions & {
-  theme: PenTheme
+export type RenderOptions = WatcherOptions & {
+  dist: string;
+  namespace: string;
+  theme: PenTheme;
+};
+
+export type PenOptions = Omit<WatcherOptions
+& ReaderOptions
+& SocketOptions
+& RemarkOptions
+& RenderOptions
+& {
   silent: boolean;
-}, 'remark' | 'watcher'>;
+}, 'relative' | 'remark' | 'watcher'>;
 
 export type PenCliOptions = Partial<PenOptions & {
   port: number

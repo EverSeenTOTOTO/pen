@@ -20,18 +20,21 @@ const devSSR = () => ({
     const style = `<style id="${theme.id}">${theme.css}</style>`;
     const templateHtml = fs.readFileSync(paths.template, 'utf-8');
     const transports = ['websocket'] as ('websocket' | 'polling')[];
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    const remark = { // FIXME: unified is a mjs module which cannot be required in vite dev
+      logger,
+      render: {} as unknown as any,
+      usePlugins() {},
+      process: (s: string) => Promise.resolve(s),
+      processError: (s?: Error) => Promise.resolve(s?.message ?? ''),
+    };
 
     const watcher = createWatcher({
       root,
       logger,
       ignores,
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      remark: { // FIXME: unified is a mjs module which cannot be required in vite dev
-        use: () => {},
-        process: (s: string) => Promise.resolve(s),
-        processError: (s?: Error) => Promise.resolve(s?.message ?? ''),
-      },
+      remark,
     });
 
     bindSocket(vite.httpServer, {
@@ -47,7 +50,12 @@ const devSSR = () => ({
     // 缺点是不能调试完整服务端代码，只能调试服务端同构应用的部分
     return () => vite.middlewares.use(async (req, res, next) => {
       try {
-        const current = await readUnknown('/', root, ignores).catch(() => undefined);
+        const current = await readUnknown({
+          remark,
+          root,
+          ignores,
+          relative: '/',
+        }).catch(() => undefined);
         const { render } = await vite.ssrLoadModule(paths.serverEntry);
         const template = await vite.transformIndexHtml(req.originalUrl, templateHtml);
 
