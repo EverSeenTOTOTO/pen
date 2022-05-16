@@ -6,23 +6,39 @@ import Divider from '@material-ui/core/Divider';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
-import TreeView from '@material-ui/lab/TreeView';
+// import TreeView from '@material-ui/lab/TreeView';
 import IconButton from '@material-ui/core/IconButton';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+// import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import ChevronRightIcon from '@material-ui/icons/ChevronRight';
 import { useStore } from '@/store';
 import { Folder, Description } from '@material-ui/icons';
 import { NoSsr } from '@material-ui/core';
 import { useNavigate } from 'react-router';
-import Toc from './Toc';
+import clsx from 'clsx';
 
-export const drawerWidth = 240;
+const drawerWidth = 240;
 
 const useStyles = makeStyles((theme) => createStyles({
   drawer: {
     width: drawerWidth,
     flexShrink: 0,
+    whiteSpace: 'nowrap',
+  },
+  drawerOpen: {
+    width: drawerWidth,
+    transition: theme.transitions.create('width', {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.enteringScreen,
+    }),
+  },
+  drawerClose: {
+    transition: theme.transitions.create('width', {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.leavingScreen,
+    }),
+    overflowX: 'hidden',
+    width: theme.spacing(8),
   },
   drawerPaper: {
     width: drawerWidth,
@@ -41,6 +57,7 @@ const useStyles = makeStyles((theme) => createStyles({
   },
   dir: {
     flexGrow: 1,
+    marginTop: theme.spacing(1),
   },
   icon: {
     minWidth: theme.spacing(4),
@@ -72,25 +89,30 @@ const Drawer = observer(() => {
 
   return (
       <MuiDrawer
-        className={classes.drawer}
-        variant="persistent"
-        open={drawer.visible}
+        variant="permanent"
+        className={clsx(classes.drawer, {
+          [classes.drawerOpen]: drawer.visible,
+          [classes.drawerClose]: !drawer.visible,
+        })}
         classes={{
-          paper: classes.drawerPaper,
+          paper: clsx({
+            [classes.drawerOpen]: drawer.visible,
+            [classes.drawerClose]: !drawer.visible,
+          }),
         }}
       >
         <div className={classes.drawerContainer}>
-          <TreeView
+          {/* <TreeView
             className={classes.toc}
             defaultExpanded={drawer.expandedToc}
             defaultCollapseIcon={<NoSsr><ExpandMoreIcon /></NoSsr>}
             defaultExpandIcon={<NoSsr><ChevronRightIcon /></NoSsr>}
           >
             <Toc toc={drawer.toc} />
-          </TreeView>
+          </TreeView> */}
           <Divider />
           <List dense className={classes.dir}>
-            {drawer.childDocs.map((doc) => (
+            {drawer.visible && drawer.childDocs.map((doc) => (
               <ListItem button key={doc.filename} onClick={() => navigate(doc.relativePath)}>
                 <NoSsr>
                   <ListItemIcon className={classes.icon}>{
@@ -105,8 +127,8 @@ const Drawer = observer(() => {
           </List>
           <Divider />
           <div className={classes.btn}>
-            <IconButton onClick={() => drawer.toggle(false)}>
-              {<ChevronLeftIcon />}
+            <IconButton onClick={() => drawer.toggle()}>
+              {drawer.visible ? <ChevronLeftIcon /> : <ChevronRightIcon />}
             </IconButton>
           </div>
         </div>

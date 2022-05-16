@@ -1,13 +1,19 @@
 import path from 'path';
+import fs from 'fs';
 import express, { Express, Request, Response } from 'express';
 import { stripNamespace } from '@/utils';
 import { PenOptions } from '@/types';
-import { readUnknown, readTemplate } from './reader';
+import { readUnknown } from './reader';
 
-export function loadRender() {
+function loadRender() {
   // eslint-disable-next-line import/no-dynamic-require, @typescript-eslint/no-var-requires, global-require
   const { render } = require(path.join(__dirname, 'index.server.js'));
   return render;
+}
+
+function readTemplate(dist: string, html = 'index.html') {
+  const index = path.join(dist, html);
+  return fs.readFileSync(index, 'utf8');
 }
 
 // extract for dev and test
@@ -25,7 +31,7 @@ export const bindRender = (app: Express, options: PenOptions) => {
         stripNamespace(namespace, req.originalUrl),
         root,
         ignores,
-      );
+      ).catch(() => undefined);
 
       const { html } = await render({
         req,

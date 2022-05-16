@@ -3,10 +3,11 @@ import clsx from 'clsx';
 import { useStore } from '@/store';
 import Snackbar from '@material-ui/core/Snackbar';
 import Alert from '@material-ui/lab/Alert';
+import CssBaseline from '@material-ui/core/CssBaseline';
 import { makeStyles, ThemeProvider } from '@material-ui/core/styles';
 import { useAutoFetch, useTheme } from '@/store/hooks';
 import Markdown from './components/Markdown';
-import Drawer, { drawerWidth } from './components/Drawer';
+import Drawer from './components/Drawer';
 import Header from './components/Header';
 
 const useStyles = makeStyles((theme) => ({
@@ -15,12 +16,12 @@ const useStyles = makeStyles((theme) => ({
   },
   content: {
     flexGrow: 1,
+    overflow: 'hidden',
     padding: theme.spacing(2),
     transition: theme.transitions.create('margin', {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.leavingScreen,
     }),
-    marginLeft: -drawerWidth,
   },
   contentShift: {
     transition: theme.transitions.create('margin', {
@@ -41,6 +42,7 @@ const Home = observer(() => {
   useAutoFetch();
 
   return <ThemeProvider theme={theme.theme}>
+    <CssBaseline />
     <div className={classes.root}>
       <Drawer />
       <main className={clsx(classes.content, {

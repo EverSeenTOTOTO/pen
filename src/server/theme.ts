@@ -40,17 +40,16 @@ const themes: { [k in string]: ThemeOptions } = {
   },
 };
 
-const readThemeCss = async (dist: string, name: keyof typeof themes) => {
-  try {
-    const csses = await Promise.all([
-      fs.promises.readFile(path.join(dist, `assets/theme.${name}.css`), 'utf8'),
-      fs.promises.readFile(path.join(dist, `assets/github-markdown-${name}.css`), 'utf8'),
-    ]);
+const readCssNothrow = (dist: string, file: string) => fs.promises.readFile(path.join(dist, file), 'utf8').catch(() => '');
 
-    return csses.reduce((p, c) => `${p}\n${c}`);
-  } catch (e) {
-    return '';
-  }
+const readThemeCss = async (dist: string, name: keyof typeof themes) => {
+  const csses = await Promise.all([
+    readCssNothrow(dist, `assets/theme.${name}.css`),
+    readCssNothrow(dist, `assets/github-markdown-${name}.css`),
+    readCssNothrow(dist, `assets/highlightjs-github-${name}.css`),
+  ]);
+
+  return csses.reduce((p, c) => `${p}\n${c}`);
 };
 
 const globalId: string = uuid();

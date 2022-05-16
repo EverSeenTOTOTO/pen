@@ -5,6 +5,9 @@ DIST ?= dist
 .PHONY: prepare
 prepare:
 	npx husky install
+	cp node_modules/github-markdown-css/github-markdown-*.css src/assets
+	cp node_modules/highlight.js/styles/github-dark.css src/assets/highlightjs-github-dark.css
+	cp node_modules/highlight.js/styles/github.css src/assets/highlightjs-github-light.css
 
 .PHONY: lint
 lint:
@@ -20,16 +23,23 @@ clean:
 dev: clean
 	npx vite --mode development --config config/vite.dev.ts
 
-.PHONY: build
-build: clean
+.PHONY: build\:client
+build\:client:
+	npx vite build --mode production --config config/vite.prod.ts
+
+.PHONY: build\:server
+build\:server:
 	# parallel use \n to separate inputs
-	echo -e "prod\\nserver\\nserverEntry" |\
+	echo -e "server\\nserverEntry" |\
 		parallel -j4 --tty "npx vite build --mode production --config config/vite.{}.ts"
+
+.PHONY: build
+build: clean build\:server build\:client
 
 .PHONY: start
 start: build
 	DEBUG=socket.io:* node ${DIST}/server.js
 
-.PHONY: test 
+.PHONY: test
 test:
 	npx jest --coverage --silent

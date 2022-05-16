@@ -28,7 +28,7 @@ export enum ServerEvents {
 }
 
 export type ServerToClientEvents = {
-  [ServerEvents.PenData]: (data: PenMarkdownData | PenDirectoryData) => void;
+  [ServerEvents.PenData]: (data: PenMarkdownData | PenDirectoryData | PenErrorData) => void;
   [ServerEvents.PenError]: (error: PenErrorData) => void;
   [ServerEvents.PenStyle]: (theme: PenTheme) => void;
 };
@@ -90,9 +90,11 @@ export type WatcherOptions = {
   logger?: Logger;
 };
 
+export type RemarkPlugin = [string, Plugin, ...any];
+
 export type RemarkOptions = {
   logger?: Logger;
-  plugins: [string, Plugin, ...any][]
+  plugins: RemarkPlugin[]
 };
 
 export type SocketOptions = PenSocketInfo & {
@@ -107,6 +109,6 @@ export type PenOptions = Omit<WatcherOptions & SocketOptions & RemarkOptions & {
   silent: boolean;
 }, 'remark' | 'watcher'>;
 
-export type PenCliOptions = PenOptions & {
-  port?: number
-};
+export type PenCliOptions = Partial<PenOptions & {
+  port: number
+}>;

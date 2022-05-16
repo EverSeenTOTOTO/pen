@@ -10,5 +10,9 @@
   "rules": {
     "no-empty-source": null
   },
-"ignoreFiles": ["dist/**", "src/assets/github-markdown-*.css"]
+  "ignoreFiles": [
+    "dist/**",
+    "src/assets/github-markdown-*.css",
+    "src/assets/highlightjs-*.css"
+  ]
 }

@@ -13,10 +13,9 @@ const devSSR = () => ({
   async configureServer(vite: ViteDevServer) {
     const namespace = '/';
     const ignores = [/^\/\./];
-    const root = process.cwd();
-    // const root = path.join(process.cwd(), 'README.md');
     const socketPath = '/pensocket.io';
     const dist = path.join(process.cwd(), 'src');
+    const root = path.join(process.cwd(), '../../doc');
     const theme = await createTheme('dark', dist);
     const style = `<style id="${theme.id}">${theme.css}</style>`;
     const templateHtml = fs.readFileSync(paths.template, 'utf-8');
@@ -48,7 +47,7 @@ const devSSR = () => ({
     // 缺点是不能调试完整服务端代码，只能调试服务端同构应用的部分
     return () => vite.middlewares.use(async (req, res, next) => {
       try {
-        const current = await readUnknown('.', root, ignores);
+        const current = await readUnknown('/', root, ignores).catch(() => undefined);
         const { render } = await vite.ssrLoadModule(paths.serverEntry);
         const template = await vite.transformIndexHtml(req.originalUrl, templateHtml);
 
@@ -80,7 +79,7 @@ export default defineConfig((c) => {
     ...config,
     server: {
       watch: {
-        ignored: ['**/server/*.ts', 'coverage/*'],
+        ignored: ['coverage/*'],
       },
     },
     plugins: [

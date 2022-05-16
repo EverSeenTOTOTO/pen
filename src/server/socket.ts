@@ -13,11 +13,14 @@ import { createTheme } from './theme';
 type PenSocket = Socket<ClientToServerEvents, ServerToClientEvents>;
 
 const setupWatcher = (socket: PenSocket, options: SocketOptions) => {
-  const { watcher, namespace } = options;
+  const { watcher, namespace, logger } = options;
 
   watcher.setupEmit(socket.emit.bind(socket));
 
-  socket.on('disconnect', () => watcher.close());
+  socket.on('disconnect', () => {
+    logger?.warn(`Pen disconnect with ${socket.id}`);
+    watcher.close();
+  });
   socket.on(ClientEvents.BackRoot, () => watcher.setupWatching(namespace));
   socket.on(ClientEvents.BackUpdir, () => watcher.goUpdir());
   socket.on(ClientEvents.FetchData, (relative) => watcher.setupWatching(relative)); // already stripNamespace in clientside

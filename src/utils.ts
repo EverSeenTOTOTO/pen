@@ -40,7 +40,7 @@ export function formatPath(p: string) {
     .replace(/^$/, '/');
 }
 
-export const stripNamespace = (namespace: string, pathname: string) => formatPath(pathname.replace(new RegExp(`^${namespace}`), ''));
+export const stripNamespace = (namespace: string, pathname: string) => decodeURIComponent(formatPath(pathname.replace(new RegExp(`^${namespace}`), '')));
 
 export const createMarkup = (__html: string) => ({ __html });
 

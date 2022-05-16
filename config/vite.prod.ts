@@ -18,7 +18,11 @@ export default defineConfig((c) => {
             dest: 'assets/', // relate to dist
           },
           {
-            src: path.join(__dirname, '../node_modules/github-markdown-css/github-markdown-*.css'),
+            src: path.join(__dirname, '../src/assets/github-markdown-*.css'),
+            dest: 'assets/', // relate to dist
+          },
+          {
+            src: path.join(__dirname, '../src/assets/highlightjs-github-*.css'),
             dest: 'assets/', // relate to dist
           },
         ],

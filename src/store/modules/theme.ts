@@ -33,6 +33,10 @@ export class ThemeStore implements PrefetchStore<PenTheme> {
     this.root.socket.emit(ClientEvents.FetchStyle, name);
   }
 
+  saveMemory() {
+    this.css = '';
+  }
+
   hydrate(state: PenTheme): void {
     this.id = state.id;
     this.css = state.css;

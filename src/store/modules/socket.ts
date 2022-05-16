@@ -39,7 +39,7 @@ export class SocketStore implements PrefetchStore<PenSocketInfo> {
       });
       this._socket.on(ServerEvents.PenData, (data) => this.onData(data));
       this._socket.on(ServerEvents.PenStyle, (style) => this.onStyle(style));
-      this._socket.on(ServerEvents.PenError, (error) => this.onError(error));
+      this._socket.on(ServerEvents.PenError, (error) => this.onData(error));
       this._socket.on('disconnect', () => this.onDisconnect());
       this._socket.on('connect_error', (error) => this.onError(error));
     }
@@ -50,21 +50,21 @@ export class SocketStore implements PrefetchStore<PenSocketInfo> {
     return this.socket.emit.bind(this.socket);
   }
 
-  onData(data: PenMarkdownData | PenDirectoryData) {
+  onData(data: PenMarkdownData | PenDirectoryData | PenErrorData) {
     if (import.meta.env.DEV) {
-      console.log(data);
+      console.info(data);
     }
     this.root.home.hydrate({ data });
   }
 
   onStyle(style: PenTheme) {
     if (import.meta.env.DEV) {
-      console.warn(style);
+      console.info(style);
     }
     this.root.theme.hydrate(style);
   }
 
-  onError(error: Error | PenErrorData) {
+  onError(error: Error) {
     if (import.meta.env.DEV) {
       console.error(error);
     }
@@ -75,6 +75,7 @@ export class SocketStore implements PrefetchStore<PenSocketInfo> {
     this.root.home.notify('warning', 'socket disconnect');
   }
 
+  // relative pathname to namespace
   get pathname() {
     return stripNamespace(this.namespace, window.location.pathname);
   }

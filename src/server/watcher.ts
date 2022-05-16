@@ -60,6 +60,11 @@ export class Watcher {
     throw new Error('goUpdir not implemented');
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  protected async onChange(_event: string, _detail: string) {
+    throw new Error('onChange not implemented');
+  }
+
   protected async setupWatcher(pathInfo: PathInfo) {
     await this.close();
 
@@ -70,18 +75,13 @@ export class Watcher {
         ignored: this.ignores,
       });
       this.watcher.on('error', (e) => {
-        this.onError(new Error(`Error in watcher: ${e.message}`, { cause: e }));
+        this.onError(new Error(`Pen watcher error: ${e.message}`, { cause: e }));
       });
       this.watcher.on('ready', () => {
         this.watcher?.on('all', this.onChange.bind(this));
         resolve();
       });
     });
-  }
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected async onChange(_event: string, _detail: string) {
-    throw new Error('onChange not implemented');
   }
 
   protected async onError(e?: Error) {
@@ -160,7 +160,7 @@ class DirectoryWatcher extends Watcher {
       this.sendData();
     } catch (e) {
       const err = e as Error;
-      await this.onError(new Error(`Error on setupWatching: ${err.message}`, { cause: err }));
+      await this.onError(new Error(`${err.message}`, { cause: err }));
     }
   }
 

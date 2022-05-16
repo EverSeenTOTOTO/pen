@@ -18,6 +18,9 @@ const useStyles = makeStyles((theme: Theme) => createStyles({
   breadcrumb: {
     marginTop: theme.spacing(1),
     marginLeft: theme.spacing(1),
+    '& li:not(:nth-child(1))': {
+      marginTop: -theme.spacing(0.5),
+    },
   },
   icon: {
     marginRight: theme.spacing(0.5),
@@ -30,6 +33,7 @@ const useStyles = makeStyles((theme: Theme) => createStyles({
 const BreadCrumbRoutes = observer(() => {
   const classes = useStyles();
   const theme = useStore('theme');
+  const home = useStore('home');
   const navigate = useNavigate();
 
   return (
@@ -40,6 +44,16 @@ const BreadCrumbRoutes = observer(() => {
             <HomeIcon className={classes.icon} />
           </NoSsr>
         </Link>
+        {home.breadcrumb.map((link) => (
+          <Link
+            key={link.relative}
+            component="button"
+            color="inherit"
+            onClick={() => navigate(link.relative)}
+          >
+            {link.filename}
+          </Link>
+        ))}
       </Breadcrumbs>
       <Switch
         checked={theme.dark}

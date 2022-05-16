@@ -11,7 +11,7 @@ import { bindSocket } from './socket';
 import { createWatcher } from './watcher';
 import { RemarkRehype } from './rehype';
 
-export const normalizeOptions = async (opts?: PenOptions): Promise<Required<PenOptions>> => {
+export const normalizeOptions = async (opts?: Partial<PenOptions>): Promise<Required<PenOptions>> => {
   const silent = opts?.silent ?? false;
   const logger = silent ? emptyLogger : builtInLogger;
   const dist = opts?.dist ? path.join(opts?.dist) : path.join(__dirname);
@@ -42,9 +42,9 @@ export const createServer = async (opts?: PenCliOptions) => {
   bindRender(app, options);
   bindSocket(server, { ...options, watcher });
 
-  const avaliablePort = await getPort(opts?.port ?? 3000);
+  const avaliablePort = await getPort(opts?.port ?? 5000);
 
-  if (avaliablePort !== opts?.port) {
+  if (opts?.port && avaliablePort !== opts?.port) {
     options.logger.warn(`Pen found port ${opts?.port} unavaliable, use port ${avaliablePort} instead`);
   }
 
@@ -53,4 +53,6 @@ export const createServer = async (opts?: PenCliOptions) => {
   });
 };
 
-createServer();
+createServer({
+  root: path.join(process.cwd(), '../../doc'),
+});

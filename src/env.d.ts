@@ -3,6 +3,10 @@ declare module 'detect-port' {
   const anything = any;
   export default anything;
 }
+declare module 'remark-prism' {
+  const anything = any;
+  export default anything;
+}
 /// <reference types="vite/client" />
 /// <reference types="vue/macros-global" />
 

@@ -1,16 +1,34 @@
 import { unified, Plugin, Processor } from 'unified';
 import remarkParse from 'remark-parse';
+import remarkGFM from 'remark-gfm';
+import remarkToc from 'remark-toc';
 import remarkRehype from 'remark-rehype';
-import rehypeSanitize from 'rehype-sanitize';
+import rehypeRaw from 'rehype-raw';
+import rehypeSlug from 'rehype-slug';
+import rehypeHighlight from 'rehype-highlight';
+import rehypeAutolinkHeadings from 'rehype-autolink-headings';
 import rehypeStringify from 'rehype-stringify';
-import { RemarkOptions } from '../types';
+import { RemarkOptions, RemarkPlugin } from '../types';
 import { Logger } from './logger';
+import { loadLanguages } from './lang';
 
 const defaultPlugins = [
-  ['remark-parse', remarkParse] as [string, Plugin],
-  ['remark-rehype', remarkRehype] as [string, Plugin],
-  ['rehype-sanitize', rehypeSanitize] as [string, Plugin],
-  ['rehype-stringify', rehypeStringify] as [string, Plugin],
+  ['remark-parse', remarkParse],
+  ['remark-gfm', remarkGFM],
+  ['remark-toc', remarkToc, {
+    heading: 'toc|table[ -]of[ -]contents?|目录',
+  }],
+  ['remark-rehype', remarkRehype, { allowDangerousHtml: true }],
+  /* -------- Seperator for remark and rehype -------- */
+  ['rehype-raw', rehypeRaw],
+  ['rehype-slug', rehypeSlug],
+  ['rehype-autolink-headings', rehypeAutolinkHeadings],
+  ['rehype-highlight', rehypeHighlight, {
+    ignoreMissing: true,
+    plainText: ['txt', 'text'],
+    languages: loadLanguages(),
+  }],
+  ['rehype-stringify', rehypeStringify],
 ];
 
 const formatError = (e: Error) => `
@@ -30,11 +48,20 @@ export class RemarkRehype {
     this.render = unified();
     this.logger = options.logger;
 
-    const plugins = [...defaultPlugins, ...options.plugins];
-    for (const [name, plug, ...opts] of plugins) {
+    this.mergePlugins(options.plugins);
+  }
+
+  protected mergePlugins(userPlugins: RemarkOptions['plugins']) {
+    const plugins = new Map<string, RemarkPlugin>();
+
+    for (const p of [...defaultPlugins, ...userPlugins]) {
+      plugins.set(p[0] as string, p as RemarkPlugin);
+    }
+
+    for (const [name, plug, ...opts] of [...plugins.values()]) {
       this.logger?.info(`Pen add remark/rehype plugin: ${name}`);
 
-      this.render.use(plug, ...opts);
+      this.render.use(plug as Plugin, ...opts);
     }
   }
 
@@ -42,18 +69,26 @@ export class RemarkRehype {
     this.render.use(plug);
   }
 
-  process(markdown: string): Promise<string> {
-    return this.render
-      .process(markdown)
-      .then((f) => f.toString())
-      .catch(this.processError.bind(this));
+  async process(markdown: string): Promise<string> {
+    try {
+      const f = await this.render
+        .process(markdown);
+      return f.toString();
+    } catch (reason) {
+      return String(reason);
+    }
   }
 
-  processError(e?: Error) {
-    const error = e?.message ? e : new Error('An unexpect error has occured when processing markdown');
+  async processError(e?: Error) {
+    const error = e?.message
+      ? e
+      : new Error('An unexpect error has occured when processing markdown', { cause: e instanceof Error ? e : undefined });
 
-    this.logger?.error(error.message);
-
-    return this.process(formatError(error)).then((f) => f.toString()).catch(() => error.message);
+    try {
+      const f = await this.process(formatError(error));
+      return f.toString();
+    } catch (err) {
+      return error.message;
+    }
   }
 }

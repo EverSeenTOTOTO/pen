@@ -99,12 +99,7 @@ export async function readDirectory(pathInfo: PathInfo, root: string, ignores: R
 export async function readUnknown(relative: string, root: string, ignores: RegExp[]) {
   const pathInfo = resolvePathInfo(root, relative);
 
-  return isDir(pathInfo.fullpath)
+  return pathInfo.type === 'directory'
     ? readDirectory(pathInfo, root, ignores)
     : readMarkdown(pathInfo);
-}
-
-export function readTemplate(dist: string, html = 'index.html') {
-  const index = path.join(dist, html);
-  return fs.readFileSync(index, 'utf8');
 }

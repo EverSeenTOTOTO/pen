@@ -10,8 +10,9 @@ export const useTheme = () => {
   useEffect(() => {
     if (styleElement.current) {
       styleElement.current.innerHTML = theme.css;
-    } else {
-      styleElement.current = window && window.document.querySelector(`#${theme.id}`);
+      theme.saveMemory();
+    } else if (theme.id.startsWith('UUID')) {
+      styleElement.current = document.querySelector(`#${theme.id}`);
     }
   }, [theme.css, theme.id]);
 };
