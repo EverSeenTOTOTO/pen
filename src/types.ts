@@ -3,7 +3,6 @@ import { ThemeOptions } from '@material-ui/core/styles';
 import { Plugin } from 'unified';
 import { Logger } from './server/logger';
 import type { RemarkRehype } from './server/rehype';
-import type { Watcher } from './server/watcher';
 
 // client fetch
 export enum ClientEvents {
@@ -99,10 +98,10 @@ export type RemarkOptions = {
   plugins: RemarkPlugin[]
 };
 
-export type SocketOptions = PenSocketInfo & {
+export type SocketOptions = PenSocketInfo & WatcherOptions & {
   dist: string;
   connectTimeout: number;
-  watcher: Watcher;
+  remark: RemarkRehype;
   logger: Logger;
 };
 
@@ -119,7 +118,7 @@ export type PenOptions = Omit<WatcherOptions
 & RenderOptions
 & {
   silent: boolean;
-}, 'relative' | 'remark' | 'watcher'>;
+}, 'relative' | 'remark'>;
 
 export type PenCliOptions = Partial<PenOptions & {
   port: number

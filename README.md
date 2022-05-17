@@ -7,3 +7,4 @@ TODO:
 3. beautify logger
 4. keyboard events
 5. test reconnection
+6. log distinct client

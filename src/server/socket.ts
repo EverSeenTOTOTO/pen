@@ -10,11 +10,13 @@ import {
   SocketOptions,
 } from '../types';
 import { createTheme } from './theme';
+import { createWatcher } from './watcher';
 
 type PenSocket = Socket<ClientToServerEvents, ServerToClientEvents>;
 
 const setupWatcher = (socket: PenSocket, options: SocketOptions) => {
-  const { watcher, logger, namespace } = options;
+  const { logger, namespace } = options;
+  const watcher = createWatcher(options);
 
   watcher.setupEmit(socket.emit.bind(socket));
 

@@ -8,7 +8,6 @@ import { logger as builtInLogger, emptyLogger } from './logger';
 import { createTheme } from './theme';
 import { bindRender } from './render';
 import { bindSocket } from './socket';
-import { createWatcher } from './watcher';
 import { RemarkRehype } from './rehype';
 
 export const normalizeOptions = async (opts?: Partial<PenOptions>): Promise<Required<PenOptions>> => {
@@ -37,10 +36,9 @@ export const createServer = async (opts?: PenCliOptions) => {
   const server = http.createServer(app);
   const options = await normalizeOptions(opts);
   const remark = new RemarkRehype(options);
-  const watcher = createWatcher({ ...options, remark });
 
   bindRender(app, { ...options, remark });
-  bindSocket(server, { ...options, watcher });
+  bindSocket(server, { ...options, remark });
 
   const avaliablePort = await getPort(opts?.port ?? 3000);
 
