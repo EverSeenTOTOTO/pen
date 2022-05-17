@@ -1,7 +1,6 @@
 import path from 'path';
 import fs from 'fs';
 import express, { Express, Request, Response } from 'express';
-import { isMarkdown, stripNamespace } from '../utils';
 import { RenderOptions } from '../types';
 import { readUnknown } from './reader';
 
@@ -29,7 +28,7 @@ export const bindRender = (app: Express, options: RenderOptions) => {
     try {
       const current = await readUnknown({
         ...options,
-        relative: stripNamespace(namespace, req.originalUrl),
+        relative: decodeURIComponent(req.url),
       });
 
       const { html } = await render({
@@ -44,7 +43,7 @@ export const bindRender = (app: Express, options: RenderOptions) => {
         },
       });
 
-      logger.done(`Pen rendered page: ${req.originalUrl}`);
+      logger.done(`Pen rendered page: ${req.url}`);
 
       res.setHeader('Content-Type', 'text/html');
       res.end(html);
@@ -54,9 +53,11 @@ export const bindRender = (app: Express, options: RenderOptions) => {
     }
   };
 
-  app.get(new RegExp(`${namespace}/*`), (req: Request, res: Response, next: () => void) => {
-    serveAssets(req, res, () => (isMarkdown(req.originalUrl)
-      ? ssr(req, res, next)
-      : serveRoot(req, res, () => ssr(req, res, next))));
-  });
+  const router = express.Router();
+
+  router.use(ssr);
+  router.use(serveRoot);
+
+  app.use(serveAssets);
+  app.use(namespace, router);
 };

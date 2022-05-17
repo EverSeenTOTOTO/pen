@@ -35,11 +35,12 @@ const BreadCrumbRoutes = observer(() => {
   const nav = useNav();
   const theme = useStore('theme');
   const home = useStore('home');
+  const socket = useStore('socket');
 
   return (
     <div className={classes.root}>
       <Breadcrumbs aria-label="breadcrumb" className={classes.breadcrumb}>
-        <Link onClick={() => nav('/')}>
+        <Link onClick={() => nav(socket.namespace)}>
           <NoSsr>
             <HomeIcon className={classes.icon} />
           </NoSsr>

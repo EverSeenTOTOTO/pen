@@ -1,7 +1,7 @@
 import Clipboard from 'clipboard';
 import { useNavigate } from 'react-router';
 import { useEffect } from 'react';
-import { isMarkdown } from '@/utils';
+import { isMarkdown, stripNamespace } from '@/utils';
 import { useStore } from '.';
 
 export const useMUIServerStyle = () => {
@@ -40,9 +40,11 @@ export const useNav = () => {
   return (relative: string) => {
     navigate(relative);
     if (socket.socket.connected) {
-      if (socket.pathname !== home.reading) {
-        console.log(`fetch ${socket.pathname}`);
-        home.fetchData(socket.pathname);
+      const pathname = stripNamespace(socket.namespace, window.location.pathname);
+
+      if (pathname !== home.reading) {
+        console.log(`fetch ${window.location.pathname}`);
+        home.fetchData(window.location.pathname);
       }
 
       if (!isMarkdown(relative)) {
@@ -60,7 +62,7 @@ export const useAutoFetch = () => {
 
   useEffect(() => { // onMounted
     if (socket.socket.connected) {
-      home.fetchData(socket.pathname, false);
+      home.fetchData(window.location.pathname, false);
     }
   }, []);
 };

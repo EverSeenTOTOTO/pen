@@ -37,7 +37,7 @@ export async function render(context: RenderContext) {
 
   const html = ReactDOMServer.renderToString(
     sheets.collect(
-    <StaticRouter location={req.originalUrl}>
+    <StaticRouter location={req.url}>
       <App store={store} routes={routes}/>
     </StaticRouter>,
     ),

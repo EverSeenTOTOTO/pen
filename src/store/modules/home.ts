@@ -62,9 +62,11 @@ export class HomeStore implements PrefetchStore<HomeState> {
     const result = [];
 
     for (let i = 0; i < split.length; ++i) {
+      const path = `/${split.slice(0, i + 1).join('/')}`;
+
       result.push({
-        relative: `/${split.slice(0, i + 1).join('/')}`,
         filename: split[i],
+        relative: `${this.root.socket.computePath(path)}`,
       });
     }
     return result;

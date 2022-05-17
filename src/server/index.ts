@@ -54,6 +54,7 @@ export const createServer = async (opts?: PenCliOptions) => {
 };
 
 createServer({
+  // namespace: '/doc',
   root: path.join(process.cwd(), '../../doc'),
   ignores: [/^\./],
 });

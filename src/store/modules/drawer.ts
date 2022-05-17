@@ -39,7 +39,7 @@ export class DrawerStore {
     const data = this.root.home?.data;
 
     return data?.type === 'directory'
-      ? data.children
+      ? data.children.map((each) => ({ ...each, relativePath: `${this.root.socket.computePath(each.relativePath)}` }))
       : [];
   }
 }

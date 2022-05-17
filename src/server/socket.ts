@@ -1,3 +1,4 @@
+import { stripNamespace } from '@/utils';
 import http from 'http';
 import https from 'https';
 import { Server, Socket } from 'socket.io';
@@ -13,7 +14,7 @@ import { createTheme } from './theme';
 type PenSocket = Socket<ClientToServerEvents, ServerToClientEvents>;
 
 const setupWatcher = (socket: PenSocket, options: SocketOptions) => {
-  const { watcher, logger } = options;
+  const { watcher, logger, namespace } = options;
 
   watcher.setupEmit(socket.emit.bind(socket));
 
@@ -21,7 +22,7 @@ const setupWatcher = (socket: PenSocket, options: SocketOptions) => {
     logger.warn(`Pen disconnect with ${socket.id}`);
     watcher.close();
   });
-  socket.on(ClientEvents.FetchData, (relative) => watcher.setupWatching(relative)); // already stripNamespace in clientside
+  socket.on(ClientEvents.FetchData, (relative) => watcher.setupWatching(stripNamespace(namespace, relative))); // already stripNamespace in clientside
 };
 
 const setupThemeProvider = (socket: PenSocket, options: SocketOptions) => {
@@ -40,6 +41,7 @@ export const bindSocket = (server: http.Server | https.Server, options: SocketOp
     connectTimeout,
     path: socketPath,
   });
+  logger.info(`Pen socket namespace: ${namespace}`);
   const nsp = io.of(namespace);
 
   nsp.on('error', (e) => {

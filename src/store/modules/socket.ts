@@ -12,7 +12,6 @@ import {
   ClientToServerEvents,
   ServerToClientEvents,
 } from '@/types';
-import { stripNamespace } from '@/utils';
 import type { AppStore, PrefetchStore } from '..';
 
 export class SocketStore implements PrefetchStore<PenSocketInfo> {
@@ -31,9 +30,15 @@ export class SocketStore implements PrefetchStore<PenSocketInfo> {
     this.root = root;
   }
 
+  computePath(relative: string) {
+    return `${this.namespace === '/' ? '' : this.namespace}${relative}`;
+  }
+
   get socket() {
     if (!this._socket) {
-      this._socket = io({
+      console.info(`connect to ${this.namespace}`);
+
+      this._socket = io(this.namespace, {
         path: this.socketPath,
         transports: this.transports,
       });
@@ -76,16 +81,11 @@ export class SocketStore implements PrefetchStore<PenSocketInfo> {
   }
 
   onConnect() {
-    this.root.home.fetchData(this.pathname, false);
+    this.root.home.fetchData(window.location.pathname, false);
   }
 
   onDisconnect() {
     this.root.home.notify('error', 'socket disconnect');
-  }
-
-  // relative pathname to namespace
-  get pathname() {
-    return stripNamespace(this.namespace, window.location.pathname);
   }
 
   hydrate(opts: PenSocketInfo) {
