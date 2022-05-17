@@ -5,13 +5,12 @@ import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import remarkParse from 'remark-parse';
 import remarkRehype from 'remark-rehype';
-import rehypeHighlight from 'rehype-highlight';
 import rehypeStringify from 'rehype-stringify';
 import remarkDirective from 'remark-directive';
 import { unified, Plugin, Processor } from 'unified';
 import rehypeAutolinkHeadings from 'rehype-autolink-headings';
-import { loadLanguages } from './plugins/highlight';
 import { RemarkOptions, RemarkPlugin } from '../types';
+import rehypeHighlight from './plugins/rehype-highlight';
 import rehypeCopy from './plugins/rehype-copy';
 import { Logger } from './logger';
 import { makeContainerPlugin } from './plugins/remark-container';
@@ -33,17 +32,13 @@ const defaultPlugins = [
   ['remark-rehype', remarkRehype, { allowDangerousHtml: true }],
   /* -------- Seperator for remark and rehype -------- */
   ['rehype-raw', rehypeRaw],
+  ['rehype-highlight', rehypeHighlight],
   ['rehype-katex', rehypeKatex, {
     strict: false,
   }],
   ['rehype-slug', rehypeSlug],
   ['rehype-autolink-headings', rehypeAutolinkHeadings],
   ['rehype-copy', rehypeCopy],
-  ['rehype-highlight', rehypeHighlight, {
-    ignoreMissing: true,
-    plainText: ['txt', 'text'],
-    languages: loadLanguages(),
-  }],
   ['rehype-stringify', rehypeStringify],
 ];
 
