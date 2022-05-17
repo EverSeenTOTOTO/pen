@@ -1,6 +1,5 @@
 import rehypeRaw from 'rehype-raw';
 import remarkGFM from 'remark-gfm';
-import remarkToc from 'remark-toc';
 import rehypeSlug from 'rehype-slug';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
@@ -29,9 +28,6 @@ const defaultPlugins = [
   ['remark-parse', remarkParse],
   ['remark-directive', remarkDirective],
   ['remark-gfm', remarkGFM],
-  ['remark-toc', remarkToc, {
-    heading: 'toc|table[ -]of[ -]contents?|目录',
-  }],
   ['remark-container', makeContainerPlugin(['info', 'warn', 'error'])],
   ['remark-math', remarkMath],
   ['remark-rehype', remarkRehype, { allowDangerousHtml: true }],

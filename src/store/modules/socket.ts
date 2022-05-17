@@ -76,7 +76,7 @@ export class SocketStore implements PrefetchStore<PenSocketInfo> {
   }
 
   onConnect() {
-    this.root.home.fetchData(this.pathname);
+    this.root.home.fetchData(this.pathname, false);
   }
 
   onDisconnect() {

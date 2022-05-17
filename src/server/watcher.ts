@@ -61,7 +61,7 @@ export class Watcher {
   }
 
   protected async setupWatcher(pathInfo: PathInfo) {
-    await this.close();
+    await this.watcher?.close();
 
     return new Promise<void>((resolve) => {
       this.watcher = chokidar.watch(pathInfo.fullpath, {
@@ -103,6 +103,7 @@ export class Watcher {
   }
 
   close() {
+    this.emit = undefined;
     return this.watcher?.close();
   }
 }
@@ -110,8 +111,13 @@ export class Watcher {
 class DirectoryWatcher extends Watcher {
   current?: PenDirectoryData;
 
+  close() {
+    this.current = undefined;
+    return super.close();
+  }
+
   async setupWatching(switchTo: string) {
-    this.logger.info(`Pen requested: ${formatPath(switchTo)}`);
+    this.logger.info(`Pen requested: ${formatPath(switchTo)}, current watching: ${this.current?.relativePath}`);
 
     if (formatPath(switchTo) === this.current?.relativePath) {
       // back from child doc to self, clear reading
@@ -131,7 +137,7 @@ class DirectoryWatcher extends Watcher {
         await this.onDirChange(pathInfo.relativePath);
       } else {
         if (this.current?.reading?.relativePath === pathInfo.relativePath) {
-          this.logger.info(`Pen use cache, still watching ${this.current.relativePath}`);
+          this.logger.info(`Pen sent cache, still watching ${this.current.relativePath}`);
           this.sendData();
           return;
         }
@@ -165,9 +171,9 @@ class DirectoryWatcher extends Watcher {
     const isSelf = this.current?.relativePath === relative;
     const isChild = formatPath(path.dirname(detail)) === formatPath(path.join(this.root, this.current?.relativePath ?? ''));
 
-    if (!(isSelf || isChild)) return;
-
     this.logger.info(`Pen detected ${event}: ${relative}`);
+
+    if (!(isSelf || isChild)) return;
 
     switch (event) {
       case 'addDir':
@@ -246,8 +252,14 @@ class DirectoryWatcher extends Watcher {
 class MarkdownWatcher extends Watcher {
   current?: PenMarkdownData;
 
+  close() {
+    this.current = undefined;
+    return super.close();
+  }
+
   async setupWatching(switchTo: string) {
-    this.logger.info(`Pen requested: ${formatPath(switchTo)}`);
+    this.logger.info(`Pen requested: ${formatPath(switchTo)}, current watching: ${this.current?.relativePath}`);
+
     if (this.current) {
       if (this.current.relativePath !== formatPath(switchTo)) {
         this.sendError(new Error(`Pen not permit to watch ${switchTo}`));
@@ -255,7 +267,7 @@ class MarkdownWatcher extends Watcher {
       }
 
       if (this.watcher) {
-        this.logger.info(`Pen use cache, still watching ${this.current.relativePath}`);
+        this.logger.info(`Pen sent cache, still watching ${this.current.relativePath}`);
         this.sendData();
         return;
       }
@@ -281,9 +293,9 @@ class MarkdownWatcher extends Watcher {
     const relative = formatPath(path.relative(this.root, detail));
     const isSelf = this.current?.relativePath === relative;
 
-    if (!isSelf) return;
-
     this.logger.info(`Pen detected ${event}: ${this.current?.filename}`);
+
+    if (!isSelf) return;
 
     switch (event) {
       case 'add':

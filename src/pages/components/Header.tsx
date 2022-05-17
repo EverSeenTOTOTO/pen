@@ -5,8 +5,7 @@ import HomeIcon from '@material-ui/icons/Home';
 import { observer } from 'mobx-react-lite';
 import { useStore } from '@/store';
 import { NoSsr, Switch } from '@material-ui/core';
-import { useNavigate } from 'react-router';
-import { isMarkdown } from '@/utils';
+import { useNav } from '@/store/hooks';
 
 const useStyles = makeStyles((theme: Theme) => createStyles({
   root: {
@@ -33,16 +32,9 @@ const useStyles = makeStyles((theme: Theme) => createStyles({
 
 const BreadCrumbRoutes = observer(() => {
   const classes = useStyles();
+  const nav = useNav();
   const theme = useStore('theme');
   const home = useStore('home');
-  const drawer = useStore('drawer');
-  const navigate = useNavigate();
-  const nav = (relative: string) => {
-    navigate(relative);
-    if (!isMarkdown(relative)) {
-      drawer.toggle(true);
-    }
-  };
 
   return (
     <div className={classes.root}>

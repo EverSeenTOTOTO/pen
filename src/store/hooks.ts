@@ -1,6 +1,7 @@
 import Clipboard from 'clipboard';
-import { useLocation } from 'react-router';
+import { useNavigate } from 'react-router';
 import { useEffect } from 'react';
+import { isMarkdown } from '@/utils';
 import { useStore } from '.';
 
 export const useMUIServerStyle = () => {
@@ -30,15 +31,36 @@ export const useClipboard = () => {
   }, []);
 };
 
+export const useNav = () => {
+  const navigate = useNavigate();
+  const home = useStore('home');
+  const socket = useStore('socket');
+  const drawer = useStore('drawer');
+
+  return (relative: string) => {
+    navigate(relative);
+    if (socket.socket.connected) {
+      if (socket.pathname !== home.reading) {
+        console.log(`fetch ${socket.pathname}`);
+        home.fetchData(socket.pathname);
+      }
+
+      if (!isMarkdown(relative)) {
+        drawer.toggle(true);
+      }
+    } else {
+      home.notify('error', 'socket not connect');
+    }
+  };
+};
+
 export const useAutoFetch = () => {
   const home = useStore('home');
   const socket = useStore('socket');
-  const location = useLocation();
 
-  useEffect(() => {
-    if (home.initialLoad || socket.pathname !== home.reading) {
-      console.log(`fetch ${socket.pathname}`);
-      home.fetchData(socket.pathname);
+  useEffect(() => { // onMounted
+    if (socket.socket.connected) {
+      home.fetchData(socket.pathname, false);
     }
-  }, [location]);
+  }, []);
 };

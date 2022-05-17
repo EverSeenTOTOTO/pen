@@ -15,7 +15,7 @@ import ExpandLessTwoToneIcon from '@material-ui/icons/ExpandLessTwoTone';
 import { useStore } from '@/store';
 import { Folder, Description } from '@material-ui/icons';
 import { NoSsr } from '@material-ui/core';
-import { useNavigate } from 'react-router';
+import { useNav } from '@/store/hooks';
 import clsx from 'clsx';
 
 const useStyles = makeStyles((theme) => createStyles({
@@ -85,7 +85,7 @@ const useStyles = makeStyles((theme) => createStyles({
 const Drawer = observer(() => {
   const classes = useStyles();
   const drawer = useStore('drawer');
-  const navigate = useNavigate();
+  const nav = useNav();
 
   return (
       <MuiDrawer
@@ -113,7 +113,7 @@ const Drawer = observer(() => {
           <Divider />
           <List dense className={classes.dir}>
             {drawer.visible && drawer.childDocs.map((doc) => (
-              <ListItem button key={doc.filename} onClick={() => navigate(doc.relativePath)}>
+              <ListItem button key={doc.filename} onClick={() => nav(doc.relativePath)}>
                 <NoSsr>
                   <ListItemIcon className={classes.icon}>{
                     doc.type === 'directory'
