@@ -1,6 +1,6 @@
 /* eslint-disable no-param-reassign */
 import fs from 'fs';
-import path, { parse } from 'path';
+import path from 'path';
 import {
   PathInfo,
   PenMarkdownData,
@@ -89,7 +89,7 @@ export async function readUnknown(options: ReaderOptions) {
   const pathInfo = resolvePathInfo(root, relative);
 
   if (pathInfo.type === 'other') {
-    throw new Error(`Pen unable to watch: ${pathInfo.fullpath}, it's not a markdown or directory.`);
+    throw new Error(`Pen unable to read: ${pathInfo.fullpath}, it's not a markdown or directory.`);
   }
 
   return pathInfo.type === 'directory'

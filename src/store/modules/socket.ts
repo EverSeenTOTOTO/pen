@@ -40,6 +40,7 @@ export class SocketStore implements PrefetchStore<PenSocketInfo> {
       this._socket.on(ServerEvents.PenData, (data) => this.onData(data));
       this._socket.on(ServerEvents.PenStyle, (style) => this.onStyle(style));
       this._socket.on(ServerEvents.PenError, (error) => this.onData(error));
+      this._socket.on('connect', () => this.onConnect());
       this._socket.on('disconnect', () => this.onDisconnect());
       this._socket.on('connect_error', (error) => this.onError(error));
     }
@@ -47,7 +48,10 @@ export class SocketStore implements PrefetchStore<PenSocketInfo> {
   }
 
   get emit(): EmitFunction<ClientToServerEvents, ClientEvents> {
-    return this.socket.emit.bind(this.socket);
+    return (evt, data) => {
+      if (!this.socket.connected) return;
+      this.socket.emit(evt, data);
+    };
   }
 
   onData(data: PenMarkdownData | PenDirectoryData | PenErrorData) {
@@ -71,8 +75,12 @@ export class SocketStore implements PrefetchStore<PenSocketInfo> {
     this.root.home.notify('error', error.message);
   }
 
+  onConnect() {
+    this.root.home.fetchData(this.pathname);
+  }
+
   onDisconnect() {
-    this.root.home.notify('warning', 'socket disconnect');
+    this.root.home.notify('error', 'socket disconnect');
   }
 
   // relative pathname to namespace

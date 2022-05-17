@@ -203,7 +203,7 @@ it('test change children', async () => {
 
   fs.writeFileSync(path.join(root, 'a/b/c.md'), '# CCC');
   await watcher.isReady();
-  expect(emit).toHaveBeenCalledTimes(3);
+  expect(emit).toHaveBeenCalledTimes(2);
 });
 
 it('test change nested', async () => {

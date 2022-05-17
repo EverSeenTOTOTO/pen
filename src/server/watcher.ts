@@ -182,15 +182,21 @@ class DirectoryWatcher extends Watcher {
         if (this.current && isChild) {
           // not this.onDirChange(relative) because we want to refresh current.chidren, not change current
           await this.onDirChange(this.current.relativePath)
-            .then(() => this.onFileChange(relative))
+            .then(async () => {
+              if (this.current?.reading?.relativePath === relative) {
+                await this.onFileChange(relative);
+              }
+            })
             .then(() => this.sendData())
             .catch((e) => this.sendError(e));
         }
         break;
       case 'change':
-        await this.onFileChange(relative)
-          .then(() => this.sendData())
-          .catch((e) => this.sendError(e));
+        if (this.current && isChild && this.current?.reading?.relativePath === relative) {
+          await this.onFileChange(relative)
+            .then(() => this.sendData())
+            .catch((e) => this.sendError(e));
+        }
         break;
       default:
         break;

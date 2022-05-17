@@ -13,7 +13,7 @@ export const useMUIServerStyle = () => {
         jssStyles?.parentElement?.removeChild(jssStyles);
       }
     }
-  }, [theme.id]);
+  }, [theme.name, theme.id]);
 };
 
 export const useClipboard = () => {
@@ -36,7 +36,9 @@ export const useAutoFetch = () => {
   const location = useLocation();
 
   useEffect(() => {
-    console.log(`fetch ${socket.pathname}`);
-    home.fetchData(socket.pathname);
+    if (home.initialLoad || socket.pathname !== home.reading) {
+      console.log(`fetch ${socket.pathname}`);
+      home.fetchData(socket.pathname);
+    }
   }, [location]);
 };

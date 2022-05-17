@@ -30,6 +30,20 @@ export class HomeStore implements PrefetchStore<HomeState> {
     this.root = root;
   }
 
+  static getReadingPath(data: HomeState['data']) {
+    return data?.type === 'markdown'
+      ? data?.relativePath
+      : data?.type === 'directory'
+        ? data?.reading
+          ? data.reading?.relativePath
+          : data.relativePath
+        : undefined;
+  }
+
+  get reading() {
+    return HomeStore.getReadingPath(this.data);
+  }
+
   get html() {
     return this.data?.type === 'markdown'
       ? this.data.content
@@ -45,16 +59,8 @@ export class HomeStore implements PrefetchStore<HomeState> {
   }
 
   get breadcrumb() {
-    const reading = this.data?.type === 'markdown'
-      ? this.data?.relativePath
-      : this.data?.type === 'directory'
-        ? this.data?.reading
-          ? this.data.reading?.relativePath
-          : this.data.relativePath
-        : undefined;
-
-    if (!reading || reading === '/') return [];
-    const split = reading.split('/').slice(1);
+    if (!this.reading || this.reading === '/') return [];
+    const split = this.reading.split('/').slice(1);
     const result = [];
 
     for (let i = 0; i < split.length; ++i) {
@@ -82,12 +88,12 @@ export class HomeStore implements PrefetchStore<HomeState> {
   }
 
   hydrate(state: HomeState): void {
-    this.data = state.data;
-    this.loading = false;
-    clearTimeout(this.timeoutId as number);
-    if (globalThis && globalThis.scrollTo) {
+    if (globalThis && globalThis.scrollTo && this.reading !== HomeStore.getReadingPath(state.data)) {
       globalThis.scrollTo(0, 0);
     }
+    clearTimeout(this.timeoutId as number);
+    this.loading = false;
+    this.data = state.data;
   }
 
   dehydra(): HomeState {

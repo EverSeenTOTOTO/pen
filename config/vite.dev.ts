@@ -54,7 +54,7 @@ const devSSR = () => ({
           root,
           ignores,
           relative: '/',
-        }).catch(() => undefined);
+        });
         const { render } = await vite.ssrLoadModule(paths.serverEntry);
         const template = await vite.transformIndexHtml(req.originalUrl, templateHtml);
 

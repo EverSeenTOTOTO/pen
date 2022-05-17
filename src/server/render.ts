@@ -30,7 +30,7 @@ export const bindRender = (app: Express, options: RenderOptions) => {
       const current = await readUnknown({
         ...options,
         relative: stripNamespace(namespace, req.originalUrl),
-      }).catch(() => undefined);
+      });
 
       const { html } = await render({
         req,
@@ -49,7 +49,7 @@ export const bindRender = (app: Express, options: RenderOptions) => {
       res.setHeader('Content-Type', 'text/html');
       res.end(html);
     } catch (e) {
-      logger.error(`Pen ssr error: ${(e as Error).message}`);
+      logger.error((e as Error).message);
       next();
     }
   };

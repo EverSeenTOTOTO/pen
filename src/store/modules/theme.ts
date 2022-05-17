@@ -34,18 +34,18 @@ export class ThemeStore implements PrefetchStore<ThemeState> {
   }
 
   hydrate(state: PenTheme): void {
-    this.id = state.id;
-    this.name = state.name;
-    this.options = state.options;
-    this.avaliable = state.avaliable;
-
     if (globalThis.document && this.id.startsWith('UUID') && typeof state.css === 'string') {
       const styleElement = globalThis.document.getElementById(this.id);
 
       if (styleElement) {
+        styleElement.id = state.id;
         styleElement.innerHTML = state.css;
       }
     }
+    this.id = state.id;
+    this.name = state.name;
+    this.options = state.options;
+    this.avaliable = state.avaliable;
   }
 
   dehydra() {
