@@ -1,7 +1,7 @@
-import { stripNamespace } from '@/utils';
 import http from 'http';
 import https from 'https';
 import { Server, Socket } from 'socket.io';
+import { stripNamespace } from '../utils';
 import {
   ClientEvents,
   ServerEvents,

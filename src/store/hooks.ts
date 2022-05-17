@@ -1,7 +1,7 @@
 import Clipboard from 'clipboard';
-import { useNavigate } from 'react-router';
+import { useLocation, useNavigate } from 'react-router';
 import { useEffect } from 'react';
-import { isMarkdown, stripNamespace } from '@/utils';
+import { isMarkdown } from '@/utils';
 import { useStore } from '.';
 
 export const useMUIServerStyle = () => {
@@ -39,19 +39,10 @@ export const useNav = () => {
 
   return (relative: string) => {
     navigate(relative);
-    if (socket.socket.connected) {
-      const pathname = stripNamespace(socket.namespace, window.location.pathname);
-
-      if (pathname !== home.reading) {
-        console.log(`fetch ${window.location.pathname}`);
-        home.fetchData(window.location.pathname);
-      }
-
-      if (!isMarkdown(relative)) {
-        drawer.toggle(true);
-      }
-    } else {
+    if (!socket.socket.connected) {
       home.notify('error', 'socket not connect');
+    } else if (!isMarkdown(relative)) {
+      drawer.toggle(true);
     }
   };
 };
@@ -59,10 +50,22 @@ export const useNav = () => {
 export const useAutoFetch = () => {
   const home = useStore('home');
   const socket = useStore('socket');
+  const location = useLocation();
+  const drawer = useStore('drawer');
 
   useEffect(() => { // onMounted
     if (socket.socket.connected) {
       home.fetchData(window.location.pathname, false);
     }
   }, []);
+
+  useEffect(() => {
+    if (socket.socket.connected && window.location.pathname !== home.reading) {
+      console.log(`fetch ${window.location.pathname}`);
+      home.fetchData(window.location.pathname);
+      if (!isMarkdown(window.location.pathname)) {
+        drawer.toggle(true);
+      }
+    }
+  }, [location]);
 };

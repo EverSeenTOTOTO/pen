@@ -46,7 +46,7 @@ const supportLanguageList = [
   'yaml',
 ];
 
-const createHighlighter = () => {
+const loadLanguages = () => {
   const highlightjs = path.join(__dirname, '../node_modules/highlight.js/lib/languages');
 
   supportLanguageList
@@ -64,7 +64,7 @@ const createHighlighter = () => {
   return hljs;
 };
 
-createHighlighter();
+loadLanguages();
 
 export default makeCodeBlockPlugin((language: string | undefined, node: any) => {
   if (!language) return;

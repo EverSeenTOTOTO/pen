@@ -66,7 +66,7 @@ const devSSR = () => ({
           prefetch: {
             theme,
             home: { data: current },
-            socket: { socketPath, transports },
+            socket: { socketPath, transports, namespace },
           },
         });
 
