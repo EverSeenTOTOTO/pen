@@ -50,9 +50,7 @@ export class HomeStore implements PrefetchStore<HomeState> {
         : this.data?.type === 'directory'
           ? this.data?.reading
             ? this.data?.reading?.content
-            : this.data?.readme
-              ? this.data?.readme?.content
-              : ''
+            : ''
           : '';
   }
 

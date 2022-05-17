@@ -14,7 +14,6 @@ import {
 } from '../types';
 import {
   formatPath,
-  isReadme,
   resolvePathInfo,
 } from '../utils';
 import { Logger } from './logger';
@@ -220,24 +219,13 @@ class DirectoryWatcher extends Watcher {
   }
 
   protected async onFileChange(relative: string) {
-    if (!this.current) return;
-
-    const reading = await readUnknown({
-      relative,
-      root: this.root,
-      remark: this.remark,
-      ignores: this.ignores,
-    }) as PenMarkdownData;
-
-    this.changeReading(reading);
-  }
-
-  protected changeReading(data: PenMarkdownData | undefined) {
     if (this.current) {
-      this.current.reading = data;
-      if (!data || isReadme(data?.relativePath)) {
-        this.current.readme = data;
-      }
+      this.current.reading = await readUnknown({
+        relative,
+        root: this.root,
+        remark: this.remark,
+        ignores: this.ignores,
+      }) as PenMarkdownData;
     }
   }
 

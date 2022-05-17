@@ -298,18 +298,17 @@ it('test change readme', async () => {
   fs.writeFileSync(readme, '# README');
   await watcher.isReady();
   expect(emit).toHaveReturnedTimes(2);
-  expect((data[1] as PenDirectoryData).readme?.content).toMatch(/README/);
+  expect((data[1] as PenDirectoryData).reading?.content).toMatch(/README/);
 
   // reading === readme
   await watcher.setupWatching('/Readme.md');
   fs.writeFileSync(readme, '# aaa');
   await watcher.isReady();
-  expect((data[3] as PenDirectoryData).readme?.content).toMatch(/aaa/);
   expect((data[3] as PenDirectoryData).reading?.content).toMatch(/aaa/);
 
   fs.unlinkSync(readme);
   await watcher.isReady();
-  expect((data[4] as PenDirectoryData).readme).toBeUndefined();
+  expect((data[4] as PenDirectoryData).reading).toBeUndefined();
 });
 
 it('test ignore readme', async () => {

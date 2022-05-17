@@ -71,7 +71,6 @@ export type PenDirectoryData = {
   relativePath: string,
   children: Omit<PathInfo, 'fullpath'>[],
   reading?: PenMarkdownData
-  readme?: PenMarkdownData
 };
 
 export type PenErrorData = {

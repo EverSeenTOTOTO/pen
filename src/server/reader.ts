@@ -70,7 +70,7 @@ async function readDirectory(render: RemarkRehype, pathInfo: PathInfo, root: str
     type: 'directory',
     filename: pathInfo.filename,
     relativePath: pathInfo.relativePath,
-    readme: readme.length > 0
+    reading: readme.length > 0
       ? await readMarkdown(render, readme[0])
       : undefined,
     children: infos.sort(sortChildren).map((c) => {

@@ -1,3 +1,8 @@
+@font-face {
+  font-family: "ZCOOL KuaiLe";
+  src: url("./ZCOOLKuaiLe-Regular.ttf");
+}
+
 html,
 body {
   scroll-behavior: smooth;
@@ -15,6 +20,9 @@ body {
 }
 
 .markdown-body {
+  font-family: "ZCOOL KuaiLe", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+  font-size: 1.4em;
+
   & .container {
     padding: 0.1rem 1.5rem;
     border-left-width: 0.5rem;

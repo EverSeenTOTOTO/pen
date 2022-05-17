@@ -32,13 +32,13 @@ const defaultPlugins = [
   ['remark-rehype', remarkRehype, { allowDangerousHtml: true }],
   /* -------- Seperator for remark and rehype -------- */
   ['rehype-raw', rehypeRaw],
+  ['rehype-copy', rehypeCopy],
   ['rehype-highlight', rehypeHighlight],
   ['rehype-katex', rehypeKatex, {
     strict: false,
   }],
   ['rehype-slug', rehypeSlug],
   ['rehype-autolink-headings', rehypeAutolinkHeadings],
-  ['rehype-copy', rehypeCopy],
   ['rehype-stringify', rehypeStringify],
 ];
 

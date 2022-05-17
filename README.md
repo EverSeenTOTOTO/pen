@@ -2,7 +2,8 @@
 
 TODO:
 
-1. server timeout
-2. memory leak
-3. logger
-4. keyboard
+1. add server timeout
+2. test memory leak
+3. beautify logger
+4. keyboard events
+5. test reconnection
