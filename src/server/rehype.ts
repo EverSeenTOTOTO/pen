@@ -1,6 +1,5 @@
 import rehypeRaw from 'rehype-raw';
 import remarkGFM from 'remark-gfm';
-import rehypeSlug from 'rehype-slug';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import remarkParse from 'remark-parse';
@@ -8,7 +7,6 @@ import remarkRehype from 'remark-rehype';
 import rehypeStringify from 'rehype-stringify';
 import remarkDirective from 'remark-directive';
 import { unified, Plugin, Processor } from 'unified';
-import rehypeAutolinkHeadings from 'rehype-autolink-headings';
 import { RemarkOptions, RemarkPlugin } from '../types';
 import rehypeHighlight from './plugins/rehype-highlight';
 import rehypeCopy from './plugins/rehype-copy';
@@ -37,8 +35,6 @@ const defaultPlugins = [
   ['rehype-katex', rehypeKatex, {
     strict: false,
   }],
-  ['rehype-slug', rehypeSlug],
-  ['rehype-autolink-headings', rehypeAutolinkHeadings],
   ['rehype-stringify', rehypeStringify],
 ];
 

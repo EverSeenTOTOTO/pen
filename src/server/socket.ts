@@ -61,4 +61,6 @@ export const bindSocket = (server: http.Server | https.Server, options: SocketOp
       logger.info('Pen socket closed');
     });
   });
+
+  return io;
 };

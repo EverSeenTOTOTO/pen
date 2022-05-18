@@ -22,6 +22,7 @@ export const bindRender = (app: Express, options: RenderOptions) => {
   } = options;
   const template = readTemplate(dist);
   const render = loadRender(dist);
+
   const serveAssets = express.static(dist, { index: false, dotfiles: 'allow' });
   const serveRoot = express.static(root, { index: false, dotfiles: 'allow' });
   const ssr = async (req: Request, res: Response, next: () => void) => {

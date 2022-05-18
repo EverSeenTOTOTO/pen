@@ -46,4 +46,4 @@ start: build
 
 .PHONY: test
 test:
-	npx jest --coverage --silent
+	NODE_ENV=test npx jest --coverage --silent

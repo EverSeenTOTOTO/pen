@@ -89,7 +89,7 @@ export default defineConfig((c) => {
     ],
     ssr: {
       noExternal: [
-        /^(unified|(remark|rehype)-(\w+))/,
+        /^(unified|(remark|rehype|hast|unist)[\w-.]+)/,
       ],
     },
   };

@@ -36,7 +36,7 @@ export class Watcher {
   protected emit?: EmitFunction<ServerToClientEvents, ServerEvents>
 
   // for test
-  protected ready: boolean = true;
+  ready: boolean = true;
 
   constructor(options: WatcherOptions) {
     this.root = options.root;
@@ -66,6 +66,7 @@ export class Watcher {
       this.watcher = chokidar.watch(pathInfo.fullpath, {
         depth: 0,
         ignored: this.ignores,
+        awaitWriteFinish: process.env.NODE_ENV !== 'test',
       });
       this.watcher.on('error', (e) => {
         this.sendError(new Error(`Pen watcher error: ${e.message}`, { cause: e }));
@@ -90,8 +91,9 @@ export class Watcher {
     return undefined;
   }
 
-  isReady() {
-    return new Promise<void>((res) => {
+  isReady(timeout = 1000) {
+    return new Promise<void>((res, rej) => {
+      setTimeout(() => rej(new Error('watcher timeout')), timeout);
       const interval = setInterval(() => {
         if (this.ready) {
           clearInterval(interval);
@@ -116,7 +118,7 @@ class DirectoryWatcher extends Watcher {
   }
 
   async setupWatching(switchTo: string) {
-    this.logger.info(`Pen requested: ${formatPath(switchTo)}, current watching: ${this.current?.relativePath}`);
+    this.logger.info(`Pen requested: ${formatPath(switchTo)}, current watching: ${this.current?.relativePath ?? 'none'}`);
 
     if (formatPath(switchTo) === this.current?.relativePath) {
       // back from child doc to self, clear reading
@@ -164,7 +166,6 @@ class DirectoryWatcher extends Watcher {
   }
 
   protected async onChange(event: string, detail: string) {
-    this.ready = false;
     const relative = formatPath(path.relative(this.root, detail));
 
     const isSelf = this.current?.relativePath === relative;
@@ -246,7 +247,7 @@ class MarkdownWatcher extends Watcher {
   }
 
   async setupWatching(switchTo: string) {
-    this.logger.info(`Pen requested: ${formatPath(switchTo)}, current watching: ${this.current?.relativePath}`);
+    this.logger.info(`Pen requested: ${formatPath(switchTo)}, current watching: ${this.current?.relativePath ?? 'None'}`);
 
     if (this.current) {
       if (this.current.relativePath !== formatPath(switchTo)) {
@@ -277,7 +278,6 @@ class MarkdownWatcher extends Watcher {
   }
 
   protected async onChange(event: string, detail: string) {
-    this.ready = false;
     const relative = formatPath(path.relative(this.root, detail));
     const isSelf = this.current?.relativePath === relative;
 

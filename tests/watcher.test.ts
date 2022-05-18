@@ -8,20 +8,21 @@ import {
   PenDirectoryData,
   WatcherOptions,
 } from '@/types';
-import { RemarkRehype } from '@/server/rehype';
+import { logger } from '@/server/logger';
 
 jest.setTimeout(600000);
 
 let watcher: ReturnType<typeof createWatcher>;
 
-const logger = {
-  ...console,
-  done: console.log,
-};
-const remark = new RemarkRehype({
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+const remark = {
   logger,
-  plugins: [],
-});
+  render: {} as any,
+  usePlugins() {},
+  process: (s: string) => Promise.resolve(s),
+  processError: (s?: Error) => Promise.resolve(s?.message ?? ''),
+};
 const root = path.join(__dirname, 'test_temp');
 
 const initWatcher = async (options?: Partial<WatcherOptions>, emit?: any) => {
@@ -38,7 +39,6 @@ const initWatcher = async (options?: Partial<WatcherOptions>, emit?: any) => {
 const makeEmitFn = (): [any[], jest.Mock<any, any>] => {
   const data: any[] = [];
   const emit = jest.fn().mockImplementation((_, x) => {
-    console.log(performance.now(), x);
     data.push(x);
   });
 
@@ -161,6 +161,7 @@ it('test change content', async () => {
   expect(emit).toHaveBeenCalledTimes(1);
   expect((data[0] as PenMarkdownData).content).toMatch(/A/);
 
+  watcher.ready = false;
   fs.writeFileSync(path.join(root, 'a.md'), '# AAA');
   // wait for event
   await watcher.isReady();
