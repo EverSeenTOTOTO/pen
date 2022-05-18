@@ -20,8 +20,9 @@ body {
 }
 
 .markdown-body {
-  font-family: "ZCOOL KuaiLe", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
-  font-size: 1.4em;
+  font-display: swap;
+  font-family: "ZCOOL KuaiLe", cursive;
+  font-size: 1.5em;
 
   & .container {
     padding: 0.1rem 1.5rem;
@@ -55,6 +56,16 @@ body {
       height: 100%;
       line-height: 100%;
       text-align: center;
+    }
+  }
+}
+
+@media (max-width: 960px) {
+  .markdown-body {
+    font-size: 1.2em;
+
+    & .copy-btn {
+      right: 0.3rem;
     }
   }
 }

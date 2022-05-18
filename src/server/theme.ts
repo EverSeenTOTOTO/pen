@@ -26,6 +26,13 @@ const themes: { [k in string]: ThemeOptions } = {
         default: '#0d1117',
       },
     },
+    overrides: {
+      MuiPaper: {
+        root: {
+          color: 'rgba(255 255 255 / 80%)',
+        },
+      },
+    },
   },
   light: {
     ...defaultTheme,
@@ -35,6 +42,13 @@ const themes: { [k in string]: ThemeOptions } = {
       background: {
         paper: '#fff',
         default: '#fff',
+      },
+    },
+    overrides: {
+      MuiPaper: {
+        root: {
+          color: 'rgba(0 0 0 / 70%)',
+        },
       },
     },
   },

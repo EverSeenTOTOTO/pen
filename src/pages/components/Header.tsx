@@ -11,6 +11,7 @@ const useStyles = makeStyles((theme: Theme) => createStyles({
   root: {
     display: 'flex',
     justifyContent: 'space-between',
+    alignItems: 'center',
     marginBottom: theme.spacing(1),
     marginLeft: theme.spacing(3),
     marginRight: theme.spacing(3),
@@ -19,7 +20,7 @@ const useStyles = makeStyles((theme: Theme) => createStyles({
     marginTop: theme.spacing(1),
     marginLeft: theme.spacing(1),
     '& li:not(:nth-child(1))': {
-      marginTop: -theme.spacing(0.5),
+      marginTop: -theme.spacing(1),
     },
   },
   icon: {

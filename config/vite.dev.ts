@@ -5,7 +5,6 @@ import base, { paths } from './vite.common';
 import { createTheme } from '../src/server/theme';
 import { readUnknown } from '../src/server/reader';
 import { bindSocket } from '../src/server/socket';
-import { createWatcher } from '../src/server/watcher';
 import { logger } from '../src/server/logger';
 
 const devSSR = () => ({
@@ -29,17 +28,12 @@ const devSSR = () => ({
       processError: (s?: Error) => Promise.resolve(s?.message ?? ''),
     };
 
-    const watcher = createWatcher({
-      root,
-      logger,
-      ignores,
-      remark,
-    });
-
     bindSocket(vite.httpServer, {
+      root,
+      ignores,
       dist,
       logger,
-      watcher,
+      remark,
       namespace,
       socketPath,
       transports,
