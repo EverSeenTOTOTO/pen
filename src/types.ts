@@ -3,6 +3,7 @@ import { ThemeOptions } from '@material-ui/core/styles';
 import { Plugin } from 'unified';
 import { Logger } from './server/logger';
 import type { RemarkRehype } from './server/rehype';
+import type { ThemeNames } from './server/theme';
 
 // client fetch
 export enum ClientEvents {
@@ -11,7 +12,7 @@ export enum ClientEvents {
 }
 
 export type ClientToServerEvents = {
-  [ClientEvents.FetchStyle]: (name: string) => void;
+  [ClientEvents.FetchStyle]: (name: ThemeNames) => void;
   [ClientEvents.FetchData]: (relative: string) => void;
 };
 
@@ -108,7 +109,7 @@ export type SocketOptions = PenSocketInfo & WatcherOptions & {
 export type RenderOptions = WatcherOptions & {
   dist: string;
   namespace: string;
-  theme: PenTheme;
+  theme?: ThemeNames;
 };
 
 export type PenOptions = Omit<WatcherOptions

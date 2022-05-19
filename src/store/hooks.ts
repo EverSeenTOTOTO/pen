@@ -35,14 +35,11 @@ export const useNav = () => {
   const navigate = useNavigate();
   const home = useStore('home');
   const socket = useStore('socket');
-  const drawer = useStore('drawer');
 
   return (relative: string) => {
     navigate(relative);
     if (!socket.socket.connected) {
       home.notify('error', 'socket not connect');
-    } else if (!isMarkdown(relative)) {
-      drawer.toggle(true);
     }
   };
 };
@@ -63,9 +60,10 @@ export const useAutoFetch = () => {
     if (socket.socket.connected && window.location.pathname !== home.reading) {
       console.log(`fetch ${window.location.pathname}`);
       home.fetchData(window.location.pathname);
-      if (!isMarkdown(window.location.pathname)) {
-        drawer.toggle(true);
-      }
+    }
+
+    if (!isMarkdown(window.location.pathname)) {
+      drawer.toggle(true);
     }
   }, [location]);
 };

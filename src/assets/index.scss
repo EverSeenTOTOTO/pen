@@ -15,14 +15,12 @@ body {
   margin: 0;
 }
 
-.hljs {
-  border-radius: 2px;
-}
-
 .markdown-body {
-  font-display: swap;
-  font-family: "ZCOOL KuaiLe", cursive;
   font-size: 1.5em;
+
+  & .hljs {
+    border-radius: 2px;
+  }
 
   & .container {
     padding: 0.1rem 1.5rem;

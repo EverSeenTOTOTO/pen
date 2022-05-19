@@ -5,12 +5,11 @@ import express from 'express';
 import getPort from 'detect-port';
 import { PenOptions, PenCliOptions } from '@/types';
 import { logger as builtInLogger, emptyLogger } from './logger';
-import { createTheme } from './theme';
 import { bindRender } from './render';
 import { bindSocket } from './socket';
 import { RemarkRehype } from './rehype';
 
-export const normalizeOptions = async (opts?: Partial<PenOptions>): Promise<Required<PenOptions>> => {
+export const normalizeOptions = async (opts?: Partial<PenOptions>) => {
   const silent = opts?.silent ?? false;
   const logger = silent ? emptyLogger : builtInLogger;
   const dist = opts?.dist ? path.join(opts?.dist) : path.join(__dirname);
@@ -18,6 +17,7 @@ export const normalizeOptions = async (opts?: Partial<PenOptions>): Promise<Requ
   return {
     dist,
     silent,
+    theme: opts?.theme,
     ignores: opts?.ignores ?? [],
     logger: silent ? emptyLogger : logger,
     connectTimeout: opts?.connectTimeout ?? 10000,
@@ -25,7 +25,6 @@ export const normalizeOptions = async (opts?: Partial<PenOptions>): Promise<Requ
     transports: opts?.transports ?? ['websocket', 'polling'],
     root: opts?.root ? formatPath(opts?.root) : process.cwd(),
     namespace: opts?.namespace ? formatPath(opts?.namespace) : '/',
-    theme: opts?.theme ?? await createTheme('light', dist),
     plugins: opts?.plugins ?? [],
   };
 };
@@ -53,7 +52,7 @@ export const createServer = async (opts?: PenCliOptions) => {
 
 createServer({
   // namespace: '/doc',
-  port: 8193,
-  root: path.join(process.cwd(), '../doc'),
+  port: 4000,
+  root: path.join(process.cwd(), '../../doc'),
   ignores: [/^\./],
 });

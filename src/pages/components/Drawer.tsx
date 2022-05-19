@@ -45,12 +45,12 @@ const useStyles = makeStyles((theme) => createStyles({
     height: '100%',
     overflow: 'auto',
   },
-  toc: {
-    padding: theme.spacing(2),
-    '& .MuiTypography-body1': {
-      fontSize: '0.875rem',
-    },
-  },
+  // toc: {
+  //   padding: theme.spacing(2),
+  //   '& .MuiTypography-body1': {
+  //     fontSize: '0.875rem',
+  //   },
+  // },
   dir: {
     flexGrow: 1,
     marginTop: theme.spacing(1),

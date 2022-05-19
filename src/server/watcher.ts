@@ -35,8 +35,7 @@ export class Watcher {
 
   protected emit?: EmitFunction<ServerToClientEvents, ServerEvents>
 
-  // for test
-  ready: boolean = true;
+  current?: PenDirectoryData | PenMarkdownData;
 
   constructor(options: WatcherOptions) {
     this.root = options.root;
@@ -66,7 +65,10 @@ export class Watcher {
       this.watcher = chokidar.watch(pathInfo.fullpath, {
         depth: 0,
         ignored: this.ignores,
-        awaitWriteFinish: process.env.NODE_ENV !== 'test',
+        awaitWriteFinish: {
+          pollInterval: 100,
+          stabilityThreshold: 300,
+        },
       });
       this.watcher.on('error', (e) => {
         this.sendError(new Error(`Pen watcher error: ${e.message}`, { cause: e }));
@@ -78,8 +80,23 @@ export class Watcher {
     });
   }
 
+  protected read(relative: string) {
+    return readUnknown({
+      relative,
+      root: this.root,
+      remark: this.remark,
+      ignores: this.ignores,
+    });
+  }
+
+  protected async sendData() {
+    if (this.current) {
+      this.emit?.(ServerEvents.PenData, this.current);
+    }
+  }
+
   protected async sendError(e?: Error) {
-    const error = e?.message ? e : new Error('An unexpect error has occured when watching files');
+    const error = e?.message ? e : new Error('An unexpect error has occured.');
     const message = await this.remark.processError(error);
 
     this.logger.error(error.message);
@@ -91,58 +108,30 @@ export class Watcher {
     return undefined;
   }
 
-  isReady(timeout = 1000) {
-    return new Promise<void>((res, rej) => {
-      setTimeout(() => rej(new Error('watcher timeout')), timeout);
-      const interval = setInterval(() => {
-        if (this.ready) {
-          clearInterval(interval);
-          res();
-        }
-      }, 300);
-    });
-  }
-
   close() {
     this.emit = undefined;
+    this.current = undefined;
     return this.watcher?.close();
   }
 }
 
 class DirectoryWatcher extends Watcher {
-  current?: PenDirectoryData;
-
-  close() {
-    this.current = undefined;
-    return super.close();
-  }
+  declare current?: PenDirectoryData;
 
   async setupWatching(switchTo: string) {
     this.logger.info(`Pen requested: ${formatPath(switchTo)}, current watching: ${this.current?.relativePath ?? 'none'}`);
-
-    if (formatPath(switchTo) === this.current?.relativePath) {
-      // back from child doc to self, clear reading
-      this.current.reading = undefined;
-      this.logger.info(`Pen switched to ${this.current.relativePath}`);
-      this.sendData();
-      return;
-    }
-
     try {
       const pathInfo = resolvePathInfo(this.root, switchTo);
 
       validatePath(pathInfo, this.ignores);
 
       if (pathInfo.type === 'directory') {
-        await this.setupWatcher(pathInfo);
-        await this.onDirChange(pathInfo.relativePath);
-      } else {
-        if (this.current?.reading?.relativePath === pathInfo.relativePath) {
-          this.logger.info(`Pen sent cache, still watching ${this.current.relativePath}`);
-          this.sendData();
-          return;
+        if (this.current?.relativePath !== pathInfo.relativePath) {
+          await this.setupWatcher(pathInfo);
         }
 
+        this.current = await this.read(pathInfo.relativePath) as PenDirectoryData;
+      } else {
         const parent = formatPath(path.relative(this.root, path.dirname(pathInfo.fullpath)));
 
         // jump to nested child doc, change watch dir to its parent
@@ -152,9 +141,9 @@ class DirectoryWatcher extends Watcher {
           validatePath(parentInfo, this.ignores);
 
           await this.setupWatcher(parentInfo);
-          await this.onDirChange(parentInfo.relativePath);
+          this.current = await this.read(parentInfo.relativePath) as PenDirectoryData;
         }
-        await this.onFileChange(pathInfo.relativePath);
+        this.current.reading = await this.read(pathInfo.relativePath) as PenMarkdownData;
       }
 
       this.logger.info(`Pen switched to ${pathInfo.fullpath}`);
@@ -170,6 +159,7 @@ class DirectoryWatcher extends Watcher {
 
     const isSelf = this.current?.relativePath === relative;
     const isChild = formatPath(path.dirname(detail)) === formatPath(path.join(this.root, this.current?.relativePath ?? ''));
+    const isReading = this.current?.reading?.relativePath === relative;
 
     this.logger.info(`Pen detected ${event}: ${relative}`);
 
@@ -178,98 +168,74 @@ class DirectoryWatcher extends Watcher {
     switch (event) {
       case 'addDir':
       case 'unlinkDir':
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        await this.onDirChange(this.current!.relativePath)
-          .then(() => this.sendData())
-          .catch((e) => this.sendError(e));
+        if (this.current) {
+          try {
+            // not this.onDirChange(relative) because we want to refresh current.chidren, not change current
+            const current = await this.read(this.current.relativePath) as PenDirectoryData;
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            this.current = {
+              ...current,
+              reading: this.current.reading, // keep reading
+            };
+
+            this.sendData();
+          } catch (e) {
+            await this.sendError(e as Error);
+          }
+        }
         break;
       case 'add':
       case 'unlink':
         if (this.current && isChild) {
-          // not this.onDirChange(relative) because we want to refresh current.chidren, not change current
-          await this.onDirChange(this.current.relativePath)
-            .then(async () => {
-              if (this.current?.reading?.relativePath === relative) {
-                await this.onFileChange(relative);
-              }
-            })
-            .then(() => this.sendData())
-            .catch((e) => this.sendError(e));
+          try {
+            const current = await this.read(this.current.relativePath) as PenDirectoryData;
+
+            if (isReading) {
+              current.reading = await this.read(relative) as PenMarkdownData;
+            } else {
+              current.reading = this.current.reading;
+            }
+
+            this.current = current;
+            this.sendData();
+          } catch (e) {
+            await this.sendError(e as Error);
+          }
         }
         break;
       case 'change':
-        if (this.current && isChild && this.current?.reading?.relativePath === relative) {
-          await this.onFileChange(relative)
-            .then(() => this.sendData())
-            .catch((e) => this.sendError(e));
+        if (this.current && isChild && isReading) {
+          try {
+            this.current.reading = await this.read(relative) as PenMarkdownData;
+            this.sendData();
+          } catch (e) {
+            this.current.reading = undefined;
+            this.sendError(e as Error);
+          }
         }
         break;
       default:
         break;
     }
-    this.ready = true;
-  }
-
-  protected async onDirChange(relative: string) {
-    this.current = await readUnknown({
-      relative,
-      root: this.root,
-      remark: this.remark,
-      ignores: this.ignores,
-    }) as PenDirectoryData;
-  }
-
-  protected async onFileChange(relative: string) {
-    if (this.current) {
-      this.current.reading = await readUnknown({
-        relative,
-        root: this.root,
-        remark: this.remark,
-        ignores: this.ignores,
-      }) as PenMarkdownData;
-    }
-  }
-
-  protected sendData() {
-    // trigger server push
-    if (this.current) {
-      this.emit?.(ServerEvents.PenData, this.current);
-    }
   }
 }
 
 class MarkdownWatcher extends Watcher {
-  current?: PenMarkdownData;
-
-  close() {
-    this.current = undefined;
-    return super.close();
-  }
+  declare current?: PenMarkdownData;
 
   async setupWatching(switchTo: string) {
     this.logger.info(`Pen requested: ${formatPath(switchTo)}, current watching: ${this.current?.relativePath ?? 'None'}`);
-
-    if (this.current) {
-      if (this.current.relativePath !== formatPath(switchTo)) {
-        this.sendError(new Error(`Pen not permit to watch ${switchTo}`));
-        return;
-      }
-
-      if (this.watcher) {
-        this.logger.info(`Pen sent cache, still watching ${this.current.relativePath}`);
-        this.sendData();
-        return;
-      }
-    }
 
     try {
       const pathInfo = resolvePathInfo(this.root, '');
 
       validatePath(pathInfo, this.ignores);
 
-      await this.setupWatcher(pathInfo);
-      await this.onFileChange();
+      if (this.current?.relativePath !== pathInfo.relativePath) {
+        await this.setupWatcher(pathInfo);
+      }
 
+      this.current = await this.read('') as PenMarkdownData;
       this.logger.info(`Pen switched to ${pathInfo.fullpath}`);
       this.sendData();
     } catch (e) {
@@ -289,32 +255,16 @@ class MarkdownWatcher extends Watcher {
       case 'add':
       case 'unlink':
       case 'change':
-        await this.onFileChange()
-          .then(() => this.sendData())
-          .catch((e) => {
-            this.current = undefined;
-            return this.sendError(e);
-          });
+        try {
+          this.current = await this.read('') as PenMarkdownData;
+          this.sendData();
+        } catch (e) {
+          this.current = undefined;
+          await this.sendError();
+        }
         break;
       default:
         break;
-    }
-    this.ready = true;
-  }
-
-  protected async onFileChange() {
-    this.current = await readUnknown({
-      relative: '',
-      root: this.root,
-      ignores: this.ignores,
-      remark: this.remark,
-    }) as PenMarkdownData;
-  }
-
-  protected sendData() {
-    // trigger server push
-    if (this.current) {
-      this.emit?.(ServerEvents.PenData, this.current);
     }
   }
 }
@@ -323,7 +273,7 @@ export const createWatcher = (options: WatcherOptions) => {
   const { root, logger } = options;
   const info = resolvePathInfo(root, '');
 
-  logger.info(`Pen init to watch ${info.type}: ${info.filename}`);
+  logger.info(`Pen init with ${info.type}: ${info.filename}`);
 
   return info.type === 'directory'
     ? new DirectoryWatcher({ ...options, root: info.fullpath })

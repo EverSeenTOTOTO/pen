@@ -12,7 +12,7 @@ export class DrawerStore {
   }
 
   toggle(value?: boolean) {
-    this.visible = value ?? !this.visible;
+    this.visible = value !== undefined ? value : !this.visible;
   }
 
   // eslint-disable-next-line class-methods-use-this

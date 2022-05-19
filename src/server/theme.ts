@@ -15,7 +15,7 @@ const defaultTheme = {
   },
 };
 
-const themes: { [k in string]: ThemeOptions } = {
+const themes: { [k in 'dark' | 'light']: ThemeOptions } = {
   dark: {
     ...defaultTheme,
     palette: {
@@ -68,7 +68,9 @@ const readThemeCss = async (dist: string, name: keyof typeof themes) => {
 
 const globalId: string = uuid();
 
-export const createTheme = async (name: keyof typeof themes, dist?: string): Promise<PenTheme> => {
+export type ThemeNames = keyof typeof themes;
+
+export const createTheme = async (name: ThemeNames, dist?: string): Promise<PenTheme> => {
   const css = dist ? await readThemeCss(dist, name) : '';
 
   return {

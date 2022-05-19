@@ -3,6 +3,7 @@ import fs from 'fs';
 import express, { Express, Request, Response } from 'express';
 import { RenderOptions } from '../types';
 import { readUnknown } from './reader';
+import { createTheme, ThemeNames } from './theme';
 
 function loadRender(dist: string) {
   // eslint-disable-next-line import/no-dynamic-require, @typescript-eslint/no-var-requires, global-require
@@ -10,37 +11,41 @@ function loadRender(dist: string) {
   return render;
 }
 
+function loadTheme(theme: ThemeNames | undefined, dist: string) {
+  const hour = new Date().getHours();
+  const name = theme ?? (hour >= 18 || hour <= 6 ? 'dark' : 'light'); // 6~18: light
+
+  return createTheme(name, dist);
+}
+
 function readTemplate(dist: string) {
   const index = path.join(dist, 'index.html');
   return fs.readFileSync(index, 'utf8');
 }
 
-// extract for dev and test
-export const bindRender = (app: Express, options: RenderOptions) => {
-  const {
-    root, dist, namespace, theme, logger,
-  } = options;
+export const createSSRMiddleware = (options: RenderOptions) => {
+  const { dist, theme, logger } = options;
   const template = readTemplate(dist);
   const render = loadRender(dist);
 
-  const serveAssets = express.static(dist, { index: false, dotfiles: 'allow' });
-  const serveRoot = express.static(root, { index: false, dotfiles: 'allow' });
-  const ssr = async (req: Request, res: Response, next: () => void) => {
+  return async (req: Request, res: Response, next: () => void) => {
     try {
-      const current = await readUnknown({
-        ...options,
-        relative: decodeURIComponent(req.url),
-      });
+      const [data, themeData] = await Promise.all([
+        readUnknown({
+          ...options,
+          relative: decodeURIComponent(req.url),
+        }),
+        loadTheme(theme, dist),
+      ]);
 
       const { html } = await render({
         req,
         res,
-        theme,
         template,
         prefetch: {
           socket: options,
-          theme,
-          home: { data: current },
+          theme: themeData,
+          home: { data },
         },
       });
 
@@ -49,10 +54,23 @@ export const bindRender = (app: Express, options: RenderOptions) => {
       res.setHeader('Content-Type', 'text/html');
       res.end(html);
     } catch (e) {
-      logger.error((e as Error).message);
       next();
     }
   };
+};
+
+// extract for dev and test
+export const bindRender = (app: Express, options: RenderOptions) => {
+  const { root, dist, namespace } = options;
+
+  const ssr = createSSRMiddleware(options);
+  const serveRoot = express.static(root, { index: false, dotfiles: 'allow' });
+  const serveAssets = express.static(dist, {
+    index: false,
+    immutable: true,
+    maxAge: 31536000,
+    dotfiles: 'allow',
+  });
 
   const router = express.Router();
 

@@ -18,7 +18,6 @@ const serialize = (state: Record<string, unknown>) => `<script>;window.__PREFETC
 export type RenderContext = {
   req: Request;
   res: Response;
-  theme: PenTheme;
   template: string;
   html?: string;
   prefetch: Record<string, unknown>
@@ -26,13 +25,14 @@ export type RenderContext = {
 
 export async function render(context: RenderContext) {
   const ctx = context as Required<RenderContext>;
-  const { req, theme } = ctx;
+  const { req, prefetch } = ctx;
 
   const store = createStore();
   const routes = createRoutes();
 
   // ssr prefetch
-  store.hydrate(ctx.prefetch);
+  store.hydrate(prefetch);
+
   const sheets = new ServerStyleSheets();
 
   const html = ReactDOMServer.renderToString(
@@ -44,6 +44,7 @@ export async function render(context: RenderContext) {
   );
 
   const state = store.dehydra();
+  const { theme } = prefetch as { theme: PenTheme };
   const style = `<style id="${theme.id}">${theme.css}</style><style id="MUI${theme.id}">${sheets.toString()}</style>`;
 
   ctx.html = ctx.template
