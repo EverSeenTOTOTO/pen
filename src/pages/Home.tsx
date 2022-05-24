@@ -20,6 +20,7 @@ const useStyles = makeStyles((theme) => ({
     marginLeft: theme.spacing(8),
     [theme.breakpoints.down('md')]: {
       padding: 0,
+      marginLeft: theme.spacing(4),
     },
   },
   contentShift: {
@@ -28,8 +29,8 @@ const useStyles = makeStyles((theme) => ({
       duration: theme.transitions.duration.enteringScreen,
     }),
     marginLeft: theme.spacing(30),
-    [theme.breakpoints.down('sm')]: {
-      marginLeft: theme.spacing(8),
+    [theme.breakpoints.down('md')]: {
+      marginLeft: theme.spacing(4),
     },
   },
 }));

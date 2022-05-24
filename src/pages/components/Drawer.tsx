@@ -38,6 +38,9 @@ const useStyles = makeStyles((theme) => createStyles({
     }),
     overflowX: 'hidden',
     width: theme.spacing(8),
+    [theme.breakpoints.down('md')]: {
+      width: theme.spacing(4),
+    },
   },
   drawerContainer: {
     display: 'flex',
