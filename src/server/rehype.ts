@@ -2,24 +2,18 @@ import rehypeRaw from 'rehype-raw';
 import remarkGFM from 'remark-gfm';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
+import rehypeParse from 'rehype-parse';
 import remarkParse from 'remark-parse';
 import remarkRehype from 'remark-rehype';
 import rehypeStringify from 'rehype-stringify';
 import remarkDirective from 'remark-directive';
 import { unified, Plugin, Processor } from 'unified';
-import { RemarkOptions, RemarkPlugin } from '../types';
+import { DocToc, RemarkOptions, RemarkPlugin } from '@/types';
 import rehypeHighlight from './plugins/rehype-highlight';
 import rehypeCopy from './plugins/rehype-copy';
+import { rehypeToc, rehypeTocId } from './plugins/rehype-toc';
 import { Logger } from './logger';
 import { makeContainerPlugin } from './plugins/remark-container';
-
-const formatError = (e: Error) => `
-\`\`\`txt
-${e.message}
-
-${e.stack}
-\`\`\`
-`;
 
 const defaultPlugins = [
   ['remark-parse', remarkParse],
@@ -30,6 +24,7 @@ const defaultPlugins = [
   ['remark-rehype', remarkRehype, { allowDangerousHtml: true }],
   /* -------- Seperator for remark and rehype -------- */
   ['rehype-raw', rehypeRaw],
+  ['rehype-toc-id', rehypeTocId],
   ['rehype-copy', rehypeCopy],
   ['rehype-highlight', rehypeHighlight],
   ['rehype-katex', rehypeKatex, {
@@ -43,9 +38,12 @@ export class RemarkRehype {
 
   logger: Logger;
 
+  tocExtractor: Processor;
+
   constructor(options: RemarkOptions) {
     this.render = unified();
     this.logger = options.logger;
+    this.tocExtractor = unified().use(rehypeParse).use(rehypeToc);
 
     this.usePlugins(options.plugins);
   }
@@ -66,12 +64,15 @@ export class RemarkRehype {
     }
   }
 
-  async process(markdown: string): Promise<string> {
+  async process(markdown: string): Promise<{ content: string, toc?: DocToc[] }> {
     try {
-      const f = await this.render.process(markdown);
-      return f.toString();
+      const content = (await this.render.process(markdown)).toString();
+      const toc = (await this.tocExtractor.process(content)).result as DocToc[];
+
+      return { content, toc };
     } catch (reason) {
-      return String(reason);
+      // TODO: cannot use processError because that may cause infinite loop
+      return { content: `Remark/Rehype Error: ${String(reason)}` };
     }
   }
 
@@ -81,10 +82,20 @@ export class RemarkRehype {
       : new Error('An unexpect error has occured when processing markdown', { cause: e instanceof Error ? e : undefined });
 
     try {
-      const f = await this.process(formatError(error));
-      return f.toString();
+      const message = (await this.process(RemarkRehype.formatError(error))).toString();
+      return { message };
     } catch (err) {
-      return error.message;
+      return { message: error.message };
     }
+  }
+
+  static formatError(e: Error) {
+    return `
+\`\`\`txt
+${e.message}
+
+${e.stack}
+\`\`\`
+`;
   }
 }

@@ -3,19 +3,12 @@ import fs from 'fs';
 import express, { Express, Request, Response } from 'express';
 import { RenderOptions } from '../types';
 import { readUnknown } from './reader';
-import { createTheme, ThemeNames } from './theme';
+import { createTheme } from './theme';
 
 function loadRender(dist: string) {
   // eslint-disable-next-line import/no-dynamic-require, @typescript-eslint/no-var-requires, global-require
   const { render } = require(path.join(dist, 'index.server.js'));
   return render;
-}
-
-function loadTheme(theme: ThemeNames | undefined, dist: string) {
-  const hour = new Date().getHours();
-  const name = theme ?? (hour >= 18 || hour <= 6 ? 'dark' : 'light'); // 6~18: light
-
-  return createTheme(name, dist);
 }
 
 function readTemplate(dist: string) {
@@ -35,7 +28,7 @@ export const createSSRMiddleware = (options: RenderOptions) => {
           ...options,
           relative: decodeURIComponent(req.url),
         }),
-        loadTheme(theme, dist),
+        createTheme(theme, dist),
       ]);
 
       const { html } = await render({

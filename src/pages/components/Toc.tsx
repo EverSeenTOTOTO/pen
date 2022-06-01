@@ -1,8 +1,8 @@
+import { DocToc } from '@/types';
 import {
   alpha, withStyles, Theme, createStyles,
 } from '@material-ui/core/styles';
 import TreeItem, { TreeItemProps } from '@material-ui/lab/TreeItem';
-// import { DocToc } from '@/types';
 
 const StyledTreeItem = withStyles((theme: Theme) => createStyles({
   group: {
@@ -12,13 +12,24 @@ const StyledTreeItem = withStyles((theme: Theme) => createStyles({
   },
 }))((props: TreeItemProps) => <TreeItem {...props} />);
 
-const Toc = ({ toc }: { toc: any }) => (toc.children.length > 0
-  ? <StyledTreeItem nodeId={toc.name} label={toc.name}>
+const Toc = ({ toc }: { toc: DocToc }) => {
+  const handleClick = (e: React.MouseEvent) => {
+    const heading = document.getElementById(toc.id);
+
+    console.log(toc.id);
+
+    heading?.scrollIntoView();
+    e.preventDefault();
+  };
+
+  return (toc.children.length > 0
+    ? <StyledTreeItem nodeId={toc.id} label={toc.text} onLabelClick={handleClick}>
     {
-      toc.children.map((child) => <Toc key={child.name} toc={child} />)
+      toc.children.map((child: DocToc) => <Toc key={child.id} toc={child} />)
     }
   </StyledTreeItem>
-  : <StyledTreeItem nodeId={toc.name} label={toc.name} />
-);
+    : <StyledTreeItem nodeId={toc.id} label={toc.text} onLabelClick={handleClick}/>
+  );
+};
 
 export default Toc;

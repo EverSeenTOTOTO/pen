@@ -9,15 +9,19 @@ import { bindRender } from './render';
 import { bindSocket } from './socket';
 import { RemarkRehype } from './rehype';
 
-export const normalizeOptions = async (opts?: Partial<PenOptions>) => {
+export const normalizeOptions = (opts?: Partial<PenOptions>) => {
   const silent = opts?.silent ?? false;
   const logger = silent ? emptyLogger : builtInLogger;
   const dist = opts?.dist ? path.join(opts?.dist) : path.join(__dirname);
 
+  const hour = new Date().getHours();
+  const name = hour >= 18 || hour <= 6 ? 'dark' : 'light';
+  const theme = typeof opts?.theme === 'function' ? opts?.theme() : opts?.theme ?? name;
+
   return {
     dist,
+    theme,
     silent,
-    theme: opts?.theme,
     ignores: opts?.ignores ?? [],
     logger: silent ? emptyLogger : logger,
     connectTimeout: opts?.connectTimeout ?? 10000,
@@ -33,7 +37,7 @@ export const normalizeOptions = async (opts?: Partial<PenOptions>) => {
 export const createServer = async (opts?: PenCliOptions) => {
   const app = express();
   const server = http.createServer(app);
-  const options = await normalizeOptions(opts);
+  const options = normalizeOptions(opts);
   const remark = new RemarkRehype(options);
 
   bindRender(app, { ...options, remark });

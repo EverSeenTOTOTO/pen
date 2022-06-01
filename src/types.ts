@@ -53,16 +53,20 @@ export type PathInfo = {
   fullpath: string,
 };
 
-// export type DocToc = {
-//   name: string,
-//   children: DocToc[]
-// };
+export type DocToc = {
+  text: string,
+  id: string,
+  heading: number;
+  parent?: DocToc,
+  children: DocToc[]
+};
 
 export type PenMarkdownData = {
   type: 'markdown',
   filename: string,
-  relativePath: string
+  relativePath: string,
   content: string,
+  toc?: DocToc[],
 };
 
 export type PenDirectoryData = {
@@ -109,17 +113,18 @@ export type SocketOptions = PenSocketInfo & WatcherOptions & {
 export type RenderOptions = WatcherOptions & {
   dist: string;
   namespace: string;
-  theme?: ThemeNames;
+  theme: ThemeNames;
 };
 
 export type PenOptions = Omit<WatcherOptions
 & ReaderOptions
 & SocketOptions
 & RemarkOptions
-& RenderOptions
+& RenderOptions, 'theme' | 'relative' | 'remark'>
 & {
   silent: boolean;
-}, 'relative' | 'remark'>;
+  theme: ThemeNames | (() => ThemeNames)
+};
 
 export type PenCliOptions = Partial<PenOptions & {
   port: number

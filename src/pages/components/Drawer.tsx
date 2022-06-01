@@ -6,9 +6,9 @@ import Divider from '@material-ui/core/Divider';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
-// import TreeView from '@material-ui/lab/TreeView';
+import TreeView from '@material-ui/lab/TreeView';
 import IconButton from '@material-ui/core/IconButton';
-// import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import ChevronRightIcon from '@material-ui/icons/ChevronRight';
 import ExpandLessTwoToneIcon from '@material-ui/icons/ExpandLessTwoTone';
@@ -17,27 +17,28 @@ import { Folder, Description } from '@material-ui/icons';
 import { NoSsr } from '@material-ui/core';
 import { useNav } from '@/store/hooks';
 import clsx from 'clsx';
+import Toc from './Toc';
 
 const useStyles = makeStyles((theme) => createStyles({
   drawer: {
-    width: theme.spacing(30),
+    width: theme.spacing(40),
     flexShrink: 0,
     whiteSpace: 'nowrap',
   },
   drawerOpen: {
-    width: theme.spacing(30),
+    width: theme.spacing(40),
     transition: theme.transitions.create('width', {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.enteringScreen,
     }),
   },
   drawerClose: {
+    width: theme.spacing(8),
+    overflow: 'hidden',
     transition: theme.transitions.create('width', {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.leavingScreen,
     }),
-    overflowX: 'hidden',
-    width: theme.spacing(8),
     [theme.breakpoints.down('md')]: {
       width: theme.spacing(4),
     },
@@ -46,17 +47,25 @@ const useStyles = makeStyles((theme) => createStyles({
     display: 'flex',
     flexDirection: 'column',
     height: '100%',
-    overflow: 'auto',
   },
-  // toc: {
-  //   padding: theme.spacing(2),
-  //   '& .MuiTypography-body1': {
-  //     fontSize: '0.875rem',
-  //   },
-  // },
   dir: {
     flexGrow: 1,
-    marginTop: theme.spacing(1),
+  },
+  dirHidden: {
+    visibility: 'hidden',
+  },
+  toc: {
+    flexGrow: 1,
+    maxHeight: theme.spacing(70),
+    overflowY: 'scroll',
+    overflowX: 'hidden',
+    padding: theme.spacing(2),
+    '& .MuiTypography-body1': {
+      fontSize: '0.875rem',
+    },
+  },
+  tocHidden: {
+    visibility: 'hidden',
   },
   icon: {
     minWidth: theme.spacing(4),
@@ -105,17 +114,8 @@ const Drawer = observer(() => {
         }}
       >
         <div className={classes.drawerContainer}>
-          {/* <TreeView
-            className={classes.toc}
-            defaultExpanded={drawer.expandedToc}
-            defaultCollapseIcon={<NoSsr><ExpandMoreIcon /></NoSsr>}
-            defaultExpandIcon={<NoSsr><ChevronRightIcon /></NoSsr>}
-          >
-            <Toc toc={drawer.toc} />
-          </TreeView> */}
-          <Divider />
-          <List dense className={classes.dir}>
-            {drawer.visible && drawer.childDocs.map((doc) => (
+          <List dense className={clsx(classes.dir, { [classes.dirHidden]: !drawer.visible })}>
+            {drawer.childDocs.map((doc) => (
               <ListItem button key={doc.filename} onClick={() => nav(doc.relativePath)}>
                 <NoSsr>
                   <ListItemIcon className={classes.icon}>{
@@ -128,6 +128,17 @@ const Drawer = observer(() => {
               </ListItem>
             ))}
           </List>
+          <Divider />
+          {drawer.toc.length > 0 && <TreeView
+            className={clsx(classes.toc, {
+              [classes.tocHidden]: !drawer.visible,
+            })}
+            expanded={drawer.expandedToc}
+            defaultCollapseIcon={<NoSsr><ExpandMoreIcon /></NoSsr>}
+            defaultExpandIcon={<NoSsr><ChevronRightIcon /></NoSsr>}
+          >
+            <Toc toc={drawer.toc[0]} />
+          </TreeView>}
           <Divider />
           <div className={clsx(classes.btn, { [classes.btnClose]: !drawer.visible })}>
             <IconButton onClick={() => drawer.toggle()}>

@@ -97,7 +97,7 @@ export class Watcher {
 
   protected async sendError(e?: Error) {
     const error = e?.message ? e : new Error('An unexpect error has occured.');
-    const message = await this.remark.processError(error);
+    const { message } = await this.remark.processError(error);
 
     this.logger.error(error.message);
     this.emit?.(ServerEvents.PenError, {

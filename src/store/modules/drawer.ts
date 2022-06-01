@@ -1,8 +1,9 @@
+import { DocToc } from '@/types';
 import { makeAutoObservable } from 'mobx';
 import type { AppStore } from '..';
 
 export class DrawerStore {
-  visible = false;
+  visible = true;
 
   root: AppStore;
 
@@ -15,25 +16,35 @@ export class DrawerStore {
     this.visible = value !== undefined ? value : !this.visible;
   }
 
-  // eslint-disable-next-line class-methods-use-this
-  // get toc() {
-  //   return { name: 'TODO', children: [] };
-  // }
+  get toc() {
+    const data = this.root.home?.data;
 
-  // get expandedToc() {
-  //   const tocs: string[] = [];
+    // eslint-disable-next-line no-nested-ternary
+    const toc = data?.type === 'directory'
+      ? data.reading?.toc
+      : data?.type === 'markdown'
+        ? data?.toc
+        : undefined;
 
-  //   const push = (toc: DocToc) => {
-  //     if (toc.children.length > 0) {
-  //       tocs.push(toc.name);
-  //       toc.children.forEach(push);
-  //     }
-  //   };
+    return toc ?? [];
+  }
 
-  //   push(this.toc);
+  get expandedToc() {
+    if (this.toc.length === 0) return [];
 
-  //   return tocs;
-  // }
+    const tocs: string[] = [];
+
+    const push = (toc: DocToc) => {
+      if (toc.children.length > 0) {
+        tocs.push(toc.id);
+        toc.children.forEach(push);
+      }
+    };
+
+    push(this.toc[0]);
+
+    return tocs;
+  }
 
   get childDocs() {
     const data = this.root.home?.data;

@@ -41,10 +41,12 @@ function sortChildren(a: PathInfo, b: PathInfo) {
 
 async function readMarkdown(render: RemarkRehype, pathInfo: PathInfo): Promise<PenMarkdownData> {
   const content = await fs.promises.readFile(pathInfo.fullpath, 'utf8');
+  const data = await render.process(content);
 
   return {
     type: 'markdown',
-    content: await render.process(content),
+    content: data.content,
+    toc: data.toc,
     filename: pathInfo.filename,
     relativePath: pathInfo.relativePath,
   };
