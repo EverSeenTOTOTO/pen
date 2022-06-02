@@ -120,12 +120,13 @@ export type PenOptions = Omit<WatcherOptions
 & ReaderOptions
 & SocketOptions
 & RemarkOptions
-& RenderOptions, 'theme' | 'relative' | 'remark'>
+& RenderOptions, 'ignores' | 'theme' | 'relative' | 'remark'>
 & {
   silent: boolean;
+  ignores: string[];
   theme: ThemeNames | (() => ThemeNames)
 };
 
 export type PenCliOptions = Partial<PenOptions & {
-  port: number
+  port: string
 }>;

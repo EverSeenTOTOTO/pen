@@ -1,10 +1,65 @@
 # @everseen/pen
 
-TODO:
+A cli tool which provides the ability to preview when editing markdown files, based on [socket.io](https://socket.io/) and [chokidar](https://github.com/paulmillr/chokidar).
+
+<img src="./Pen.gif" />
+
+## Usage 
+
+### Use with CLI
+
+```bash 
+# install globally 
+npm i -g @everseen/pen 
+
+# default usage 
+pen 
+  
+# use with cli options 
+pen -o -p 5000 -r ../docs
+```
+
+#### CLI Options
+
++ `--help|-h`
+    
+    Print help message.
+
++ `--root|-r`
+
+    Set watching directory or markdown file, default `.`.
+
++ `--namespace|-n`
+
+    Set socket.io namespace, default `/`.
+
++ `--port|-p`
+
+    Set server port, default `3000` or another auto-detected avaliable port.
+
++ `--silent|-s`
+
+    Ignore logger messages, default `false`.
+
++ `--open|-o`
+
+    Open browser automatically, default `false`.
+
++ `--theme|-T`
+
+    Select theme, `dark` or `light`.
+
++ `--socketPath|-S`
+
+    Set socket.io path, default `/pensocket.io`.
+
+### Use with Node.js
+
+Check [server.ts](./src/server/index.ts) as an example.
+
+## TODO
 
 1. add server timeout
 2. test memory leak
-3. beautify logger
 4. keyboard events
-5. test reconnection
-6. log distinct client
+6. log for distinct client

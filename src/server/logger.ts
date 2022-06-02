@@ -1,10 +1,7 @@
-export type Logger = {
-  log: Console['log'],
-  info: Console['info'],
-  warn: Console['warn'],
-  error: Console['error'],
+import betterLogger from 'better-logging';
+
+export type Logger = Pick<Console, 'log' | 'info' | 'warn' | 'error' | 'clear'> & {
   done: Console['log'],
-  clear: Console['clear']
 };
 
 const PASS = () => {};
@@ -17,11 +14,6 @@ export const emptyLogger: Logger = {
   clear: PASS,
 };
 
-export const logger: Logger = {
-  log: console.log,
-  info: console.info,
-  warn: console.warn,
-  error: console.error,
-  done: console.log,
-  clear: console.clear,
-};
+betterLogger(console);
+
+export const logger = { ...console, done: console.info.bind(console) };

@@ -3,7 +3,7 @@ declare module 'detect-port' {
   const anything = any;
   export default anything;
 }
-declare module 'remark-prism' {
+declare module 'better-logging' {
   const anything = any;
   export default anything;
 }

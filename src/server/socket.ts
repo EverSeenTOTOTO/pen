@@ -43,7 +43,10 @@ export const bindSocket = (server: http.Server | https.Server, options: SocketOp
     connectTimeout,
     path: socketPath,
   });
+
+  logger.info(`Pen socket path: ${socketPath}`);
   logger.info(`Pen socket namespace: ${namespace}`);
+
   const nsp = io.of(namespace);
 
   nsp.on('error', (e) => {

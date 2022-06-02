@@ -119,7 +119,7 @@ class DirectoryWatcher extends Watcher {
   declare current?: PenDirectoryData;
 
   async setupWatching(switchTo: string) {
-    this.logger.info(`Pen requested: ${formatPath(switchTo)}, current watching: ${this.current?.relativePath ?? 'none'}`);
+    this.logger.log(`Pen requested: ${formatPath(switchTo)}, current watching: ${this.current?.relativePath ?? 'none'}`);
     try {
       const pathInfo = resolvePathInfo(this.root, switchTo);
 
@@ -146,7 +146,7 @@ class DirectoryWatcher extends Watcher {
         this.current.reading = await this.read(pathInfo.relativePath) as PenMarkdownData;
       }
 
-      this.logger.info(`Pen switched to ${pathInfo.fullpath}`);
+      this.logger.log(`Pen switched to ${pathInfo.fullpath}`);
       this.sendData();
     } catch (e) {
       const err = e as Error;
@@ -161,7 +161,7 @@ class DirectoryWatcher extends Watcher {
     const isChild = formatPath(path.dirname(detail)) === formatPath(path.join(this.root, this.current?.relativePath ?? ''));
     const isReading = this.current?.reading?.relativePath === relative;
 
-    this.logger.info(`Pen detected ${event}: ${relative}`);
+    this.logger.log(`Pen detected ${event}: ${relative}`);
 
     if (!(isSelf || isChild)) return;
 
@@ -224,7 +224,7 @@ class MarkdownWatcher extends Watcher {
   declare current?: PenMarkdownData;
 
   async setupWatching(switchTo: string) {
-    this.logger.info(`Pen requested: ${formatPath(switchTo)}, current watching: ${this.current?.relativePath ?? 'None'}`);
+    this.logger.log(`Pen requested: ${formatPath(switchTo)}, current watching: ${this.current?.relativePath ?? 'None'}`);
 
     try {
       const pathInfo = resolvePathInfo(this.root, '');
@@ -236,7 +236,7 @@ class MarkdownWatcher extends Watcher {
       }
 
       this.current = await this.read('') as PenMarkdownData;
-      this.logger.info(`Pen switched to ${pathInfo.fullpath}`);
+      this.logger.log(`Pen switched to ${pathInfo.fullpath}`);
       this.sendData();
     } catch (e) {
       await this.sendError(e as Error);
@@ -247,7 +247,7 @@ class MarkdownWatcher extends Watcher {
     const relative = formatPath(path.relative(this.root, detail));
     const isSelf = this.current?.relativePath === relative;
 
-    this.logger.info(`Pen detected ${event}: ${this.current?.filename}`);
+    this.logger.log(`Pen detected ${event}: ${this.current?.filename}`);
 
     if (!isSelf) return;
 
@@ -273,7 +273,7 @@ export const createWatcher = (options: WatcherOptions) => {
   const { root, logger } = options;
   const info = resolvePathInfo(root, '');
 
-  logger.info(`Pen init with ${info.type}: ${info.filename}`);
+  logger.info(`Pen init with root: ${info.relativePath}`);
 
   return info.type === 'directory'
     ? new DirectoryWatcher({ ...options, root: info.fullpath })
