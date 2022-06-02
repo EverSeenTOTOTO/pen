@@ -273,7 +273,7 @@ export const createWatcher = (options: WatcherOptions) => {
   const { root, logger } = options;
   const info = resolvePathInfo(root, '');
 
-  logger.info(`Pen init with root: ${info.relativePath}`);
+  logger.info(`Pen init with root: ${info.fullpath}`);
 
   return info.type === 'directory'
     ? new DirectoryWatcher({ ...options, root: info.fullpath })

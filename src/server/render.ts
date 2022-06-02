@@ -47,6 +47,9 @@ export const createSSRMiddleware = (options: RenderOptions) => {
       res.setHeader('Content-Type', 'text/html');
       res.end(html);
     } catch (e) {
+      // const error = e as Error;
+      // logger.error(error.stack ?? error.message);
+
       next();
     }
   };

@@ -1,5 +1,5 @@
 import path from 'path';
-import { formatPath } from '@/utils';
+import { formatPath, isMarkdown } from '@/utils';
 import http from 'http';
 import express from 'express';
 import getPort from 'detect-port';
@@ -19,7 +19,14 @@ export const normalizeOptions = (opts?: Partial<PenOptions>) => {
   const name = hour >= 18 || hour <= 6 ? 'dark' : 'light';
   const theme = typeof opts?.theme === 'function' ? opts?.theme() : opts?.theme ?? name;
 
+  const root = opts?.root ? formatPath(path.join(process.cwd(), opts?.root)) : formatPath(process.cwd());
+
+  if (isMarkdown(root)) {
+    throw new Error('The "root" options must be a directory');
+  }
+
   return {
+    root,
     dist,
     theme,
     silent,
@@ -28,7 +35,6 @@ export const normalizeOptions = (opts?: Partial<PenOptions>) => {
     connectTimeout: opts?.connectTimeout ?? 10000,
     socketPath: opts?.socketPath ?? '/pensocket.io',
     transports: opts?.transports ?? ['websocket', 'polling'],
-    root: opts?.root ? formatPath(path.join(process.cwd(), opts?.root)) : formatPath(process.cwd()),
     namespace: opts?.namespace ? formatPath(opts?.namespace) : '/',
     plugins: opts?.plugins ?? [],
   };

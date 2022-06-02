@@ -27,7 +27,7 @@ pen -o -p 5000 -r ../docs
 
 + `--root|-r`
 
-    Set watching directory or markdown file, default `.`.
+    Set watching directory, default `.`.
 
 + `--namespace|-n`
 

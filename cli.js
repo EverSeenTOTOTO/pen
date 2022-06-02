@@ -8,7 +8,7 @@ const { version } = require('./package.json');
 
 program
   .version(version)
-  .option('-r, --root <root>', 'root directory or markdown to watch, default "."')
+  .option('-r, --root <root>', 'root directory, default "."')
   .option('-n, --namespace <namespace>', 'socket.io namespace, default "/"')
   .option('-p, --port <port>', 'port to listen, default "3000"')
   .option('-i, --ignores <ignores...>', 'ignore files, default []')
