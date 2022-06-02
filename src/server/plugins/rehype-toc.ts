@@ -59,13 +59,6 @@ export function rehypeTocId() {
   };
 }
 
-const top: DocToc = {
-  id: uuid(),
-  text: 'never mind',
-  children: [],
-  heading: -1,
-};
-
 function removeParent(toc: DocToc) {
   // eslint-disable-next-line no-param-reassign
   delete toc.parent;
@@ -73,6 +66,13 @@ function removeParent(toc: DocToc) {
 }
 
 function createToc(tree: any) {
+  const top: DocToc = {
+    id: uuid(),
+    text: 'never mind',
+    children: [],
+    heading: -1,
+  };
+
   let last = top;
 
   function addHeadingToc(node: any) {
@@ -104,10 +104,7 @@ function createToc(tree: any) {
   addHeadingToc(tree);
   removeParent(top);
 
-  const { children } = top;
-  top.children = []; // reset
-
-  return children;
+  return top.children;
 }
 
 export function rehypeToc() {

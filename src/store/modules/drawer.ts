@@ -1,5 +1,5 @@
 import { DocToc } from '@/types';
-import { makeAutoObservable } from 'mobx';
+import { makeAutoObservable, reaction } from 'mobx';
 import type { AppStore } from '..';
 
 export class DrawerStore {
@@ -7,9 +7,17 @@ export class DrawerStore {
 
   root: AppStore;
 
+  expandedToc: string[] = [];
+
   constructor(root: AppStore) {
     makeAutoObservable(this);
     this.root = root;
+
+    reaction(() => this.root.home.data, () => {
+      if (this.root.home.data?.type === 'directory') {
+        this.expandToc(this.root.home.data?.reading?.toc ?? []);
+      }
+    });
   }
 
   toggle(value?: boolean) {
@@ -22,28 +30,32 @@ export class DrawerStore {
     // eslint-disable-next-line no-nested-ternary
     const toc = data?.type === 'directory'
       ? data.reading?.toc
-      : data?.type === 'markdown'
-        ? data?.toc
-        : undefined;
+      : undefined;
 
     return toc ?? [];
   }
 
-  get expandedToc() {
-    if (this.toc.length === 0) return [];
+  expandToc(tocs: DocToc[]) {
+    if (tocs.length === 0) {
+      this.expandedToc = [];
+    } else {
+      const result: string[] = [];
 
-    const tocs: string[] = [];
+      const push = (toc: DocToc) => {
+        if (toc.children.length > 0) {
+          result.push(toc.id);
+          toc.children.forEach(push);
+        }
+      };
 
-    const push = (toc: DocToc) => {
-      if (toc.children.length > 0) {
-        tocs.push(toc.id);
-        toc.children.forEach(push);
-      }
-    };
+      push(tocs[0]);
 
-    push(this.toc[0]);
+      this.expandedToc = result;
+    }
+  }
 
-    return tocs;
+  setExpandedToc(value: string[]) {
+    this.expandedToc = value;
   }
 
   get childDocs() {

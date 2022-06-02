@@ -133,6 +133,7 @@ const Drawer = observer(() => {
               [classes.hidden]: !drawer.visible,
             })}
             expanded={drawer.expandedToc}
+            onNodeToggle={(_, data: string[]) => drawer.setExpandedToc(data)}
             defaultCollapseIcon={<NoSsr><ExpandMoreIcon /></NoSsr>}
             defaultExpandIcon={<NoSsr><ChevronRightIcon /></NoSsr>}
           >

@@ -2,16 +2,16 @@
 import { makeAutoObservable } from 'mobx';
 import { Color } from '@material-ui/lab/Alert';
 import {
-  ClientEvents, PenDirectoryData, PenErrorData, PenMarkdownData,
+  ClientEvents, PenDirectoryData, PenErrorData,
 } from '@/types';
 import type { AppStore, PrefetchStore } from '..';
 
 export type HomeState = {
-  data?: PenDirectoryData | PenMarkdownData | PenErrorData;
+  data?: PenDirectoryData | PenErrorData;
 };
 
 export class HomeStore implements PrefetchStore<HomeState> {
-  data?: PenDirectoryData | PenMarkdownData | PenErrorData;
+  data?: PenDirectoryData | PenErrorData;
 
   loading = false;
 
@@ -29,13 +29,11 @@ export class HomeStore implements PrefetchStore<HomeState> {
   }
 
   static getReadingPath(data: HomeState['data']) {
-    return data?.type === 'markdown'
-      ? data?.relativePath
-      : data?.type === 'directory'
-        ? data?.reading
-          ? data.reading?.relativePath
-          : data.relativePath
-        : undefined;
+    return data?.type === 'directory'
+      ? data?.reading
+        ? data.reading?.relativePath
+        : data.relativePath
+      : undefined;
   }
 
   get reading() {
@@ -43,15 +41,13 @@ export class HomeStore implements PrefetchStore<HomeState> {
   }
 
   get html() {
-    return this.data?.type === 'markdown'
-      ? this.data.content
-      : this.data?.type === 'error'
-        ? this.data?.message
-        : this.data?.type === 'directory'
-          ? this.data?.reading
-            ? this.data?.reading?.content
-            : ''
-          : '';
+    return this.data?.type === 'error'
+      ? this.data?.message
+      : this.data?.type === 'directory'
+        ? this.data?.reading
+          ? this.data?.reading?.content
+          : ''
+        : '';
   }
 
   get breadcrumb() {
