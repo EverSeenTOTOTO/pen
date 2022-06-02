@@ -21,12 +21,12 @@ import Toc from './Toc';
 
 const useStyles = makeStyles((theme) => createStyles({
   drawer: {
-    width: theme.spacing(40),
+    width: theme.spacing(36),
     flexShrink: 0,
     whiteSpace: 'nowrap',
   },
   drawerOpen: {
-    width: theme.spacing(40),
+    width: theme.spacing(36),
     transition: theme.transitions.create('width', {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.enteringScreen,
@@ -34,7 +34,6 @@ const useStyles = makeStyles((theme) => createStyles({
   },
   drawerClose: {
     width: theme.spacing(8),
-    overflow: 'hidden',
     transition: theme.transitions.create('width', {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.leavingScreen,
@@ -47,24 +46,21 @@ const useStyles = makeStyles((theme) => createStyles({
     display: 'flex',
     flexDirection: 'column',
     height: '100%',
+    overflowX: 'hidden',
   },
   dir: {
     flexGrow: 1,
   },
-  dirHidden: {
-    visibility: 'hidden',
-  },
   toc: {
     flexGrow: 1,
-    maxHeight: theme.spacing(70),
-    overflowY: 'scroll',
-    overflowX: 'hidden',
     padding: theme.spacing(2),
     '& .MuiTypography-body1': {
       fontSize: '0.875rem',
     },
   },
-  tocHidden: {
+  hidden: {
+    height: 0,
+    flexGrow: 0,
     visibility: 'hidden',
   },
   icon: {
@@ -79,6 +75,9 @@ const useStyles = makeStyles((theme) => createStyles({
       whiteSpace: 'nowrap',
       textOverflow: 'ellipsis',
     },
+  },
+  box: {
+    flexGrow: 1,
   },
   btn: {
     display: 'flex',
@@ -114,7 +113,7 @@ const Drawer = observer(() => {
         }}
       >
         <div className={classes.drawerContainer}>
-          <List dense className={clsx(classes.dir, { [classes.dirHidden]: !drawer.visible })}>
+          <List dense className={clsx(classes.dir, { [classes.hidden]: !drawer.visible })}>
             {drawer.childDocs.map((doc) => (
               <ListItem button key={doc.filename} onClick={() => nav(doc.relativePath)}>
                 <NoSsr>
@@ -131,7 +130,7 @@ const Drawer = observer(() => {
           <Divider />
           {drawer.toc.length > 0 && <TreeView
             className={clsx(classes.toc, {
-              [classes.tocHidden]: !drawer.visible,
+              [classes.hidden]: !drawer.visible,
             })}
             expanded={drawer.expandedToc}
             defaultCollapseIcon={<NoSsr><ExpandMoreIcon /></NoSsr>}
@@ -139,6 +138,7 @@ const Drawer = observer(() => {
           >
             <Toc toc={drawer.toc[0]} />
           </TreeView>}
+          <div className={clsx({ [classes.box]: !drawer.visible })}/>
           <Divider />
           <div className={clsx(classes.btn, { [classes.btnClose]: !drawer.visible })}>
             <IconButton onClick={() => drawer.toggle()}>

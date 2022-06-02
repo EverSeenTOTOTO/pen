@@ -42,7 +42,7 @@ build: clean build\:server build\:client
 
 .PHONY: start
 start: build
-	DEBUG=socket.io:* node ${DIST}/server.js
+	DEBUG=socket.io:* node cli.js -o -r ../../doc
 
 .PHONY: test
 test:

@@ -1,6 +1,6 @@
 # @everseen/pen
 
-A cli tool which provides the ability to preview when editing markdown files, based on [socket.io](https://socket.io/) and [chokidar](https://github.com/paulmillr/chokidar).
+A cli tool provides the ability to preview markdown files when editing, based on [socket.io](https://socket.io/) and [chokidar](https://github.com/paulmillr/chokidar).
 
 <img src="./Pen.gif" />
 

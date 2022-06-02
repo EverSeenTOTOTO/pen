@@ -28,7 +28,7 @@ const useStyles = makeStyles((theme) => ({
       easing: theme.transitions.easing.easeOut,
       duration: theme.transitions.duration.enteringScreen,
     }),
-    marginLeft: theme.spacing(40),
+    marginLeft: theme.spacing(36),
     [theme.breakpoints.down('md')]: {
       marginLeft: theme.spacing(4),
     },
