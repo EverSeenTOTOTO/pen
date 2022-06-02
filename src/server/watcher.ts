@@ -35,7 +35,7 @@ export class Watcher {
 
   protected emit?: EmitFunction<ServerToClientEvents, ServerEvents>
 
-  current?: PenDirectoryData | PenMarkdownData;
+  current?: PenDirectoryData;
 
   constructor(options: WatcherOptions) {
     this.root = options.root;
@@ -48,78 +48,8 @@ export class Watcher {
     this.emit = emit;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async setupWatching(_switchTo: string) {
-    throw new Error('setupWatching not implemented');
-  }
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected async onChange(_event: string, _detail: string) {
-    throw new Error('onChange not implemented');
-  }
-
-  protected async setupWatcher(pathInfo: PathInfo) {
-    await this.watcher?.close();
-
-    return new Promise<void>((resolve) => {
-      this.watcher = chokidar.watch(pathInfo.fullpath, {
-        depth: 0,
-        ignored: this.ignores,
-        awaitWriteFinish: {
-          pollInterval: 100,
-          stabilityThreshold: 300,
-        },
-      });
-      this.watcher.on('error', (e) => {
-        this.sendError(new Error(`Pen watcher error: ${e.message}`, { cause: e }));
-      });
-      this.watcher.on('ready', () => {
-        this.watcher?.on('all', this.onChange.bind(this));
-        resolve();
-      });
-    });
-  }
-
-  protected read(relative: string) {
-    return readUnknown({
-      relative,
-      root: this.root,
-      remark: this.remark,
-      ignores: this.ignores,
-    });
-  }
-
-  protected async sendData() {
-    if (this.current) {
-      this.emit?.(ServerEvents.PenData, this.current);
-    }
-  }
-
-  protected async sendError(e?: Error) {
-    const error = e?.message ? e : new Error('An unexpect error has occured.');
-    const { message } = await this.remark.processError(error);
-
-    this.logger.error(error.message);
-    this.emit?.(ServerEvents.PenError, {
-      type: 'error',
-      message,
-    });
-
-    return undefined;
-  }
-
-  close() {
-    this.emit = undefined;
-    this.current = undefined;
-    return this.watcher?.close();
-  }
-}
-
-class DirectoryWatcher extends Watcher {
-  declare current?: PenDirectoryData;
-
   async setupWatching(switchTo: string) {
-    this.logger.log(`Pen requested: ${formatPath(switchTo)}, current watching: ${this.current?.relativePath ?? 'none'}`);
+    this.logger.log(`Pen requested: ${formatPath(switchTo)}, current watching: ${this.current?.relativePath ?? 'nothing'}`);
     try {
       const pathInfo = resolvePathInfo(this.root, switchTo);
 
@@ -218,64 +148,60 @@ class DirectoryWatcher extends Watcher {
         break;
     }
   }
-}
 
-class MarkdownWatcher extends Watcher {
-  declare current?: PenMarkdownData;
+  protected async setupWatcher(pathInfo: PathInfo) {
+    await this.watcher?.close();
 
-  async setupWatching(switchTo: string) {
-    this.logger.log(`Pen requested: ${formatPath(switchTo)}, current watching: ${this.current?.relativePath ?? 'None'}`);
+    return new Promise<void>((resolve) => {
+      this.watcher = chokidar.watch(pathInfo.fullpath, {
+        depth: 0,
+        ignored: this.ignores,
+        awaitWriteFinish: {
+          pollInterval: 100,
+          stabilityThreshold: 300,
+        },
+      });
+      this.watcher.on('error', (e) => {
+        this.sendError(new Error(`Pen watcher error: ${e.message}`, { cause: e }));
+      });
+      this.watcher.on('ready', () => {
+        this.watcher?.on('all', this.onChange.bind(this));
+        resolve();
+      });
+    });
+  }
 
-    try {
-      const pathInfo = resolvePathInfo(this.root, '');
+  protected read(relative: string) {
+    return readUnknown({
+      relative,
+      root: this.root,
+      remark: this.remark,
+      ignores: this.ignores,
+    });
+  }
 
-      validatePath(pathInfo, this.ignores);
-
-      if (this.current?.relativePath !== pathInfo.relativePath) {
-        await this.setupWatcher(pathInfo);
-      }
-
-      this.current = await this.read('') as PenMarkdownData;
-      this.logger.log(`Pen switched to ${pathInfo.fullpath}`);
-      this.sendData();
-    } catch (e) {
-      await this.sendError(e as Error);
+  protected async sendData() {
+    if (this.current) {
+      this.emit?.(ServerEvents.PenData, this.current);
     }
   }
 
-  protected async onChange(event: string, detail: string) {
-    const relative = formatPath(path.relative(this.root, detail));
-    const isSelf = this.current?.relativePath === relative;
+  protected async sendError(e?: Error) {
+    const error = e?.message ? e : new Error('An unexpect error has occured.');
+    const { message } = await this.remark.processError(error);
 
-    this.logger.log(`Pen detected ${event}: ${this.current?.filename}`);
+    this.logger.error(error.message);
+    this.emit?.(ServerEvents.PenError, {
+      type: 'error',
+      message,
+    });
 
-    if (!isSelf) return;
+    return undefined;
+  }
 
-    switch (event) {
-      case 'add':
-      case 'unlink':
-      case 'change':
-        try {
-          this.current = await this.read('') as PenMarkdownData;
-          this.sendData();
-        } catch (e) {
-          this.current = undefined;
-          await this.sendError();
-        }
-        break;
-      default:
-        break;
-    }
+  close() {
+    this.emit = undefined;
+    this.current = undefined;
+    return this.watcher?.close();
   }
 }
-
-export const createWatcher = (options: WatcherOptions) => {
-  const { root, logger } = options;
-  const info = resolvePathInfo(root, '');
-
-  logger.info(`Pen init with root: ${info.fullpath}`);
-
-  return info.type === 'directory'
-    ? new DirectoryWatcher({ ...options, root: info.fullpath })
-    : new MarkdownWatcher({ ...options, root: info.fullpath });
-};

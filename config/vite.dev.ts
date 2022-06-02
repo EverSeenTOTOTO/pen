@@ -23,9 +23,10 @@ const devSSR = () => ({
     const remark = { // FIXME: unified is a mjs module which cannot be required in vite dev
       logger,
       render: {} as any,
+      tocExtractor: {} as any,
       usePlugins() {},
-      process: (s: string) => Promise.resolve(s),
-      processError: (s?: Error) => Promise.resolve(s?.message ?? ''),
+      process: (s: string) => Promise.resolve({ content: s }),
+      processError: (s?: Error) => Promise.resolve({ message: s?.message ?? '' }),
     };
 
     bindSocket(vite.httpServer, {

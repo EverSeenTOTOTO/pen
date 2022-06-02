@@ -17,7 +17,9 @@ function readTemplate(dist: string) {
 }
 
 export const createSSRMiddleware = (options: RenderOptions) => {
-  const { dist, theme, logger } = options;
+  const {
+    dist, theme, logger,
+  } = options;
   const template = readTemplate(dist);
   const render = loadRender(dist);
 
@@ -47,9 +49,6 @@ export const createSSRMiddleware = (options: RenderOptions) => {
       res.setHeader('Content-Type', 'text/html');
       res.end(html);
     } catch (e) {
-      // const error = e as Error;
-      // logger.error(error.stack ?? error.message);
-
       next();
     }
   };
@@ -74,5 +73,6 @@ export const bindRender = (app: Express, options: RenderOptions) => {
   router.use(serveRoot);
 
   app.use(serveAssets);
+  app.use(serveRoot);
   app.use(namespace, router);
 };

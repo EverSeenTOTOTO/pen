@@ -27,9 +27,7 @@ const defaultPlugins = [
   ['rehype-toc-id', rehypeTocId],
   ['rehype-copy', rehypeCopy],
   ['rehype-highlight', rehypeHighlight],
-  ['rehype-katex', rehypeKatex, {
-    strict: false,
-  }],
+  ['rehype-katex', rehypeKatex, { strict: false }],
   ['rehype-stringify', rehypeStringify],
 ];
 

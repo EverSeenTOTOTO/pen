@@ -16,8 +16,6 @@ const Toc = ({ toc }: { toc: DocToc }) => {
   const handleClick = (e: React.MouseEvent) => {
     const heading = document.getElementById(toc.id);
 
-    console.log(toc.id);
-
     heading?.scrollIntoView();
     e.preventDefault();
   };
