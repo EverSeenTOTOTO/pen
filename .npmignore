@@ -1,6 +1,10 @@
 tests
 *.log
-Pen.gif
+coverage
+src/assets
+.eslint*
+.browserslist*
+.env
 babel.config.js
 commitlint.config.js
 jest.config.js

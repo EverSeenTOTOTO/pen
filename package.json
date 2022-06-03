@@ -1,5 +1,5 @@
 {
-  "version": "5.0.1",
+  "version": "5.0.3",
   "name": "@everseen/pen",
   "main": "dist/server.js",
   "bin": {

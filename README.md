@@ -37,6 +37,10 @@ pen -o -p 5000 -r ../docs
 
     Set server port, default `3000` or another auto-detected avaliable port.
 
++ `--ignores|-i`
+
+    Set ignoring files, default `[]`, example if you want to ignore dotfiles: `-i "^\\."`
+
 + `--silent|-s`
 
     Ignore logger messages, default `false`.

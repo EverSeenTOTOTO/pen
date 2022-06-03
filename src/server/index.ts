@@ -15,9 +15,10 @@ export const normalizeOptions = (opts?: Partial<PenOptions>) => {
   const dist = opts?.dist ? path.join(opts?.dist) : path.join(__dirname);
   const ignores = opts?.ignores?.filter((_: string) => _).map((p: string) => new RegExp(p, 'g')) ?? [];
 
-  const hour = new Date().getHours();
-  const name = hour >= 18 || hour <= 6 ? 'dark' : 'light';
-  const theme = typeof opts?.theme === 'function' ? opts?.theme() : opts?.theme ?? name;
+  const theme = opts?.theme ?? (() => {
+    const hour = new Date().getHours();
+    return hour >= 18 || hour <= 6 ? 'dark' : 'light';
+  });
 
   const root = opts?.root ? formatPath(path.join(process.cwd(), opts?.root)) : formatPath(process.cwd());
 

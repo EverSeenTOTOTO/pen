@@ -18,13 +18,14 @@ function readTemplate(dist: string) {
 
 export const createSSRMiddleware = (options: RenderOptions) => {
   const {
-    dist, theme, logger,
+    dist, logger,
   } = options;
   const template = readTemplate(dist);
   const render = loadRender(dist);
 
   return async (req: Request, res: Response, next: () => void) => {
     try {
+      const theme = typeof options.theme === 'function' ? options.theme() : options.theme;
       const [data, themeData] = await Promise.all([
         readUnknown({
           ...options,
@@ -74,4 +75,5 @@ export const bindRender = (app: Express, options: RenderOptions) => {
 
   app.use(serveAssets);
   app.use(namespace, router);
+  app.use(serveRoot); // fallback
 };

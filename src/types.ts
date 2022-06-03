@@ -113,18 +113,17 @@ export type SocketOptions = PenSocketInfo & WatcherOptions & {
 export type RenderOptions = WatcherOptions & {
   dist: string;
   namespace: string;
-  theme: ThemeNames;
+  theme: ThemeNames | (() => ThemeNames)
 };
 
 export type PenOptions = Omit<WatcherOptions
 & ReaderOptions
 & SocketOptions
 & RemarkOptions
-& RenderOptions, 'ignores' | 'theme' | 'relative' | 'remark'>
+& RenderOptions, 'ignores' | 'relative' | 'remark'>
 & {
   silent: boolean;
   ignores: string[];
-  theme: ThemeNames | (() => ThemeNames)
 };
 
 export type PenCliOptions = Partial<PenOptions & {
