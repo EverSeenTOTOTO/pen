@@ -1,6 +1,6 @@
 # @everseen/pen
 
-A cli tool provides the ability to preview markdown files when editing, based on [socket.io](https://socket.io/) and [chokidar](https://github.com/paulmillr/chokidar).
+A cli tool provides the ability to preview markdown files when editing, based on [socket.io](https://socket.io/) and [chokidar](https://github.com/paulmillr/chokidar), with builtin katex, highlight.js, copy, doctoc and vuepress style container support.
 
 <img src="./Pen.gif" />
 
@@ -55,11 +55,17 @@ pen -o -p 5000 -r ../docs
 
 ### Use with Node.js
 
-Check [server.ts](./src/server/index.ts) as an example.
+Check [cli.js](./cli.js) and [server/index.ts](./src/server/index.ts) as an example.
+
+## Q & A?
+
+1. The UI looks ugly, how to customize theme?
+
+    My fault🐶, fork this project and rewrite the client part, this is a small project!.
 
 ## TODO
 
 1. add server timeout
-2. test memory leak
-4. keyboard events
+2. test cases, and test memory leak
+4. support keyboard events
 6. log for distinct client

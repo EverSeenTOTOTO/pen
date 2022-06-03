@@ -73,6 +73,5 @@ export const bindRender = (app: Express, options: RenderOptions) => {
   router.use(serveRoot);
 
   app.use(serveAssets);
-  app.use(serveRoot);
   app.use(namespace, router);
 };

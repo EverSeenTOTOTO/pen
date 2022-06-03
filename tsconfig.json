@@ -28,7 +28,7 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "paths": {
-      "@/*":[
+      "@/*": [
         "src/*"
       ]
     }
