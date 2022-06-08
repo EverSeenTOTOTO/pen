@@ -3,6 +3,7 @@ tests
 coverage
 src/assets
 .eslint*
+.stylelint*
 .browserslist*
 .env
 babel.config.js

@@ -105,7 +105,8 @@ export class Watcher {
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             this.current = {
               ...current,
-              reading: this.current.reading, // keep reading
+              // by default, current.reading is README or undefined, need keep reading
+              reading: this.current.reading ?? current.reading,
             };
 
             this.sendData();
@@ -123,7 +124,7 @@ export class Watcher {
             if (isReading) {
               current.reading = await this.read(relative) as PenMarkdownData;
             } else {
-              current.reading = this.current.reading;
+              current.reading = this.current.reading ?? current.reading;
             }
 
             this.current = current;

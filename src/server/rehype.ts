@@ -80,8 +80,9 @@ export class RemarkRehype {
       : new Error('An unexpect error has occured when processing markdown', { cause: e instanceof Error ? e : undefined });
 
     try {
-      const message = (await this.process(RemarkRehype.formatError(error))).toString();
-      return { message };
+      const { content } = await this.process(RemarkRehype.formatError(error));
+
+      return { message: content };
     } catch (err) {
       return { message: error.message };
     }
