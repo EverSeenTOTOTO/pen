@@ -1,7 +1,8 @@
 import path from 'path';
 import fs from 'fs';
 import express, { Express, Request, Response } from 'express';
-import { RenderOptions } from '../types';
+import { isMarkdown } from '@/utils';
+import { PenDirectoryData, RenderOptions } from '../types';
 import { readUnknown } from './reader';
 import { createTheme } from './theme';
 
@@ -18,19 +19,22 @@ function readTemplate(dist: string) {
 
 export const createSSRMiddleware = (options: RenderOptions) => {
   const {
-    dist, logger,
+    root, dist, logger,
   } = options;
   const template = readTemplate(dist);
   const render = loadRender(dist);
 
   return async (req: Request, res: Response, next: () => void) => {
+    const url = decodeURIComponent(req.url);
+    const isMd = isMarkdown(url);
+
     try {
       const theme = typeof options.theme === 'function' ? options.theme() : options.theme;
-      const [data, themeData] = await Promise.all([
-        readUnknown({
-          ...options,
-          relative: decodeURIComponent(req.url),
-        }),
+      const directory = isMd ? path.relative(root, path.dirname(path.join(root, url))) : url;
+
+      const [dir, reading, themeData] = await Promise.all([
+        readUnknown({ ...options, relative: directory }),
+        isMd ? readUnknown({ ...options, relative: url }) : undefined,
         createTheme(theme, dist),
       ]);
 
@@ -41,7 +45,12 @@ export const createSSRMiddleware = (options: RenderOptions) => {
         prefetch: {
           socket: options,
           theme: themeData,
-          home: { data },
+          home: {
+            data: {
+              ...dir,
+              reading: reading ?? (dir as PenDirectoryData).reading,
+            },
+          },
         },
       });
 
@@ -75,5 +84,5 @@ export const bindRender = (app: Express, options: RenderOptions) => {
 
   app.use(serveAssets);
   app.use(namespace, router);
-  app.use(serveRoot); // fallback
+  app.use(serveRoot);
 };

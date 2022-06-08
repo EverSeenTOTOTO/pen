@@ -61,7 +61,7 @@ pen -o -p 5000 -r ../docs
 
 Check [cli.js](./cli.js) and [server/index.ts](./src/server/index.ts) as an example.
 
-## Q & A?
+## Q & A
 
 1. The UI looks ugly, how to customize theme?
 

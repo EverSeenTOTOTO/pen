@@ -17,6 +17,7 @@ import { Folder, Description } from '@material-ui/icons';
 import { NoSsr } from '@material-ui/core';
 import { useNav } from '@/store/hooks';
 import clsx from 'clsx';
+import { useRef } from 'react';
 import Toc from './Toc';
 
 const useStyles = makeStyles((theme) => createStyles({
@@ -51,17 +52,15 @@ const useStyles = makeStyles((theme) => createStyles({
   dir: {
     flexGrow: 1,
   },
+  hidden: {
+    display: 'none',
+  },
   toc: {
     flexGrow: 1,
     padding: theme.spacing(2),
     '& .MuiTypography-body1': {
       fontSize: '0.875rem',
     },
-  },
-  hidden: {
-    height: 0,
-    flexGrow: 0,
-    visibility: 'hidden',
   },
   icon: {
     minWidth: theme.spacing(4),
@@ -97,6 +96,7 @@ const Drawer = observer(() => {
   const classes = useStyles();
   const drawer = useStore('drawer');
   const nav = useNav();
+  const ref = useRef<HTMLElement | null>();
 
   return (
       <MuiDrawer
@@ -129,6 +129,7 @@ const Drawer = observer(() => {
           </List>
           <Divider />
           {drawer.toc.length > 0 && <TreeView
+            ref={ref}
             className={clsx(classes.toc, {
               [classes.hidden]: !drawer.visible,
             })}
@@ -145,7 +146,10 @@ const Drawer = observer(() => {
             <IconButton onClick={() => drawer.toggle()}>
               {drawer.visible ? <ChevronLeftIcon /> : <ChevronRightIcon />}
             </IconButton>
-            <IconButton onClick={() => window.scrollTo(0, 0)}>
+            <IconButton onClick={() => {
+              ref.current?.scrollIntoView();
+              window.scrollTo(0, 0);
+            }}>
               <ExpandLessTwoToneIcon />
             </IconButton>
           </div>
