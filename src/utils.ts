@@ -2,7 +2,8 @@ import path from 'path';
 import fs from 'fs';
 import { PathInfo } from './types';
 
-function slash(p: string) {
+// forked from 'slash'
+export function slash(p: string) {
   const isExtendedLengthPath = /^\\\\\?\\/.test(p);
   const hasNonAscii = /[^\u0000-\u0080]+/.test(p); // eslint-disable-line no-control-regex
 
@@ -31,10 +32,11 @@ export function isReadme(filepath: string) {
 // '/a/' -> '/a'
 // '/a/b/' -> '/a/b'
 // '\\' -> '/'
+// ':\\' -> '/'
 // '\\\\' -> '/'
 // '//' -> '/'
 // '' -> '/'
-export function formatPath(p: string) {
+export function formatRelative(p: string) {
   return slash(p)
     .replace(/^(.*?)\/*$/g, '$1')
     .replace(/^(?!\/)(.*)$/g, '/$1')
@@ -42,19 +44,21 @@ export function formatPath(p: string) {
     .replace(/^$/, '/');
 }
 
-export function resolvePathInfo(root: string, switchTo: string):PathInfo {
-  const fullpath = path.join(root, switchTo.replace(/~$/, '')); const filename = path.basename(fullpath);
+export function resolvePathInfo(root: string, relative: string):PathInfo {
+  const fullpath = slash(path.join(root, relative.replace(/~$/, '')));
+  const filename = path.basename(fullpath);
+  const relativePath = formatRelative(path.relative(root, fullpath));
 
   return {
     fullpath,
     filename,
-    relativePath: formatPath(path.relative(root, fullpath)),
+    relativePath,
     // eslint-disable-next-line no-nested-ternary
     type: isDir(fullpath) ? 'directory' : isMarkdown(fullpath) ? 'markdown' : 'other',
   };
 }
 
-export const stripNamespace = (namespace: string, pathname: string) => decodeURIComponent(formatPath(pathname.replace(new RegExp(`^${namespace}`), '')));
+export const stripNamespace = (namespace: string, pathname: string) => decodeURIComponent(formatRelative(pathname.replace(new RegExp(`^${namespace}`), '')));
 
 export const createMarkup = (__html: string) => ({ __html });
 

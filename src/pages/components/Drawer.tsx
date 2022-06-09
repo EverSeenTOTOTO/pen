@@ -22,12 +22,12 @@ import Toc from './Toc';
 
 const useStyles = makeStyles((theme) => createStyles({
   drawer: {
-    width: theme.spacing(36),
+    width: theme.spacing(40),
     flexShrink: 0,
     whiteSpace: 'nowrap',
   },
   drawerOpen: {
-    width: theme.spacing(36),
+    width: theme.spacing(40),
     transition: theme.transitions.create('width', {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.enteringScreen,

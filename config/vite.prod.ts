@@ -2,6 +2,7 @@ import path from 'path';
 import { defineConfig } from 'vite';
 import legacy from '@vitejs/plugin-legacy';
 import { viteStaticCopy as copy } from 'vite-plugin-static-copy';
+import { slash } from '../src/utils';
 import base from './vite.common';
 
 const injectHtml = () => ({
@@ -24,7 +25,7 @@ export default defineConfig((c) => {
       copy({
         targets: [
           {
-            src: path.join(__dirname, '../src/assets/*'),
+            src: slash(path.join(__dirname, '../src/assets/*')),
             dest: 'assets/', // relate to dist
           },
         ],

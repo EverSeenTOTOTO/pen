@@ -1,5 +1,5 @@
 import path from 'path';
-import { formatPath, isMarkdown } from '@/utils';
+import { slash, formatRelative, isMarkdown } from '@/utils';
 import http from 'http';
 import express from 'express';
 import getPort from 'get-port';
@@ -10,6 +10,12 @@ import { bindSocket } from './socket';
 import { RemarkRehype } from './rehype';
 
 export const normalizeOptions = (opts?: Partial<PenOptions>) => {
+  const root = slash(opts?.root ? path.join(process.cwd(), opts?.root) : process.cwd());
+
+  if (isMarkdown(root)) {
+    throw new Error('The "root" options must be a directory');
+  }
+
   const silent = opts?.silent ?? false;
   const logger = silent ? emptyLogger : builtInLogger;
   const dist = opts?.dist ? path.join(opts?.dist) : path.join(__dirname);
@@ -19,12 +25,6 @@ export const normalizeOptions = (opts?: Partial<PenOptions>) => {
     const hour = new Date().getHours();
     return hour >= 18 || hour <= 6 ? 'dark' : 'light';
   });
-
-  const root = opts?.root ? formatPath(path.join(process.cwd(), opts?.root)) : formatPath(process.cwd());
-
-  if (isMarkdown(root)) {
-    throw new Error('The "root" options must be a directory');
-  }
 
   return {
     root,
@@ -36,7 +36,7 @@ export const normalizeOptions = (opts?: Partial<PenOptions>) => {
     connectTimeout: opts?.connectTimeout ?? 10000,
     socketPath: opts?.socketPath ?? '/pensocket.io',
     transports: opts?.transports ?? ['websocket', 'polling'],
-    namespace: opts?.namespace ? formatPath(opts?.namespace) : '/',
+    namespace: opts?.namespace ? formatRelative(opts?.namespace) : '/',
     plugins: opts?.plugins ?? [],
   };
 };
@@ -58,5 +58,5 @@ export const createServer = async (opts?: PenCliOptions) => {
     options.logger.warn(`Pen found port ${opts?.port} unavaliable, use port ${avaliablePort} instead`);
   }
 
-  return new Promise((resolve) => server.listen(avaliablePort, () => resolve({ server, port: avaliablePort, options })));
+  return new Promise((resolve) => server.listen(port, () => resolve({ server, port, options })));
 };

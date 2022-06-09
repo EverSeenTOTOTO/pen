@@ -24,7 +24,10 @@ const setupWatcher = (socket: PenSocket, options: SocketOptions) => {
     logger.warn(`Pen disconnect with ${socket.id}`);
     watcher.close();
   });
-  socket.on(ClientEvents.FetchData, (relative) => watcher.setupWatching(stripNamespace(namespace, relative))); // already stripNamespace in clientside
+  socket.on(ClientEvents.FetchData, (relative) => watcher
+    .setupWatching(stripNamespace(namespace, relative))
+    .then(() => watcher.sendData())
+    .catch((e) => watcher.sendError(e)));
 };
 
 const setupThemeProvider = (socket: PenSocket, options: SocketOptions) => {

@@ -4,25 +4,25 @@ A cli tool provides the ability to preview markdown files when editing, based on
 
 <img src="./Pen.gif" />
 
-## Usage 
+## Usage
 
 ### Use with CLI
 
-```bash 
-# install globally 
-npm i -g @everseen/pen 
+```bash
+# install globally
+npm i -g @everseen/pen
 
-# default usage 
-pen 
-  
-# use with cli options 
+# default usage
+pen
+
+# use with cli options
 pen -o -p 5000 -r ../docs
 ```
 
 #### CLI Options
 
 + `--help|-h`
-    
+
     Print help message.
 
 + `--root|-r`

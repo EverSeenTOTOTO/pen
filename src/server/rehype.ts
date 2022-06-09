@@ -77,7 +77,7 @@ export class RemarkRehype {
   async processError(e?: Error) {
     const error = e?.message
       ? e
-      : new Error('An unexpect error has occured when processing markdown', { cause: e instanceof Error ? e : undefined });
+      : new Error('An unexpect error has occured when processing markdown.');
 
     try {
       const { content } = await this.process(RemarkRehype.formatError(error));

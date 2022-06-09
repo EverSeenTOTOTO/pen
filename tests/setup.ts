@@ -1,8 +1,34 @@
-import path from 'path';
+import { slash } from '@/utils';
+import EventEmitter from 'events';
 import fs, { mkdirSync } from 'fs';
+import os from 'os';
+import path from 'path';
 import puppeteer from 'puppeteer-core';
 
-jest.setTimeout(10000);
+export class MockChokidar extends EventEmitter {
+  root: string;
+
+  options: any;
+
+  constructor(root: string, options: any) {
+    super();
+    this.root = root;
+    this.options = options;
+  }
+
+  on(evt: string, callback: (...args: any[]) => void) {
+    super.on(evt, callback);
+
+    if (evt === 'ready') {
+      this.emit('ready');
+    }
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  close() {
+    return Promise.resolve();
+  }
+}
 
 export const dist = path.resolve(__dirname, '../dist');
 
@@ -14,7 +40,7 @@ export const dist = path.resolve(__dirname, '../dist');
   *   - a.md
   *   - a.txt
   * */
-export const rootDir = path.resolve(__dirname, 'temp');
+export const rootDir = slash(path.resolve(__dirname, 'temp'));
 export const dirA = path.join(rootDir, 'A');
 export const dirAB = path.join(dirA, 'B');
 export const mdA = path.join(rootDir, 'A.md');
@@ -34,7 +60,11 @@ beforeAll(async () => {
   fs.writeFileSync(txtA, '# A');
   fs.writeFileSync(mdb, '# b');
 
-  browser = await puppeteer.launch({ executablePath: 'google-chrome' });
+  browser = await puppeteer.launch({
+    executablePath: os.platform() === 'win32'
+      ? 'C:/Program Files/Google/Chrome/Application/chrome.exe'
+      : 'google-chrome',
+  });
 });
 
 afterAll(async () => {

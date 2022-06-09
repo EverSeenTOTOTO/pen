@@ -13,7 +13,7 @@ import {
 } from '../utils';
 import { RemarkRehype } from './rehype';
 
-export function validatePath(pathInfo: PathInfo, ignores: RegExp[]) {
+function validatePath(pathInfo: PathInfo, ignores: RegExp[]) {
   if (ignores.some((re) => re.test(pathInfo.filename))) {
     throw new Error(`Pen not permitted to watch: ${pathInfo.fullpath}, it's ignored by settings.`);
   }
@@ -52,12 +52,10 @@ async function readMarkdown(render: RemarkRehype, pathInfo: PathInfo): Promise<P
   };
 }
 
-async function readDirectory(render: RemarkRehype, pathInfo: PathInfo, root: string, ignores: RegExp[]): Promise<PenDirectoryData | undefined> {
+async function readDirectory(root: string, pathInfo: PathInfo, ignores: RegExp[]): Promise<PenDirectoryData> {
   const dirs = await fs.promises.readdir(pathInfo.fullpath);
   const infos = dirs
-    .map((dir) => path.join(pathInfo.fullpath, dir))
-    .map((dir) => resolvePathInfo(root, path.relative(root, dir)))
-    .filter((info) => info.type !== 'other')
+    .map((dir) => resolvePathInfo(root, path.join(pathInfo.relativePath, dir)))
     .filter((info) => {
       try {
         validatePath(info, ignores);
@@ -66,15 +64,11 @@ async function readDirectory(render: RemarkRehype, pathInfo: PathInfo, root: str
         return false;
       }
     });
-  const readme = infos.filter((each) => isReadme(each.relativePath));
 
   return {
     type: 'directory',
     filename: pathInfo.filename,
     relativePath: pathInfo.relativePath,
-    reading: readme.length > 0
-      ? await readMarkdown(render, readme[0])
-      : undefined,
     children: infos.sort(sortChildren).map((c) => {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
@@ -90,11 +84,24 @@ export async function readUnknown(options: ReaderOptions) {
   } = options;
   const pathInfo = resolvePathInfo(root, relative);
 
-  if (pathInfo.type === 'other') {
-    throw new Error(`Pen unable to read: ${pathInfo.fullpath}, it's not a markdown or directory.`);
+  validatePath(pathInfo, ignores);
+
+  // if markdown, read its parent
+  const directory = pathInfo.type === 'directory' ? pathInfo : resolvePathInfo(root, path.dirname(pathInfo.relativePath));
+  const data = await readDirectory(root, directory, ignores);
+
+  if (pathInfo.type === 'markdown') {
+    data.reading = await readMarkdown(remark, pathInfo);
+  } else {
+    // if readme
+    const readme = data.children.filter((each) => isReadme(each.filename));
+
+    if (readme.length > 0) {
+      const readmeInfo = resolvePathInfo(root, readme[0].relativePath);
+
+      data.reading = await readMarkdown(remark, readmeInfo);
+    }
   }
 
-  return pathInfo.type === 'directory'
-    ? readDirectory(remark, pathInfo, root, ignores)
-    : readMarkdown(remark, pathInfo);
+  return data;
 }
