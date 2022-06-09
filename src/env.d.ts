@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-declare module 'detect-port' {
+declare module 'get-port' {
   const anything = any;
   export default anything;
 }

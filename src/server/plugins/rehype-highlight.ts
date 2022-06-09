@@ -7,69 +7,30 @@ import * as h2s from 'hast-util-to-string';
 import * as hfp from 'hast-util-from-parse5';
 import { makeCodeBlockPlugin } from './code-block';
 
-const supportLanguageList = [
-  'awk',
-  'bash',
-  'bnf',
-  'c',
-  'cmake',
-  'cpp',
-  'csharp',
-  'diff',
-  'dockerfile',
-  'go',
-  'graphql',
-  'haskell',
-  'java',
-  'javascript',
-  'json',
-  'latex',
-  'llvm',
-  'lua',
-  'makefile',
-  'markdown',
-  'nginx',
-  'perl',
-  'profile',
-  'python-repl',
-  'python',
-  'rust',
-  'scheme',
-  'scss',
-  'shell',
-  'sql',
-  'typescript',
-  'vim',
-  'wasm',
-  'x86asm',
-  'xml',
-  'yaml',
-];
+const loadedLanguages = new Set<string>();
 
-const loadLanguages = () => {
+const loadLanguage = (lang: string) => {
+  if (loadedLanguages.has(lang)) return;
+
   const highlightjs = path.join(__dirname, '../node_modules/highlight.js/lib/languages');
 
-  supportLanguageList
-    .forEach((lang) => {
-      try {
-        // eslint-disable-next-line import/no-dynamic-require, @typescript-eslint/no-var-requires, global-require
-        const language = require(path.join(highlightjs, `${lang}.js`));
+  try {
+    // eslint-disable-next-line import/no-dynamic-require, @typescript-eslint/no-var-requires, global-require
+    const language = require(path.join(highlightjs, `${lang}.js`));
 
-        hljs.registerLanguage(lang, language);
-      } catch (e) {
-        // pass
-      }
-    });
-
-  return hljs;
+    hljs.registerLanguage(lang, language);
+    loadedLanguages.add(lang);
+  } catch (e) {
+    // pass
+  }
 };
-
-loadLanguages();
 
 export default makeCodeBlockPlugin((language: string | undefined, node: any) => {
   if (!language) return;
 
   try {
+    loadLanguage(language);
+
     const code = hljs.highlight(h2s.toString(node), { language }).value;
     const ast = hfp.fromParse5(parse5.parse(code));
 
@@ -78,6 +39,5 @@ export default makeCodeBlockPlugin((language: string | undefined, node: any) => 
     }
   } catch (e) {
     // pass
-    console.log(e);
   }
 });

@@ -2,7 +2,7 @@ import path from 'path';
 import { formatPath, isMarkdown } from '@/utils';
 import http from 'http';
 import express from 'express';
-import getPort from 'detect-port';
+import getPort from 'get-port';
 import { PenOptions, PenCliOptions } from '@/types';
 import { logger as builtInLogger, emptyLogger } from './logger';
 import { bindRender } from './render';
@@ -52,7 +52,7 @@ export const createServer = async (opts?: PenCliOptions) => {
   bindSocket(server, { ...options, remark });
 
   const port = parseInt(opts?.port ?? '3000', 10);
-  const avaliablePort = await getPort(Number.isNaN(port) ? 3000 : port);
+  const avaliablePort = await getPort({ port: Number.isNaN(port) ? 3000 : port });
 
   if (avaliablePort !== port) {
     options.logger.warn(`Pen found port ${opts?.port} unavaliable, use port ${avaliablePort} instead`);

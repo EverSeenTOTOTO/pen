@@ -6,10 +6,9 @@ import { PenDirectoryData, RenderOptions } from '../types';
 import { readUnknown } from './reader';
 import { createTheme } from './theme';
 
-function loadRender(dist: string) {
+function loadRenderAsync(dist: string) {
   // eslint-disable-next-line import/no-dynamic-require, @typescript-eslint/no-var-requires, global-require
-  const { render } = require(path.join(dist, 'index.server.js'));
-  return render;
+  return import(path.join(dist, 'index.server.js')).then((value) => value.render);
 }
 
 function readTemplate(dist: string) {
@@ -22,13 +21,14 @@ export const createSSRMiddleware = (options: RenderOptions) => {
     root, dist, logger,
   } = options;
   const template = readTemplate(dist);
-  const render = loadRender(dist);
+  const promise = loadRenderAsync(dist);
 
   return async (req: Request, res: Response, next: () => void) => {
     const url = decodeURIComponent(req.url);
     const isMd = isMarkdown(url);
 
     try {
+      const render = await promise;
       const theme = typeof options.theme === 'function' ? options.theme() : options.theme;
       const directory = isMd ? path.relative(root, path.dirname(path.join(root, url))) : url;
 
