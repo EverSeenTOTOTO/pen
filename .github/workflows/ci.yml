@@ -1,0 +1,69 @@
+name: UnitTest
+
+on:
+  push:
+    branches: [v5]
+
+jobs:
+  test-linux:
+    name: ${{ matrix.os }} (${{ matrix.browser }})
+    strategy:
+      matrix:
+        browser: [chromium, firefox]
+        os: [ubuntu-18.04]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Setup Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: 16
+        run: echo "Working directory: `pwd`"
+        run: echo "Node version: `node --version`"
+        run: echo "Npm version: `npm --version`"
+        run: echo "Yarn version: `yarn --version`"
+      - name: Install Dependencies
+        run: |
+          yarn config set registry https://registry.npmjs.org/
+          yarn --frozen-lockfile --non-interactive install
+      - name: Build
+        run: |
+          make prepare
+          make build
+      - name: Install Playwright
+        run: npx playwright install --with-deps
+      - name: Run tests
+        run: make test
+    
+  test-win:
+    name: "Windows (${{ matrix.browser }})"
+    strategy:
+      matrix:
+        browser: [chromium, firefox]
+    runs-on: windows-latest
+    steps:
+      - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Setup Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: 16
+        run: echo "Working directory: `pwd`"
+        run: echo "Node version: `node --version`"
+        run: echo "Npm version: `npm --version`"
+        run: echo "Yarn version: `yarn --version`"
+      - name: Install Dependencies
+        run: |
+          yarn config set registry https://registry.npmjs.org/
+          yarn --frozen-lockfile --non-interactive install
+      - name: Build
+        run: |
+          make prepare
+          make build
+      - name: Install Playwright
+        run: npx playwright install --with-deps
+      - name: Run tests
+        run: make test
