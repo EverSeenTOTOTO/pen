@@ -5,12 +5,12 @@ DIST ?= dist
 .PHONY: prepare
 prepare:
 	npx husky install
-	npx playwright install
 	cp node_modules/github-markdown-css/github-markdown-*.css src/assets
 	cp node_modules/highlight.js/styles/github-dark.css src/assets/highlightjs-github-dark.css
 	cp node_modules/highlight.js/styles/github.css src/assets/highlightjs-github-light.css
 	cp node_modules/katex/dist/contrib/auto-render.min.js src/assets/katex-auto-render.min.js
-	cp node_modules/katex/dist/fonts src/assets -r
+	mkdir src/assets/fonts
+	cp node_modules/katex/dist/fonts/* src/assets/fonts # not use -r or -R on mac
 	cp node_modules/katex/dist/katex.min.css src/assets
 	cp node_modules/katex/dist/katex.min.js src/assets
 

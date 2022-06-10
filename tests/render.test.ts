@@ -7,7 +7,7 @@ import {
   dist, e2e, rootDir, mockRemark,
 } from './setup';
 
-let basePort = 3000;
+let basePort = 8080;
 
 const prepareServer = (opts?: Partial<Omit<RenderOptions, 'remark'>>) => {
   const app = express();
