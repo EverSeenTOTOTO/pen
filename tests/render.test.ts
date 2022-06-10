@@ -3,7 +3,9 @@ import { bindRender } from '@/server/render';
 import { RenderOptions } from '@/types';
 import express from 'express';
 import { logger } from '@/server/logger';
-import { dist, getPage, rootDir } from './setup';
+import {
+  dist, e2e, rootDir, mockRemark,
+} from './setup';
 
 let basePort = 3000;
 
@@ -19,13 +21,7 @@ const prepareServer = (opts?: Partial<Omit<RenderOptions, 'remark'>>) => {
     theme: 'light',
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    remark: { // FIXME: unified is a mjs module which cannot be required in vite dev
-      render: {} as any,
-      tocExtractor: {} as any,
-      usePlugins() {},
-      process: (s: string) => Promise.resolve({ content: `!!TEST!! ${s}` }),
-      processError: (s?: Error) => Promise.resolve({ message: s?.message ?? '' }),
-    },
+    remark: mockRemark,
     ...opts,
   });
 
@@ -36,55 +32,86 @@ const prepareServer = (opts?: Partial<Omit<RenderOptions, 'remark'>>) => {
 
 it('test namespace /, req /', async () => {
   const { server, port } = await prepareServer();
-  const page = await getPage(`http://localhost:${port}`);
-  const html = await page.content();
 
-  expect(html).toMatch(/<span[^<]*A\.md<\/span>/);
+  await e2e(async (page) => {
+    await page.goto(`http://localhost:${port}`);
 
-  const len = await page.evaluate(() => {
-    const dir = document.querySelector('#root > div > div > div > ul.MuiList-root.jss7.MuiList-dense.MuiList-padding');
+    const title = await page.title();
+    const html = await page.content();
 
-    return dir?.children.length;
+    expect(title).toMatch(/Pen/);
+    expect(html).toMatch(/<span[^<]*A\.md<\/span>/);
+
+    const len = await page.evaluate(() => {
+      const dir = document.querySelector('#root > div > div > div > ul.MuiList-root.jss7.MuiList-dense.MuiList-padding');
+
+      return dir?.children.length;
+    });
+    expect(len).toBe(2);
+
+    const color = await page.evaluate(() => window.getComputedStyle(document.body).backgroundColor);
+    expect(color).toBe('rgb(255, 255, 255)');
   });
-
-  expect(len).toBe(2);
 
   server.close();
 });
 
 it('test namespace /, req A.md', async () => {
   const { server, port } = await prepareServer();
-  const page = await getPage(`http://localhost:${port}/A.md`);
 
-  let html = await page.content();
-  expect(html).toMatch(/!!TEST!! # A/);
+  await e2e(async (page) => {
+    await page.goto(`http://localhost:${port}/A.md`);
 
-  await page.reload();
+    let html = await page.content();
+    expect(html).toMatch(/!!TEST!! # A/);
 
-  html = await page.content();
-  expect(html).toMatch(/!!TEST!! # A/);
+    await page.reload();
+
+    html = await page.content();
+    expect(html).toMatch(/!!TEST!! # A/);
+  });
 
   server.close();
 });
 
 it('test namespace /, req b.md', async () => {
   const { server, port } = await prepareServer();
-  const page = await getPage(`http://localhost:${port}/A/b.md`);
 
-  const html = await page.content();
-  expect(html).toMatch(/<span[^<]*B<\/span>/);
-  expect(html).toMatch(/!!TEST!! # b/);
+  await e2e(async (page) => {
+    await page.goto(`http://localhost:${port}/A/b.md`);
+
+    const html = await page.content();
+    expect(html).toMatch(/<span[^<]*B<\/span>/);
+    expect(html).toMatch(/!!TEST!! # b/);
+  });
 
   server.close();
 });
 
 it('test namespace /A, req b.md', async () => {
   const { server, port } = await prepareServer({ namespace: '/A' });
-  const page = await getPage(`http://localhost:${port}/A/A/b.md`);
 
-  const html = await page.content();
-  expect(html).toMatch(/<span[^<]*B<\/span>/);
-  expect(html).toMatch(/!!TEST!! # b/);
+  await e2e(async (page) => {
+    await page.goto(`http://localhost:${port}/A/A/b.md`);
+
+    const html = await page.content();
+    expect(html).toMatch(/<span[^<]*B<\/span>/);
+    expect(html).toMatch(/!!TEST!! # b/);
+  });
+
+  server.close();
+});
+
+it('test theme', async () => {
+  const { server, port } = await prepareServer({ theme: 'dark' });
+
+  await e2e(async (page) => {
+    await page.goto(`http://localhost:${port}/`);
+
+    const color = await page.evaluate(() => window.getComputedStyle(document.body).backgroundColor);
+
+    expect(color).toBe('rgb(13, 17, 23)');
+  });
 
   server.close();
 });

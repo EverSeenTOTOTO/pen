@@ -1,27 +1,37 @@
+import {
+  chromium, firefox, Browser, Page,
+} from 'playwright';
 import { slash } from '@/utils';
 import EventEmitter from 'events';
 import fs, { mkdirSync } from 'fs';
-import os from 'os';
 import path from 'path';
-import puppeteer from 'puppeteer-core';
+
+export const mockRemark = {
+  render: {} as any,
+  tocExtractor: {} as any,
+  usePlugins() {},
+  process: (s: string) => Promise.resolve({ content: `!!TEST!! ${s}` }),
+  processError: (s?: Error) => Promise.resolve({ message: s?.message ?? '' }),
+};
 
 export class MockChokidar extends EventEmitter {
   root: string;
 
-  options: any;
+  options: unknown;
 
-  constructor(root: string, options: any) {
+  constructor(root: string, options: unknown) {
     super();
     this.root = root;
     this.options = options;
   }
 
-  on(evt: string, callback: (...args: any[]) => void) {
+  on(evt: string, callback: (...args: unknown[]) => void) {
     super.on(evt, callback);
 
     if (evt === 'ready') {
       this.emit('ready');
     }
+    return this;
   }
 
   // eslint-disable-next-line class-methods-use-this
@@ -47,7 +57,8 @@ export const mdA = path.join(rootDir, 'A.md');
 export const txtA = path.join(rootDir, 'A.txt');
 export const mdb = path.join(dirA, 'b.md');
 
-let browser: puppeteer.Browser;
+let chromiumBrowser: Browser;
+let firefoxBrowser: Browser;
 
 beforeAll(async () => {
   if (fs.existsSync(rootDir)) {
@@ -60,22 +71,24 @@ beforeAll(async () => {
   fs.writeFileSync(txtA, '# A');
   fs.writeFileSync(mdb, '# b');
 
-  browser = await puppeteer.launch({
-    executablePath: os.platform() === 'win32'
-      ? 'C:/Program Files/Google/Chrome/Application/chrome.exe'
-      : 'google-chrome',
-  });
+  chromiumBrowser = await chromium.launch();
+  firefoxBrowser = await firefox.launch();
 });
 
 afterAll(async () => {
   fs.rmSync(rootDir, { force: true, recursive: true });
-  await browser.close();
+  chromiumBrowser?.close();
+  firefoxBrowser?.close();
 });
 
-export const getPage = async (url: string) => {
-  const page = await browser.newPage();
+export const e2e = (callback: (page: Page) => Promise<void>) => {
+  const testInBrowser = async (browser: Browser) => {
+    const page = await browser.newPage();
+    return callback(page);
+  };
 
-  await page.goto(url);
-
-  return page;
+  return Promise.all([
+    testInBrowser(chromiumBrowser),
+    testInBrowser(firefoxBrowser),
+  ]);
 };

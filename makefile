@@ -5,6 +5,7 @@ DIST ?= dist
 .PHONY: prepare
 prepare:
 	npx husky install
+	npx playwright install
 	cp node_modules/github-markdown-css/github-markdown-*.css src/assets
 	cp node_modules/highlight.js/styles/github-dark.css src/assets/highlightjs-github-dark.css
 	cp node_modules/highlight.js/styles/github.css src/assets/highlightjs-github-light.css

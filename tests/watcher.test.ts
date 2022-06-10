@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 import { Watcher } from '@/server/watcher';
 import { PenDirectoryData, PenErrorData, WatcherOptions } from '@/types';
 import { logger } from '@/server/logger';
@@ -5,26 +6,20 @@ import path from 'path';
 import fs from 'fs';
 import chokidar from 'chokidar';
 import {
-  mdA, mdb, rootDir, MockChokidar, dirA,
+  mdA, mdb, rootDir, MockChokidar, dirA, mockRemark,
 } from './setup';
 
 jest.mock('chokidar');
-jest.spyOn(chokidar, 'watch').mockImplementation((root: string, options: any) => new MockChokidar(root, options));
+// @ts-ignore
+jest.spyOn(chokidar, 'watch').mockImplementation((root: string, options: unknown) => new MockChokidar(root, options));
 
 const createWatcher = (opts?: Partial<WatcherOptions>) => new Watcher({
   logger,
   root: rootDir,
   ignores: [],
   ...opts,
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
-  remark: { // FIXME: unified is a mjs module which cannot be required in vite dev
-    render: {} as any,
-    tocExtractor: {} as any,
-    usePlugins() {},
-    process: (s: string) => Promise.resolve({ content: `!!TEST!! ${s}` }),
-    processError: (s?: Error) => Promise.resolve({ message: s?.message ?? '' }),
-  },
+  remark: mockRemark,
 });
 
 const watchAndSend = (watcher: Watcher, relative: string) => watcher.setupWatching(relative)
