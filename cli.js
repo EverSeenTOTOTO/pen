@@ -8,14 +8,14 @@ const { version } = require('./package.json');
 
 program
   .version(version)
-  .option('-r, --root <root>', 'root directory, default "."')
-  .option('-n, --namespace <namespace>', 'socket.io namespace, default "/"')
-  .option('-p, --port <port>', 'port to listen, default "3000"')
-  .option('-i, --ignores <ignores...>', 'ignore files, default []')
-  .option('-s, --silent', 'ignore log output, default false')
-  .option('-o, --open', 'try open browser automaticlly, default false')
-  .option('-T, --theme <theme>', 'default theme, dark or light, default "dark"')
-  .option('-S, --socketPath <socketPath>', 'socket.io path argument, default"/pensocket.io"')
+  .option('-r, --root <root>', 'set watching directory, relative path to current dir, default `.`')
+  .option('-n, --namespace <namespace>', 'set socket.io namespace, default `/`')
+  .option('-p, --port <port>', 'set server port, default `3000` or another auto-detected avaliable port')
+  .option('-i, --ignores <ignores...>', 'set ignoring files, default `[]`, for example if you want to ignore dotfiles: `-i "^\\."`')
+  .option('-s, --silent', 'ignore logger messages, default `false`')
+  .option('-o, --open', 'open browser automatically, default `false`')
+  .option('-T, --theme <theme>', 'select theme, `dark` or `light`')
+  .option('-S, --socketPath <socketPath>', 'Set socket.io path, default `/pensocket.io`')
   .parse();
 
 const opts = program.opts();

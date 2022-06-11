@@ -27,7 +27,7 @@ pen -o -p 5000 -r ../docs
 
 + `--root|-r`
 
-    Set watching directory, default `.`.
+    Set watching directory, relative path to current dir, default `.`.
 
 + `--namespace|-n`
 
@@ -39,7 +39,7 @@ pen -o -p 5000 -r ../docs
 
 + `--ignores|-i`
 
-    Set ignoring files, default `[]`, example if you want to ignore dotfiles: `-i "^\\."`
+    Set ignoring files, default `[]`, for example if you want to ignore dotfiles: `-i "^\\."`
 
 + `--silent|-s`
 
@@ -67,9 +67,19 @@ Check [cli.js](./cli.js) and [server/index.ts](./src/server/index.ts) as an exam
 
     My fault🐶, fork this project and rewrite the client part, this is a small project!.
 
+2. Error when using namespace `/xxx` in git bash on windows?
+
+    Try Power Shell, seems namespace `/doc` will be translate to `/D:/<pwd>/doc` in git bash.
+
+3. I want some markdown graph tools?
+
+    I considered to integrate [mermaid](https://mermaid-js.github.io/mermaid/#/) or [graphviz](https://graphviz.org/) or something like that in this project, but finnaly I gave up because they all need
+    some extra efforts to learn and use. (And will not display without a tool's support, unlike Latex/Tex, which is wildly used). Nowadays I'm using online tools like [excalidraw](https://excalidraw.com/) for image demands.
+
+**PRs and issues are welcomed!**
+
 ## TODO
 
-1. add server timeout
-2. test cases, and test memory leak
-4. support keyboard events
-6. log for distinct client
+1. log for distinct client
+2. add more test cases
+3. upgrade to MUI@5

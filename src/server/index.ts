@@ -51,6 +51,8 @@ export const createServer = async (opts?: PenCliOptions) => {
   bindRender(app, { ...options, remark });
   bindSocket(server, { ...options, remark });
 
+  options.logger.info('Pen starting server, please wait...');
+
   const port = parseInt(opts?.port ?? '3000', 10);
   const avaliablePort = await getPort({ port: Number.isNaN(port) ? 3000 : port });
 

@@ -6,6 +6,8 @@ import EventEmitter from 'events';
 import fs, { mkdirSync } from 'fs';
 import path from 'path';
 
+jest.setTimeout(10000);
+
 export const mockRemark = {
   render: {} as any,
   tocExtractor: {} as any,

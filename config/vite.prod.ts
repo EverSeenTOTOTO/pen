@@ -10,7 +10,8 @@ const injectHtml = () => ({
   transformIndexHtml(html: string) {
     return html.replace('<!-- inject -->', `<link rel="stylesheet" href="/assets/katex.min.css">
     <script defer src="/assets/katex.min.js"></script>
-    <script defer src="/assets/katex-auto-render.min.js" onload="renderMathInElement(document.body);"></script>`);
+    <script defer src="/assets/katex-auto-render.min.js" onload="renderMathInElement(document.body);"></script>
+    <script defer src="/assets/katex-copy-tex.min.js"></script>`);
   },
 });
 

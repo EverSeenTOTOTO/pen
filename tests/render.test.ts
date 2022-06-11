@@ -3,11 +3,10 @@ import { bindRender } from '@/server/render';
 import { RenderOptions } from '@/types';
 import express from 'express';
 import { logger } from '@/server/logger';
+import getPort from 'get-port';
 import {
   dist, e2e, rootDir, mockRemark,
 } from './setup';
-
-let basePort = 8080;
 
 const prepareServer = (opts?: Partial<Omit<RenderOptions, 'remark'>>) => {
   const app = express();
@@ -27,7 +26,11 @@ const prepareServer = (opts?: Partial<Omit<RenderOptions, 'remark'>>) => {
 
   const server = http.createServer(app);
 
-  return new Promise<{ server: http.Server, port: number }>((resolve) => server.listen(basePort, () => resolve({ server, port: basePort++ })));
+  return new Promise<{ server: http.Server, port: number }>((resolve) => getPort()
+    .then((port: number) => server.listen(port, () => {
+      console.info(`Test server listening on ${port}`);
+      resolve({ server, port });
+    })));
 };
 
 it('test namespace /, req /', async () => {
@@ -51,9 +54,9 @@ it('test namespace /, req /', async () => {
 
     const color = await page.evaluate(() => window.getComputedStyle(document.body).backgroundColor);
     expect(color).toBe('rgb(255, 255, 255)');
+  }).finally(() => {
+    server.close();
   });
-
-  server.close();
 });
 
 it('test namespace /, req A.md', async () => {
@@ -69,9 +72,9 @@ it('test namespace /, req A.md', async () => {
 
     html = await page.content();
     expect(html).toMatch(/!!TEST!! # A/);
+  }).finally(() => {
+    server.close();
   });
-
-  server.close();
 });
 
 it('test namespace /, req b.md', async () => {
@@ -83,9 +86,9 @@ it('test namespace /, req b.md', async () => {
     const html = await page.content();
     expect(html).toMatch(/<span[^<]*B<\/span>/);
     expect(html).toMatch(/!!TEST!! # b/);
+  }).finally(() => {
+    server.close();
   });
-
-  server.close();
 });
 
 it('test namespace /A, req b.md', async () => {
@@ -97,9 +100,9 @@ it('test namespace /A, req b.md', async () => {
     const html = await page.content();
     expect(html).toMatch(/<span[^<]*B<\/span>/);
     expect(html).toMatch(/!!TEST!! # b/);
+  }).finally(() => {
+    server.close();
   });
-
-  server.close();
 });
 
 it('test theme', async () => {
@@ -111,7 +114,7 @@ it('test theme', async () => {
     const color = await page.evaluate(() => window.getComputedStyle(document.body).backgroundColor);
 
     expect(color).toBe('rgb(13, 17, 23)');
+  }).finally(() => {
+    server.close();
   });
-
-  server.close();
 });
