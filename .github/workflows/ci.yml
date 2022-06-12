@@ -3,6 +3,9 @@ name: UnitTest
 on:
   push:
     branches: [v5]
+    paths:
+      - 'src/**'
+      - 'tests/**'
 
 jobs:
   test-linux:
@@ -34,7 +37,7 @@ jobs:
       - name: Install Playwright
         run: npx playwright install --with-deps chromium firefox
       - name: Run tests
-        run: xvfb-run --auto-servernum --server-args="-screen 0 1280x960x24" -- make test
+        run: npx jest --coverage --runInBand --detectOpenHandles
 
   test-mac:
     name: "mac"
@@ -67,7 +70,7 @@ jobs:
       - name: Install Playwright
         run: npx playwright install --with-deps chromium firefox
       - name: Run tests
-        run: make test
+        run: npx jest --coverage --runInBand --detectOpenHandles
 
   test-windows:
     name: "Windows"
@@ -100,4 +103,4 @@ jobs:
       - name: Install Playwright
         run: npx playwright install --with-deps chromium firefox
       - name: Run tests
-        run: make test
+        run: npx jest --coverage --runInBand --detectOpenHandles

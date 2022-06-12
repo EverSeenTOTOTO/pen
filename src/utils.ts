@@ -5,9 +5,8 @@ import { PathInfo } from './types';
 // forked from 'slash'
 export function slash(p: string) {
   const isExtendedLengthPath = /^\\\\\?\\/.test(p);
-  const hasNonAscii = /[^\u0000-\u0080]+/.test(p); // eslint-disable-line no-control-regex
 
-  if (isExtendedLengthPath || hasNonAscii) {
+  if (isExtendedLengthPath) {
     return p;
   }
 

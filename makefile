@@ -48,4 +48,4 @@ start: build
 
 .PHONY: test
 test:
-	NODE_ENV=test npx jest --coverage --silent --runInBand
+	NODE_ENV=test npx jest --coverage --silent --runInBand --detectOpenHandles

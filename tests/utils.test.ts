@@ -14,6 +14,7 @@ it('test formatRelative', () => {
   expect(formatRelative('a/b.md/')).toBe('/a/b.md');
   expect(formatRelative('\\a/')).toBe('/a');
   expect(formatRelative('/a\\')).toBe('/a');
+  expect(formatRelative('/a\\b')).toBe('/a/b');
   expect(formatRelative('\\\\a\\\\')).toBe('/a');
   expect(formatRelative('\\\\a')).toBe('/a');
   expect(formatRelative('a\\\\')).toBe('/a');

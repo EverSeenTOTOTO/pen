@@ -11,6 +11,7 @@ import {
 } from '../types';
 import { createTheme } from './theme';
 import { Watcher } from './watcher';
+import { extendLogger } from './logger';
 
 type PenSocket = Socket<ClientToServerEvents, ServerToClientEvents>;
 
@@ -58,7 +59,8 @@ export const bindSocket = (server: http.Server | https.Server, options: SocketOp
   nsp.on('connection', (socket) => {
     logger.done(`Pen connected with ${socket.id}`);
 
-    setupWatcher(socket, options);
+    // log for distinct client
+    setupWatcher(socket, { ...options, logger: extendLogger(logger, socket.id) });
     setupThemeProvider(socket, options);
   });
 

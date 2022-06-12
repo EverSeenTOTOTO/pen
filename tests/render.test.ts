@@ -26,7 +26,7 @@ const prepareServer = (opts?: Partial<Omit<RenderOptions, 'remark'>>) => {
 
   const server = http.createServer(app);
 
-  return new Promise<{ server: http.Server, port: number }>((resolve) => getPort()
+  return new Promise<{ server: http.Server, port: number }>((resolve) => getPort({ port: 3000 })
     .then((port: number) => server.listen(port, () => {
       console.info(`Test server listening on ${port}`);
       resolve({ server, port });

@@ -6,7 +6,7 @@ import EventEmitter from 'events';
 import fs, { mkdirSync } from 'fs';
 import path from 'path';
 
-jest.setTimeout(10000);
+jest.setTimeout(20000);
 
 export const mockRemark = {
   render: {} as any,
@@ -59,8 +59,8 @@ export const mdA = path.join(rootDir, 'A.md');
 export const txtA = path.join(rootDir, 'A.txt');
 export const mdb = path.join(dirA, 'b.md');
 
-let chromiumBrowser: Browser;
-let firefoxBrowser: Browser;
+let chromiumBrowser: Browser | undefined;
+let firefoxBrowser: Browser | undefined;
 
 beforeAll(async () => {
   if (fs.existsSync(rootDir)) {
@@ -73,8 +73,14 @@ beforeAll(async () => {
   fs.writeFileSync(txtA, '# A');
   fs.writeFileSync(mdb, '# b');
 
-  chromiumBrowser = await chromium.launch();
-  firefoxBrowser = await firefox.launch();
+  chromiumBrowser = await chromium.launch().catch(() => undefined);
+  firefoxBrowser = await firefox.launch().catch(() => undefined);
+
+  if (chromiumBrowser || firefoxBrowser) {
+    console.info(`Test browser launched, chromium: ${chromiumBrowser?.version()}, firefox: ${firefoxBrowser?.version()}`);
+  } else {
+    console.error('Test browser unable to launch');
+  }
 });
 
 afterAll(async () => {
@@ -90,7 +96,7 @@ export const e2e = (callback: (page: Page) => Promise<void>) => {
   };
 
   return Promise.all([
-    testInBrowser(chromiumBrowser),
-    testInBrowser(firefoxBrowser),
+    chromiumBrowser && testInBrowser(chromiumBrowser),
+    firefoxBrowser && testInBrowser(firefoxBrowser),
   ]);
 };

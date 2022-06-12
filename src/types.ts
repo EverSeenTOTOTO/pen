@@ -35,7 +35,7 @@ export type EmitFunction<Evts extends { [k in string]: (...args: any[]) => void 
 export type PenSocketInfo = {
   namespace: string;
   socketPath: string;
-  transports: ('websocket' | 'polling')[]
+  transports: ['websocket']
 };
 
 export type PenTheme = {

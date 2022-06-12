@@ -35,7 +35,7 @@ export const normalizeOptions = (opts?: Partial<PenOptions>) => {
     logger: silent ? emptyLogger : logger,
     connectTimeout: opts?.connectTimeout ?? 10000,
     socketPath: opts?.socketPath ?? '/pensocket.io',
-    transports: opts?.transports ?? ['websocket', 'polling'],
+    transports: opts?.transports ?? ['websocket'],
     namespace: opts?.namespace ? formatRelative(opts?.namespace) : '/',
     plugins: opts?.plugins ?? [],
   };

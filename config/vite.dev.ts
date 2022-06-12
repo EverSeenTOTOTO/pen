@@ -17,7 +17,7 @@ const devSSR = () => ({
     const root = path.join(process.cwd(), '../../doc');
     const theme = await createTheme('dark', dist);
     const templateHtml = fs.readFileSync(paths.template, 'utf-8');
-    const transports = ['websocket'] as ('websocket' | 'polling')[];
+    const transports = ['websocket'];
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     const remark = { // FIXME: unified is a mjs module which cannot be required in vite dev

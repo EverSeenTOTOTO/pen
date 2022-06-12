@@ -21,7 +21,7 @@ export class SocketStore implements PrefetchStore<PenSocketInfo> {
 
   socketPath: string = '/pensocket.io';
 
-  transports: PenSocketInfo['transports'] = ['websocket', 'polling']
+  transports: PenSocketInfo['transports'] = ['websocket']
 
   _socket?: Socket<ServerToClientEvents, ClientToServerEvents>;
 
