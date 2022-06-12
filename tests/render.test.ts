@@ -1,11 +1,11 @@
-import http from 'http';
+import http, { IncomingMessage } from 'http';
 import { bindRender } from '@/server/render';
 import { RenderOptions } from '@/types';
 import express from 'express';
 import { logger } from '@/server/logger';
 import getPort from 'get-port';
 import {
-  dist, e2e, rootDir, mockRemark,
+  dist, e2e, rootDir, mockRemark, testMockServer,
 } from './setup';
 
 const prepareServer = (opts?: Partial<Omit<RenderOptions, 'remark'>>) => {
@@ -26,18 +26,25 @@ const prepareServer = (opts?: Partial<Omit<RenderOptions, 'remark'>>) => {
 
   const server = http.createServer(app);
 
-  return new Promise<{ server: http.Server, port: number }>((resolve) => getPort({ port: 3000 })
-    .then((port: number) => server.listen(port, () => {
+  return getPort({ port: 3000 })
+    .then((port: number) => new Promise((resolve) => server.listen(port, () => {
       console.info(`Test server listening on ${port}`);
       resolve({ server, port });
     })));
 };
 
+const closeServer = (server: http.Server) => new Promise<void>((res, rej) => server.close((err) => (err ? rej(err) : res())));
+
 it('test namespace /, req /', async () => {
   const { server, port } = await prepareServer();
+  const url = `http://localhost:${port}/`;
+
+  await testMockServer(url, (res: IncomingMessage) => {
+    expect(res.statusCode).toBe(200);
+  });
 
   await e2e(async (page) => {
-    await page.goto(`http://localhost:${port}`);
+    await page.goto(url);
 
     const title = await page.title();
     const html = await page.content();
@@ -55,15 +62,20 @@ it('test namespace /, req /', async () => {
     const color = await page.evaluate(() => window.getComputedStyle(document.body).backgroundColor);
     expect(color).toBe('rgb(255, 255, 255)');
   }).finally(() => {
-    server.close();
+    closeServer(server);
   });
 });
 
 it('test namespace /, req A.md', async () => {
   const { server, port } = await prepareServer();
+  const url = `http://localhost:${port}/A.md`;
+
+  await testMockServer(url, (res: IncomingMessage) => {
+    expect(res.statusCode).toBe(200);
+  });
 
   await e2e(async (page) => {
-    await page.goto(`http://localhost:${port}/A.md`);
+    await page.goto(url);
 
     let html = await page.content();
     expect(html).toMatch(/!!TEST!! # A/);
@@ -73,7 +85,7 @@ it('test namespace /, req A.md', async () => {
     html = await page.content();
     expect(html).toMatch(/!!TEST!! # A/);
   }).finally(() => {
-    server.close();
+    closeServer(server);
   });
 });
 
@@ -87,7 +99,7 @@ it('test namespace /, req b.md', async () => {
     expect(html).toMatch(/<span[^<]*B<\/span>/);
     expect(html).toMatch(/!!TEST!! # b/);
   }).finally(() => {
-    server.close();
+    closeServer(server);
   });
 });
 
@@ -101,12 +113,12 @@ it('test namespace /A, req b.md', async () => {
     expect(html).toMatch(/<span[^<]*B<\/span>/);
     expect(html).toMatch(/!!TEST!! # b/);
   }).finally(() => {
-    server.close();
+    closeServer(server);
   });
 });
 
 it('test theme', async () => {
-  const { server, port } = await prepareServer({ theme: 'dark' });
+  const { server, port } = await prepareServer({ theme: () => Promise.resolve('dark') });
 
   await e2e(async (page) => {
     await page.goto(`http://localhost:${port}/`);
@@ -115,6 +127,6 @@ it('test theme', async () => {
 
     expect(color).toBe('rgb(13, 17, 23)');
   }).finally(() => {
-    server.close();
+    closeServer(server);
   });
 });

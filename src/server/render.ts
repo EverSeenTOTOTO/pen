@@ -24,7 +24,7 @@ export const createSSRMiddleware = (options: RenderOptions) => {
 
     try {
       const [template, render] = await Promise.all([tp, rp]);
-      const theme = typeof options.theme === 'function' ? options.theme() : options.theme;
+      const theme = typeof options.theme === 'function' ? await options.theme() : options.theme;
 
       const [data, themeData] = await Promise.all([
         readUnknown({ ...options, relative: url }),

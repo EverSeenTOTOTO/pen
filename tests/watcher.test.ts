@@ -6,7 +6,7 @@ import path from 'path';
 import fs from 'fs';
 import chokidar from 'chokidar';
 import {
-  mdA, mdb, rootDir, MockChokidar, dirA, mockRemark,
+  mdA, mdb, rootDir, MockChokidar, dirA, mockRemark, dirAB,
 } from './setup';
 
 jest.mock('chokidar');
@@ -155,4 +155,23 @@ it('test add readme', (done) => {
     fs.writeFileSync(readme, '# README');
     watcher.watcher?.emit('all', 'add', readme);
   });
+});
+
+it('test sort', (done) => {
+  const watcher = createWatcher({ root: dirAB });
+
+  fs.mkdirSync(path.join(dirAB, '.a'));
+  fs.mkdirSync(path.join(dirAB, '.b'));
+  fs.mkdirSync(path.join(dirAB, 'a'));
+  fs.writeFileSync(path.join(dirAB, '.a.md'), '');
+  fs.writeFileSync(path.join(dirAB, 'a.md'), '');
+
+  watcher.setupEmit((_, data) => {
+    const dir = data as PenDirectoryData;
+
+    expect(dir.children.map((c) => c.filename)).toEqual(['.a', '.b', 'a', '.a.md', 'a.md']);
+
+    watcher.close()?.finally(done);
+  });
+  watchAndSend(watcher, '/');
 });

@@ -5,6 +5,7 @@ import { slash } from '@/utils';
 import EventEmitter from 'events';
 import fs, { mkdirSync } from 'fs';
 import path from 'path';
+import http, { IncomingMessage } from 'http';
 
 jest.setTimeout(20000);
 
@@ -89,10 +90,24 @@ afterAll(async () => {
   firefoxBrowser?.close();
 });
 
+export const testMockServer = (url: string, callback:(res: IncomingMessage)=>void) => new Promise<void>((resolve, reject) => {
+  console.log(`Connect to mock server, url: ${url}...`);
+
+  const timeout = setTimeout(() => reject(new Error('Connect timeout')), 1000);
+  const req = http.request(url, (response: IncomingMessage) => {
+    console.log(`Connected to mock server: ${url}.`);
+    callback(response);
+    clearTimeout(timeout);
+    resolve();
+  });
+  req.on('error', reject);
+  req.end();
+});
+
 export const e2e = (callback: (page: Page) => Promise<void>) => {
   const testInBrowser = async (browser: Browser) => {
     const page = await browser.newPage();
-    return callback(page);
+    return callback(page).finally(() => page.close());
   };
 
   return Promise.all([
