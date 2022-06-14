@@ -2,8 +2,9 @@
   color: skyblue;
 }
 
-.markdown-body pre {
-  color: #fff;
+.markdown-body pre,
+table {
+  color: rgb(255 255 255 / 80%);
 }
 
 .markdown-body .container-warn {
