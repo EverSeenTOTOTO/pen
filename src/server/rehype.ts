@@ -90,11 +90,11 @@ export class RemarkRehype {
 
   static formatError(e: Error) {
     return `
-\`\`\`txt
+:::error
 ${e.message}
 
 ${e.stack}
-\`\`\`
+:::
 `;
   }
 }

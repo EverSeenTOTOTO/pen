@@ -22,7 +22,7 @@ it('test process error', async () => {
 
   const { message } = await remark.processError(new Error('TEST'));
 
-  expect(decodeURIComponent(message)).toMatch(/<code.*TEST/);
+  expect(decodeURIComponent(message)).toMatch(/<div class="container container-error"><p>TEST<\/p>/);
 });
 
 it('test disable plugin', async () => {
