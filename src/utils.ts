@@ -56,7 +56,7 @@ export function resolvePathInfo(root: string, relative: string): PathInfo {
   };
 }
 
-export const stripNamespace = (namespace: string, pathname: string) => decodeURIComponent(formatRelative(pathname.replace(new RegExp(`^${namespace}`), '')));
+export const stripNamespace = (namespace: string, pathname: string) => formatRelative(pathname.replace(new RegExp(`^${namespace}`), ''));
 
 export const createMarkup = (__html: string) => ({ __html });
 

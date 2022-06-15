@@ -14,7 +14,7 @@ const devSSR = () => ({
     const ignores = [/^\/\./];
     const socketPath = '/pensocket.io';
     const dist = path.join(process.cwd(), 'src');
-    const root = path.join(process.cwd(), '../../doc');
+    const root = path.join(process.cwd(), '../..');
     const theme = await createTheme('dark', dist);
     const templateHtml = fs.readFileSync(paths.template, 'utf-8');
     const transports = ['websocket'];

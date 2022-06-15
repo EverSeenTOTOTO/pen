@@ -57,8 +57,7 @@ export const useAutoFetch = () => {
   }, []);
 
   useEffect(() => {
-    if (socket.socket.connected && window.location.pathname !== home.reading) {
-      console.log(`fetch ${window.location.pathname}`);
+    if (socket.socket.connected) {
       home.fetchData(window.location.pathname);
     }
 

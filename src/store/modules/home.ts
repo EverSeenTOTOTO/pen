@@ -66,12 +66,15 @@ export class HomeStore implements PrefetchStore<HomeState> {
     return result;
   }
 
-  fetchData(relative: string, loading = true) {
+  fetchData(pathname: string, loading = true) {
+    const relative = decodeURIComponent(pathname);
+    if (relative === this.reading) return;
     if (loading) {
       this.timeoutId = setTimeout(() => {
         this.loading = true;
       }, 300);
     }
+    console.log(`fetch ${relative}`);
     this.root.socket.emit(ClientEvents.FetchData, relative);
   }
 
