@@ -42,7 +42,7 @@ export function formatRelative(p: string) {
     .replace(/^$/, '/');
 }
 
-export function resolvePathInfo(root: string, relative: string):PathInfo {
+export function resolvePathInfo(root: string, relative: string): PathInfo {
   const fullpath = slash(path.join(root, relative.replace(/~$/, '')));
   const filename = path.basename(fullpath);
   const relativePath = formatRelative(path.relative(root, fullpath));

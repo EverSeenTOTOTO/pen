@@ -19,6 +19,7 @@ prepare:
 lint:
 	npx eslint --fix .
 	npx stylelint "src/**/*.{css,scss}" --fix
+	npx tsc -p . -noEmit
 	@echo -e '\033[1;32mNo lint errors found.'
 
 .PHONY: clean

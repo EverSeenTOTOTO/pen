@@ -42,10 +42,10 @@ export class HomeStore implements PrefetchStore<HomeState> {
 
   get html() {
     return this.data?.type === 'error'
-      ? this.data?.message
+      ? decodeURIComponent(this.data?.message)
       : this.data?.type === 'directory'
         ? this.data?.reading
-          ? this.data?.reading?.content
+          ? decodeURIComponent(this.data?.reading?.content)
           : ''
         : '';
   }

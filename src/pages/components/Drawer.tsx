@@ -99,62 +99,62 @@ const Drawer = observer(() => {
   const ref = useRef<HTMLElement | null>();
 
   return (
-      <MuiDrawer
-        variant="permanent"
-        className={clsx(classes.drawer, {
+    <MuiDrawer
+      variant="permanent"
+      className={clsx(classes.drawer, {
+        [classes.drawerOpen]: drawer.visible,
+        [classes.drawerClose]: !drawer.visible,
+      })}
+      classes={{
+        paper: clsx({
           [classes.drawerOpen]: drawer.visible,
           [classes.drawerClose]: !drawer.visible,
-        })}
-        classes={{
-          paper: clsx({
-            [classes.drawerOpen]: drawer.visible,
-            [classes.drawerClose]: !drawer.visible,
-          }),
-        }}
-      >
-        <div className={classes.drawerContainer}>
-          <List dense className={clsx(classes.dir, { [classes.hidden]: !drawer.visible })}>
-            {drawer.childDocs.map((doc) => (
-              <ListItem button key={doc.filename} onClick={() => nav(doc.relativePath)}>
-                <NoSsr>
-                  <ListItemIcon className={classes.icon}>{
-                    doc.type === 'directory'
-                      ? <Folder />
-                      : <Description />
-                    }</ListItemIcon>
-                </NoSsr>
-                <ListItemText className={classes.filename} primary={doc.filename} />
-              </ListItem>
-            ))}
-          </List>
-          <Divider />
-          {drawer.toc.length > 0 && <TreeView
-            ref={ref}
-            className={clsx(classes.toc, {
-              [classes.hidden]: !drawer.visible,
-            })}
-            expanded={drawer.expandedToc}
-            onNodeToggle={(_, data: string[]) => drawer.setExpandedToc(data)}
-            defaultCollapseIcon={<NoSsr><ExpandMoreIcon /></NoSsr>}
-            defaultExpandIcon={<NoSsr><ChevronRightIcon /></NoSsr>}
-          >
-            <Toc toc={drawer.toc[0]} />
-          </TreeView>}
-          <div className={clsx({ [classes.box]: !drawer.visible })}/>
-          <Divider />
-          <div className={clsx(classes.btn, { [classes.btnClose]: !drawer.visible })}>
-            <IconButton onClick={() => drawer.toggle()}>
-              {drawer.visible ? <ChevronLeftIcon /> : <ChevronRightIcon />}
-            </IconButton>
-            <IconButton onClick={() => {
-              ref.current?.scrollIntoView();
-              window.scrollTo(0, 0);
-            }}>
-              <ExpandLessTwoToneIcon />
-            </IconButton>
-          </div>
+        }),
+      }}
+    >
+      <div className={classes.drawerContainer}>
+        <List dense className={clsx(classes.dir, { [classes.hidden]: !drawer.visible })}>
+          {drawer.childDocs.map((doc) => (
+            <ListItem button key={doc.filename} onClick={() => nav(doc.relativePath)}>
+              <NoSsr>
+                <ListItemIcon className={classes.icon}>{
+                  doc.type === 'directory'
+                    ? <Folder />
+                    : <Description />
+                }</ListItemIcon>
+              </NoSsr>
+              <ListItemText className={classes.filename} primary={doc.filename} />
+            </ListItem>
+          ))}
+        </List>
+        <Divider />
+        {drawer.toc.length > 0 && <TreeView
+          ref={ref}
+          className={clsx(classes.toc, {
+            [classes.hidden]: !drawer.visible,
+          })}
+          expanded={drawer.expandedToc}
+          onNodeToggle={(_, data: string[]) => drawer.setExpandedToc(data)}
+          defaultCollapseIcon={<NoSsr><ExpandMoreIcon /></NoSsr>}
+          defaultExpandIcon={<NoSsr><ChevronRightIcon /></NoSsr>}
+        >
+          <Toc toc={drawer.toc[0]} />
+        </TreeView>}
+        <div className={clsx({ [classes.box]: !drawer.visible })} />
+        <Divider />
+        <div className={clsx(classes.btn, { [classes.btnClose]: !drawer.visible })}>
+          <IconButton onClick={() => drawer.toggle()}>
+            {drawer.visible ? <ChevronLeftIcon /> : <ChevronRightIcon />}
+          </IconButton>
+          <IconButton onClick={() => {
+            ref.current?.scrollIntoView();
+            window.scrollTo(0, 0);
+          }}>
+            <ExpandLessTwoToneIcon />
+          </IconButton>
         </div>
-      </MuiDrawer>);
+      </div>
+    </MuiDrawer>);
 });
 
 export default Drawer;

@@ -67,7 +67,7 @@ export class RemarkRehype {
       const content = (await this.render.process(markdown)).toString();
       const toc = (await this.tocExtractor.process(content)).result as DocToc[];
 
-      return { content, toc };
+      return { content: encodeURIComponent(content), toc };
     } catch (reason) {
       // TODO: cannot use processError because that may cause infinite loop
       return { content: `Remark/Rehype Error: ${String(reason)}` };

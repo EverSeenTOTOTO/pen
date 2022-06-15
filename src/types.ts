@@ -24,7 +24,7 @@ export enum ServerEvents {
 }
 
 export type ServerToClientEvents = {
-  [ServerEvents.PenData]: (data: PenMarkdownData | PenDirectoryData | PenErrorData) => void;
+  [ServerEvents.PenData]: (data: PenDirectoryData | PenErrorData) => void;
   [ServerEvents.PenError]: (error: PenErrorData) => void;
   [ServerEvents.PenStyle]: (theme: PenTheme) => void;
 };

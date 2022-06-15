@@ -24,20 +24,20 @@ const Markdown = observer(() => {
   const home = useStore('home');
 
   return <Container
-      maxWidth={false}
-      // required for github-markdown-css
-      className="markdown-body"
-      classes={{
-        root: classes.root,
-      }}
-    >
+    maxWidth={false}
+    // required for github-markdown-css
+    className="markdown-body"
+    classes={{
+      root: classes.root,
+    }}
+  >
     {!home.loading
       ? <Paper
-          classes={{
-            root: classes.paper,
-          }}
-          dangerouslySetInnerHTML={createMarkup(home.html)}
-        />
+        classes={{
+          root: classes.paper,
+        }}
+        dangerouslySetInnerHTML={createMarkup(home.html)}
+      />
       : <Paper
         classes={{
           root: classes.paper,

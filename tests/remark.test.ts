@@ -13,8 +13,8 @@ it('test process markdown', async () => {
 
   const { content, toc } = await remark.process('# A');
 
-  expect(content).toMatch(/<h.*?UUID[^<]*A<\/h1>/);
-  expect(toc![0].text).toMatch(/A/);
+  expect(decodeURIComponent(content)).toMatch(/<h.*?UUID[^<]*A<\/h1>/);
+  expect(toc?.[0].text).toMatch(/A/);
 });
 
 it('test process error', async () => {
@@ -22,7 +22,7 @@ it('test process error', async () => {
 
   const { message } = await remark.processError(new Error('TEST'));
 
-  expect(message).toMatch(/<code.*TEST/);
+  expect(decodeURIComponent(message)).toMatch(/<code.*TEST/);
 });
 
 it('test disable plugin', async () => {
@@ -30,7 +30,8 @@ it('test disable plugin', async () => {
     plugins: [['rehype-toc-id', false]],
   });
 
-  const { content } = await remark.process('# A');
+  const data = await remark.process('# A');
+  const content = decodeURIComponent(data.content);
 
   expect(content).not.toMatch(/<h.*?UUID[^<]*A<\/h1>/);
   expect(content).toMatch(/<h[^<]*A<\/h1>/);
@@ -39,7 +40,8 @@ it('test disable plugin', async () => {
 it('test highlightjs', async () => {
   const remark = createRemark();
 
-  const { content } = await remark.process('```ts\nconsole.log()\n```\n```bash\nls -lf\n```');
+  const data = await remark.process('```ts\nconsole.log()\n```\n```bash\nls -lf\n```');
+  const content = decodeURIComponent(data.content);
 
   expect(content).toMatch(/<code class="language-ts">/);
   expect(content).toMatch(/<code class="language-bash">/);
@@ -51,7 +53,7 @@ it('test container', async () => {
 
   const { content } = await remark.process(':::warn\nTEST\n:::');
 
-  expect(content).toMatch(/<div class="container container-warn"><p>TEST<\/p><\/div>/);
+  expect(decodeURIComponent(content)).toMatch(/<div class="container container-warn"><p>TEST<\/p><\/div>/);
 });
 
 it('test copy', async () => {
@@ -59,5 +61,5 @@ it('test copy', async () => {
 
   const { content } = await remark.process('```ts\nconsole.log()\n```');
 
-  expect(content).toMatch(/data-clipboard-text="console.log()/);
+  expect(decodeURIComponent(content)).toMatch(/data-clipboard-text="console.log()/);
 });

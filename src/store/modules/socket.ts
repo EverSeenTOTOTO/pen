@@ -7,7 +7,6 @@ import {
   PenErrorData,
   ServerEvents,
   PenSocketInfo,
-  PenMarkdownData,
   PenDirectoryData,
   ClientToServerEvents,
   ServerToClientEvents,
@@ -59,7 +58,7 @@ export class SocketStore implements PrefetchStore<PenSocketInfo> {
     };
   }
 
-  onData(data: PenMarkdownData | PenDirectoryData | PenErrorData) {
+  onData(data: PenDirectoryData | PenErrorData) {
     if (import.meta.env.DEV) {
       console.info(data);
     }

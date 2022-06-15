@@ -19,14 +19,15 @@ const Toc = ({ toc }: { toc: DocToc }) => {
     heading?.scrollIntoView();
     e.preventDefault();
   };
+  const text = decodeURIComponent(toc.text);
 
   return (toc.children.length > 0
-    ? <StyledTreeItem nodeId={toc.id} label={toc.text} onLabelClick={handleClick}>
-    {
-      toc.children.map((child: DocToc) => <Toc key={child.id} toc={child} />)
-    }
-  </StyledTreeItem>
-    : <StyledTreeItem nodeId={toc.id} label={toc.text} onLabelClick={handleClick}/>
+    ? <StyledTreeItem nodeId={toc.id} label={text} onLabelClick={handleClick}>
+      {
+        toc.children.map((child: DocToc) => <Toc key={child.id} toc={child} />)
+      }
+    </StyledTreeItem>
+    : <StyledTreeItem nodeId={toc.id} label={text} onLabelClick={handleClick} />
   );
 };
 

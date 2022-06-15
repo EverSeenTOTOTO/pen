@@ -5,14 +5,13 @@ import { slash } from '@/utils';
 import EventEmitter from 'events';
 import fs, { mkdirSync } from 'fs';
 import path from 'path';
-import http, { IncomingMessage } from 'http';
 
 jest.setTimeout(20000);
 
 export const mockRemark = {
   render: {} as any,
   tocExtractor: {} as any,
-  usePlugins() {},
+  usePlugins() { },
   process: (s: string) => Promise.resolve({ content: `!!TEST!! ${s}` }),
   processError: (s?: Error) => Promise.resolve({ message: s?.message ?? '' }),
 };
@@ -88,20 +87,6 @@ afterAll(async () => {
   fs.rmSync(rootDir, { force: true, recursive: true });
   chromiumBrowser?.close();
   firefoxBrowser?.close();
-});
-
-export const testMockServer = (url: string, callback:(res: IncomingMessage)=>void) => new Promise<void>((resolve, reject) => {
-  console.log(`Connect to mock server, url: ${url}...`);
-
-  const timeout = setTimeout(() => reject(new Error('Connect timeout')), 1000);
-  const req = http.request(url, (response: IncomingMessage) => {
-    console.log(`Connected to mock server: ${url}.`);
-    callback(response);
-    clearTimeout(timeout);
-    resolve();
-  });
-  req.on('error', reject);
-  req.end();
 });
 
 export const e2e = (callback: (page: Page) => Promise<void>) => {

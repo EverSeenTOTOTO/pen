@@ -21,4 +21,5 @@ declare interface ImportMetaEnv {
 
 declare interface ImportMeta {
   readonly env: ImportMetaEnv
+  readonly globEager(path: string): any;
 }

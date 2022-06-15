@@ -91,7 +91,7 @@ function createToc(tree: any) {
         id,
         parent,
         heading,
-        text: getInnerText(node),
+        text: encodeURIComponent(getInnerText(node)),
         children: [],
       };
 

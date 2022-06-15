@@ -12,7 +12,7 @@ export class ThemeStore implements PrefetchStore<ThemeState> {
 
   avaliable: string[] = []
 
-  options:ThemeOptions = {};
+  options: ThemeOptions = {};
 
   root: AppStore;
 

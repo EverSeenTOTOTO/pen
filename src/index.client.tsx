@@ -22,5 +22,5 @@ if (window.__PREFETCHED_STATE__) {
 }
 
 root.render(<BrowserRouter>
-    <App store={store} routes={routes}/>
-  </BrowserRouter>);
+  <App store={store} routes={routes} />
+</BrowserRouter>);
