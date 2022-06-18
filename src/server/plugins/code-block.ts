@@ -19,19 +19,22 @@ function getLanguage(node: any) {
 }
 
 export const makeCodeBlockPlugin = (callback: any) => () => (tree: any) => {
-  visit(tree, 'element', (node: any, index: number | null, parent: any) => {
+  visit(tree, 'element', (pre: any, index: number | null, parent: any) => {
     if (
       !parent
-        || !('tagName' in parent)
-        || parent.tagName !== 'pre'
-        || node.tagName !== 'code'
-        || !node.properties
+      || pre.tagName !== 'pre'
     ) {
       return;
     }
 
-    const lang = getLanguage(node);
+    const code = pre.children?.filter((each: any) => each.tagName === 'code')[0];
 
-    callback(lang, node, index, parent);
+    if (!code) return;
+
+    const lang = getLanguage(code);
+
+    if (!lang) return;
+
+    callback(lang, code, pre, index, parent);
   });
 };

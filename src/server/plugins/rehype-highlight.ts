@@ -25,17 +25,15 @@ const loadLanguage = (lang: string) => {
   }
 };
 
-export default makeCodeBlockPlugin((language: string | undefined, node: any) => {
-  if (!language) return;
-
+export default makeCodeBlockPlugin((language: string, node: any) => {
   try {
     loadLanguage(language);
 
     const code = hljs.highlight(h2s.toString(node), { language }).value;
-    const ast = hfp.fromParse5(parse5.parse(code));
+    const hlcode = hfp.fromParse5(parse5.parse(code));
 
-    if (ast.type === 'element' || ast.type === 'root') {
-      node.children = ast.children;
+    if (hlcode.type === 'element' || hlcode.type === 'root') {
+      node.children = hlcode.children;
     }
   } catch (e) {
     // pass

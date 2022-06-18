@@ -32,6 +32,10 @@ body {
     position: relative;
   }
 
+  & .copy-btn-container {
+    position: relative;
+  }
+
   & .copy-btn {
     position: absolute;
     top: 0.5rem;
