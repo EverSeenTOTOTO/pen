@@ -37,7 +37,7 @@ function getInnerText(node: any): string {
     }
   }
 
-  return text;
+  return text.trim();
 }
 
 function addHeadingId(node: any) {

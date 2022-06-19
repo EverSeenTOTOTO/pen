@@ -1,6 +1,3 @@
-import {
-  chromium, firefox, Browser, Page,
-} from 'playwright';
 import { slash } from '@/utils';
 import EventEmitter from 'events';
 import fs, { mkdirSync } from 'fs';
@@ -59,9 +56,6 @@ export const mdA = path.join(rootDir, 'A.md');
 export const txtA = path.join(rootDir, 'A.txt');
 export const mdb = path.join(dirA, 'b.md');
 
-let chromiumBrowser: Browser | undefined;
-let firefoxBrowser: Browser | undefined;
-
 beforeAll(async () => {
   if (fs.existsSync(rootDir)) {
     fs.rmSync(rootDir, { force: true, recursive: true });
@@ -72,31 +66,8 @@ beforeAll(async () => {
   fs.writeFileSync(mdA, '# A');
   fs.writeFileSync(txtA, '# A');
   fs.writeFileSync(mdb, '# b');
-
-  chromiumBrowser = await chromium.launch().catch(() => undefined);
-  firefoxBrowser = await firefox.launch().catch(() => undefined);
-
-  if (chromiumBrowser || firefoxBrowser) {
-    console.info(`Test browser launched, chromium: ${chromiumBrowser?.version()}, firefox: ${firefoxBrowser?.version()}`);
-  } else {
-    console.error('Test browser unable to launch');
-  }
 });
 
 afterAll(async () => {
   fs.rmSync(rootDir, { force: true, recursive: true });
-  chromiumBrowser?.close();
-  firefoxBrowser?.close();
 });
-
-export const e2e = (callback: (page: Page) => Promise<void>) => {
-  const testInBrowser = async (browser: Browser) => {
-    const page = await browser.newPage();
-    return callback(page).finally(() => page.close());
-  };
-
-  return Promise.all([
-    chromiumBrowser && testInBrowser(chromiumBrowser),
-    firefoxBrowser && testInBrowser(firefoxBrowser),
-  ]);
-};

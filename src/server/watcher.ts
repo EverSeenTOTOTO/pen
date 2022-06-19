@@ -11,14 +11,68 @@ import {
   PenDirectoryData,
   ServerToClientEvents,
 } from '../types';
-import {
-  formatRelative,
-  resolvePathInfo,
-} from '../utils';
+import { formatRelative, resolvePathInfo } from '../utils';
 import { Logger } from './logger';
-import {
-  readUnknown,
-} from './reader';
+import { readUnknown } from './reader';
+
+type WatcherEvent = { type: 'jump' | 'refresh', relative: string };
+
+export class SimpleQueue {
+  watcher: Watcher;
+
+  timeoutId?: NodeJS.Timeout;
+
+  interval: number;
+
+  queue: WatcherEvent[] = [];
+
+  constructor(watcher: Watcher, interval = 300) {
+    this.watcher = watcher;
+    this.interval = interval;
+  }
+
+  enque(event: WatcherEvent) {
+    // TODO: more dispatch strategy
+    if (event.type === 'jump') {
+      this.queue = [event];
+    } else if (event.type === 'refresh') {
+      this.queue = this.queue.filter((e) => e.type !== event.type || e.relative !== event.relative);
+      this.queue.push(event);
+    }
+
+    this.notify();
+  }
+
+  notify() {
+    if (this.timeoutId) return;
+    this.timeoutId = setInterval(() => {
+      this.dispatch();
+    }, this.interval);
+  }
+
+  async dispatch() {
+    if (this.queue.length > 0) {
+      const top = this.queue.shift()!;
+
+      try {
+        await this.watcher[top.type](top.relative);
+        return await this.watcher.sendData();
+      } catch (e) {
+        return this.watcher.sendError(e as Error);
+      }
+    }
+
+    this.clear();
+    return Promise.resolve();
+  }
+
+  clear() {
+    if (this.timeoutId) {
+      clearInterval(this.timeoutId);
+      this.timeoutId = undefined;
+    }
+  }
+}
 
 export class Watcher {
   root: string;
@@ -35,19 +89,29 @@ export class Watcher {
 
   current?: PenDirectoryData;
 
+  queue: SimpleQueue;
+
   constructor(options: WatcherOptions) {
     this.root = options.root;
     this.ignores = options.ignores;
     this.logger = options.logger;
     this.remark = options.remark;
+    this.queue = new SimpleQueue(this);
   }
 
   setupEmit(emit: Watcher['emit']) {
     this.emit = emit;
   }
 
-  async setupWatching(switchTo: string) {
-    const pathInfo = resolvePathInfo(this.root, switchTo);
+  setupWatching(relative: string) {
+    this.queue.enque({
+      type: 'jump',
+      relative,
+    });
+  }
+
+  async jump(jumpTo: string) {
+    const pathInfo = resolvePathInfo(this.root, jumpTo);
 
     if (pathInfo.type === 'directory') {
       if (this.current?.relativePath !== pathInfo.relativePath) {
@@ -70,7 +134,7 @@ export class Watcher {
     this.logger.log(`Pen switched to ${pathInfo.fullpath}`);
   }
 
-  protected async onChange(event: string, detail: string) {
+  protected onChange(event: string, detail: string) {
     const relative = formatRelative(path.relative(this.root, detail));
 
     this.logger.log(`Pen detected ${event}: ${relative}`);
@@ -81,16 +145,24 @@ export class Watcher {
       case 'unlinkDir':
       case 'unlink':
         if (this.current) {
-          await this.refresh(
-            this.current?.reading
-              ? this.current?.reading.relativePath
-              : this.current?.relativePath,
-          ).then(() => this.sendData());
+          this.queue.enque(
+            {
+              type: 'refresh',
+              relative: this.current.reading
+                ? this.current.reading.relativePath
+                : this.current.relativePath,
+            },
+          );
         }
         break;
       case 'change':
-        if (this.current && this.current?.reading?.relativePath === relative) {
-          await this.refresh(relative).then(() => this.sendData());
+        if (this.current && this.current.reading?.relativePath === relative) {
+          this.queue.enque(
+            {
+              type: 'refresh',
+              relative,
+            },
+          );
         }
         break;
       default:
@@ -98,30 +170,7 @@ export class Watcher {
     }
   }
 
-  protected async setupWatcher(pathInfo: PathInfo) {
-    await this.watcher?.close();
-
-    return new Promise<void>((resolve, reject) => {
-      this.watcher = chokidar.watch(pathInfo.fullpath, {
-        depth: 0,
-        ignored: this.ignores,
-        awaitWriteFinish: {
-          pollInterval: 100,
-          stabilityThreshold: 300,
-        },
-      });
-      this.watcher.on('error', (e) => {
-        this.sendError(e);
-        reject();
-      });
-      this.watcher.on('ready', () => {
-        this.watcher?.on('all', (evt, detail) => this.onChange(evt, detail).catch((e) => this.sendError(e)));
-        resolve();
-      });
-    });
-  }
-
-  protected async refresh(relative: string) {
+  async refresh(relative: string) {
     try {
       this.current = await readUnknown({
         relative,
@@ -135,6 +184,29 @@ export class Watcher {
       }
       throw e;
     }
+  }
+
+  protected async setupWatcher(pathInfo: PathInfo) {
+    await this.watcher?.close();
+
+    return new Promise<void>((resolve, reject) => {
+      this.watcher = chokidar.watch(pathInfo.fullpath, {
+        depth: 0,
+        ignored: this.ignores,
+        awaitWriteFinish: {
+          pollInterval: 100,
+          stabilityThreshold: 1000,
+        },
+      });
+      this.watcher.on('error', (e) => {
+        this.sendError(e);
+        reject();
+      });
+      this.watcher.on('ready', () => {
+        this.watcher?.on('all', this.onChange.bind(this));
+        resolve();
+      });
+    });
   }
 
   async sendData() {

@@ -1,12 +1,46 @@
 import http from 'http';
+import {
+  chromium, firefox, Browser, Page,
+} from 'playwright';
 import { bindRender } from '@/server/render';
 import { RenderOptions } from '@/types';
 import express from 'express';
 import { logger } from '@/server/logger';
 import getPort from 'get-port';
 import {
-  dist, e2e, rootDir, mockRemark,
+  dist, rootDir, mockRemark,
 } from './setup';
+
+let chromiumBrowser: Browser | undefined;
+let firefoxBrowser: Browser | undefined;
+
+beforeAll(async () => {
+  chromiumBrowser = await chromium.launch().catch(() => undefined);
+  firefoxBrowser = await firefox.launch().catch(() => undefined);
+
+  if (chromiumBrowser || firefoxBrowser) {
+    console.info(`Test browser launched, chromium: ${chromiumBrowser?.version()}, firefox: ${firefoxBrowser?.version()}`);
+  } else {
+    console.error('Test browser unable to launch');
+  }
+});
+
+afterAll(async () => {
+  chromiumBrowser?.close();
+  firefoxBrowser?.close();
+});
+
+const e2e = (callback: (page: Page) => Promise<void>) => {
+  const testInBrowser = async (browser: Browser) => {
+    const page = await browser.newPage();
+    return callback(page).finally(() => page.close());
+  };
+
+  return Promise.all([
+    chromiumBrowser && testInBrowser(chromiumBrowser),
+    firefoxBrowser && testInBrowser(firefoxBrowser),
+  ]);
+};
 
 const prepareServer = (opts?: Partial<Omit<RenderOptions, 'remark'>>) => {
   const app = express();

@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import { Watcher } from '@/server/watcher';
+import { SimpleQueue, Watcher } from '@/server/watcher';
 import { PenDirectoryData, PenErrorData, WatcherOptions } from '@/types';
 import { logger } from '@/server/logger';
 import path from 'path';
@@ -22,19 +22,70 @@ const createWatcher = (opts?: Partial<WatcherOptions>) => new Watcher({
   remark: mockRemark,
 });
 
-const watchAndSend = (watcher: Watcher, relative: string) => watcher.setupWatching(relative)
-  .then(() => watcher.sendData())
-  .catch((e) => watcher.sendError(e));
+const sleep = (timeout: number) => new Promise<void>((res) => setTimeout(res, timeout));
+
+it('test schedule', async () => {
+  const mockWatcher = {
+    jump: jest.fn(),
+    refresh: jest.fn(),
+    sendData: jest.fn(),
+    sendError: jest.fn(),
+    clear() {
+      this.jump.mockClear();
+      this.refresh.mockClear();
+      this.sendData.mockClear();
+      this.sendError.mockClear();
+    },
+  };
+  // @ts-ignore
+  const queue = new SimpleQueue(mockWatcher);
+
+  queue.enque({ type: 'jump', relative: '/' });
+  await sleep(400);
+  expect(mockWatcher.jump).toHaveBeenCalledWith('/');
+  mockWatcher.clear();
+
+  queue.enque({ type: 'jump', relative: '/' });
+  queue.enque({ type: 'jump', relative: '/a' });
+  queue.enque({ type: 'jump', relative: '/b' });
+  await sleep(400);
+  expect(mockWatcher.jump).toHaveBeenCalledTimes(1);
+  expect(mockWatcher.jump).toHaveBeenCalledWith('/b');
+  mockWatcher.clear();
+
+  queue.enque({ type: 'refresh', relative: '/' });
+  queue.enque({ type: 'refresh', relative: '/' });
+  queue.enque({ type: 'refresh', relative: '/' });
+  await sleep(400);
+  expect(mockWatcher.refresh).toHaveBeenCalledTimes(1);
+  expect(mockWatcher.refresh).toHaveBeenCalledWith('/');
+  mockWatcher.clear();
+
+  queue.enque({ type: 'jump', relative: '/' });
+  queue.enque({ type: 'refresh', relative: '/' });
+  queue.enque({ type: 'refresh', relative: '/' });
+  await sleep(700);
+  expect(mockWatcher.jump).toHaveBeenCalledTimes(1);
+  expect(mockWatcher.refresh).toHaveBeenCalledTimes(1);
+  mockWatcher.clear();
+
+  queue.enque({ type: 'refresh', relative: '/' });
+  queue.enque({ type: 'jump', relative: '/' });
+  queue.enque({ type: 'jump', relative: '/' });
+  await sleep(700);
+  expect(mockWatcher.jump).toHaveBeenCalledTimes(1);
+  expect(mockWatcher.refresh).not.toHaveBeenCalled();
+});
 
 it('test watcher', (done) => {
   const watcher = createWatcher();
 
-  watchAndSend(watcher, '/')
-    .finally(() => {
-      expect(watcher.watcher).toBeInstanceOf(MockChokidar);
-      expect(watcher.root).toBe(rootDir);
-      watcher?.close()?.finally(done);
-    });
+  watcher.setupWatching('/');
+  setTimeout(() => {
+    expect(watcher.watcher).toBeInstanceOf(MockChokidar);
+    expect(watcher.root).toBe(rootDir);
+    watcher?.close()?.finally(done);
+  }, 400);
 });
 
 it('test watch root', (done) => {
@@ -48,7 +99,7 @@ it('test watch root', (done) => {
 
     watcher.close()?.finally(done);
   });
-  watchAndSend(watcher, '/');
+  watcher.setupWatching('/');
 });
 
 it('test ignores', (done) => {
@@ -62,10 +113,10 @@ it('test ignores', (done) => {
     expect(dir.children.length).toBe(0);
     watcher.close()?.finally(done);
   });
-  watchAndSend(watcher, '/');
+  watcher.setupWatching('/');
 });
 
-it('test switchTo nested', (done) => {
+it('test jumpTo nested', (done) => {
   const watcher = createWatcher();
   const datas: any[] = [];
 
@@ -73,21 +124,24 @@ it('test switchTo nested', (done) => {
     datas.push(data);
   });
 
-  watchAndSend(watcher, '/').finally(() => {
-    watchAndSend(watcher, '/A/b.md').finally(() => {
+  watcher.setupWatching('/');
+  setTimeout(() => {
+    watcher.setupWatching('/A/b.md');
+    setTimeout(() => {
       expect(datas[0].relativePath).toBe('/');
       expect(datas[1].relativePath).toBe('/A');
       expect(datas[1].reading).not.toBeUndefined();
 
       watcher.close()?.finally(done);
-    });
-  });
+    }, 400);
+  }, 400);
 });
 
 it('test change', (done) => {
   const watcher = createWatcher();
 
-  watchAndSend(watcher, '/A/b.md').finally(() => {
+  watcher.setupWatching('/A/b.md');
+  setTimeout(() => {
     watcher.setupEmit((_, data) => {
       const dir = data as PenDirectoryData;
 
@@ -97,7 +151,7 @@ it('test change', (done) => {
 
     fs.writeFileSync(mdb, '# change');
     watcher.watcher?.emit('all', 'change', mdb);
-  });
+  }, 400);
 });
 
 it('test addDir', (done) => {
@@ -109,7 +163,8 @@ it('test addDir', (done) => {
     expect(dir.children.length).toBe(2);
   });
 
-  watchAndSend(watcher, '/A/b.md').finally(() => {
+  watcher.setupWatching('/A/b.md');
+  setTimeout(() => {
     watcher.setupEmit((_, data) => {
       const dir = data as PenDirectoryData;
 
@@ -120,13 +175,14 @@ it('test addDir', (done) => {
     const dir = path.join(dirA, 'dir');
     fs.mkdirSync(dir);
     watcher.watcher?.emit('all', 'addDir', dir);
-  });
+  }, 400);
 });
 
 it('test rm watching', (done) => {
   const watcher = createWatcher();
 
-  watcher.setupWatching('/A.md').finally(() => {
+  watcher.setupWatching('/A.md');
+  setTimeout(() => {
     watcher.setupEmit((_, data) => {
       const err = data as PenErrorData;
 
@@ -142,7 +198,8 @@ it('test rm watching', (done) => {
 it('test add readme', (done) => {
   const watcher = createWatcher();
 
-  watcher.setupWatching('/').then(() => {
+  watcher.setupWatching('/');
+  setTimeout(() => {
     watcher.setupEmit((_, data) => {
       const dir = data as PenDirectoryData;
 
@@ -173,5 +230,5 @@ it('test sort', (done) => {
 
     watcher.close()?.finally(done);
   });
-  watchAndSend(watcher, '/');
+  watcher.setupWatching('/');
 });
