@@ -1,3 +1,7 @@
+html {
+  color-scheme: dark;
+}
+
 .markdown-body a {
   color: skyblue;
 }

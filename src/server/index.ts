@@ -60,5 +60,5 @@ export const createServer = async (opts?: PenCliOptions) => {
     options.logger.warn(`Pen found port ${opts?.port} unavaliable, use port ${avaliablePort} instead`);
   }
 
-  return new Promise((resolve) => server.listen(port, () => resolve({ server, port, options })));
+  return new Promise((resolve) => server.listen(avaliablePort, () => resolve({ server, port: avaliablePort, options })));
 };
