@@ -58,7 +58,10 @@ const Home = observer(() => {
       open={home.message !== ''}
       autoHideDuration={3000}
       anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-      onClose={() => home.notify('info', '')}
+      onClose={(_?: React.SyntheticEvent, reason?: string) => {
+        if (reason === 'clickaway') { return; }
+        home.notify('info', '');
+      }}
     >
       <Alert severity={home.severity}>
         {home.message}
