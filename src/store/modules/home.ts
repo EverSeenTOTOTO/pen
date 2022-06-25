@@ -66,10 +66,10 @@ export class HomeStore implements PrefetchStore<HomeState> {
     return result;
   }
 
-  fetchData(pathname: string, loading = true) {
+  fetchData(pathname: string, foreground = true) {
     const relative = decodeURIComponent(pathname);
-    if (relative === this.reading) return;
-    if (loading) {
+    if (foreground && relative === this.reading) return;
+    if (foreground) {
       this.timeoutId = setTimeout(() => {
         this.loading = true;
       }, 300);
