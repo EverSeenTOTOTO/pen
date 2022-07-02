@@ -9,6 +9,10 @@ import { useNav } from '@/store/hooks';
 
 const useStyles = makeStyles((theme: Theme) => createStyles({
   root: {
+    position: 'sticky',
+    top: 0,
+    zIndex: 999,
+    backgroundColor: theme.palette.background.default,
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -19,6 +23,10 @@ const useStyles = makeStyles((theme: Theme) => createStyles({
   breadcrumb: {
     marginTop: theme.spacing(1),
     marginLeft: theme.spacing(1),
+    '& li:nth-child(1)': {
+      marginTop: -theme.spacing(0.25),
+      marginRight: -theme.spacing(0.5),
+    },
     '& li:not(:nth-child(1))': {
       marginTop: -theme.spacing(1),
     },
