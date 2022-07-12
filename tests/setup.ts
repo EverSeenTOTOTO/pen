@@ -2,8 +2,11 @@ import { slash } from '@/utils';
 import EventEmitter from 'events';
 import fs, { mkdirSync } from 'fs';
 import path from 'path';
+import { cache } from '@/server/reader';
 
 jest.setTimeout(20000);
+
+beforeEach(() => cache.clear());
 
 export const mockRemark = {
   render: {} as any,

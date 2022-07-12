@@ -26,8 +26,10 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
-  chromiumBrowser?.close();
-  firefoxBrowser?.close();
+  await Promise.all([
+    chromiumBrowser?.close(),
+    firefoxBrowser?.close(),
+  ]);
 });
 
 const e2e = (callback: (page: Page) => Promise<void>) => {

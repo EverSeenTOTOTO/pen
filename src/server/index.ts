@@ -41,7 +41,6 @@ export const normalizeOptions = (opts?: Partial<PenOptions>) => {
   };
 };
 
-// for test
 export const createServer = async (opts?: PenCliOptions) => {
   const app = express();
   const server = http.createServer(app);

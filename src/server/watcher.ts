@@ -230,6 +230,7 @@ export class Watcher {
   close() {
     this.emit = undefined;
     this.current = undefined;
+    this.queue.clear();
     return this.watcher?.close();
   }
 }

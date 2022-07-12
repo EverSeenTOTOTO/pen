@@ -1,6 +1,7 @@
 /* eslint-disable no-param-reassign */
 import fs from 'fs';
 import path from 'path';
+import LRU from 'lru-cache';
 import {
   PathInfo,
   PenMarkdownData,
@@ -78,6 +79,11 @@ async function readDirectory(root: string, pathInfo: PathInfo, ignores: RegExp[]
   };
 }
 
+// export for test
+export const cache = new LRU({
+  max: 10,
+});
+
 export async function readUnknown(options: ReaderOptions) {
   const {
     root, relative, remark, ignores,
@@ -86,12 +92,29 @@ export async function readUnknown(options: ReaderOptions) {
 
   validatePath(pathInfo, ignores);
 
+  const readCache = async (p: PathInfo) => {
+    const record = cache.get(p.relativePath) as (PenDirectoryData | PenMarkdownData) & { ctime: number } | null;
+    const stat = fs.statSync(p.fullpath);
+
+    if (stat.ctimeMs !== record?.ctime) {
+      const data = p.type === 'directory'
+        ? await readDirectory(root, p, ignores)
+        : await readMarkdown(remark, p);
+
+      cache.set(p.relativePath, { ...data, ctime: stat.ctimeMs });
+
+      return data;
+    }
+
+    return { ...record };
+  };
+
   // if markdown, read its parent
   const directory = pathInfo.type === 'directory' ? pathInfo : resolvePathInfo(root, path.dirname(pathInfo.relativePath));
-  const data = await readDirectory(root, directory, ignores);
+  const data = await readCache(directory) as PenDirectoryData;
 
   if (pathInfo.type === 'markdown') {
-    data.reading = await readMarkdown(remark, pathInfo);
+    data.reading = await readCache(pathInfo) as PenMarkdownData;
   } else {
     // if readme
     const readme = data.children.filter((each) => isReadme(each.filename));
