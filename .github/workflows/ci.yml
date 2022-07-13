@@ -2,7 +2,7 @@ name: UnitTest
 
 on:
   push:
-    branches: [main]
+    branches: [ci]
     paths:
       - 'src/**'
       - 'tests/**'
