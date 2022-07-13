@@ -18,7 +18,7 @@ const useStyles = makeStyles((theme) => ({
       duration: theme.transitions.duration.leavingScreen,
     }),
     marginLeft: theme.spacing(8),
-    [theme.breakpoints.down('md')]: {
+    [theme.breakpoints.down('sm')]: {
       padding: 0,
       marginLeft: theme.spacing(4),
     },
@@ -29,7 +29,7 @@ const useStyles = makeStyles((theme) => ({
       duration: theme.transitions.duration.enteringScreen,
     }),
     marginLeft: theme.spacing(40),
-    [theme.breakpoints.down('md')]: {
+    [theme.breakpoints.down('sm')]: {
       marginLeft: theme.spacing(4),
     },
   },
@@ -37,9 +37,9 @@ const useStyles = makeStyles((theme) => ({
 
 const Home = observer(() => {
   const classes = useStyles();
-  const home = useStore('home');
   const drawer = useStore('drawer');
   const theme = useStore('theme');
+  const ui = useStore('ui');
 
   useAutoFetch();
   useClipboard();
@@ -55,16 +55,16 @@ const Home = observer(() => {
       <Markdown />
     </main>
     <Snackbar
-      open={home.message !== ''}
+      open={ui.message !== ''}
       autoHideDuration={3000}
       anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
       onClose={(_?: React.SyntheticEvent, reason?: string) => {
         if (reason === 'clickaway') { return; }
-        home.notify('info', '');
+        ui.notify('info', '');
       }}
     >
-      <Alert severity={home.severity}>
-        {home.message}
+      <Alert severity={ui.severity}>
+        {ui.message}
       </Alert>
     </Snackbar>
   </ThemeProvider>;

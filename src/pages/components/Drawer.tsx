@@ -39,7 +39,7 @@ const useStyles = makeStyles((theme) => createStyles({
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.leavingScreen,
     }),
-    [theme.breakpoints.down('md')]: {
+    [theme.breakpoints.down('sm')]: {
       width: theme.spacing(4),
     },
   },

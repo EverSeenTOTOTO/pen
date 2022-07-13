@@ -43,7 +43,7 @@ const BreadCrumbRoutes = observer(() => {
   const classes = useStyles();
   const nav = useNav();
   const theme = useStore('theme');
-  const home = useStore('home');
+  const ui = useStore('ui');
   const socket = useStore('socket');
 
   return (
@@ -54,7 +54,7 @@ const BreadCrumbRoutes = observer(() => {
             <HomeIcon className={classes.icon} />
           </NoSsr>
         </Link>
-        {home.breadcrumb.map((link) => (
+        {ui.breadcrumb.map((link) => (
           <Link
             key={link.relative}
             component="button"

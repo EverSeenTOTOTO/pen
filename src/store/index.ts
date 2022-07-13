@@ -3,6 +3,7 @@ import { HomeStore } from './modules/home';
 import { DrawerStore } from './modules/drawer';
 import { ThemeStore } from './modules/theme';
 import { SocketStore } from './modules/socket';
+import { UiStore } from './modules/ui';
 
 export type PrefetchStore<State> = State & {
   // merge ssr prefetched data
@@ -24,11 +25,14 @@ export class AppStore {
 
   socket: SocketStore;
 
+  ui: UiStore;
+
   constructor() {
     this.home = new HomeStore(this);
     this.drawer = new DrawerStore(this);
     this.theme = new ThemeStore(this);
     this.socket = new SocketStore(this);
+    this.ui = new UiStore(this);
   }
 
   hydrate(data: Record<string, unknown>) {

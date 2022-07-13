@@ -1,7 +1,6 @@
 import http from 'http';
 import https from 'https';
 import { Server, Socket } from 'socket.io';
-import { stripNamespace } from '../utils';
 import {
   ClientEvents,
   ServerEvents,
@@ -16,7 +15,7 @@ import { extendLogger } from './logger';
 type PenSocket = Socket<ClientToServerEvents, ServerToClientEvents>;
 
 const setupWatcher = (socket: PenSocket, options: SocketOptions) => {
-  const { logger, namespace } = options;
+  const { logger } = options;
   const watcher = new Watcher(options);
 
   watcher.setupEmit(socket.emit.bind(socket));
@@ -25,7 +24,7 @@ const setupWatcher = (socket: PenSocket, options: SocketOptions) => {
     logger.warn(`Pen disconnect with ${socket.id}`);
     watcher.close();
   });
-  socket.on(ClientEvents.FetchData, (relative) => watcher.setupWatching(stripNamespace(namespace, relative)));
+  socket.on(ClientEvents.FetchData, (relative) => watcher.setupWatching(relative));
 };
 
 const setupThemeProvider = (socket: PenSocket, options: SocketOptions) => {

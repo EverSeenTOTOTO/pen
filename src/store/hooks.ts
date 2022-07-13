@@ -18,14 +18,14 @@ export const useMUIServerStyle = () => {
 };
 
 export const useClipboard = () => {
-  const home = useStore('home');
+  const ui = useStore('ui');
 
   useEffect(() => {
     // clipboard
     const clipboard = new Clipboard('.copy-btn');
 
-    clipboard.on('success', () => home.notify('success', 'Copied.'));
-    clipboard.on('error', () => home.notify('error', 'Copy failed.'));
+    clipboard.on('success', () => ui.notify('success', 'Copied.'));
+    clipboard.on('error', () => ui.notify('error', 'Copy failed.'));
 
     return () => clipboard.destroy();
   }, []);
@@ -33,13 +33,13 @@ export const useClipboard = () => {
 
 export const useNav = () => {
   const navigate = useNavigate();
-  const home = useStore('home');
+  const ui = useStore('ui');
   const socket = useStore('socket');
 
   return (relative: string) => {
     navigate(relative);
     if (!socket.socket.connected) {
-      home.notify('error', 'socket not connect');
+      ui.notify('error', 'socket not connect');
     }
   };
 };

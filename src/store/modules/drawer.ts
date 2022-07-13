@@ -1,5 +1,5 @@
 import { DocToc } from '@/types';
-import { makeAutoObservable, reaction } from 'mobx';
+import { makeAutoObservable, autorun } from 'mobx';
 import type { AppStore } from '..';
 
 export class DrawerStore {
@@ -13,11 +13,7 @@ export class DrawerStore {
     makeAutoObservable(this);
     this.root = root;
 
-    reaction(() => this.root.home.data, () => {
-      if (this.root.home.data?.type === 'directory') {
-        this.expandToc(this.root.home.data?.reading?.toc ?? []);
-      }
-    });
+    autorun(() => this.expandToc(this.root.home.data?.reading?.toc ?? []));
   }
 
   toggle(value?: boolean) {
@@ -25,14 +21,7 @@ export class DrawerStore {
   }
 
   get toc() {
-    const data = this.root.home?.data;
-
-    // eslint-disable-next-line no-nested-ternary
-    const toc = data?.type === 'directory'
-      ? data.reading?.toc
-      : undefined;
-
-    return toc ?? [];
+    return this.root.home.data?.reading?.toc ?? [];
   }
 
   expandToc(tocs: DocToc[]) {
@@ -40,7 +29,6 @@ export class DrawerStore {
       this.expandedToc = [];
     } else {
       const result: string[] = [];
-
       const push = (toc: DocToc) => {
         if (toc.children.length > 0) {
           result.push(toc.id);
@@ -59,10 +47,8 @@ export class DrawerStore {
   }
 
   get childDocs() {
-    const data = this.root.home?.data;
+    const { data } = this.root.home;
 
-    return data?.type === 'directory'
-      ? data.children.map((each) => ({ ...each, relativePath: `${this.root.socket.computePath(each.relativePath)}` }))
-      : [];
+    return data?.children.map((each) => ({ ...each, relativePath: this.root.socket.computePath(each.relativePath) })) ?? [];
   }
 }

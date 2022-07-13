@@ -1,17 +1,25 @@
 /* eslint-disable no-nested-ternary */
-import { makeAutoObservable } from 'mobx';
-import { Color } from '@material-ui/lab/Alert';
+import {
+  action, makeAutoObservable,
+} from 'mobx';
 import {
   ClientEvents, PenDirectoryData, PenErrorData,
 } from '@/types';
+import LRU from 'lru-cache';
 import type { AppStore, PrefetchStore } from '..';
 
 export type HomeState = {
   data?: PenDirectoryData | PenErrorData;
 };
 
+const cache = new LRU({
+  max: 5,
+});
+
 export class HomeStore implements PrefetchStore<HomeState> {
-  data?: PenDirectoryData | PenErrorData;
+  data?: PenDirectoryData;
+
+  error?: PenErrorData;
 
   loading = false;
 
@@ -19,82 +27,76 @@ export class HomeStore implements PrefetchStore<HomeState> {
 
   root: AppStore;
 
-  severity: Color = 'info';
-
-  message = '';
+  last?: string;
 
   constructor(root: AppStore) {
     makeAutoObservable(this);
     this.root = root;
   }
 
-  static getReadingPath(data: HomeState['data']) {
-    return data?.type === 'directory'
-      ? data?.reading
-        ? data.reading?.relativePath
-        : data.relativePath
-      : undefined;
-  }
-
   get reading() {
-    return HomeStore.getReadingPath(this.data);
+    return this.data?.reading?.relativePath ?? this.data?.relativePath;
   }
 
   get html() {
-    return this.data?.type === 'error'
-      ? decodeURIComponent(this.data?.message)
-      : this.data?.type === 'directory'
-        ? this.data?.reading
-          ? decodeURIComponent(this.data?.reading?.content)
-          : ''
-        : '';
-  }
-
-  get breadcrumb() {
-    if (!this.reading || this.reading === '/') return [];
-    const split = this.reading.split('/').slice(1);
-    const result = [];
-
-    for (let i = 0; i < split.length; ++i) {
-      const path = `/${split.slice(0, i + 1).join('/')}`;
-
-      result.push({
-        filename: split[i],
-        relative: `${this.root.socket.computePath(path)}`,
-      });
-    }
-    return result;
+    return decodeURIComponent(this.error
+      ? this.error?.message
+      : this.data?.reading
+        ? this.data?.reading?.content
+        : '');
   }
 
   fetchData(pathname: string, foreground = true) {
-    const relative = decodeURIComponent(pathname);
+    const relative = this.root.socket.stripPath(decodeURIComponent(pathname));
+
     if (foreground && relative === this.reading) return;
-    if (foreground) {
-      this.timeoutId = setTimeout(() => {
-        this.loading = true;
-      }, 300);
+
+    const record = cache.get(relative);
+
+    if (!record) {
+      if (foreground) {
+        this.timeoutId = setTimeout(action(() => {
+          this.loading = true;
+        }), 300);
+      }
+    } else {
+      this.data = record as PenDirectoryData;
     }
+
     console.log(`fetch ${relative}`);
+
+    this.error = undefined;
+    this.last = relative;
     this.root.socket.emit(ClientEvents.FetchData, relative);
   }
 
-  notify(severity: Color, message: string) {
-    this.severity = severity;
-    this.message = message;
-  }
+  hydrate({ data }: HomeState): void {
+    if (data?.type === 'error') {
+      this.error = data;
+    } else {
+      const reading = data?.reading?.relativePath ?? data?.relativePath;
 
-  hydrate(state: HomeState): void {
-    if (globalThis && globalThis.scrollTo && this.reading !== HomeStore.getReadingPath(state.data)) {
-      globalThis.scrollTo(0, 0);
+      if (globalThis && globalThis.scrollTo && this.reading !== reading) {
+        // drop outdated fetch
+        if (this.last && this.last !== data?.relativePath && this.last !== reading) {
+          console.log(`drop ${reading}`);
+          return;
+        }
+
+        globalThis.scrollTo(0, 0);
+      }
+
+      this.loading = false;
+      this.data = data;
+
+      clearTimeout(this.timeoutId as number);
+      cache.set(reading, this.data);
     }
-    clearTimeout(this.timeoutId as number);
-    this.loading = false;
-    this.data = state.data;
   }
 
   dehydra(): HomeState {
     return {
-      data: this.data,
+      data: this.data ?? this.error,
     };
   }
 }
