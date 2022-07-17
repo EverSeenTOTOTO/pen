@@ -32,7 +32,7 @@ export class DrawerStore {
       const push = (toc: DocToc) => {
         if (toc.children.length > 0) {
           result.push(toc.id);
-          toc.children.forEach(push);
+          // toc.children.forEach(push);
         }
       };
 
