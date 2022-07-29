@@ -44,7 +44,7 @@ const e2e = (callback: (page: Page) => Promise<void>) => {
   ]);
 };
 
-const prepareServer = (opts?: Partial<Omit<RenderOptions, 'remark'>>) => {
+const prepareServer = async (opts?: Partial<Omit<RenderOptions, 'remark'>>) => {
   const app = express();
 
   bindRender(app, {
@@ -61,11 +61,9 @@ const prepareServer = (opts?: Partial<Omit<RenderOptions, 'remark'>>) => {
   });
 
   const server = http.createServer(app);
+  const port = await getPort({ port: 3000 });
 
-  return getPort({ port: 3000 })
-    .then((port: number) => new Promise((resolve) => server.listen(port, () => {
-      resolve({ server, port });
-    })));
+  return new Promise<{ server: http.Server, port: number }>((res) => server.listen(port, () => res({ server, port })));
 };
 
 const closeServer = (server: http.Server) => new Promise<void>((res, rej) => server.close((err) => (err ? rej(err) : res())));

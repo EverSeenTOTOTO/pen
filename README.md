@@ -73,7 +73,7 @@ Check [cli.js](./cli.js) and [server/index.ts](./src/server/index.ts) as an exam
 
 3. I want some markdown graph tools?
 
-    Originally, I considered integrating [mermaid](https://mermaid-js.github.io/mermaid/#/) or [graphviz](https://graphviz.org/), but ultimately, I gave up since they all required additional effort and time to learn. (And will not display without support from a tool, unlike Latex/Tex, which is widely used). I now use online tools like [excalidraw](https://excalidraw.com/) for image demands.
+    Originally, I considered integrating [mermaid](https://mermaid-js.github.io/mermaid/#/) or [graphviz](https://graphviz.org/), but finnaly I gave up since they all required additional effort and time to learn. (And will not display without support from a tool, unlike Latex/Tex, which is widely used). I now use online tools like [excalidraw](https://excalidraw.com/) for image demands.
 
 **PRs and issues are welcomed!**
 
