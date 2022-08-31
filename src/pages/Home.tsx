@@ -38,14 +38,13 @@ const useStyles = makeStyles((theme) => ({
 const Home = observer(() => {
   const classes = useStyles();
   const drawer = useStore('drawer');
-  const theme = useStore('theme');
   const ui = useStore('ui');
 
   useAutoFetch();
   useClipboard();
   useMUIServerStyle();
 
-  return <ThemeProvider theme={theme.theme}>
+  return <>
     <CssBaseline />
     <Drawer />
     <main className={clsx(classes.content, {
@@ -67,7 +66,16 @@ const Home = observer(() => {
         {ui.message}
       </Alert>
     </Snackbar>
+  </>;
+});
+
+// migrate MUI@v4 to v5
+const MigratedHome = observer(() => {
+  const theme = useStore('theme');
+
+  return <ThemeProvider theme={theme.theme}>
+    <Home />
   </ThemeProvider>;
 });
 
-export default Home;
+export default MigratedHome;
