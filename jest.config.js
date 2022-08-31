@@ -9,6 +9,7 @@ module.exports = {
   testEnvironment: 'node',
   testMatch: [
     '**/*.test.ts',
+    '!**/render.test.ts',
   ],
   testPathIgnorePatterns: [
     '/node_modules/',

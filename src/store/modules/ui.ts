@@ -1,11 +1,11 @@
 import { makeAutoObservable } from 'mobx';
-import { Color } from '@material-ui/lab/Alert';
+import { AlertColor } from '@mui/lab/Alert';
 import type { AppStore } from '..';
 
 export class UiStore {
   root: AppStore;
 
-  severity: Color = 'info';
+  severity: AlertColor = 'info';
 
   message = '';
 
@@ -14,7 +14,7 @@ export class UiStore {
     this.root = root;
   }
 
-  notify(severity: Color, message: string) {
+  notify(severity: AlertColor, message: string) {
     this.severity = severity;
     this.message = message;
   }

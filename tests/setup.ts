@@ -4,7 +4,7 @@ import fs, { mkdirSync } from 'fs';
 import path from 'path';
 import { cache } from '@/server/reader';
 
-jest.setTimeout(20000);
+jest.setTimeout(10000);
 
 beforeEach(() => cache.clear());
 

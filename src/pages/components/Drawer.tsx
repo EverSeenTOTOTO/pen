@@ -1,26 +1,27 @@
 import { observer } from 'mobx-react-lite';
-import { makeStyles, createStyles } from '@material-ui/core/styles';
-import MuiDrawer from '@material-ui/core/Drawer';
-import List from '@material-ui/core/List';
-import Divider from '@material-ui/core/Divider';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemIcon from '@material-ui/core/ListItemIcon';
-import ListItemText from '@material-ui/core/ListItemText';
-import TreeView from '@material-ui/lab/TreeView';
-import IconButton from '@material-ui/core/IconButton';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
-import ChevronRightIcon from '@material-ui/icons/ChevronRight';
-import ExpandLessTwoToneIcon from '@material-ui/icons/ExpandLessTwoTone';
+import { Theme } from '@mui/material/styles';
+import { makeStyles, createStyles } from '@mui/styles';
+import MuiDrawer from '@mui/material/Drawer';
+import List from '@mui/material/List';
+import Divider from '@mui/material/Divider';
+import ListItem from '@mui/material/ListItem';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import ListItemText from '@mui/material/ListItemText';
+import TreeView from '@mui/lab/TreeView';
+import IconButton from '@mui/material/IconButton';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import ExpandLessTwoToneIcon from '@mui/icons-material/ExpandLessTwoTone';
 import { useStore } from '@/store';
-import { Folder, Description } from '@material-ui/icons';
-import { NoSsr } from '@material-ui/core';
+import { Folder, Description } from '@mui/icons-material';
+import { NoSsr } from '@mui/material';
 import { useNav } from '@/store/hooks';
 import clsx from 'clsx';
 import { useRef } from 'react';
 import Toc from './Toc';
 
-const useStyles = makeStyles((theme) => createStyles({
+const useStyles = makeStyles((theme: Theme) => createStyles({
   drawer: {
     width: theme.spacing(40),
     flexShrink: 0,
@@ -39,7 +40,7 @@ const useStyles = makeStyles((theme) => createStyles({
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.leavingScreen,
     }),
-    [theme.breakpoints.down('sm')]: {
+    [theme.breakpoints.down('md')]: {
       width: theme.spacing(4),
     },
   },
@@ -60,6 +61,10 @@ const useStyles = makeStyles((theme) => createStyles({
     padding: theme.spacing(2),
     '& .MuiTypography-body1': {
       fontSize: '0.875rem',
+    },
+    '& .MuiTreeItem-label': {
+      textOverflow: 'ellipsis',
+      overflow: 'hidden',
     },
   },
   icon: {
@@ -134,7 +139,13 @@ const Drawer = observer(() => {
             [classes.hidden]: !drawer.visible,
           })}
           expanded={drawer.expandedToc}
-          onNodeToggle={(_, data: string[]) => drawer.setExpandedToc(data)}
+          onNodeToggle={(_, data) => drawer.setExpandedToc(data)}
+          onNodeFocus={(e, id) => {
+            const heading = document.getElementById(id);
+
+            heading?.scrollIntoView();
+            e.preventDefault();
+          }}
           defaultCollapseIcon={<NoSsr><ExpandMoreIcon /></NoSsr>}
           defaultExpandIcon={<NoSsr><ChevronRightIcon /></NoSsr>}
         >
@@ -143,18 +154,21 @@ const Drawer = observer(() => {
         <div className={clsx({ [classes.box]: !drawer.visible })} />
         <Divider />
         <div className={clsx(classes.btn, { [classes.btnClose]: !drawer.visible })}>
-          <IconButton onClick={() => drawer.toggle()}>
+          <IconButton onClick={() => drawer.toggle()} size="large">
             {drawer.visible ? <ChevronLeftIcon /> : <ChevronRightIcon />}
           </IconButton>
-          <IconButton onClick={() => {
-            ref.current?.scrollIntoView();
-            window.scrollTo(0, 0);
-          }}>
+          <IconButton
+            onClick={() => {
+              ref.current?.scrollIntoView();
+              window.scrollTo(0, 0);
+            }}
+            size="large">
             <ExpandLessTwoToneIcon />
           </IconButton>
         </div>
       </div>
-    </MuiDrawer>);
+    </MuiDrawer>
+  );
 });
 
 export default Drawer;

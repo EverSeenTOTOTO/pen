@@ -1,10 +1,11 @@
 import path from 'path';
 import fs from 'fs';
-import { ThemeOptions } from '@material-ui/core';
+import deepmerge from 'deepmerge';
+import { ThemeOptions } from '@mui/material';
 import { uuid } from '../utils';
 import { PenTheme } from '../types';
 
-const defaultTheme = {
+const defaultTheme: ThemeOptions = {
   palette: {
     primary: {
       light: '#c1d5e0',
@@ -13,45 +14,69 @@ const defaultTheme = {
       contrastText: '#e3f2fd',
     },
   },
+  components: {
+    // migration from MUI@v4 to v5
+    MuiCssBaseline: {
+      styleOverrides: {
+        body: {
+          fontSize: '0.875rem',
+          lineHeight: 1.43,
+          letterSpacing: '0.01071em',
+        },
+      },
+    },
+    MuiLink: {
+      defaultProps: {
+        underline: 'hover',
+      },
+    },
+    MuiPaper: {
+      styleOverrides: {
+        root: {
+          backgroundImage: 'unset',
+        },
+      },
+    },
+  },
 };
 
 const themes: { [k in 'dark' | 'light']: ThemeOptions } = {
-  dark: {
-    ...defaultTheme,
+  dark: deepmerge(defaultTheme, {
     palette: {
-      ...defaultTheme.palette,
-      type: 'dark',
+      mode: 'dark',
       background: {
         paper: '#0d1117',
         default: '#0d1117',
       },
     },
-    overrides: {
+    components: {
       MuiPaper: {
-        root: {
-          color: 'rgba(255 255 255 / 80%)',
+        styleOverrides: {
+          root: {
+            color: 'rgba(255 255 255 / 80%)',
+          },
         },
       },
     },
-  },
-  light: {
-    ...defaultTheme,
+  }),
+  light: deepmerge(defaultTheme, {
     palette: {
-      ...defaultTheme.palette,
-      type: 'light',
+      mode: 'light',
       background: {
         paper: '#fff',
         default: '#fff',
       },
     },
-    overrides: {
+    components: {
       MuiPaper: {
-        root: {
-          color: 'rgba(0 0 0 / 70%)',
+        styleOverrides: {
+          root: {
+            color: 'rgba(0 0 0 / 70%)',
+          },
         },
       },
     },
-  },
+  }),
 };
 
 const readCssNothrow = (dist: string, file: string) => fs.promises.readFile(path.join(dist, file), 'utf8').catch(() => '');

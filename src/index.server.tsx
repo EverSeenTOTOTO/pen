@@ -2,7 +2,7 @@ import type { Request, Response } from 'express';
 import serializeJavascript from 'serialize-javascript';
 import ReactDOMServer from 'react-dom/server';
 import { StaticRouter } from 'react-router-dom/server';
-import { ServerStyleSheets } from '@material-ui/core/styles';
+import ServerStyleSheets from '@mui/styles/ServerStyleSheets';
 import { App } from './App';
 import { createStore } from './store';
 import { createRoutes } from './routes';

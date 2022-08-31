@@ -1,10 +1,11 @@
-import Breadcrumbs from '@material-ui/core/Breadcrumbs';
-import Link from '@material-ui/core/Link';
-import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
-import HomeIcon from '@material-ui/icons/Home';
+import Breadcrumbs from '@mui/material/Breadcrumbs';
+import Link from '@mui/material/Link';
+import { Theme } from '@mui/material/styles';
+import { createStyles, makeStyles } from '@mui/styles';
+import HomeIcon from '@mui/icons-material/Home';
 import { observer } from 'mobx-react-lite';
 import { useStore } from '@/store';
-import { NoSsr, Switch } from '@material-ui/core';
+import { NoSsr, Switch } from '@mui/material';
 import { useNav } from '@/store/hooks';
 
 const useStyles = makeStyles((theme: Theme) => createStyles({
@@ -24,11 +25,11 @@ const useStyles = makeStyles((theme: Theme) => createStyles({
     marginTop: theme.spacing(1),
     marginLeft: theme.spacing(1),
     '& li:nth-child(1)': {
-      marginTop: -theme.spacing(0.25),
-      marginRight: -theme.spacing(0.5),
+      marginTop: `-${theme.spacing(0.25)}`,
+      marginRight: `-${theme.spacing(0.5)}`,
     },
     '& li:not(:nth-child(1))': {
-      marginTop: -theme.spacing(1),
+      marginTop: `-${theme.spacing(1)}`,
     },
   },
   icon: {

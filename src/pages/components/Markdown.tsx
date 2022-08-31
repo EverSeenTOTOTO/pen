@@ -1,20 +1,21 @@
 import { observer } from 'mobx-react-lite';
 import { useStore } from '@/store';
-import Paper from '@material-ui/core/Paper';
-import { makeStyles } from '@material-ui/core/styles';
+import Paper from '@mui/material/Paper';
+import { makeStyles } from '@mui/styles';
+import { Theme } from '@mui/material/styles';
 import { createMarkup } from '@/utils';
-import { Container } from '@material-ui/core';
-import Typography from '@material-ui/core/Typography';
-import Skeleton from '@material-ui/lab/Skeleton';
+import { Container } from '@mui/material';
+import Typography from '@mui/material/Typography';
+import Skeleton from '@mui/lab/Skeleton';
 import { Suspense } from 'react';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   root: {
     height: '100%',
   },
   paper: {
     padding: theme.spacing(2),
-    [theme.breakpoints.down('sm')]: {
+    [theme.breakpoints.down('md')]: {
       padding: theme.spacing(1),
     },
   },

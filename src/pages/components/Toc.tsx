@@ -1,8 +1,7 @@
 import { DocToc } from '@/types';
-import {
-  alpha, withStyles, Theme, createStyles,
-} from '@material-ui/core/styles';
-import TreeItem, { TreeItemProps } from '@material-ui/lab/TreeItem';
+import { alpha, Theme } from '@mui/material/styles';
+import { withStyles, createStyles } from '@mui/styles';
+import TreeItem, { TreeItemProps } from '@mui/lab/TreeItem';
 
 const StyledTreeItem = withStyles((theme: Theme) => createStyles({
   group: {
@@ -13,21 +12,15 @@ const StyledTreeItem = withStyles((theme: Theme) => createStyles({
 }))((props: TreeItemProps) => <TreeItem {...props} />);
 
 const Toc = ({ toc }: { toc: DocToc }) => {
-  const handleClick = (e: React.MouseEvent) => {
-    const heading = document.getElementById(toc.id);
-
-    heading?.scrollIntoView();
-    e.preventDefault();
-  };
   const text = decodeURIComponent(toc.text);
 
   return (toc.children.length > 0
-    ? <StyledTreeItem nodeId={toc.id} label={text} onLabelClick={handleClick}>
+    ? <StyledTreeItem nodeId={toc.id} label={text}>
       {
         toc.children.map((child: DocToc) => <Toc key={child.id} toc={child} />)
       }
     </StyledTreeItem>
-    : <StyledTreeItem nodeId={toc.id} label={text} onLabelClick={handleClick} />
+    : <StyledTreeItem nodeId={toc.id} label={text} />
   );
 };
 

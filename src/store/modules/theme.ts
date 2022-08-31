@@ -1,5 +1,5 @@
 import { makeAutoObservable } from 'mobx';
-import { createTheme, ThemeOptions } from '@material-ui/core/styles';
+import { createTheme, ThemeOptions } from '@mui/material/styles';
 import { ClientEvents, PenTheme } from '@/types';
 import type { AppStore, PrefetchStore } from '..';
 
@@ -26,7 +26,7 @@ export class ThemeStore implements PrefetchStore<ThemeState> {
   }
 
   get dark() {
-    return this.options.palette?.type === 'dark';
+    return this.options.palette?.mode === 'dark';
   }
 
   changeTheme(name: string) {

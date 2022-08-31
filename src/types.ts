@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { ThemeOptions } from '@material-ui/core/styles';
+import { ThemeOptions } from '@mui/material/styles';
 import { Plugin } from 'unified';
 import { Logger } from './server/logger';
 import type { RemarkRehype } from './server/rehype';
