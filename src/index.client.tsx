@@ -1,5 +1,6 @@
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
+import createEmotionCache from './createEmotionCache';
 import { App } from './App';
 import { createRoutes } from './routes';
 import { createStore } from './store';
@@ -11,6 +12,7 @@ const container = document.getElementById('root');
 const root = createRoot(container!);
 const store = createStore();
 const routes = createRoutes();
+const cache = createEmotionCache();
 
 if (window.__PREFETCHED_STATE__) {
   if (import.meta.env.DEV) {
@@ -22,5 +24,5 @@ if (window.__PREFETCHED_STATE__) {
 }
 
 root.render(<BrowserRouter>
-  <App store={store} routes={routes} />
+  <App store={store} routes={routes} cache={cache} />
 </BrowserRouter>);

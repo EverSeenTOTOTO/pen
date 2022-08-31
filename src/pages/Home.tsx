@@ -1,20 +1,17 @@
 import { observer } from 'mobx-react-lite';
 import clsx from 'clsx';
 import { useStore } from '@/store';
+import CssBaseline from '@mui/material/CssBaseline';
 import Snackbar from '@mui/material/Snackbar';
 import Alert from '@mui/lab/Alert';
-import CssBaseline from '@mui/material/CssBaseline';
-import {
-  ThemeProvider, Theme, StyledEngineProvider,
-} from '@mui/material/styles';
-import { makeStyles } from '@mui/styles';
-import { useAutoFetch, useClipboard, useMUIServerStyle } from '@/store/hooks';
+import { ThemeProvider, styled } from '@mui/material/styles';
+import { useAutoFetch, useClipboard } from '@/store/hooks';
 import Markdown from './components/Markdown';
 import Drawer from './components/Drawer';
 import Header from './components/Header';
 
-const useStyles = makeStyles((theme: Theme) => ({
-  content: {
+const StyledMain = styled('main')(({ theme }) => ({
+  '& .main-content': {
     padding: theme.spacing(2),
     transition: theme.transitions.create('margin', {
       easing: theme.transitions.easing.sharp,
@@ -26,7 +23,7 @@ const useStyles = makeStyles((theme: Theme) => ({
       marginLeft: theme.spacing(4),
     },
   },
-  contentShift: {
+  '& .main-contentShift': {
     transition: theme.transitions.create('margin', {
       easing: theme.transitions.easing.easeOut,
       duration: theme.transitions.duration.enteringScreen,
@@ -39,23 +36,20 @@ const useStyles = makeStyles((theme: Theme) => ({
 }));
 
 const Home = observer(() => {
-  const classes = useStyles();
   const drawer = useStore('drawer');
   const ui = useStore('ui');
 
   useAutoFetch();
   useClipboard();
-  useMUIServerStyle();
 
-  return <>
-    <CssBaseline />
+  return <StyledMain>
     <Drawer />
-    <main className={clsx(classes.content, {
-      [classes.contentShift]: drawer.visible,
+    <div className={clsx('main-content', {
+      'main-contentShift': drawer.visible,
     })}>
       <Header />
       <Markdown />
-    </main>
+    </div>
     <Snackbar
       open={ui.message !== ''}
       autoHideDuration={3000}
@@ -69,7 +63,7 @@ const Home = observer(() => {
         {ui.message}
       </Alert>
     </Snackbar>
-  </>;
+  </StyledMain>;
 });
 
 // migrate MUI@v4 to v5
@@ -77,11 +71,10 @@ const MigratedHome = observer(() => {
   const theme = useStore('theme');
 
   return (
-    <StyledEngineProvider injectFirst>
-      <ThemeProvider theme={theme.theme}>
-        <Home />
-      </ThemeProvider>
-    </StyledEngineProvider>
+    <ThemeProvider theme={theme.theme}>
+      <CssBaseline />
+      <Home />
+    </ThemeProvider>
   );
 });
 

@@ -4,19 +4,6 @@ import { useEffect } from 'react';
 import { isMarkdown } from '@/utils';
 import { useStore } from '.';
 
-export const useMUIServerStyle = () => {
-  const theme = useStore('theme');
-
-  useEffect(() => {
-    if (theme.id.startsWith('UUID')) {
-      const jssStyles = document.getElementById(`MUI${theme.id}`);
-      if (jssStyles) {
-        jssStyles?.parentElement?.removeChild(jssStyles);
-      }
-    }
-  }, [theme.name, theme.id]);
-};
-
 export const useClipboard = () => {
   const ui = useStore('ui');
 

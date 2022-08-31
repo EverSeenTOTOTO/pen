@@ -2,7 +2,8 @@ import type { Request, Response } from 'express';
 import serializeJavascript from 'serialize-javascript';
 import ReactDOMServer from 'react-dom/server';
 import { StaticRouter } from 'react-router-dom/server';
-import ServerStyleSheets from '@mui/styles/ServerStyleSheets';
+import createEmotionServer from '@emotion/server/create-instance';
+import createEmotionCache from './createEmotionCache';
 import { App } from './App';
 import { createStore } from './store';
 import { createRoutes } from './routes';
@@ -29,23 +30,25 @@ export async function render(context: RenderContext) {
 
   const store = createStore();
   const routes = createRoutes();
+  const cache = createEmotionCache();
+  const { extractCriticalToChunks, constructStyleTagsFromChunks } = createEmotionServer(cache);
 
   // ssr prefetch
   store.hydrate(prefetch);
 
-  const sheets = new ServerStyleSheets();
-
   const html = ReactDOMServer.renderToString(
-    sheets.collect(
-      <StaticRouter location={req.url}>
-        <App store={store} routes={routes} />
-      </StaticRouter>,
-    ),
+    <StaticRouter location={req.url}>
+      <App store={store} routes={routes} cache={cache} />
+    </StaticRouter>,
   );
+
+  // Grab the CSS from emotion
+  const emotionChunks = extractCriticalToChunks(html);
+  const emotionCss = constructStyleTagsFromChunks(emotionChunks);
 
   const state = store.dehydra();
   const { theme } = prefetch as { theme: PenTheme };
-  const style = `<style id="${theme.id}">${theme.css}</style><style id="MUI${theme.id}">${sheets.toString()}</style>`;
+  const style = `<style id="${theme.id}">${theme.css}</style>${emotionCss}`;
 
   ctx.html = ctx.template
     .replace(APP_HTML, html)

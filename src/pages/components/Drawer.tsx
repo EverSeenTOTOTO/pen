@@ -1,6 +1,5 @@
 import { observer } from 'mobx-react-lite';
-import { Theme } from '@mui/material/styles';
-import { makeStyles, createStyles } from '@mui/styles';
+import { styled } from '@mui/material/styles';
 import MuiDrawer from '@mui/material/Drawer';
 import List from '@mui/material/List';
 import Divider from '@mui/material/Divider';
@@ -21,20 +20,18 @@ import clsx from 'clsx';
 import { useRef } from 'react';
 import Toc from './Toc';
 
-const useStyles = makeStyles((theme: Theme) => createStyles({
-  drawer: {
-    width: theme.spacing(40),
-    flexShrink: 0,
-    whiteSpace: 'nowrap',
-  },
-  drawerOpen: {
+const StyledDrawer = styled(MuiDrawer)(({ theme }) => ({
+  width: theme.spacing(40),
+  flexShrink: 0,
+  whiteSpace: 'nowrap',
+  '& .drawer-drawerOpen': {
     width: theme.spacing(40),
     transition: theme.transitions.create('width', {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.enteringScreen,
     }),
   },
-  drawerClose: {
+  '& .drawer-drawerClose': {
     width: theme.spacing(8),
     transition: theme.transitions.create('width', {
       easing: theme.transitions.easing.sharp,
@@ -44,99 +41,89 @@ const useStyles = makeStyles((theme: Theme) => createStyles({
       width: theme.spacing(4),
     },
   },
-  drawerContainer: {
-    display: 'flex',
-    flexDirection: 'column',
-    height: '100%',
-    overflowX: 'hidden',
-  },
-  dir: {
-    flexGrow: 1,
-  },
-  hidden: {
+  '& .drawer-childHidden': {
     display: 'none',
   },
-  toc: {
-    flexGrow: 1,
-    padding: theme.spacing(2),
-    '& .MuiTypography-body1': {
-      fontSize: '0.875rem',
-    },
-    '& .MuiTreeItem-label': {
-      textOverflow: 'ellipsis',
-      overflow: 'hidden',
-    },
-  },
-  icon: {
-    minWidth: theme.spacing(4),
-    '& svg': {
-      fontSize: '1rem',
-    },
-  },
-  filename: {
-    '& span': {
-      overflow: 'hidden',
-      whiteSpace: 'nowrap',
-      textOverflow: 'ellipsis',
-    },
-  },
-  box: {
-    flexGrow: 1,
-  },
-  btn: {
-    display: 'flex',
-    alignItems: 'center',
-    padding: theme.spacing(0, 1),
-    // necessary for content to be below app bar
-    ...theme.mixins.toolbar,
-    justifyContent: 'flex-end',
-  },
-  btnClose: {
+  '& .drawer-btnClose': {
     flexDirection: 'column',
     justifyContent: 'flex-start',
   },
 }));
 
+const StyledDrawerContainer = styled('div')(() => ({
+  display: 'flex',
+  flexDirection: 'column',
+  height: '100%',
+  overflowX: 'hidden',
+}));
+
+const StyledToc = styled(TreeView)(({ theme }) => ({
+  flexGrow: 1,
+  padding: theme.spacing(2),
+  '& .MuiTypography-body1': {
+    fontSize: '0.875rem',
+  },
+  '& .MuiTreeItem-label': {
+    textOverflow: 'ellipsis',
+    overflow: 'hidden',
+  },
+}));
+
+const StyledBtn = styled('div')(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  padding: theme.spacing(0, 1),
+  // necessary for content to be below app bar
+  ...theme.mixins.toolbar,
+  justifyContent: 'flex-end',
+}));
+
 const Drawer = observer(() => {
-  const classes = useStyles();
   const drawer = useStore('drawer');
   const nav = useNav();
   const ref = useRef<HTMLElement | null>();
 
   return (
-    <MuiDrawer
+    <StyledDrawer
       variant="permanent"
-      className={clsx(classes.drawer, {
-        [classes.drawerOpen]: drawer.visible,
-        [classes.drawerClose]: !drawer.visible,
-      })}
       classes={{
         paper: clsx({
-          [classes.drawerOpen]: drawer.visible,
-          [classes.drawerClose]: !drawer.visible,
+          'drawer-drawerOpen': drawer.visible,
+          'drawer-drawerClose': !drawer.visible,
         }),
       }}
     >
-      <div className={classes.drawerContainer}>
-        <List dense className={clsx(classes.dir, { [classes.hidden]: !drawer.visible })}>
+      <StyledDrawerContainer >
+        <List dense sx={{ flexGrow: 1 }} className={clsx({ 'drawer-childHidden': !drawer.visible })}>
           {drawer.childDocs.map((doc) => (
             <ListItem button key={doc.filename} onClick={() => nav(doc.relativePath)}>
               <NoSsr>
-                <ListItemIcon className={classes.icon}>{
-                  doc.type === 'directory'
-                    ? <Folder />
-                    : <Description />
-                }</ListItemIcon>
+                <ListItemIcon sx={{
+                  minWidth: (theme) => theme.spacing(4),
+                  '& svg': {
+                    fontSize: '1rem',
+                  },
+                }}>{
+                    doc.type === 'directory'
+                      ? <Folder />
+                      : <Description />
+                  }</ListItemIcon>
               </NoSsr>
-              <ListItemText className={classes.filename} primary={doc.filename} />
+              <ListItemText sx={{
+                '& span': {
+                  overflow: 'hidden',
+                  whiteSpace: 'nowrap',
+                  textOverflow: 'ellipsis',
+                },
+              }} primary={doc.filename} />
             </ListItem>
           ))}
         </List>
         <Divider />
-        {drawer.toc.length > 0 && <TreeView
+        {drawer.toc.length > 0 && <StyledToc
           ref={ref}
-          className={clsx(classes.toc, {
-            [classes.hidden]: !drawer.visible,
+          className={clsx({
+            'drawer-childHidden': !drawer.visible,
           })}
           expanded={drawer.expandedToc}
           onNodeToggle={(_, data) => drawer.setExpandedToc(data)}
@@ -150,10 +137,10 @@ const Drawer = observer(() => {
           defaultExpandIcon={<NoSsr><ChevronRightIcon /></NoSsr>}
         >
           <Toc toc={drawer.toc[0]} />
-        </TreeView>}
-        <div className={clsx({ [classes.box]: !drawer.visible })} />
+        </StyledToc>}
+        <div style={{ flexGrow: 1 }} className={clsx({ 'drawer-childHidden': drawer.visible })} />
         <Divider />
-        <div className={clsx(classes.btn, { [classes.btnClose]: !drawer.visible })}>
+        <StyledBtn className={clsx({ 'drawer-btnClose': !drawer.visible })}>
           <IconButton onClick={() => drawer.toggle()} size="large">
             {drawer.visible ? <ChevronLeftIcon /> : <ChevronRightIcon />}
           </IconButton>
@@ -165,9 +152,9 @@ const Drawer = observer(() => {
             size="large">
             <ExpandLessTwoToneIcon />
           </IconButton>
-        </div>
-      </div>
-    </MuiDrawer>
+        </StyledBtn>
+      </StyledDrawerContainer>
+    </StyledDrawer>
   );
 });
 
