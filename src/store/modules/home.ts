@@ -1,7 +1,5 @@
 /* eslint-disable no-nested-ternary */
-import {
-  action, makeAutoObservable,
-} from 'mobx';
+import { makeAutoObservable } from 'mobx';
 import {
   ClientEvents, PenDirectoryData, PenErrorData,
 } from '@/types';
@@ -22,8 +20,6 @@ export class HomeStore implements PrefetchStore<HomeState> {
   error?: PenErrorData;
 
   loading = false;
-
-  timeoutId?: NodeJS.Timeout | number;
 
   root: AppStore;
 
@@ -55,9 +51,7 @@ export class HomeStore implements PrefetchStore<HomeState> {
 
     if (!record) {
       if (foreground) {
-        this.timeoutId = setTimeout(action(() => {
-          this.loading = true;
-        }), 300);
+        this.loading = true;
       }
     } else {
       this.data = record as PenDirectoryData;
@@ -89,7 +83,6 @@ export class HomeStore implements PrefetchStore<HomeState> {
       this.loading = false;
       this.data = data;
 
-      clearTimeout(this.timeoutId as number);
       cache.set(reading, this.data);
     }
   }

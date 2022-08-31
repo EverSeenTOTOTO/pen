@@ -6,6 +6,7 @@ import { createMarkup } from '@/utils';
 import { Container } from '@material-ui/core';
 import Typography from '@material-ui/core/Typography';
 import Skeleton from '@material-ui/lab/Skeleton';
+import { Suspense } from 'react';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -19,9 +20,49 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const Markdown = observer(() => {
+const Loading = () => {
+  const classes = useStyles();
+
+  return <Paper
+    classes={{
+      root: classes.paper,
+    }}
+  >
+    <Typography component="div" variant="h1">
+      <Skeleton animation="wave" />
+    </Typography>
+    <Typography component="div" variant="caption">
+      <Skeleton animation="wave" />
+    </Typography>
+    <Typography component="div" variant="body1">
+      <Skeleton animation="wave" />
+    </Typography>
+    <Typography component="div" variant="body1">
+      <Skeleton animation="wave" />
+    </Typography>
+    <Typography component="div" variant="body1">
+      <Skeleton animation="wave" />
+    </Typography>
+  </Paper>;
+};
+
+const Data = observer(() => {
   const classes = useStyles();
   const home = useStore('home');
+
+  // eslint-disable-next-line @typescript-eslint/no-throw-literal
+  if (home.loading) throw new Promise<void>((res) => res());
+
+  return <Paper
+    classes={{
+      root: classes.paper,
+    }}
+    dangerouslySetInnerHTML={createMarkup(home.html)}
+  />;
+});
+
+const Markdown = observer(() => {
+  const classes = useStyles();
 
   return <Container
     maxWidth={false}
@@ -31,34 +72,9 @@ const Markdown = observer(() => {
       root: classes.root,
     }}
   >
-    {!home.loading
-      ? <Paper
-        classes={{
-          root: classes.paper,
-        }}
-        dangerouslySetInnerHTML={createMarkup(home.html)}
-      />
-      : <Paper
-        classes={{
-          root: classes.paper,
-        }}
-      >
-        <Typography component="div" variant="h1">
-          <Skeleton animation="wave" />
-        </Typography>
-        <Typography component="div" variant="caption">
-          <Skeleton animation="wave" />
-        </Typography>
-        <Typography component="div" variant="body1">
-          <Skeleton animation="wave" />
-        </Typography>
-        <Typography component="div" variant="body1">
-          <Skeleton animation="wave" />
-        </Typography>
-        <Typography component="div" variant="body1">
-          <Skeleton animation="wave" />
-        </Typography>
-      </Paper>}
+    <Suspense fallback={<Loading />}>
+      <Data />
+    </Suspense>
   </Container>;
 });
 
