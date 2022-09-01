@@ -1,7 +1,9 @@
 import path from 'path';
 import { defineConfig } from 'vite';
+import deepmerge from 'deepmerge';
 import legacy from '@vitejs/plugin-legacy';
 import { viteStaticCopy as copy } from 'vite-plugin-static-copy';
+// import { visualizer } from 'rollup-plugin-visualizer';
 import { slash } from '../src/utils';
 import base from './vite.common';
 
@@ -15,22 +17,18 @@ const injectHtml = () => ({
   },
 });
 
-export default defineConfig((c) => {
-  const config = base(c);
-  return {
-    ...config,
-    plugins: [
-      ...(config.plugins || []),
-      legacy(),
-      injectHtml(),
-      copy({
-        targets: [
-          {
-            src: slash(path.join(__dirname, '../src/assets/*')),
-            dest: 'assets/', // relate to dist
-          },
-        ],
-      }),
-    ],
-  };
-});
+export default defineConfig((c) => deepmerge(base(c), {
+  plugins: [
+    legacy(),
+    injectHtml(),
+    copy({
+      targets: [
+        {
+          src: slash(path.join(__dirname, '../src/assets/*')),
+          dest: 'assets/', // relate to dist
+        },
+      ],
+    }),
+    // visualizer({ emitFile: true, filename: 'prod.stats.html' }),
+  ],
+}));

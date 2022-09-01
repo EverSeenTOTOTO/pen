@@ -1,6 +1,3 @@
-/* eslint-disable global-require */
-/* eslint-disable @typescript-eslint/no-var-requires */
-/* eslint-disable import/no-extraneous-dependencies */
 import path from 'path';
 import postcssNormalize from 'postcss-normalize';
 import react from '@vitejs/plugin-react';
@@ -15,6 +12,9 @@ export const paths = {
 };
 
 export default ({ mode }) => ({
+  plugins: [
+    react(),
+  ],
   build: {
     sourcemap: true,
     emptyOutDir: false,
@@ -39,7 +39,4 @@ export default ({ mode }) => ({
     },
     devSourcemap: mode === 'development',
   },
-  plugins: [
-    react(),
-  ],
 });

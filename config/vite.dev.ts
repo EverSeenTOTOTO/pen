@@ -1,6 +1,7 @@
 import path from 'path';
 import fs from 'fs';
 import { defineConfig, ViteDevServer } from 'vite';
+import deepmerge from 'deepmerge';
 import base, { paths } from './vite.common';
 import { createTheme } from '../src/server/theme';
 import { readUnknown } from '../src/server/reader';
@@ -17,7 +18,7 @@ const devSSR = () => ({
     const root = path.join(process.cwd(), '../..');
     const theme = await createTheme('dark', dist);
     const templateHtml = fs.readFileSync(paths.template, 'utf-8');
-    const transports = ['websocket'];
+    const transports: ['websocket'] = ['websocket'];
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     const remark = { // FIXME: unified is a mjs module which cannot be required in vite dev
@@ -29,7 +30,7 @@ const devSSR = () => ({
       processError: (s?: Error) => Promise.resolve({ message: s?.message ?? '' }),
     };
 
-    bindSocket(vite.httpServer, {
+    bindSocket(vite.httpServer!, {
       root,
       ignores,
       dist,
@@ -51,7 +52,7 @@ const devSSR = () => ({
           relative: '/',
         });
         const { render } = await vite.ssrLoadModule(paths.serverEntry);
-        const template = await vite.transformIndexHtml(req.originalUrl, templateHtml);
+        const template = await vite.transformIndexHtml(req.originalUrl!, templateHtml);
 
         const { html } = await render({
           req,
@@ -75,23 +76,18 @@ const devSSR = () => ({
   },
 });
 
-export default defineConfig((c) => {
-  const config = base(c);
-  return {
-    ...config,
-    server: {
-      watch: {
-        ignored: ['coverage/*'],
-      },
+export default defineConfig((c) => deepmerge(base(c), {
+  server: {
+    watch: {
+      ignored: ['coverage/*'],
     },
-    plugins: [
-      ...(config.plugins || []),
-      devSSR(),
+  },
+  plugins: [
+    devSSR(),
+  ],
+  ssr: {
+    noExternal: [
+      /^(unified|(remark|rehype|hast|unist)[\w-.]+)/,
     ],
-    ssr: {
-      noExternal: [
-        /^(unified|(remark|rehype|hast|unist)[\w-.]+)/,
-      ],
-    },
-  };
-});
+  },
+}));
