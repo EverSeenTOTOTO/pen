@@ -1,6 +1,13 @@
 {
-  "version": "5.3.0",
+  "version": "5.3.2",
   "name": "@everseen/pen",
+  "author": "EverSeenTOTOTO",
+  "keywords": "markdown,gfm",
+  "homepage": "https://github.com/EverSeenTOTOTO/pen-middleware#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/EverSeenTOTOTO/pen-middleware.git"
+  },
   "main": "dist/server.js",
   "bin": {
     "pen": "cli.js"
