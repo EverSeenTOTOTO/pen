@@ -3,7 +3,7 @@ import { makeAutoObservable, autorun } from 'mobx';
 import type { AppStore } from '..';
 
 export class DrawerStore {
-  visible = true;
+  visible = false;
 
   root: AppStore;
 

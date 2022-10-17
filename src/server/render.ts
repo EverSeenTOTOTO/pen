@@ -2,33 +2,30 @@ import path from 'path';
 import fs from 'fs';
 import express, { Express, Request, Response } from 'express';
 import { RenderOptions } from '../types';
-import { createTheme } from './theme';
+import { createTheme, ThemeNames } from './theme';
 import { readUnknown } from './reader';
 
-function loadRenderAsync(dist: string) {
-  return import(path.join(dist, 'index.server.js')).then((value) => value.render);
-}
-
-function readTemplateAsync(dist: string) {
-  const index = path.join(dist, 'index.html');
-  return fs.promises.readFile(index, 'utf8');
-}
-
 export const createSSRMiddleware = (options: RenderOptions) => {
-  const { dist } = options;
-  const tp = readTemplateAsync(dist);
-  const rp = loadRenderAsync(dist);
+  const preloadPromise = Promise.all([
+    fs.promises.readFile(path.join(options.dist, 'index.html'), 'utf8'),
+    import(path.join(options.dist, 'index.server.js')).then((value) => value.render),
+  ]);
 
   return async (req: Request, res: Response, next: () => void) => {
     const url = decodeURIComponent(req.url);
 
+    let theme: ThemeNames = 'light';
     try {
-      const [template, render] = await Promise.all([tp, rp]);
-      const theme = typeof options.theme === 'function' ? await options.theme() : options.theme;
+      theme = JSON.parse(req.cookies.themeMode);
+    } catch (e) {
+      options.logger.error(e);
+    }
 
+    try {
+      const [template, render] = await preloadPromise;
       const [data, themeData] = await Promise.all([
         readUnknown({ ...options, relative: url }),
-        createTheme(theme, dist),
+        createTheme(theme, options.dist),
       ]);
 
       const { html } = await render({

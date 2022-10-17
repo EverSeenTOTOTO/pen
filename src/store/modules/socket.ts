@@ -64,23 +64,14 @@ export class SocketStore implements PrefetchStore<PenSocketInfo> {
   }
 
   onData(data: PenDirectoryData | PenErrorData) {
-    if (import.meta.env.DEV) {
-      console.info(data);
-    }
     this.root.home.hydrate({ data });
   }
 
   onStyle(style: PenTheme) {
-    if (import.meta.env.DEV) {
-      console.info(style);
-    }
     this.root.theme.hydrate(style);
   }
 
   onError(error: Error) {
-    if (import.meta.env.DEV) {
-      console.error(error);
-    }
     this.root.ui.notify('error', error.message);
   }
 

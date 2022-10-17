@@ -1,7 +1,7 @@
 import Clipboard from 'clipboard';
 import { useLocation, useNavigate } from 'react-router';
 import { useEffect } from 'react';
-import { isMarkdown } from '@/utils';
+import { reaction } from 'mobx';
 import { useStore } from '.';
 
 export const useClipboard = () => {
@@ -35,7 +35,6 @@ export const useAutoFetch = () => {
   const home = useStore('home');
   const socket = useStore('socket');
   const location = useLocation();
-  const drawer = useStore('drawer');
 
   useEffect(() => { // onMounted
     if (socket.socket.connected) {
@@ -47,9 +46,17 @@ export const useAutoFetch = () => {
     if (socket.socket.connected) {
       home.fetchData(window.location.pathname);
     }
-
-    if (!isMarkdown(window.location.pathname)) {
-      drawer.toggle(true);
-    }
   }, [location]);
+};
+
+export const useCookie = () => {
+  const cookie = useStore('cookie');
+  const drawer = useStore('drawer');
+
+  useEffect(() => {
+    const data = cookie.load();
+
+    drawer.toggle(data.drawerVisible);
+    reaction(() => cookie.data, () => cookie.save());
+  }, []);
 };

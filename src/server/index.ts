@@ -2,6 +2,7 @@ import path from 'path';
 import { slash, formatRelative, isMarkdown } from '@/utils';
 import http from 'http';
 import express from 'express';
+import cookieParser from 'cookie-parser';
 import getPort from 'get-port';
 import { PenOptions, PenCliOptions } from '@/types';
 import { logger as builtInLogger, emptyLogger } from './logger';
@@ -13,7 +14,7 @@ export const normalizeOptions = (opts?: Partial<PenOptions>) => {
   const root = slash(opts?.root ? path.join(process.cwd(), opts?.root) : process.cwd());
 
   if (isMarkdown(root)) {
-    throw new Error('The "root" options must be a directory');
+    throw new Error('The "root" option must be a directory.');
   }
 
   const silent = opts?.silent ?? false;
@@ -21,15 +22,9 @@ export const normalizeOptions = (opts?: Partial<PenOptions>) => {
   const dist = opts?.dist ? path.join(opts?.dist) : path.join(__dirname);
   const ignores = opts?.ignores?.filter((_: string) => _).map((p: string) => new RegExp(p, 'g')) ?? [];
 
-  const theme = opts?.theme ?? (() => {
-    const hour = new Date().getHours();
-    return hour >= 18 || hour <= 6 ? 'dark' : 'light';
-  });
-
   return {
     root,
     dist,
-    theme,
     silent,
     ignores,
     logger: silent ? emptyLogger : logger,
@@ -47,6 +42,7 @@ export const createServer = async (opts?: PenCliOptions) => {
   const options = normalizeOptions(opts);
   const remark = new RemarkRehype(options);
 
+  app.use(cookieParser());
   bindRender(app, { ...options, remark });
   bindSocket(server, { ...options, remark });
 

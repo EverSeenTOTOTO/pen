@@ -65,8 +65,8 @@ const BreadCrumbRoutes = observer(() => {
         ))}
       </StyledBreadcrumbs>
       <Switch
-        checked={theme.dark}
-        onChange={() => theme.changeTheme(theme.dark ? 'light' : 'dark')}
+        checked={theme.mode === 'dark'}
+        onChange={() => theme.changeTheme(theme.mode === 'dark' ? 'light' : 'dark')}
         name="checkedB"
         color="primary"
       />

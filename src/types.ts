@@ -113,7 +113,6 @@ export type SocketOptions = PenSocketInfo & WatcherOptions & {
 export type RenderOptions = WatcherOptions & {
   dist: string;
   namespace: string;
-  theme: ThemeNames | (() => ThemeNames) | (() => Promise<ThemeNames>)
 };
 
 export type PenOptions = Omit<WatcherOptions

@@ -141,17 +141,3 @@ it('test namespace /A, req b.md', async () => {
     closeServer(server);
   });
 });
-
-it('test theme', async () => {
-  const { server, port } = await prepareServer({ theme: () => Promise.resolve('dark') });
-
-  await e2e(async (page) => {
-    await page.goto(`http://localhost:${port}/`);
-
-    const color = await page.evaluate(() => window.getComputedStyle(document.body).backgroundColor);
-
-    expect(color).toBe('rgb(13, 17, 23)');
-  }).finally(() => {
-    closeServer(server);
-  });
-});

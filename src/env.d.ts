@@ -1,4 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+declare module 'cookie-parser' {
+  const anything = any;
+  export default anything;
+}
 declare module 'get-port' {
   const anything = any;
   export default anything;

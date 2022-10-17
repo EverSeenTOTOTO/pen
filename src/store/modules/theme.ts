@@ -25,8 +25,8 @@ export class ThemeStore implements PrefetchStore<ThemeState> {
     return createTheme(this.options);
   }
 
-  get dark() {
-    return this.options.palette?.mode === 'dark';
+  get mode() {
+    return this.options.palette?.mode;
   }
 
   changeTheme(name: string) {
