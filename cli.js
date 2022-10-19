@@ -14,7 +14,6 @@ program
   .option('-i, --ignores <ignores...>', 'set ignoring files, default `[]`, for example if you want to ignore dotfiles: `-i "^\\."`')
   .option('-s, --silent', 'ignore logger messages, default `false`')
   .option('-o, --open', 'open browser automatically, default `false`')
-  .option('-T, --theme <theme>', 'select theme, `dark` or `light`')
   .option('-S, --socketPath <socketPath>', 'Set socket.io path, default `/pensocket.io`')
   .parse();
 

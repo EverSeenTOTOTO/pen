@@ -49,10 +49,6 @@ pen -o -p 5000 -r ../docs
 
     Open browser automatically, default `false`.
 
-+ `--theme|-T`
-
-    Select theme, `dark` or `light`.
-
 + `--socketPath|-S`
 
     Set socket.io path, default `/pensocket.io`.
@@ -80,3 +76,4 @@ Check [cli.js](./cli.js) and [server/index.ts](./src/server/index.ts) as an exam
 ## TODO
 
 1. add more test cases
+2. reduce memory usage
