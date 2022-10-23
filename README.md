@@ -73,7 +73,3 @@ Check [cli.js](./cli.js) and [server/index.ts](./src/server/index.ts) as an exam
 
 **PRs and issues are welcomed!**
 
-## TODO
-
-1. add more test cases
-2. reduce memory usage

@@ -6,7 +6,7 @@ import { SocketStore } from './modules/socket';
 import { UiStore } from './modules/ui';
 import { Cookie } from './modules/cookie';
 
-export type PrefetchStore<State> = State & {
+export type PrefetchStore<State> = {
   // merge ssr prefetched data
   hydrate(state: State): void;
   // provide ssr prefetched data

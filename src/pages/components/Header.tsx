@@ -4,7 +4,8 @@ import { styled } from '@mui/material/styles';
 import HomeIcon from '@mui/icons-material/Home';
 import { observer } from 'mobx-react-lite';
 import { useStore } from '@/store';
-import { NoSsr, Switch } from '@mui/material';
+import NoSsr from '@mui/material/NoSsr';
+import Switch from '@mui/material/Switch';
 import { useNav } from '@/store/hooks';
 
 const Root = styled('div')(({ theme }) => ({

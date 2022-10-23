@@ -1,7 +1,7 @@
 import path from 'path';
 import fs from 'fs';
 import deepmerge from 'deepmerge';
-import { ThemeOptions } from '@mui/material';
+import { ThemeOptions } from '@mui/material/styles';
 import { uuid } from '../utils';
 import { PenTheme } from '../types';
 

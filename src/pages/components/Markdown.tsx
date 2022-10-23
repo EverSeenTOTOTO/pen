@@ -3,7 +3,7 @@ import { useStore } from '@/store';
 import Paper from '@mui/material/Paper';
 import { styled } from '@mui/material/styles';
 import { createMarkup } from '@/utils';
-import { Container } from '@mui/material';
+import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
 import Skeleton from '@mui/lab/Skeleton';
 import { Suspense } from 'react';

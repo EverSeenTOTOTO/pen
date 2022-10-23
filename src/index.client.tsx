@@ -1,4 +1,4 @@
-import { createRoot } from 'react-dom/client';
+import { hydrateRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import createEmotionCache from './createEmotionCache';
 import { App } from './App';
@@ -8,8 +8,6 @@ import { createStore } from './store';
 import './assets/index.scss';
 
 const container = document.getElementById('root');
-// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-const root = createRoot(container!);
 const store = createStore();
 const routes = createRoutes();
 const cache = createEmotionCache();
@@ -23,6 +21,6 @@ if (window.__PREFETCHED_STATE__) {
   delete window.__PREFETCHED_STATE__;
 }
 
-root.render(<BrowserRouter>
+hydrateRoot(container!, <BrowserRouter>
   <App store={store} routes={routes} cache={cache} />
 </BrowserRouter>);

@@ -2,12 +2,16 @@ import type { Request, Response } from 'express';
 import serializeJavascript from 'serialize-javascript';
 import ReactDOMServer from 'react-dom/server';
 import { StaticRouter } from 'react-router-dom/server';
+import { enableStaticRendering } from 'mobx-react-lite';
 import createEmotionServer from '@emotion/server/create-instance';
 import createEmotionCache from './createEmotionCache';
 import { App } from './App';
 import { createStore } from './store';
 import { createRoutes } from './routes';
 import { PenTheme } from './types';
+
+// Call enableStaticRendering(true) when running in an SSR environment, in which observer wrapped components should never re-render, but cleanup after the first rendering automatically.
+enableStaticRendering(true);
 
 // see index.html
 const APP_HTML = '<!--app-html-->';
