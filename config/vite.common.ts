@@ -16,7 +16,7 @@ export default ({ mode }) => ({
     react(),
   ],
   build: {
-    sourcemap: true,
+    sourcemap: mode === 'development',
     emptyOutDir: false,
   },
   resolve: {

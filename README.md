@@ -2,7 +2,7 @@
 
 A cli tool provides the ability to preview markdown files when editing, based on [socket.io](https://socket.io/) and [chokidar](https://github.com/paulmillr/chokidar), with builtin katex, highlight.js, copy, doctoc and vuepress style container support.
 
-<img src="./Pen.gif" />
+<img src="./Pen.gif" width="1200" />
 
 ## Usage
 

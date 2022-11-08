@@ -64,6 +64,7 @@ export class RemarkRehype {
 
   async process(markdown: string): Promise<{ content: string, toc?: DocToc[] }> {
     try {
+      // TODO: one pass
       const content = (await this.render.process(markdown)).toString();
       const toc = (await this.tocExtractor.process(content)).result as DocToc[];
 

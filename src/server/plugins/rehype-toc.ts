@@ -3,6 +3,7 @@
 import { DocToc } from '@/types';
 import { uuid } from '@/utils';
 import { visit } from 'unist-util-visit';
+import { h } from 'hastscript';
 
 function isHtmlElementNode(node: any) {
   return typeof node === 'object'
@@ -40,24 +41,32 @@ function getInnerText(node: any): string {
   return text.trim();
 }
 
-function addHeadingId(node: any) {
+function modifyHeading(node: any) {
   const heading = getHeadingNode(node);
 
   if (heading !== -1) {
     // eslint-disable-next-line no-param-reassign
-    node.properties = {
-      ...node.properties,
-      id: node.properties?.id ?? `H${heading}${uuid()}`,
-    };
+    node.children = [
+      h(
+        'span',
+        {
+          id: `H${heading}${uuid()}`,
+          style: 'padding-top: 64px',
+        },
+        Array.isArray(node.children) ? node.children : [],
+      ),
+    ];
   }
 }
 
 // add a unique id to each heading
 export function rehypeTocId() {
   return (tree: any) => {
-    visit(tree, 'element', addHeadingId);
+    visit(tree, 'element', modifyHeading);
   };
 }
+
+/* ---- Seperator for rehypeTocId and rehypeToc ---- */
 
 function removeParent(toc: DocToc) {
   // eslint-disable-next-line no-param-reassign
@@ -85,17 +94,21 @@ function createToc(tree: any) {
         parent = parent.parent ?? top;
       }
 
-      const { id } = node.properties;
+      const span = node.children.filter((each: any) => each.tagName === 'span')[0];
 
-      last = {
-        id,
-        parent,
-        heading,
-        text: encodeURIComponent(getInnerText(node)),
-        children: [],
-      };
+      if (span) {
+        const { id } = span.properties;
 
-      parent.children.push(last);
+        last = {
+          id,
+          parent,
+          heading,
+          text: encodeURIComponent(getInnerText(node)),
+          children: [],
+        };
+
+        parent.children.push(last);
+      }
     } else if (Array.isArray(node.children)) {
       node.children.forEach(addHeadingToc);
     }
@@ -107,6 +120,7 @@ function createToc(tree: any) {
   return top.children;
 }
 
+// extract doc toc from html
 export function rehypeToc() {
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore

@@ -14,3 +14,4 @@ jest.config.js
 playwright.config.ts
 .github
 .husky
+config/*

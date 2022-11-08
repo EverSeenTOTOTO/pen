@@ -13,7 +13,7 @@ it('test process markdown', async () => {
 
   const { content, toc } = await remark.process('# A');
 
-  expect(decodeURIComponent(content)).toMatch(/<h.*?UUID[^<]*A<\/h1>/);
+  expect(decodeURIComponent(content)).toMatch(/<h1><span id="H1UUID[^>]*>A<\/span><\/h1>/);
   expect(toc?.[0].text).toMatch(/A/);
 });
 
