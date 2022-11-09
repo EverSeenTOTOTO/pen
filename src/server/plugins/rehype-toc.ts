@@ -13,7 +13,7 @@ function isHtmlElementNode(node: any) {
     && typeof node.properties === 'object';
 }
 
-function getHeadingNode(node: any) {
+function getHeadingNumber(node: any) {
   if (isHtmlElementNode(node)) {
     const match = /^h(?<heading>[1-6])$/.exec(node.tagName);
 
@@ -41,28 +41,35 @@ function getInnerText(node: any): string {
   return text.trim();
 }
 
-function modifyHeading(node: any) {
-  const heading = getHeadingNode(node);
+function modifyHeader(uid: number) {
+  return (node: any) => {
+    const heading = getHeadingNumber(node);
 
-  if (heading !== -1) {
-    // eslint-disable-next-line no-param-reassign
-    node.children = [
-      h(
-        'span',
-        {
-          id: `H${heading}${uuid()}`,
-          style: 'padding-top: 64px',
-        },
-        Array.isArray(node.children) ? node.children : [],
-      ),
-    ];
-  }
+    if (heading !== -1) {
+      const content = getInnerText(node);
+      const id = `H${uuid(content + uid)}`;
+      // eslint-disable-next-line no-param-reassign
+      node.children = [
+        h(
+          'span', // for navigate
+          {
+            id,
+          },
+        ),
+        h(
+          'span', // for display
+          Array.isArray(node.children) ? node.children : [],
+        ),
+      ];
+    }
+  };
 }
 
 // add a unique id to each heading
 export function rehypeTocId() {
+  let uid = 0;
   return (tree: any) => {
-    visit(tree, 'element', modifyHeading);
+    visit(tree, 'element', modifyHeader(uid++));
   };
 }
 
@@ -84,12 +91,13 @@ function createToc(tree: any) {
 
   let last = top;
 
-  function addHeadingToc(node: any) {
+  function extract(node: any) {
     let parent = last;
-    const heading = getHeadingNode(node);
+    const heading = getHeadingNumber(node);
 
     if (heading !== -1) {
       // find the closest upper heading
+      // 因为可能出现在DOM结构上是父子关系，但在header层级上是兄弟关系等
       while (heading <= parent.heading) {
         parent = parent.parent ?? top;
       }
@@ -100,7 +108,7 @@ function createToc(tree: any) {
         const { id } = span.properties;
 
         last = {
-          id,
+          id, // extract out for navigation: document.getElementById(id).scrollIntoView();
           parent,
           heading,
           text: encodeURIComponent(getInnerText(node)),
@@ -110,11 +118,12 @@ function createToc(tree: any) {
         parent.children.push(last);
       }
     } else if (Array.isArray(node.children)) {
-      node.children.forEach(addHeadingToc);
+      node.children.forEach(extract);
     }
   }
 
-  addHeadingToc(tree);
+  extract(tree);
+  // avoid recursive when stringify to json
   removeParent(top);
 
   return top.children;

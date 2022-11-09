@@ -5,7 +5,9 @@ import CssBaseline from '@mui/material/CssBaseline';
 import Snackbar from '@mui/material/Snackbar';
 import Alert from '@mui/lab/Alert';
 import { ThemeProvider, styled } from '@mui/material/styles';
-import { useAutoFetch, useClipboard, useCookie } from '@/store/hooks';
+import {
+  useAutoFetch, useClipboard, useCookie,
+} from '@/store/hooks';
 import Markdown from './components/Markdown';
 import Drawer from './components/Drawer';
 import Header from './components/Header';

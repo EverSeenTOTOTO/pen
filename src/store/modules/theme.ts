@@ -34,7 +34,7 @@ export class ThemeStore implements PrefetchStore<ThemeState> {
   }
 
   hydrate(state: PenTheme): void {
-    if (globalThis.document && this.id.startsWith('UUID') && typeof state.css === 'string') {
+    if (globalThis.document && this.id) {
       const styleElement = globalThis.document.getElementById(this.id);
 
       if (styleElement) {

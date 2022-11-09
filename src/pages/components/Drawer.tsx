@@ -129,9 +129,7 @@ const Drawer = observer(() => {
           expanded={drawer.expandedToc}
           onNodeToggle={(_, data) => drawer.setExpandedToc(data)}
           onNodeFocus={(e, id) => {
-            const heading = document.getElementById(id);
-
-            heading?.scrollIntoView();
+            window.location.hash = `#${id}`;
             e.preventDefault();
           }}
           defaultCollapseIcon={<NoSsr><ExpandMoreIcon /></NoSsr>}

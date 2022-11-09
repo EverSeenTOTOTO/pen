@@ -49,22 +49,6 @@ it('test resolvePathInfo', () => {
 });
 
 it('test uuid', () => {
-  const map = new Map<string, boolean>();
-
-  let diff = true;
-
-  // FIXME: will got conflict number for larger numbers
-  for (let i = 0; i < 1000; ++i) {
-    const id = uuid();
-
-    if (map.get(id) === true) {
-      diff = false;
-      console.error(`Conflict id ${id}, ${map.size}`);
-      break;
-    }
-
-    map.set(id, true);
-  }
-
-  expect(diff).toBe(true);
+  expect(uuid('any').length).toBe(16);
+  expect(uuid('')).not.toBe(uuid('pen'));
 });

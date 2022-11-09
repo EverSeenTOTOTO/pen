@@ -60,4 +60,10 @@ export const stripNamespace = (namespace: string, pathname: string) => formatRel
 
 export const createMarkup = (__html: string) => ({ __html });
 
-export const uuid = () => `UUID${String(Math.random()).replace(/0?\./, '').slice(0, 8)}`;
+export const uuid = (content?: string) => {
+  // avoid bundle error
+  // eslint-disable-next-line global-require, @typescript-eslint/no-var-requires
+  const hash = require('crypto').createHash('sha256');
+
+  return hash.update(content ?? 'pen').digest('hex').slice(0, 16);
+};

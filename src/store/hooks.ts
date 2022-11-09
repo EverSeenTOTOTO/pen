@@ -38,15 +38,15 @@ export const useAutoFetch = () => {
 
   useEffect(() => { // onMounted
     if (socket.socket.connected) {
-      home.fetchData(window.location.pathname, false);
+      home.fetchData(location.pathname, false);
     }
   }, []);
 
   useEffect(() => {
     if (socket.socket.connected) {
-      home.fetchData(window.location.pathname);
+      home.fetchData(location.pathname);
     }
-  }, [location]);
+  }, [location.pathname]);
 };
 
 export const useCookie = () => {

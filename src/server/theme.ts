@@ -91,7 +91,7 @@ const readThemeCss = async (dist: string, name: keyof typeof themes) => {
   return csses.reduce((p, c) => `${p}\n${c}`);
 };
 
-const globalId: string = uuid();
+const globalId = `THEME${uuid()}`;
 
 export type ThemeNames = keyof typeof themes;
 
