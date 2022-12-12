@@ -67,8 +67,8 @@ function modifyHeader(uid: number) {
 
 // add a unique id to each heading
 export function rehypeTocId() {
-  let uid = 0;
   return (tree: any) => {
+    let uid = 0;
     visit(tree, 'element', modifyHeader(uid++));
   };
 }

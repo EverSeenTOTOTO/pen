@@ -43,10 +43,6 @@ export class AppStore {
     Object.keys(data).forEach((key) => {
       const k = key as PickKeys<AppStore>;
 
-      if (import.meta.env.DEV) {
-        console.log(`hydrate ${k}`);
-      }
-
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       if (data[k]) this[k]?.hydrate?.(data[k] as any);
     });

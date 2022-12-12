@@ -20,15 +20,12 @@ type WatcherEvent = { type: 'jump' | 'refresh', relative: string };
 export class SimpleQueue {
   watcher: Watcher;
 
-  timeoutId?: NodeJS.Timeout;
-
-  interval: number;
-
   queue: WatcherEvent[] = [];
 
-  constructor(watcher: Watcher, interval = 300) {
+  schedule?: NodeJS.Timeout;
+
+  constructor(watcher: Watcher) {
     this.watcher = watcher;
-    this.interval = interval;
   }
 
   enque(event: WatcherEvent) {
@@ -40,37 +37,34 @@ export class SimpleQueue {
       this.queue.push(event);
     }
 
-    this.notify();
-  }
-
-  notify() {
-    if (this.timeoutId) return;
-    this.timeoutId = setInterval(() => {
-      this.dispatch();
-    }, this.interval);
+    if (!this.schedule) {
+      this.schedule = setTimeout(() => this.dispatch(), 300);
+    }
   }
 
   async dispatch() {
-    if (this.queue.length > 0) {
-      const top = this.queue.shift()!;
+    const top = this.queue.shift();
 
+    if (top) {
       try {
         await this.watcher[top.type](top.relative);
         return await this.watcher.sendData();
       } catch (e) {
-        return this.watcher.sendError(e as Error);
+        return await this.watcher.sendError(e as Error);
+      } finally {
+        if (this.queue.length > 0) {
+          this.schedule = setTimeout(() => this.dispatch(), 300);
+        } else {
+          this.schedule = undefined;
+        }
       }
     }
-
-    this.clear();
+    // IDLE
     return Promise.resolve();
   }
 
   clear() {
-    if (this.timeoutId) {
-      clearInterval(this.timeoutId);
-      this.timeoutId = undefined;
-    }
+    this.queue = [];
   }
 }
 

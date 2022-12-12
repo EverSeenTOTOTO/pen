@@ -25,7 +25,7 @@ export function isMarkdown(filepath: string) {
 }
 
 export function isReadme(filepath: string) {
-  return /README\.md$/i.test(filepath);
+  return /README\.(md|markdown)$/i.test(filepath);
 }
 
 // '/a/' -> '/a'

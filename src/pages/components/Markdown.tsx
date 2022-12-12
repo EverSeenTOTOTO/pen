@@ -62,14 +62,8 @@ const Data = observer(() => {
   return <StyledPaper ref={ref} dangerouslySetInnerHTML={createMarkup(home.html)} />;
 });
 
-const Markdown = observer(() => {
-  const home = useStore('home');
-
-  return <StyledContainer
+const Markdown = observer(() => <StyledContainer
     maxWidth={false}
-    sx={{
-      cursor: home.loading ? 'progress' : 'auto',
-    }}
     // required for github-markdown-css
     className="markdown-body"
 
@@ -77,7 +71,6 @@ const Markdown = observer(() => {
     <Suspense fallback={<Loading />}>
       <Data />
     </Suspense>
-  </StyledContainer>;
-});
+  </StyledContainer>);
 
 export default Markdown;

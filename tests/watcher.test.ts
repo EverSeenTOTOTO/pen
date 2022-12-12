@@ -41,16 +41,12 @@ it('test schedule', async () => {
   const queue = new SimpleQueue(mockWatcher);
 
   queue.enque({ type: 'jump', relative: '/' });
-  await sleep(400);
-  expect(mockWatcher.jump).toHaveBeenCalledWith('/');
-  mockWatcher.clear();
-
-  queue.enque({ type: 'jump', relative: '/' });
   queue.enque({ type: 'jump', relative: '/a' });
   queue.enque({ type: 'jump', relative: '/b' });
+  queue.enque({ type: 'jump', relative: '/c' });
   await sleep(400);
   expect(mockWatcher.jump).toHaveBeenCalledTimes(1);
-  expect(mockWatcher.jump).toHaveBeenCalledWith('/b');
+  expect(mockWatcher.jump).toHaveBeenNthCalledWith(1, '/c');
   mockWatcher.clear();
 
   queue.enque({ type: 'refresh', relative: '/' });
@@ -64,6 +60,7 @@ it('test schedule', async () => {
   queue.enque({ type: 'jump', relative: '/' });
   queue.enque({ type: 'refresh', relative: '/' });
   queue.enque({ type: 'refresh', relative: '/' });
+  queue.enque({ type: 'refresh', relative: '/' });
   await sleep(700);
   expect(mockWatcher.jump).toHaveBeenCalledTimes(1);
   expect(mockWatcher.refresh).toHaveBeenCalledTimes(1);
@@ -72,7 +69,8 @@ it('test schedule', async () => {
   queue.enque({ type: 'refresh', relative: '/' });
   queue.enque({ type: 'jump', relative: '/' });
   queue.enque({ type: 'jump', relative: '/' });
-  await sleep(700);
+  queue.enque({ type: 'jump', relative: '/' });
+  await sleep(400);
   expect(mockWatcher.jump).toHaveBeenCalledTimes(1);
   expect(mockWatcher.refresh).not.toHaveBeenCalled();
 });
@@ -211,7 +209,7 @@ it('test add readme', (done) => {
 
     fs.writeFileSync(readme, '# README');
     watcher.watcher?.emit('all', 'add', readme);
-  });
+  }, 400);
 });
 
 it('test sort', (done) => {
