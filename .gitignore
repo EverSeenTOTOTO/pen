@@ -9,3 +9,4 @@ src/assets/highlightjs-*
 src/assets/katex*
 src/assets/fonts
 .vscode
+.clinic

@@ -9,7 +9,9 @@ import {
   useAutoFetch, useClipboard, useCookie,
 } from '@/store/hooks';
 import Markdown from './components/Markdown';
-import Drawer from './components/Drawer';
+import Drawer, {
+  DRAWER_WIDTH, DRAWER_WIDTH_CLOSED, DRAWER_WIDTH_CLOSED_MOBILE,
+} from './components/Drawer';
 import Header from './components/Header';
 
 const StyledMain = styled('main')(({ theme }) => ({
@@ -19,10 +21,10 @@ const StyledMain = styled('main')(({ theme }) => ({
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.leavingScreen,
     }),
-    marginLeft: theme.spacing(8),
+    marginLeft: theme.spacing(DRAWER_WIDTH_CLOSED),
     [theme.breakpoints.down('md')]: {
       padding: 0,
-      marginLeft: theme.spacing(4),
+      marginLeft: theme.spacing(DRAWER_WIDTH_CLOSED_MOBILE),
     },
   },
   '& .main-contentShift': {
@@ -30,9 +32,9 @@ const StyledMain = styled('main')(({ theme }) => ({
       easing: theme.transitions.easing.easeOut,
       duration: theme.transitions.duration.enteringScreen,
     }),
-    marginLeft: theme.spacing(40),
+    marginLeft: theme.spacing(DRAWER_WIDTH),
     [theme.breakpoints.down('md')]: {
-      marginLeft: theme.spacing(4),
+      marginLeft: theme.spacing(DRAWER_WIDTH_CLOSED_MOBILE),
     },
   },
 }));

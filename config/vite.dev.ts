@@ -78,6 +78,7 @@ const devSSR = () => ({
 
 export default defineConfig((c) => deepmerge(base(c), {
   server: {
+    host: true,
     watch: {
       ignored: ['coverage/*'],
     },

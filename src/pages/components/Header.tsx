@@ -11,7 +11,7 @@ import { useNav } from '@/store/hooks';
 const Root = styled('div')(({ theme }) => ({
   position: 'sticky',
   top: 0,
-  zIndex: 999,
+  zIndex: 1,
   backgroundColor: theme.palette.background.default,
   display: 'flex',
   justifyContent: 'space-between',
@@ -19,6 +19,11 @@ const Root = styled('div')(({ theme }) => ({
   marginBottom: theme.spacing(1),
   marginLeft: theme.spacing(3),
   marginRight: theme.spacing(3),
+  [theme.breakpoints.down('md')]: {
+    marginBottom: 0,
+    marginLeft: theme.spacing(1),
+    marginRight: 0,
+  },
 }));
 
 const StyledBreadcrumbs = styled(Breadcrumbs)(({ theme }) => ({
@@ -30,6 +35,12 @@ const StyledBreadcrumbs = styled(Breadcrumbs)(({ theme }) => ({
   },
   '& li:not(:nth-of-type(1))': {
     marginTop: `-${theme.spacing(1)}`,
+  },
+  '& .MuiBreadcrumbs-separator': {
+    [theme.breakpoints.down('md')]: {
+      marginLeft: theme.spacing(0.5),
+      marginRight: theme.spacing(0.5),
+    },
   },
 }));
 
@@ -57,9 +68,13 @@ const BreadCrumbRoutes = observer(() => {
         {ui.breadcrumb.map((link) => (
           <Link
             key={link.relative}
-            component="button"
+            component="a"
+            href={link.relative}
             color="inherit"
-            onClick={() => nav(link.relative)}
+            onClick={(e) => {
+              e.preventDefault();
+              nav(link.relative);
+            }}
           >
             {link.filename}
           </Link>

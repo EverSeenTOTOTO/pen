@@ -23,8 +23,6 @@ export class HomeStore implements PrefetchStore<HomeState> {
 
   root: AppStore;
 
-  last?: string;
-
   constructor(root: AppStore) {
     makeAutoObservable(this);
     this.root = root;
@@ -60,7 +58,6 @@ export class HomeStore implements PrefetchStore<HomeState> {
     console.log(`fetch ${relative}`);
 
     this.error = undefined;
-    this.last = relative;
     this.root.socket.emit(ClientEvents.FetchData, relative);
   }
 
@@ -72,10 +69,6 @@ export class HomeStore implements PrefetchStore<HomeState> {
 
       if (globalThis && globalThis.scrollTo && this.reading !== reading) {
         // drop outdated fetch
-        if (this.last && this.last !== data?.relativePath && this.last !== reading) {
-          console.log(`drop ${reading}`);
-          return;
-        }
 
         globalThis.scrollTo(0, 0);
       }
