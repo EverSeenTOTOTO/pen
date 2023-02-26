@@ -41,35 +41,36 @@ function getInnerText(node: any): string {
   return text.trim();
 }
 
-function modifyHeader(uid: number) {
-  return (node: any) => {
-    const heading = getHeadingNumber(node);
+const appearance = new Map<string, number>();
 
-    if (heading !== -1) {
-      const content = getInnerText(node);
-      const id = `H${uuid(content + uid)}`;
-      // eslint-disable-next-line no-param-reassign
-      node.children = [
-        h(
-          'span', // for navigate
-          {
-            id,
-          },
-        ),
-        h(
-          'span', // for display
-          Array.isArray(node.children) ? node.children : [],
-        ),
-      ];
-    }
-  };
+function modifyHeader(node: any) {
+  const heading = getHeadingNumber(node);
+
+  if (heading !== -1) {
+    const content = getInnerText(node);
+    appearance.set(content, appearance.get(content) ? appearance.get(content)! + 1 : 1);
+    const id = `H${uuid(content + appearance.get(content))}`;
+    // eslint-disable-next-line no-param-reassign
+    node.children = [
+      h(
+        'span', // for navigate
+        {
+          id,
+        },
+      ),
+      h(
+        'span', // for display
+        Array.isArray(node.children) ? node.children : [],
+      ),
+    ];
+  }
 }
 
 // add a unique id to each heading
 export function rehypeTocId() {
   return (tree: any) => {
-    let uid = 0;
-    visit(tree, 'element', modifyHeader(uid++));
+    visit(tree, 'element', modifyHeader);
+    appearance.clear();
   };
 }
 

@@ -63,3 +63,20 @@ it('test copy', async () => {
 
   expect(decodeURIComponent(content)).toMatch(/data-clipboard-text="console.log()/);
 });
+
+it('test toc', async () => {
+  const remark = createRemark();
+
+  let { toc } = await remark.process('## A\n ## A\n ## A');
+
+  const tocId0 = toc?.[0].id;
+  const tocId1 = toc?.[1].id;
+
+  expect(tocId0).not.toBe(tocId1);
+
+  toc = (await remark.process('## A\n## A')).toc;
+
+  expect(toc?.length).toBe(2);
+  expect(toc?.[0].id).toBe(tocId0);
+  expect(toc?.[1].id).toBe(tocId1);
+});

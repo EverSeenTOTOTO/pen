@@ -34,7 +34,7 @@ export class SocketStore implements PrefetchStore<PenSocketInfo> {
     return stripNamespace(this.namespace, pathname);
   }
 
-  computePath(relative: string) {
+  resolveRelativePath(relative: string) {
     return `${this.namespace === '/' ? '' : this.namespace}${relative}`;
   }
 

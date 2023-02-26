@@ -76,7 +76,7 @@ Check [cli.js](./cli.js) and [server/index.ts](./src/server/index.ts) as an exam
 ## TODOs
 
 1. 减少内存占用
-2. 加快处理速度，考虑Rust编写的markdown parser
+2. 加快处理速度
 3. 渐进式渲染
 4. 单文档模式
 5. 修复footnote滚动遮挡问题

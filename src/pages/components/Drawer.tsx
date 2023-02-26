@@ -19,8 +19,7 @@ import Folder from '@mui/icons-material/Folder';
 import Description from '@mui/icons-material/Description';
 import { useNav } from '@/store/hooks';
 import clsx from 'clsx';
-import { useEffect, useRef } from 'react';
-import { autorun } from 'mobx';
+import { useRef } from 'react';
 import Toc from './Toc';
 
 export const DRAWER_WIDTH = 40;
@@ -110,7 +109,7 @@ const Folders = observer(() => {
   const nav = useNav();
 
   return <List dense sx={{ flexGrow: 1 }} className={clsx({ 'drawer-childHidden': !drawer.visible })}>
-    {drawer.childDocs.map((doc) => (
+    {drawer.subdirs.map((doc) => (
       <ListItemButton key={doc.filename} className={clsx({ 'drawerItem-loading': home.loading && home.last !== doc.relativePath })} onClick={() => {
         if (!home.loading) {
           nav(doc.relativePath);
@@ -138,36 +137,6 @@ const Drawer = observer(() => {
   const drawer = useStore('drawer');
   const drawerRef = useRef<HTMLDivElement | null>(null);
   const tocRef = useRef<HTMLElement | null>();
-
-  useEffect(autorun(() => {
-    let startY: number;
-    const recordStartY = (e: TouchEvent) => {
-      if (e.targetTouches.length > 1) return;
-      startY = e.targetTouches[0].clientY;
-    };
-    const preventOverScroll = (e: TouchEvent) => {
-      if (e.targetTouches.length > 1) return;
-
-      if (drawerRef.current!.scrollTop <= 0 && e.targetTouches[0].clientY > startY) {
-        drawerRef.current!.scrollTop = 0;
-        e.preventDefault();
-      }
-
-      const maxScrollTop = drawerRef.current!.scrollHeight - drawerRef.current!.clientHeight;
-      if (maxScrollTop >= 0 && e.targetTouches[0].clientY < startY) {
-        drawerRef.current!.scrollTop = maxScrollTop;
-        e.preventDefault();
-      }
-    };
-
-    drawerRef.current?.addEventListener('touchstart', recordStartY);
-    drawerRef.current?.addEventListener('touchmove', preventOverScroll, { passive: false });
-
-    return () => {
-      drawerRef.current?.removeEventListener('touchstart', recordStartY);
-      drawerRef.current?.removeEventListener('touchmove', preventOverScroll);
-    };
-  }), []);
 
   return (
     <StyledDrawer

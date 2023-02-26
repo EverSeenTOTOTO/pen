@@ -30,7 +30,7 @@ export class UiStore {
 
       result.push({
         filename: split[i],
-        relative: `${this.root.socket.computePath(path)}`,
+        relative: `${this.root.socket.resolveRelativePath(path)}`,
       });
     }
 

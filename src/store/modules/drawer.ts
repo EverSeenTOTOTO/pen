@@ -1,5 +1,4 @@
-import { DocToc } from '@/types';
-import { makeAutoObservable, autorun } from 'mobx';
+import { makeAutoObservable, reaction } from 'mobx';
 import type { AppStore } from '..';
 
 export class DrawerStore {
@@ -13,7 +12,7 @@ export class DrawerStore {
     makeAutoObservable(this);
     this.root = root;
 
-    autorun(() => this.expandToc(this.root.home.data?.reading?.toc ?? []));
+    reaction(() => this.toc, () => this.expandToc());
   }
 
   toggle(value?: boolean) {
@@ -24,21 +23,9 @@ export class DrawerStore {
     return this.root.home.data?.reading?.toc ?? [];
   }
 
-  expandToc(tocs: DocToc[]) {
-    if (tocs.length === 0) {
-      this.expandedToc = [];
-    } else {
-      const result: string[] = [];
-      const push = (toc: DocToc) => {
-        if (toc.children.length > 0) {
-          result.push(toc.id);
-          // toc.children.forEach(push);
-        }
-      };
-
-      push(tocs[0]);
-
-      this.expandedToc = result;
+  protected expandToc() {
+    if (this.toc[0]?.children.length > 0 && !this.expandedToc.includes(this.toc[0]?.id)) {
+      this.expandedToc.push(this.toc[0].id); // expand first level
     }
   }
 
@@ -46,9 +33,9 @@ export class DrawerStore {
     this.expandedToc = value;
   }
 
-  get childDocs() {
+  get subdirs() {
     const { data } = this.root.home;
 
-    return data?.children.map((each) => ({ ...each, relativePath: this.root.socket.computePath(each.relativePath) })) ?? [];
+    return data?.children.map((each) => ({ ...each, relativePath: this.root.socket.resolveRelativePath(each.relativePath) })) ?? [];
   }
 }

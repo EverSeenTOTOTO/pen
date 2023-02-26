@@ -30,14 +30,19 @@ const StyledBreadcrumbs = styled(Breadcrumbs)(({ theme }) => ({
   marginTop: theme.spacing(1),
   marginLeft: theme.spacing(1),
   '& li:nth-of-type(1)': {
-    marginTop: `-${theme.spacing(0.25)}`,
-    marginRight: `-${theme.spacing(0.5)}`,
+    marginRight: `-${theme.spacing(1)}`,
   },
-  '& li:not(:nth-of-type(1))': {
-    marginTop: `-${theme.spacing(0.5)}`,
-  },
-  '& .MuiBreadcrumbs-separator': {
-    [theme.breakpoints.down('md')]: {
+  [theme.breakpoints.down('md')]: {
+    '& a': {
+      fontSize: '0.8rem',
+    },
+    '& li:not(.MuiBreadcrumbs-li)': {
+      marginTop: `-${theme.spacing(0.5)}`,
+    },
+    '& li.MuiBreadcrumbs-li:not(:first-child)': {
+      marginTop: `-${theme.spacing(1)}`,
+    },
+    '& .MuiBreadcrumbs-separator': {
       marginLeft: theme.spacing(0.5),
       marginRight: theme.spacing(0.5),
     },
@@ -60,7 +65,10 @@ const BreadCrumbRoutes = observer(() => {
   return (
     <Root>
       <StyledBreadcrumbs aria-label="breadcrumb">
-        <Link onClick={() => nav(socket.namespace)}>
+        <Link component="a" href={socket.namespace} onClick={(e) => {
+          e.preventDefault();
+          nav(socket.namespace);
+        }}>
           <NoSsr>
             <StyledHomeIcon />
           </NoSsr>
