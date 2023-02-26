@@ -59,6 +59,9 @@ const StyledDrawer = styled(MuiDrawer)(({ theme }) => ({
     flexDirection: 'column',
     justifyContent: 'flex-start',
   },
+  '& .drawerItem-loading': {
+    color: 'grey',
+  },
 }));
 
 const StyledDrawerContainer = styled('div')(() => ({
@@ -102,12 +105,17 @@ const StyledFolderItem = styled(ListItemText)(() => ({
 }));
 
 const Folders = observer(() => {
+  const home = useStore('home');
   const drawer = useStore('drawer');
   const nav = useNav();
 
   return <List dense sx={{ flexGrow: 1 }} className={clsx({ 'drawer-childHidden': !drawer.visible })}>
     {drawer.childDocs.map((doc) => (
-      <ListItemButton key={doc.filename} onClick={() => nav(doc.relativePath)}>
+      <ListItemButton key={doc.filename} className={clsx({ 'drawerItem-loading': home.loading && home.last !== doc.relativePath })} onClick={() => {
+        if (!home.loading) {
+          nav(doc.relativePath);
+        }
+      }}>
         <NoSsr>
           <ListItemIcon sx={{
             minWidth: (theme) => theme.spacing(4),

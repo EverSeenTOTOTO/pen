@@ -11,7 +11,7 @@ export type HomeState = {
 };
 
 const cache = new LRU({
-  max: 5,
+  max: import.meta.env.DEV ? 1 : 5,
 });
 
 export class HomeStore implements PrefetchStore<HomeState> {
@@ -19,9 +19,15 @@ export class HomeStore implements PrefetchStore<HomeState> {
 
   error?: PenErrorData;
 
+  last = '/';
+
   loading = false;
 
+  loadingTimeout = false;
+
   root: AppStore;
+
+  timeoutId?: NodeJS.Timeout;
 
   constructor(root: AppStore) {
     makeAutoObservable(this);
@@ -49,7 +55,9 @@ export class HomeStore implements PrefetchStore<HomeState> {
 
     if (!record) {
       if (foreground) {
+        this.last = relative;
         this.loading = true;
+        this.timeoutId = setTimeout(() => { this.loadingTimeout = true; }, 500);
       }
     } else {
       this.data = record as PenDirectoryData;
@@ -68,12 +76,13 @@ export class HomeStore implements PrefetchStore<HomeState> {
       const reading = data?.reading?.relativePath ?? data?.relativePath;
 
       if (globalThis && globalThis.scrollTo && this.reading !== reading) {
-        // drop outdated fetch
-
         globalThis.scrollTo(0, 0);
       }
 
+      if (this.timeoutId) clearTimeout(this.timeoutId);
+
       this.loading = false;
+      this.loadingTimeout = false;
       this.data = data;
 
       cache.set(reading, this.data);

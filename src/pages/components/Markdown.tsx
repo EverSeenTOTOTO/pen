@@ -5,7 +5,7 @@ import { styled } from '@mui/material/styles';
 import { createMarkup } from '@/utils';
 import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
-import { Skeleton } from '@mui/material';
+import Skeleton from '@mui/material/Skeleton';
 import { Suspense, useEffect, useRef } from 'react';
 
 const StyledContainer = styled(Container)(() => ({
@@ -57,7 +57,7 @@ const Data = observer(() => {
   }, [home.html]);
 
   // eslint-disable-next-line @typescript-eslint/no-throw-literal
-  if (home.loading) throw new Promise<void>((res) => res());
+  if (home.loadingTimeout) throw new Promise<void>((res) => res());
 
   return <StyledPaper ref={ref} dangerouslySetInnerHTML={createMarkup(home.html)} />;
 });

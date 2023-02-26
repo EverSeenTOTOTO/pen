@@ -1,4 +1,3 @@
-import Clipboard from 'clipboard';
 import { useLocation, useNavigate } from 'react-router';
 import { useEffect } from 'react';
 import { reaction } from 'mobx';
@@ -8,13 +7,15 @@ export const useClipboard = () => {
   const ui = useStore('ui');
 
   useEffect(() => {
-    // clipboard
-    const clipboard = new Clipboard('.copy-btn');
+    import('clipboard').then((mod) => mod.default).then((Clipboard) => {
+      // clipboard
+      const clipboard = new Clipboard('.copy-btn');
 
-    clipboard.on('success', () => ui.notify('success', 'Copied.'));
-    clipboard.on('error', () => ui.notify('error', 'Copy failed.'));
+      clipboard.on('success', () => ui.notify('success', 'Copied.'));
+      clipboard.on('error', () => ui.notify('error', 'Copy failed.'));
 
-    return () => clipboard.destroy();
+      return () => clipboard.destroy();
+    });
   }, []);
 };
 

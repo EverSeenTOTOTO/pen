@@ -34,7 +34,7 @@ const StyledBreadcrumbs = styled(Breadcrumbs)(({ theme }) => ({
     marginRight: `-${theme.spacing(0.5)}`,
   },
   '& li:not(:nth-of-type(1))': {
-    marginTop: `-${theme.spacing(1)}`,
+    marginTop: `-${theme.spacing(0.5)}`,
   },
   '& .MuiBreadcrumbs-separator': {
     [theme.breakpoints.down('md')]: {
