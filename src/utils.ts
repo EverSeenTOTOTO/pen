@@ -30,31 +30,33 @@ export function isReadme(filepath: string) {
   return /README\.(md|markdown)$/i.test(filepath);
 }
 
-// '/a/' -> '/a'
-// '/a/b/' -> '/a/b'
 // '\\' -> '/'
 // '\\\\' -> '/'
 // '//' -> '/'
 // '' -> '/'
 export function formatRelative(p: string) {
   return slash(p)
-    .replace(/^(.*?)\/*$/g, '$1')
     .replace(/^(?!\/)(.*)$/g, '/$1')
     .replace(/\/\//g, '/')
     .replace(/^$/, '/');
+}
+
+export function formatDirPath(p: string) {
+  return p.replace(/([^/])$/, '$1/');
 }
 
 export function resolvePathInfo(root: string, relative: string): PathInfo {
   const fullpath = slash(path.join(root, relative.replace(/~$/, '')));
   const filename = path.basename(fullpath);
   const relativePath = formatRelative(path.relative(root, fullpath));
+  const isDirectory = isDir(fullpath);
 
   return {
     fullpath,
     filename,
-    relativePath,
+    relativePath: isDirectory ? formatDirPath(relativePath) : relativePath,
     // eslint-disable-next-line no-nested-ternary
-    type: isDir(fullpath) ? 'directory' : isMarkdown(fullpath) ? 'markdown' : 'other',
+    type: isDirectory ? 'directory' : isMarkdown(fullpath) ? 'markdown' : 'other',
   };
 }
 

@@ -11,7 +11,7 @@ import {
   ClientToServerEvents,
   ServerToClientEvents,
 } from '@/types';
-import { stripNamespace } from '@/utils';
+import { formatDirPath, isMarkdown, stripNamespace } from '@/utils';
 import type { AppStore, PrefetchStore } from '..';
 
 export class SocketStore implements PrefetchStore<PenSocketInfo> {
@@ -35,7 +35,9 @@ export class SocketStore implements PrefetchStore<PenSocketInfo> {
   }
 
   resolveRelativePath(relative: string) {
-    return `${this.namespace === '/' ? '' : this.namespace}${relative}`;
+    const path = `${this.namespace === '/' ? '' : this.namespace}${relative}`;
+
+    return isMarkdown(path) ? path : formatDirPath(path);
   }
 
   get socket() {

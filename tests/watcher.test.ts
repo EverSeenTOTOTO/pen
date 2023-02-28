@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import { Watcher } from '@/server/watcher';
 import { PenDirectoryData, PenErrorData, WatcherOptions } from '@/types';
@@ -75,7 +76,7 @@ it('test jumpTo nested', (done) => {
   watcher.setupWatching('/').then(() => {
     watcher.setupWatching('/A/b.md').then(() => {
       expect(datas[0].relativePath).toBe('/');
-      expect(datas[1].relativePath).toBe('/A');
+      expect(datas[1].relativePath).toBe('/A/');
       expect(datas[1].reading).not.toBeUndefined();
 
       watcher.close()?.finally(done);
@@ -140,6 +141,15 @@ it('test rm watching', (done) => {
 
 it('test add readme', (done) => {
   const watcher = createWatcher();
+  const datas: any[] = [];
+
+  watcher.setupEmit((_, data) => {
+    datas.push(data);
+    if (datas.length >= 2) {
+      expect(datas[0].reading?.content).toMatch(/!!TEST!! # README/);
+      expect(datas[1].reading?.content).toMatch(/!!TEST!! # README changed/);
+    }
+  });
 
   watcher.setupWatching('/').then(() => {
     watcher.setupEmit((_, data) => {
@@ -153,6 +163,8 @@ it('test add readme', (done) => {
 
     fs.writeFileSync(readme, '# README');
     watcher.watcher?.emit('all', 'add', readme);
+    fs.writeFileSync(readme, '# README changed');
+    watcher.watcher?.emit('all', 'change', readme);
   });
 });
 
