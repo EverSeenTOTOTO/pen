@@ -1,6 +1,8 @@
 import path from 'path';
 import fs from 'fs';
-import { PathInfo } from './types';
+import type { PathInfo } from './types';
+
+export function PASS() { }
 
 // forked from 'slash'
 export function slash(p: string) {
@@ -67,3 +69,25 @@ export const uuid = (content?: string) => {
 
   return hash.update(content ?? 'pen').digest('hex').slice(0, 16);
 };
+
+export const perf = new Proxy(performance, {
+  get(t, p, r) {
+    const result = Reflect.get(t, p, r);
+
+    if (typeof result === 'function') {
+      if (process.env.NODE_ENV !== 'development') {
+        return PASS;
+      }
+
+      if (p === 'measure') {
+        return (...args: unknown[]) => {
+          const record = result(...args);
+
+          console.log(`${record.name}: ${record.duration}`);
+        };
+      }
+    }
+
+    return result;
+  },
+});

@@ -1,19 +1,20 @@
+import { DocToc, RemarkOptions, RemarkPlugin } from '@/types';
+import { perf } from '@/utils';
+import rehypeParse from 'rehype-parse';
 import rehypeRaw from 'rehype-raw';
+import rehypeStringify from 'rehype-stringify';
+import remarkDirective from 'remark-directive';
 import remarkGFM from 'remark-gfm';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
-import rehypeParse from 'rehype-parse';
 import remarkParse from 'remark-parse';
 import remarkRehype from 'remark-rehype';
-import rehypeStringify from 'rehype-stringify';
-import remarkDirective from 'remark-directive';
 import { unified, Plugin, Processor } from 'unified';
-import { DocToc, RemarkOptions, RemarkPlugin } from '@/types';
+import { rehypeToc, rehypeTocId } from './plugins/rehype-toc';
 import rehypeHighlight from './plugins/rehype-highlight';
 import rehypeCopy from './plugins/rehype-copy';
-import { rehypeToc, rehypeTocId } from './plugins/rehype-toc';
-import { Logger } from './logger';
 import { makeContainerPlugin } from './plugins/remark-container';
+import { Logger } from './logger';
 
 const defaultPlugins = [
   ['remark-parse', remarkParse],
@@ -21,13 +22,13 @@ const defaultPlugins = [
   ['remark-gfm', remarkGFM],
   ['remark-container', makeContainerPlugin(['info', 'warn', 'error'])],
   ['remark-math', remarkMath],
-  ['remark-rehype', remarkRehype, { allowDangerousHtml: true }],
+  ['remark-rehype', remarkRehype, { allowDangerousHtml: true }], // FIXME: stupid escape strategy
   /* -------- Seperator for remark and rehype -------- */
   ['rehype-raw', rehypeRaw],
   ['rehype-toc-id', rehypeTocId],
   ['rehype-copy', rehypeCopy],
   ['rehype-highlight', rehypeHighlight],
-  ['rehype-katex', rehypeKatex, { strict: false }],
+  ['rehype-katex', rehypeKatex, { strict: false }], // FIXME: too slow on server side
   ['rehype-stringify', rehypeStringify],
 ];
 
@@ -64,9 +65,16 @@ export class RemarkRehype {
 
   async process(markdown: string): Promise<{ content: string, toc?: DocToc[] }> {
     try {
-      // TODO: one pass
+      perf.mark('process content');
+
       const content = (await this.render.process(markdown)).toString();
+
+      perf.measure('process content done', 'process content');
+      perf.mark('process toc');
+
       const toc = (await this.tocExtractor.process(content)).result as DocToc[];
+
+      perf.measure('process toc done', 'process toc');
 
       return { content: encodeURIComponent(content), toc };
     } catch (reason) {

@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 /* eslint-disable @typescript-eslint/no-var-requires */
 
+process.env.NODE_ENV = process.env.NODE_ENV || 'production';
+
 const { program } = require('commander');
 const open = require('open');
 const { createServer } = require('./dist/server');

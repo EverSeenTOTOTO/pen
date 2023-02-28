@@ -1,5 +1,5 @@
 {
-  "version": "5.4.2",
+  "version": "5.4.3",
   "name": "@everseen/pen",
   "author": "EverSeenTOTOTO",
   "keywords": "markdown,gfm",
@@ -35,7 +35,7 @@
     "express": "^4.18.1",
     "highlight.js": "^11.5.1",
     "js-cookie": "^3.0.1",
-    "katex": "^0.16.0",
+    "katex": "^0.16.4",
     "lru-cache": "^7.12.0",
     "mobx": "^6.5.0",
     "mobx-react-lite": "^3.4.0",
@@ -45,6 +45,7 @@
     "react-dom": "^18.0.0",
     "react-router": "^6.3.0",
     "react-router-dom": "^6.3.0",
+    "rehype-dom-stringify": "^3.0.1",
     "serialize-javascript": "^6.0.0",
     "socket.io": "^4.5.0",
     "socket.io-client": "^4.5.0"

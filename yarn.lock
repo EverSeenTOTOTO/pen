@@ -2253,6 +2253,11 @@
   resolved "https://registry.npmmirror.com/@types/unist/-/unist-2.0.6.tgz"
   integrity sha512-PBjIUxZHOuj0R15/xuwJYjFi+KZdNFrehocChv4g5hu6aFroHue8m0lBP0POdK2nKzbw0cgV1mws8+V/JAcEkQ==
 
+"@types/web@^0.0.50":
+  version "0.0.50"
+  resolved "https://registry.npmmirror.com/@types/web/-/web-0.0.50.tgz#db2a20af31c415a92ce83ca6cdf060bdbdd3c5a5"
+  integrity sha512-WxV9pLn1XOVMmdflpft88cIXkhl/vi9k7xWEcFWrporpv4/wJq1W/MRyxJbP1npAZqaUNIIw0cH3/3Brgssyjw==
+
 "@types/yargs-parser@*":
   version "21.0.0"
   resolved "https://registry.npmmirror.com/@types/yargs-parser/-/yargs-parser-21.0.0.tgz"
@@ -4612,6 +4617,14 @@ hast-util-raw@^7.2.0:
     web-namespaces "^2.0.0"
     zwitch "^2.0.0"
 
+hast-util-to-dom@^3.0.0:
+  version "3.1.1"
+  resolved "https://registry.npmmirror.com/hast-util-to-dom/-/hast-util-to-dom-3.1.1.tgz#7cd9f925b0cff8ec2c95474ef896b1865fcefd62"
+  integrity sha512-hDiYqOapuWzLPDMADCD5z6re/07OQOpQuT2YO5hxPjaxWTtgcbjqCjlv4KtyMuEQiW4wKTIPoK+japvbZ5zqxg==
+  dependencies:
+    property-information "^6.0.0"
+    web-namespaces "^2.0.0"
+
 hast-util-to-html@^8.0.0:
   version "8.0.3"
   resolved "https://registry.npmmirror.com/hast-util-to-html/-/hast-util-to-html-8.0.3.tgz"
@@ -5705,10 +5718,10 @@ katex@^0.15.0:
   dependencies:
     commander "^8.0.0"
 
-katex@^0.16.0:
-  version "0.16.0"
-  resolved "https://registry.npmmirror.com/katex/-/katex-0.16.0.tgz#4faff4c905aad0c6010e85901c4d9140efb80a5e"
-  integrity sha512-wPRB4iUPysfH97wTgG5/tRLYxmKVq6Q4jRAWRVOUxXB1dsiv4cvcNjqabHkrOvJHM1Bpk3WrgmllSO1vIvP24w==
+katex@^0.16.4:
+  version "0.16.4"
+  resolved "https://registry.npmmirror.com/katex/-/katex-0.16.4.tgz#87021bc3bbd80586ef715aeb476794cba6a49ad4"
+  integrity sha512-WudRKUj8yyBeVDI4aYMNxhx5Vhh2PjpzQw1GRu/LVGqL4m1AxwD1GcUp0IMbdJaf5zsjtj8ghP0DOQRYhroNkw==
   dependencies:
     commander "^8.0.0"
 
@@ -7517,6 +7530,17 @@ regjsparser@^0.8.2:
   integrity sha512-J3LABycON/VNEu3abOviqGHuB/LOtOQj8SKmfP9anY5GfAVw/SPjwzSjxGjbZXIxbGfqTHtJw58C2Li/WkStmA==
   dependencies:
     jsesc "~0.5.0"
+
+rehype-dom-stringify@^3.0.1:
+  version "3.0.1"
+  resolved "https://registry.npmmirror.com/rehype-dom-stringify/-/rehype-dom-stringify-3.0.1.tgz#55d1802a36bd0abb7a371655a8a14a48956fc46a"
+  integrity sha512-SjYgzb7uW1MSCMazKda5hvGMwXiwSIgtdxX+buy6XWTQ2XYNdra1ZbBrj+x8vtEoHRhFrPY8EvJE7nNnKlDpTg==
+  dependencies:
+    "@types/hast" "^2.0.0"
+    "@types/web" "^0.0.50"
+    hast-util-to-dom "^3.0.0"
+    unified "^10.0.0"
+    web-namespaces "^2.0.0"
 
 rehype-katex@^6.0.2:
   version "6.0.2"

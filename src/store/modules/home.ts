@@ -57,7 +57,7 @@ export class HomeStore implements PrefetchStore<HomeState> {
       if (foreground) {
         this.last = relative;
         this.loading = true;
-        this.timeoutId = setTimeout(() => { this.loadingTimeout = true; }, 500);
+        this.timeoutId = setTimeout(() => { this.loadingTimeout = true; }, 300);
       }
     } else {
       this.data = record as PenDirectoryData;

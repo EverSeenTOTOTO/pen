@@ -1,6 +1,7 @@
 import path from 'path';
 import fs from 'fs';
 import express, { Express, Request, Response } from 'express';
+import { perf } from '@/utils';
 import { RenderOptions } from '../types';
 import { createTheme, ThemeNames } from './theme';
 import { readUnknown } from './reader';
@@ -14,6 +15,8 @@ export const createSSRMiddleware = (options: RenderOptions) => {
   return async (req: Request, res: Response, next: () => void) => {
     const url = decodeURIComponent(req.url);
 
+    perf.mark('parse theme start');
+
     let theme: ThemeNames = 'light';
     try {
       theme = JSON.parse(req.cookies.themeMode);
@@ -21,12 +24,18 @@ export const createSSRMiddleware = (options: RenderOptions) => {
       options.logger.error(e);
     }
 
+    perf.measure('parse theme end', 'parse theme start');
+    perf.mark('read data start');
+
     try {
       const [template, render] = await preloadPromise;
       const [data, themeData] = await Promise.all([
         readUnknown({ ...options, relative: url }),
         createTheme(theme, options.dist),
       ]);
+
+      perf.measure('read data end', 'read data start');
+      perf.mark('render start');
 
       const { html } = await render({
         req,
@@ -38,6 +47,8 @@ export const createSSRMiddleware = (options: RenderOptions) => {
           home: { data },
         },
       });
+
+      perf.measure('render end', 'render start');
 
       res.setHeader('Content-Type', 'text/html');
       res.end(html);

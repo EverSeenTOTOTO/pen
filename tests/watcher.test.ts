@@ -22,6 +22,10 @@ const createWatcher = (opts?: Partial<WatcherOptions>) => new Watcher({
   remark: mockRemark,
 });
 
+afterEach(async () => {
+  await new Promise<void>((resolve) => { setTimeout(resolve, 100); });
+});
+
 it('test watcher', (done) => {
   const watcher = createWatcher();
 

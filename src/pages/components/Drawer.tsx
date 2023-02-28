@@ -59,7 +59,7 @@ const StyledDrawer = styled(MuiDrawer)(({ theme }) => ({
     justifyContent: 'flex-start',
   },
   '& .drawerItem-loading': {
-    color: 'grey',
+    color: theme.palette.mode === 'dark' ? 'grey' : '#b2b2b2',
   },
 }));
 

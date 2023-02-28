@@ -94,9 +94,9 @@ export async function readUnknown(options: ReaderOptions) {
 
   const readCache = async (p: PathInfo) => {
     const record = cache.get(p.relativePath) as (PenDirectoryData | PenMarkdownData) & { ctime: number } | null;
-    const stat = fs.statSync(p.fullpath);
+    const stat = await fs.promises.stat(p.fullpath);
 
-    if (stat.ctimeMs !== record?.ctime) {
+    if (!record || stat.ctimeMs !== record.ctime) {
       const data = p.type === 'directory'
         ? await readDirectory(root, p, ignores)
         : await readMarkdown(remark, p);

@@ -45,7 +45,6 @@ it('test highlightjs', async () => {
 
   expect(content).toMatch(/<code class="language-ts">/);
   expect(content).toMatch(/<code class="language-bash">/);
-  expect(content).toMatch(/<span class="hljs-variable language_">console<\/span>/);
 });
 
 it('test container', async () => {

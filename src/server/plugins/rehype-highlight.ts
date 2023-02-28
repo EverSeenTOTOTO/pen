@@ -1,17 +1,13 @@
 /* eslint-disable no-param-reassign */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import path from 'path';
-import hljs from 'highlight.js';
+import hljs from 'highlight.js/lib/core';
 import parse5 from 'parse5';
 import * as h2s from 'hast-util-to-string';
 import * as hfp from 'hast-util-from-parse5';
 import { makeCodeBlockPlugin } from './code-block';
 
-const loadedLanguages = new Set<string>();
-
 const loadLanguage = (lang: string) => {
-  if (loadedLanguages.has(lang)) return;
-
   const highlightjs = path.join(__dirname, '../node_modules/highlight.js/lib/languages');
 
   try {
@@ -19,11 +15,30 @@ const loadLanguage = (lang: string) => {
     const language = require(path.join(highlightjs, `${lang}.js`));
 
     hljs.registerLanguage(lang, language);
-    loadedLanguages.add(lang);
   } catch (e) {
     // pass
   }
 };
+
+loadLanguage('xml');
+loadLanguage('bash');
+loadLanguage('c');
+loadLanguage('cpp');
+loadLanguage('css');
+loadLanguage('markdown');
+loadLanguage('diff');
+loadLanguage('go');
+loadLanguage('java');
+loadLanguage('javascript');
+loadLanguage('json');
+loadLanguage('lua');
+loadLanguage('makefile');
+loadLanguage('plaintext');
+loadLanguage('python');
+loadLanguage('rust');
+loadLanguage('scss');
+loadLanguage('yaml');
+loadLanguage('typescript');
 
 export default makeCodeBlockPlugin((language: string, node: any) => {
   try {

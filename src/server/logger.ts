@@ -1,10 +1,10 @@
 import betterLogger from 'better-logging';
+import { PASS } from '../utils';
 
 export type Logger = Pick<Console, 'log' | 'info' | 'warn' | 'error' | 'clear'> & {
   done: Console['log'],
 };
 
-const PASS = () => {};
 export const emptyLogger: Logger = {
   log: PASS,
   info: PASS,

@@ -15,7 +15,8 @@ declare module 'better-logging' {
 /// <reference types="vue/macros-global" />
 
 declare interface Window {
-  __PREFETCHED_STATE__: any
+  __PREFETCHED_STATE__: any,
+  renderMathInElement: (element: HTMLElement, options: unknown) => void
 }
 
 declare interface ImportMetaEnv {
