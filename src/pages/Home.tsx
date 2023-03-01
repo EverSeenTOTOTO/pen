@@ -6,7 +6,7 @@ import Snackbar from '@mui/material/Snackbar';
 import Alert from '@mui/lab/Alert';
 import { ThemeProvider, styled } from '@mui/material/styles';
 import {
-  useAutoFetch, useClipboard, useCookie,
+  useAutoFetch, useClipboard,
 } from '@/store/hooks';
 import Markdown from './components/Markdown';
 import Drawer, {
@@ -43,7 +43,6 @@ const Home = observer(() => {
   const drawer = useStore('drawer');
   const ui = useStore('ui');
 
-  useCookie();
   useAutoFetch();
   useClipboard();
 

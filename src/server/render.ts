@@ -17,9 +17,11 @@ export const createSSRMiddleware = (options: RenderOptions) => {
 
     perf.mark('parse theme start');
 
-    let theme: ThemeNames = 'light';
+    let themeMode: ThemeNames = 'light';
+    let drawerVisible = false;
     try {
-      theme = JSON.parse(req.cookies.themeMode);
+      themeMode = JSON.parse(req.cookies.themeMode);
+      drawerVisible = JSON.parse(req.cookies.drawerVisible);
     } catch (e) {
       options.logger.error(e);
     }
@@ -31,7 +33,7 @@ export const createSSRMiddleware = (options: RenderOptions) => {
       const [template, render] = await preloadPromise;
       const [data, themeData] = await Promise.all([
         readUnknown({ ...options, relative: url }),
-        createTheme(theme, options.dist),
+        createTheme(themeMode, options.dist),
       ]);
 
       perf.measure('read data end', 'read data start');
@@ -45,6 +47,7 @@ export const createSSRMiddleware = (options: RenderOptions) => {
           socket: options,
           theme: themeData,
           home: { data },
+          drawer: { visible: drawerVisible },
         },
       });
 

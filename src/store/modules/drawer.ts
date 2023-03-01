@@ -1,7 +1,11 @@
 import { makeAutoObservable, reaction } from 'mobx';
-import type { AppStore } from '..';
+import type { AppStore, PrefetchStore } from '..';
 
-export class DrawerStore {
+type DrawerState = {
+  visible: boolean;
+};
+
+export class DrawerStore implements PrefetchStore<DrawerState> {
   visible = false;
 
   root: AppStore;
@@ -37,5 +41,15 @@ export class DrawerStore {
     const { data } = this.root.home;
 
     return data?.children.map((each) => ({ ...each, relativePath: this.root.socket.resolveRelativePath(each.relativePath) })) ?? [];
+  }
+
+  hydrate(state: DrawerState): void {
+    this.visible = state.visible;
+  }
+
+  dehydra() {
+    return {
+      visible: this.visible,
+    };
   }
 }

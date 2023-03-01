@@ -1,4 +1,4 @@
-import { makeAutoObservable } from 'mobx';
+import { makeAutoObservable, reaction } from 'mobx';
 import cookie from 'js-cookie';
 import type { AppStore } from '..';
 
@@ -8,9 +8,11 @@ export class Cookie {
   constructor(root: AppStore) {
     makeAutoObservable(this);
     this.root = root;
+
+    reaction(() => this.data, () => this.save());
   }
 
-  save() {
+  protected save() {
     if (globalThis.document) {
       Object.keys(this.data).forEach((key) => {
         cookie.set(key, JSON.stringify(this.data[key]), { expires: 365 });
@@ -22,7 +24,7 @@ export class Cookie {
     }
   }
 
-  load(): Cookie['data'] {
+  protected load(): Cookie['data'] {
     const result = this.data; // default value
 
     if (globalThis.document) {
@@ -40,7 +42,7 @@ export class Cookie {
     return result;
   }
 
-  get data(): Record<string, any> {
+  get data(): Record<string, unknown> {
     return {
       drawerVisible: this.root.drawer.visible,
       themeMode: this.root.theme.mode,

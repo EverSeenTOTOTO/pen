@@ -1,6 +1,5 @@
 import { useLocation, useNavigate } from 'react-router';
 import { useEffect } from 'react';
-import { reaction } from 'mobx';
 import { useStore } from '.';
 
 export const useClipboard = () => {
@@ -50,14 +49,22 @@ export const useAutoFetch = () => {
   }, [location.pathname]);
 };
 
-export const useCookie = () => {
-  const cookie = useStore('cookie');
-  const drawer = useStore('drawer');
+export const useDocToc = () => {
+  const home = useStore('home');
 
   useEffect(() => {
-    const data = cookie.load();
+    const headers = document.querySelectorAll('h1, h2, h3, h4, h5, h6');
 
-    drawer.toggle(data.drawerVisible);
-    reaction(() => cookie.data, () => cookie.save());
-  }, []);
+    headers.forEach((h) => {
+      const archor = h.querySelector('span:first-of-type');
+      const click = h.querySelector('span:last-of-type');
+
+      if (archor && click) {
+        click.addEventListener('click', (e) => {
+          window.location.hash = archor.id;
+          e.preventDefault();
+        });
+      }
+    });
+  }, [home.html]);
 };

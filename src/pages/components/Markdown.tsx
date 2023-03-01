@@ -6,7 +6,8 @@ import { createMarkup } from '@/utils';
 import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
 import Skeleton from '@mui/material/Skeleton';
-import { Suspense, useEffect, useRef } from 'react';
+import { Suspense, useRef } from 'react';
+import { useDocToc } from '@/store/hooks';
 
 const StyledContainer = styled(Container)(() => ({
   height: '100%',
@@ -41,20 +42,7 @@ const Data = observer(() => {
   const home = useStore('home');
   const ref = useRef(null);
 
-  useEffect(() => {
-    const headers = document.querySelectorAll('h1, h2, h3, h4, h5, h6');
-
-    headers.forEach((h) => {
-      const archor = h.querySelector('span:first-child');
-      const click = h.querySelector('span:last-child');
-
-      if (archor && click) {
-        click.addEventListener('click', () => {
-          window.location.hash = archor.id;
-        });
-      }
-    });
-  }, [home.html]);
+  useDocToc();
 
   // eslint-disable-next-line @typescript-eslint/no-throw-literal
   if (home.loadingTimeout) throw new Promise<void>((res) => res());
