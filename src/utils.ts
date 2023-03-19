@@ -72,7 +72,7 @@ export const uuid = (content?: string) => {
   return hash.update(content ?? 'pen').digest('hex').slice(0, 16);
 };
 
-export const perf = new Proxy(performance, {
+export const perf = globalThis.performance && new Proxy(performance, {
   get(t, p, r) {
     const result = Reflect.get(t, p, r);
 

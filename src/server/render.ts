@@ -15,7 +15,7 @@ export const createSSRMiddleware = (options: RenderOptions) => {
   return async (req: Request, res: Response, next: () => void) => {
     const url = decodeURIComponent(req.url);
 
-    perf.mark('parse theme start');
+    perf?.mark('parse theme start');
 
     let themeMode: ThemeNames = 'light';
     let drawerVisible = false;
@@ -26,8 +26,8 @@ export const createSSRMiddleware = (options: RenderOptions) => {
       options.logger.error(e);
     }
 
-    perf.measure('parse theme end', 'parse theme start');
-    perf.mark('read data start');
+    perf?.measure('parse theme end', 'parse theme start');
+    perf?.mark('read data start');
 
     try {
       const [template, render] = await preloadPromise;
@@ -36,8 +36,8 @@ export const createSSRMiddleware = (options: RenderOptions) => {
         createTheme(themeMode, options.dist),
       ]);
 
-      perf.measure('read data end', 'read data start');
-      perf.mark('render start');
+      perf?.measure('read data end', 'read data start');
+      perf?.mark('render start');
 
       const { html } = await render({
         req,
@@ -51,7 +51,7 @@ export const createSSRMiddleware = (options: RenderOptions) => {
         },
       });
 
-      perf.measure('render end', 'render start');
+      perf?.measure('render end', 'render start');
 
       res.setHeader('Content-Type', 'text/html');
       res.end(html);

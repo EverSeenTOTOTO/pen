@@ -29,4 +29,4 @@ createServer(opts)
       open(`http://localhost:${port}${options.namespace}`);
     }
   })
-  .catch((e) => console.error(e.stack ?? e.message));
+  .catch((e) => console.error(e.stack || e.message));

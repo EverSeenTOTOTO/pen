@@ -21,6 +21,8 @@ export default defineConfig(({ mode }) => ({
   resolve: {
     alias: {
       '@': paths.src,
+      'node:net': 'net',
+      'node:os': 'os',
     },
   },
   ssr: {

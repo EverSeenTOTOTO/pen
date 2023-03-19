@@ -65,16 +65,16 @@ export class RemarkRehype {
 
   async process(markdown: string): Promise<{ content: string, toc?: DocToc[] }> {
     try {
-      perf.mark('process content');
+      perf?.mark('process content');
 
       const content = (await this.render.process(markdown)).toString();
 
-      perf.measure('process content done', 'process content');
-      perf.mark('process toc');
+      perf?.measure('process content done', 'process content');
+      perf?.mark('process toc');
 
       const toc = (await this.tocExtractor.process(content)).result as DocToc[];
 
-      perf.measure('process toc done', 'process toc');
+      perf?.measure('process toc done', 'process toc');
 
       return { content: encodeURIComponent(content), toc };
     } catch (reason) {
