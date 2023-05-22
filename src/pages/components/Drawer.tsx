@@ -22,8 +22,8 @@ import clsx from 'clsx';
 import { useRef } from 'react';
 import Toc from './Toc';
 
-export const DRAWER_WIDTH = 40;
-export const DRAWER_WIDTH_MOBILE = 34;
+export const DRAWER_WIDTH = 30;
+export const DRAWER_WIDTH_MOBILE = 24;
 export const DRAWER_WIDTH_CLOSED = 8;
 export const DRAWER_WIDTH_CLOSED_MOBILE = 4;
 

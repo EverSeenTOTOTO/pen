@@ -11,6 +11,10 @@ table {
   color: rgb(255 255 255 / 80%);
 }
 
+.markdown-body .container a {
+  color: #0e335d;
+}
+
 .markdown-body .container-warn {
   border-color: darkorange;
   background-color: #ecdca6;

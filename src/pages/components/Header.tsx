@@ -30,6 +30,7 @@ const StyledBreadcrumbs = styled(Breadcrumbs)(({ theme }) => ({
   marginTop: theme.spacing(1),
   marginLeft: theme.spacing(1),
   '& li:nth-of-type(1)': {
+    marginTop: `${theme.spacing(0.5)}`,
     marginRight: `-${theme.spacing(1)}`,
   },
   [theme.breakpoints.down('md')]: {

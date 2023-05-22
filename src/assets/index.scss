@@ -1,5 +1,6 @@
 html,
 body {
+  font-size: 16px;
   scroll-behavior: smooth;
 }
 
@@ -31,11 +32,33 @@ h6 {
 }
 
 .markdown-body {
-  font-size: 1.5em;
-  letter-spacing: 0.055em;
+  font-family: "Heti Song", serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  -webkit-font-smoothing: subpixel-antialiased;
+  font-weight: 400;
+  hyphens: auto;
+  letter-spacing: 0.02em;
+  line-height: 1.5;
+  text-size-adjust: 100%;
+  word-wrap: break-word;
 
   & .hljs {
     border-radius: 2px;
+  }
+
+  h1 {
+    margin: 0;
+  }
+
+  p {
+    margin-block-end: 24px;
+    margin-block-start: 12px;
+    text-align: justify;
+    text-indent: 2em;
+  }
+
+  blockquote > p,
+  li > p {
+    text-indent: 0;
   }
 
   & .container {
@@ -46,6 +69,7 @@ h6 {
 
     & p {
       margin: 0;
+      text-indent: 0;
     }
   }
 
