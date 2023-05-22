@@ -29,7 +29,6 @@ export const DRAWER_WIDTH_CLOSED_MOBILE = 4;
 
 const StyledDrawer = styled(MuiDrawer)(({ theme }) => ({
   width: theme.spacing(DRAWER_WIDTH),
-  flexShrink: 0,
   whiteSpace: 'nowrap',
   '& .drawer-drawerOpen': {
     width: theme.spacing(DRAWER_WIDTH),
@@ -152,7 +151,6 @@ const Drawer = observer(() => {
           'drawer-drawerClose': !drawer.visible,
         }),
       }}
-      onScroll={(e) => console.log(e.target)}
     >
       <StyledDrawerContainer ref={drawerRef}
       >

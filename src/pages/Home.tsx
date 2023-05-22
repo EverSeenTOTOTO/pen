@@ -10,7 +10,7 @@ import {
 } from '@/store/hooks';
 import Markdown from './components/Markdown';
 import Drawer, {
-  DRAWER_WIDTH, DRAWER_WIDTH_CLOSED, DRAWER_WIDTH_CLOSED_MOBILE,
+  DRAWER_WIDTH, DRAWER_WIDTH_CLOSED_MOBILE,
 } from './components/Drawer';
 import Header from './components/Header';
 
@@ -21,10 +21,13 @@ const StyledMain = styled('main')(({ theme }) => ({
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.leavingScreen,
     }),
-    marginLeft: theme.spacing(DRAWER_WIDTH_CLOSED),
+    marginLeft: theme.spacing(DRAWER_WIDTH + 17),
     [theme.breakpoints.down('md')]: {
       padding: 0,
       marginLeft: theme.spacing(DRAWER_WIDTH_CLOSED_MOBILE),
+    },
+    [theme.breakpoints.up('md')]: {
+      marginRight: theme.spacing(38),
     },
   },
   '& .main-contentShift': {
@@ -32,7 +35,6 @@ const StyledMain = styled('main')(({ theme }) => ({
       easing: theme.transitions.easing.easeOut,
       duration: theme.transitions.duration.enteringScreen,
     }),
-    marginLeft: theme.spacing(DRAWER_WIDTH),
     [theme.breakpoints.down('md')]: {
       marginLeft: theme.spacing(DRAWER_WIDTH_CLOSED_MOBILE),
     },

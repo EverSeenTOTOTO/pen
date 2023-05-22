@@ -17,7 +17,7 @@ export const createSSRMiddleware = (options: RenderOptions) => {
 
     perf?.mark('parse theme start');
 
-    let themeMode: ThemeNames = 'light';
+    let themeMode: ThemeNames = 'dark';
     let drawerVisible = false;
     try {
       themeMode = JSON.parse(req.cookies.themeMode);
