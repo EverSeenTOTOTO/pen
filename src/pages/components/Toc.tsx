@@ -1,6 +1,6 @@
 import { DocToc } from '@/types';
 import { alpha, styled } from '@mui/material/styles';
-import TreeItem from '@mui/lab/TreeItem';
+import { TreeItem } from '@mui/x-tree-view/TreeItem';
 
 const StyledTreeItem = styled(TreeItem)(({ theme }) => ({
   group: {

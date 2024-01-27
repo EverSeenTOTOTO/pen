@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from 'react-router';
-import { useEffect } from 'react';
+import { useEffect, useTransition } from 'react';
 import { useStore } from '.';
 
 export const useClipboard = () => {
@@ -22,9 +22,12 @@ export const useNav = () => {
   const navigate = useNavigate();
   const ui = useStore('ui');
   const socket = useStore('socket');
+  const [, startTransition] = useTransition();
 
   return (relative: string) => {
-    navigate(relative);
+    startTransition(() => {
+      navigate(relative);
+    });
     if (!socket.socket.connected) {
       ui.notify('error', 'socket not connect');
     }

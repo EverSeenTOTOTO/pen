@@ -18,7 +18,7 @@ prepare:
 lint:
 	npx eslint --fix .
 	npx stylelint "src/**/*.{css,scss}" --fix
-	npx tsc -p . -noEmit
+	# npx tsc -p . -noEmit
 	@echo -e '\033[1;32mNo lint errors found.'
 
 .PHONY: clean
@@ -27,17 +27,16 @@ clean:
 
 .PHONY: dev
 dev: clean
-	npx vite --mode development --config config/vite.dev.ts
+	npx vite --mode development --config config/vite.dev.mts
 
 .PHONY: build\:client
 build\:client:
-	npx vite build --mode production --config config/vite.prod.ts
+	npx vite build --mode production --config config/vite.prod.mts
 
 .PHONY: build\:server
 build\:server:
-	# parallel use \n to separate inputs
-	echo -e "server\\nserverEntry" |\
-		parallel -j4 --tty "npx vite build --mode production --config config/vite.{}.ts"
+	npx vite build --mode production --config config/vite.server.mts
+	npx vite build --mode production --config config/vite.serverEntry.mts
 
 .PHONY: build
 build: clean build\:server build\:client

@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // fork from rehype-toc
 import { DocToc } from '@/types';
-import { uuid } from '@/utils';
 import { visit } from 'unist-util-visit';
 import { h } from 'hastscript';
+import { uuid } from '../../utils';
 
 function isHtmlElementNode(node: any) {
   return typeof node === 'object'

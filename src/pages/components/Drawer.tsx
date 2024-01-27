@@ -7,7 +7,7 @@ import Divider from '@mui/material/Divider';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
-import TreeView from '@mui/lab/TreeView';
+import { TreeView } from '@mui/x-tree-view/TreeView';
 import IconButton from '@mui/material/IconButton';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
@@ -140,7 +140,7 @@ const Folders = observer(() => {
 const Drawer = observer(() => {
   const drawer = useStore('drawer');
   const drawerRef = useRef<HTMLDivElement | null>(null);
-  const tocRef = useRef<HTMLElement | null>();
+  const tocRef = useRef<HTMLDivElement | null>(null);
 
   return (
     <StyledDrawer

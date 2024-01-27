@@ -2,11 +2,12 @@ import path from 'path';
 import fs from 'fs';
 import { defineConfig, ViteDevServer } from 'vite';
 import deepmerge from 'deepmerge';
-import base, { paths } from './vite.common';
+import base, { paths } from './vite.common.mts';
 import { createTheme } from '../src/server/theme';
 import { readUnknown } from '../src/server/reader';
 import { bindSocket } from '../src/server/socket';
 import { logger } from '../src/server/logger';
+import { RemarkRehype } from '../src/server/rehype';
 
 const devSSR = () => ({
   name: 'dev-ssr',
@@ -19,16 +20,7 @@ const devSSR = () => ({
     const theme = await createTheme('dark', dist);
     const templateHtml = fs.readFileSync(paths.template, 'utf-8');
     const transports: ['websocket'] = ['websocket'];
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    const remark = { // FIXME: unified is a mjs module which cannot be required in vite dev
-      logger,
-      render: {} as any,
-      tocExtractor: {} as any,
-      usePlugins() {},
-      process: (s: string) => Promise.resolve({ content: s }),
-      processError: (s?: Error) => Promise.resolve({ message: s?.message ?? '' }),
-    };
+    const remark = new RemarkRehype({ logger, plugins: [] })
 
     bindSocket(vite.httpServer!, {
       root,

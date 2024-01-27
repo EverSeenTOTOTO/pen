@@ -5,7 +5,7 @@ import legacy from '@vitejs/plugin-legacy';
 import { viteStaticCopy as copy } from 'vite-plugin-static-copy';
 // import { visualizer } from 'rollup-plugin-visualizer';
 import { slash } from '../src/utils';
-import base from './vite.common';
+import base from './vite.common.mts';
 
 const injectHtml = () => ({
   name: 'inject-html',

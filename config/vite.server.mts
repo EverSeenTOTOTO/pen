@@ -1,6 +1,6 @@
 import { defineConfig } from 'vite';
 // import { visualizer } from 'rollup-plugin-visualizer';
-import { paths } from './vite.common';
+import { paths } from './vite.common.mts';
 import pkg from '../package.json';
 
 // use vite as cjs bundler
@@ -13,8 +13,7 @@ export default defineConfig(({ mode }) => ({
     rollupOptions: {
       input: paths.server,
       output: {
-        dir: undefined, // must leave undefined explicitly
-        file: paths.serverOutput,
+        format: 'cjs'
       },
     },
   },

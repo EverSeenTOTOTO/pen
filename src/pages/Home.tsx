@@ -21,13 +21,16 @@ const StyledMain = styled('main')(({ theme }) => ({
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.leavingScreen,
     }),
-    marginLeft: theme.spacing(DRAWER_WIDTH + 17),
+    marginLeft: theme.spacing(DRAWER_WIDTH + 8),
     [theme.breakpoints.down('md')]: {
       padding: 0,
       marginLeft: theme.spacing(DRAWER_WIDTH_CLOSED_MOBILE),
     },
+    [theme.breakpoints.up('lg')]: {
+      marginRight: theme.spacing(32),
+    },
     [theme.breakpoints.up('md')]: {
-      marginRight: theme.spacing(38),
+      marginRight: theme.spacing(24),
     },
   },
   '& .main-contentShift': {

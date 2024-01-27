@@ -1,5 +1,4 @@
 import { DocToc, RemarkOptions, RemarkPlugin } from '@/types';
-import { perf } from '@/utils';
 import rehypeParse from 'rehype-parse';
 import rehypeRaw from 'rehype-raw';
 import rehypeStringify from 'rehype-stringify';
@@ -10,6 +9,7 @@ import rehypeKatex from 'rehype-katex';
 import remarkParse from 'remark-parse';
 import remarkRehype from 'remark-rehype';
 import { unified, Plugin, Processor } from 'unified';
+import { perf } from '../utils';
 import { rehypeToc, rehypeTocId } from './plugins/rehype-toc';
 import rehypeHighlight from './plugins/rehype-highlight';
 import rehypeCopy from './plugins/rehype-copy';

@@ -1,6 +1,8 @@
 import path from 'path';
 import postcssNormalize from 'postcss-normalize';
 import react from '@vitejs/plugin-react';
+import postcssFlexBugsFixes from 'postcss-flexbugs-fixes';
+import postcssPresetEnv from 'postcss-preset-env';
 
 export const paths = {
   src: path.resolve(__dirname, '..', 'src'),
@@ -8,7 +10,6 @@ export const paths = {
   template: path.resolve(__dirname, '..', 'index.html'),
   server: path.resolve(__dirname, '..', 'src/server/index.ts'), // 服务端代码入口
   serverEntry: path.resolve(__dirname, '..', 'src/index.server.tsx'), // 服务端同构应用入口
-  serverOutput: path.resolve(__dirname, '..', 'dist/server.js'),
 };
 
 export default ({ mode }) => ({
@@ -27,8 +28,8 @@ export default ({ mode }) => ({
   css: {
     postcss: {
       plugins: [
-        require('postcss-flexbugs-fixes'),
-        require('postcss-preset-env')({
+        postcssFlexBugsFixes(),
+        postcssPresetEnv({
           autoprefixer: {
             flexbox: 'no-2009',
           },

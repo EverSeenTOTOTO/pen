@@ -39,6 +39,7 @@ loadLanguage('rust');
 loadLanguage('scss');
 loadLanguage('yaml');
 loadLanguage('typescript');
+loadLanguage('wasm');
 
 export default makeCodeBlockPlugin((language: string, node: any) => {
   try {

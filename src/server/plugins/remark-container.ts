@@ -9,8 +9,8 @@ export const makeContainerPlugin = (type: string[]) => () => (tree: any) => {
   visit(tree, (node: any) => {
     if (
       node.type === 'textDirective'
-        || node.type === 'leafDirective'
-        || node.type === 'containerDirective'
+      || node.type === 'leafDirective'
+      || node.type === 'containerDirective'
     ) {
       if (!regex.test(node.name)) return;
 
