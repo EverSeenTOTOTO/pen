@@ -140,7 +140,7 @@ const Folders = observer(() => {
 const Drawer = observer(() => {
   const drawer = useStore('drawer');
   const drawerRef = useRef<HTMLDivElement | null>(null);
-  const tocRef = useRef<HTMLDivElement | null>(null);
+  const tocRef = useRef<HTMLUListElement | null>(null);
 
   return (
     <StyledDrawer
@@ -152,8 +152,7 @@ const Drawer = observer(() => {
         }),
       }}
     >
-      <StyledDrawerContainer ref={drawerRef}
-      >
+      <StyledDrawerContainer ref={drawerRef}>
         <Folders />
         <Divider />
         {drawer.toc.length > 0 && <StyledToc
