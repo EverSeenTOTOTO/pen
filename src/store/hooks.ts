@@ -52,22 +52,27 @@ export const useAutoFetch = () => {
   }, [location.pathname]);
 };
 
-export const useDocToc = () => {
+export const scrollToHeading = (id: string) => {
+  document.getElementById(id)?.scrollIntoView();
+  history.replaceState(null, '', `#${id}`);
+};
+
+export const useScrollSpy = () => {
   const home = useStore('home');
+  const drawer = useStore('drawer');
 
   useEffect(() => {
-    const headers = document.querySelectorAll('h1, h2, h3, h4, h5, h6');
+    const headers = Array.from(document.querySelectorAll('h1[id], h2[id], h3[id], h4[id], h5[id], h6[id]'));
+    if (!headers.length) return;
 
-    headers.forEach((h) => {
-      const archor = h.querySelector('span:first-of-type');
-      const click = h.querySelector('span:last-of-type');
+    const observer = new IntersectionObserver((entries) => {
+      const visible = entries
+        .filter((e) => e.isIntersecting)
+        .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)[0];
+      if (visible) drawer.setActiveToc(visible.target.id);
+    }, { rootMargin: '-64px 0px -70% 0px' });
 
-      if (archor && click) {
-        click.addEventListener('click', (e) => {
-          window.location.hash = archor.id;
-          e.preventDefault();
-        });
-      }
-    });
+    headers.forEach((header) => observer.observe(header));
+    return () => observer.disconnect();
   }, [home.html]);
 };

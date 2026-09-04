@@ -12,6 +12,8 @@ export class DrawerStore implements PrefetchStore<DrawerState> {
 
   expandedToc: string[] = [];
 
+  activeToc = '';
+
   constructor(root: AppStore) {
     makeAutoObservable(this);
     this.root = root;
@@ -35,6 +37,10 @@ export class DrawerStore implements PrefetchStore<DrawerState> {
 
   setExpandedToc(value: string[]) {
     this.expandedToc = value;
+  }
+
+  setActiveToc(id: string) {
+    this.activeToc = id;
   }
 
   get subdirs() {

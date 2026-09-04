@@ -10,17 +10,14 @@ const StyledTreeItem = styled(TreeItem)(({ theme }) => ({
   },
 }));
 
-const Toc = ({ toc }: { toc: DocToc }) => {
-  const text = decodeURIComponent(toc.text);
-
-  return (toc.children.length > 0
-    ? <StyledTreeItem itemId={toc.id} label={text}>
+const Toc = ({ toc }: { toc: DocToc }) => (
+  toc.children.length > 0
+    ? <StyledTreeItem itemId={toc.id} label={toc.text}>
       {
         toc.children.map((child: DocToc) => <Toc key={child.id} toc={child} />)
       }
     </StyledTreeItem>
-    : <StyledTreeItem itemId={toc.id} label={text} />
-  );
-};
+    : <StyledTreeItem itemId={toc.id} label={toc.text} />
+);
 
 export default Toc;

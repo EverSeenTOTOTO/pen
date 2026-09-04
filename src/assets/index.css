@@ -15,20 +15,14 @@ img {
   margin: 0;
 }
 
-/* archor header */
+/* anchor headers: leave room for the sticky header when jumping to ids */
 h1,
 h2,
 h3,
 h4,
 h5,
 h6 {
-  & > span:last-child {
-    cursor: pointer;
-  }
-
-  & > span[id^="H"] {
-    padding-top: 64px;
-  }
+  scroll-margin-top: 64px;
 }
 
 .markdown-body {

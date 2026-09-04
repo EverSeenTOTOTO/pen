@@ -7,7 +7,7 @@ import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
 import Skeleton from '@mui/material/Skeleton';
 import { Suspense, useRef } from 'react';
-import { useDocToc } from '@/store/hooks';
+import { useScrollSpy } from '@/store/hooks';
 
 const StyledContainer = styled(Container)(() => ({
   height: '100%',
@@ -42,7 +42,7 @@ const Data = observer(() => {
   const home = useStore('home');
   const ref = useRef(null);
 
-  useDocToc();
+  useScrollSpy();
 
   if (home.loadingTimeout) throw new Promise<void>((res) => res());
 
