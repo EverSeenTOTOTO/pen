@@ -6,7 +6,9 @@ type DrawerState = {
 };
 
 export class DrawerStore implements PrefetchStore<DrawerState> {
-  visible = false;
+  visible = false; // desktop: persistent sidebar open
+
+  overlay = false; // mobile: overlay drawer open (not persisted)
 
   root: AppStore;
 
@@ -23,6 +25,20 @@ export class DrawerStore implements PrefetchStore<DrawerState> {
 
   toggle(value?: boolean) {
     this.visible = value !== undefined ? value : !this.visible;
+  }
+
+  openOverlay() {
+    this.overlay = true;
+  }
+
+  closeOverlay() {
+    this.overlay = false;
+  }
+
+  toggleToc(id: string) {
+    this.expandedToc = this.expandedToc.includes(id)
+      ? this.expandedToc.filter((x) => x !== id)
+      : [...this.expandedToc, id];
   }
 
   get toc() {
