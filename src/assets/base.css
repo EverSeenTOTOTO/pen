@@ -1,0 +1,374 @@
+/* ---- tokens ---- */
+:root {
+  --pen-header-height: 48px;
+  --pen-sidebar-width: 280px;
+  --pen-bg: #fff;
+  --pen-fg: rgb(0 0 0 / 80%);
+  --pen-fg-muted: rgb(0 0 0 / 50%);
+  --pen-border: rgb(0 0 0 / 12%);
+  --pen-accent: #0969da;
+  --pen-paper: #fff;
+  --pen-backdrop: rgb(0 0 0 / 40%);
+}
+
+:root[data-theme='dark'] {
+  --pen-bg: #0d1117;
+  --pen-fg: rgb(255 255 255 / 80%);
+  --pen-fg-muted: rgb(255 255 255 / 50%);
+  --pen-border: rgb(255 255 255 / 15%);
+  --pen-accent: #58a6ff;
+  --pen-paper: #0d1117;
+}
+
+/* ---- shell ---- */
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--pen-bg);
+  color: var(--pen-fg);
+  font-size: 16px;
+  font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+}
+
+.app {
+  min-height: 100dvh;
+}
+
+.app-main {
+  margin-left: 0;
+  padding: 0 16px;
+  transition: margin-left 0.25s ease;
+}
+
+.app-sidebar-open .app-main {
+  margin-left: var(--pen-sidebar-width);
+}
+
+/* ---- header ---- */
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  height: var(--pen-header-height);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  background: var(--pen-bg);
+  border-bottom: 1px solid var(--pen-border);
+  padding: 0 12px;
+}
+
+.app-header .menu-toggle {
+  display: none; /* hamburger, mobile only */
+}
+
+/* ---- breadcrumbs ---- */
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  overflow: hidden;
+
+  & a {
+    color: var(--pen-fg-muted);
+    text-decoration: none;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    &:hover {
+      color: var(--pen-accent);
+    }
+  }
+}
+
+.breadcrumb-sep {
+  color: var(--pen-fg-muted);
+  user-select: none;
+}
+
+/* ---- buttons ---- */
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--pen-fg-muted);
+  cursor: pointer;
+
+  &:hover {
+    background: var(--pen-border);
+    color: var(--pen-fg);
+  }
+}
+
+/* ---- sidebar ---- */
+.sidebar {
+  position: fixed;
+  inset-block: 0;
+  left: 0;
+  width: var(--pen-sidebar-width);
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  background: var(--pen-bg);
+  border-right: 1px solid var(--pen-border);
+  transform: translateX(-100%);
+  transition: transform 0.25s ease;
+}
+
+.app-sidebar-open .sidebar {
+  transform: translateX(0);
+}
+
+.sidebar-files {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding: 8px 0;
+}
+
+.sidebar-toc {
+  flex: 2 1 auto;
+  overflow-y: auto;
+  border-top: 1px solid var(--pen-border);
+  padding: 8px 0;
+}
+
+.sidebar-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 4px;
+  padding: 4px;
+  border-top: 1px solid var(--pen-border);
+}
+
+.file-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 6px 12px;
+  border: none;
+  background: transparent;
+  color: var(--pen-fg);
+  font-size: 0.875rem;
+  text-align: left;
+  cursor: pointer;
+
+  & .file-name {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  &:hover {
+    background: var(--pen-border);
+  }
+
+  &[aria-current='true'] {
+    color: var(--pen-accent);
+  }
+}
+
+/* ---- toc tree ---- */
+.toc,
+.toc-children {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.toc-row {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.toc-toggle {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border: none;
+  background: transparent;
+  color: var(--pen-fg-muted);
+  cursor: pointer;
+}
+
+.toc-toggle-leaf {
+  visibility: hidden;
+}
+
+.toc-link {
+  flex: 1;
+  min-width: 0;
+  padding: 3px 8px 3px 0;
+  font-size: 0.8125rem;
+  color: var(--pen-fg);
+  text-decoration: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  &:hover {
+    color: var(--pen-accent);
+  }
+}
+
+.toc-link-active {
+  color: var(--pen-accent);
+  font-weight: 600;
+}
+
+/* ---- toast ---- */
+.toast {
+  position: fixed;
+  top: calc(var(--pen-header-height) + 12px);
+  right: 12px;
+  z-index: 100;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  opacity: 0;
+  transform: translateY(-8px);
+  pointer-events: none;
+  transition: opacity 0.2s, transform 0.2s;
+}
+
+.toast-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.toast-success {
+  background: #1a7f37;
+  color: #fff;
+}
+
+.toast-error {
+  background: #cf222e;
+  color: #fff;
+}
+
+.toast-info {
+  background: var(--pen-accent);
+  color: #fff;
+}
+
+.toast-warning {
+  background: #9a6700;
+  color: #fff;
+}
+
+/* ---- skeleton ---- */
+.skeleton {
+  height: 14px;
+  margin: 12px 0;
+  border-radius: 4px;
+  background: linear-gradient(90deg, var(--pen-border) 25%, var(--pen-fg-muted) 50%, var(--pen-border) 75%);
+  background-size: 200% 100%;
+  animation: pen-shimmer 1.4s infinite;
+}
+
+.skeleton-title {
+  height: 28px;
+  width: 40%;
+}
+
+.skeleton-short {
+  width: 65%;
+}
+
+@keyframes pen-shimmer {
+  from {
+    background-position: 200% 0;
+  }
+
+  to {
+    background-position: -200% 0;
+  }
+}
+
+/* ---- markdown paper ---- */
+.markdown-paper {
+  max-width: 960px;
+  margin: 16px auto;
+  padding: 24px;
+  border: 1px solid var(--pen-border);
+  border-radius: 8px;
+  background: var(--pen-paper);
+}
+
+/* ---- mermaid ---- */
+.mermaid-error {
+  padding: 12px;
+  border: 1px dashed #cf222e;
+  color: var(--pen-fg);
+  font-size: 0.85rem;
+  white-space: pre-wrap;
+}
+
+/* ---- mobile ---- */
+@media (width < 768px) {
+  .app-main {
+    margin-left: 0 !important;
+    padding: 0 8px;
+  }
+
+  .app-header .menu-toggle {
+    display: inline-flex; /* hamburger */
+  }
+
+  .markdown-paper {
+    margin: 8px auto;
+    padding: 12px;
+    border: none;
+  }
+
+  .app-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 15;
+    background: var(--pen-backdrop);
+  }
+
+  .app-overlay-open {
+    & .app-backdrop {
+      display: block;
+    }
+
+    & .sidebar {
+      box-shadow: 0 0 40px rgb(0 0 0 / 40%);
+    }
+  }
+}
+
+@media (width >= 768px) {
+  .app-backdrop {
+    display: none !important;
+  }
+}

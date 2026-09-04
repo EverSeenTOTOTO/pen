@@ -5,6 +5,7 @@ import { App } from './App';
 import { createRoutes } from './routes';
 import { createStore } from './store';
 
+import './assets/base.css';
 import './assets/index.css';
 
 const container = document.getElementById('root');

@@ -1,22 +1,29 @@
 import { makeAutoObservable } from 'mobx';
-import type { AlertColor } from '@mui/lab/Alert';
 import type { AppStore } from '..';
+
+export type Severity = 'success' | 'error' | 'info' | 'warning';
 
 export class UiStore {
   root: AppStore;
 
-  severity: AlertColor = 'info';
+  severity: Severity = 'info';
 
   message = '';
+
+  timer?: ReturnType<typeof setTimeout>;
 
   constructor(root: AppStore) {
     makeAutoObservable(this);
     this.root = root;
   }
 
-  notify(severity: AlertColor, message: string) {
+  notify(severity: Severity, message: string) {
     this.severity = severity;
     this.message = message;
+    if (this.timer) clearTimeout(this.timer);
+    if (message) {
+      this.timer = setTimeout(() => { this.message = ''; }, 3000);
+    }
   }
 
   get breadcrumb() {
