@@ -1,6 +1,8 @@
 import { makeAutoObservable } from 'mobx';
-import { createTheme, ThemeOptions } from '@mui/material/styles';
-import { ClientEvents, PenTheme } from '@/types';
+import { createTheme } from '@mui/material/styles';
+import type { ThemeOptions } from '@mui/material/styles';
+import { ClientEvents } from '@/types';
+import type { PenTheme } from '@/types';
 import type { AppStore, PrefetchStore } from '..';
 
 type ThemeState = Omit<PenTheme, 'css'>;

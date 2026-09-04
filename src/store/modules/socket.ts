@@ -1,11 +1,13 @@
 import { io, Socket } from 'socket.io-client';
 import { makeAutoObservable } from 'mobx';
 import {
-  PenTheme,
   ClientEvents,
+  ServerEvents,
+} from '@/types';
+import type {
+  PenTheme,
   EmitFunction,
   PenErrorData,
-  ServerEvents,
   PenSocketInfo,
   PenDirectoryData,
   ClientToServerEvents,

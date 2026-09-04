@@ -1,9 +1,11 @@
 import path from 'path';
 import fs from 'fs';
-import express, { Express, Request, Response } from 'express';
+import express from 'express';
+import type { Express, Request, Response } from 'express';
 import { perf } from '@/utils';
-import { RenderOptions } from '../types';
-import { createTheme, ThemeNames } from './theme';
+import type { RenderOptions } from '../types';
+import { createTheme } from './theme';
+import type { ThemeNames } from './theme';
 import { readUnknown } from './reader';
 
 export const createSSRMiddleware = (options: RenderOptions) => {

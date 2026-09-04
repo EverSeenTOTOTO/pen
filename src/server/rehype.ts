@@ -1,4 +1,4 @@
-import { DocToc, RemarkOptions, RemarkPlugin } from '@/types';
+import type { DocToc, RemarkOptions, RemarkPlugin } from '@/types';
 import rehypeParse from 'rehype-parse';
 import rehypeRaw from 'rehype-raw';
 import rehypeStringify from 'rehype-stringify';
@@ -8,13 +8,14 @@ import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import remarkParse from 'remark-parse';
 import remarkRehype from 'remark-rehype';
-import { unified, Plugin, Processor } from 'unified';
+import { unified } from 'unified';
+import type { Plugin, Processor } from 'unified';
 import { perf } from '../utils';
 import { rehypeToc, rehypeTocId } from './plugins/rehype-toc';
 import rehypeHighlight from './plugins/rehype-highlight';
 import rehypeCopy from './plugins/rehype-copy';
 import { makeContainerPlugin } from './plugins/remark-container';
-import { Logger } from './logger';
+import type { Logger } from './logger';
 
 const defaultPlugins = [
   ['remark-parse', remarkParse],
@@ -42,7 +43,12 @@ export class RemarkRehype {
   constructor(options: RemarkOptions) {
     this.render = unified();
     this.logger = options.logger;
-    this.tocExtractor = unified().use(rehypeParse).use(rehypeToc);
+    // rehype-parse@8 ships unified@10 types; cast to the unified@11 Plugin to
+    // bridge the two type packages until Task 8 removes this code path.
+    const extractor = unified();
+    extractor.use(rehypeParse as unknown as Plugin);
+    extractor.use(rehypeToc);
+    this.tocExtractor = extractor;
 
     this.usePlugins(options.plugins);
   }
@@ -58,7 +64,9 @@ export class RemarkRehype {
       if (plug !== false) {
         this.logger.info(`Pen add remark/rehype plugin: ${name}`);
 
-        this.render.use(plug as Plugin, ...opts);
+        // unified's use() overloads cannot express "any plugin with any settings";
+        // bridge via a Plugin with unknown parameters.
+        this.render.use(plug as Plugin<unknown[], any, any>, ...opts);
       }
     }
   }

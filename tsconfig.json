@@ -1,41 +1,26 @@
 {
   "compilerOptions": {
-    "target": "esnext",
+    "target": "es2022",
     "module": "esnext",
-    "declaration": true,
-    "declarationMap": true,
-    "sourceMap": true,
-    "baseUrl": ".",
-    "strict": true,
-    "lib": [
-      "esnext",
-      "dom",
-      "dom.iterable"
-    ],
+    "moduleResolution": "bundler",
+    "lib": ["es2022", "dom", "dom.iterable"],
     "jsx": "react-jsx",
+    "strict": true,
     "noEmit": true,
     "noUnusedLocals": true,
-    "moduleResolution": "node",
     "noUnusedParameters": true,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "esModuleInterop": true,
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
     "skipLibCheck": true,
     "useDefineForClassFields": true,
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "paths": {
-      "@/*": [
-        "src/*"
-      ]
-    }
+    "verbatimModuleSyntax": true,
+    "allowImportingTsExtensions": true,
+    "baseUrl": ".",
+    "paths": { "@/*": ["src/*"] }
   },
-  "include": [
-    "src",
-    "tests"
-  ],
-  "exclude": []
+  "include": ["src", "tests", "config", "cli.mjs"]
 }

@@ -1,6 +1,6 @@
 import { RemarkRehype } from '@/server/rehype';
 import { logger } from '@/server/logger';
-import { RemarkOptions } from '@/types';
+import type { RemarkOptions } from '@/types';
 
 const createRemark = (opts?: Partial<RemarkOptions>) => new RemarkRehype({
   logger,

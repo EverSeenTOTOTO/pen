@@ -4,6 +4,8 @@ import { Server, Socket } from 'socket.io';
 import {
   ClientEvents,
   ServerEvents,
+} from '../types';
+import type {
   ClientToServerEvents,
   ServerToClientEvents,
   SocketOptions,

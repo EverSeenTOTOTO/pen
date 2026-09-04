@@ -140,7 +140,7 @@ const Folders = observer(() => {
 const Drawer = observer(() => {
   const drawer = useStore('drawer');
   const drawerRef = useRef<HTMLDivElement | null>(null);
-  const tocRef = useRef<HTMLDivElement | null>(null);
+  const tocRef = useRef<HTMLUListElement | null>(null);
 
   return (
     <StyledDrawer
@@ -161,14 +161,16 @@ const Drawer = observer(() => {
           className={clsx({
             'drawer-childHidden': !drawer.visible,
           })}
-          expanded={drawer.expandedToc}
-          onNodeToggle={(_, data) => drawer.setExpandedToc(data)}
-          onNodeFocus={(e, id) => {
+          expandedItems={drawer.expandedToc}
+          onExpandedItemsChange={(_, data) => drawer.setExpandedToc(data)}
+          onItemFocus={(e, id) => {
             window.location.hash = `#${id}`;
-            e.preventDefault();
+            e?.preventDefault();
           }}
-          defaultCollapseIcon={<NoSsr><ExpandMoreIcon /></NoSsr>}
-          defaultExpandIcon={<NoSsr><ChevronRightIcon /></NoSsr>}
+          slots={{
+            collapseIcon: ExpandMoreIcon,
+            expandIcon: ChevronRightIcon,
+          }}
         >
           <Toc toc={drawer.toc[0]} />
         </StyledToc>}

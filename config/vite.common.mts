@@ -9,7 +9,7 @@ export const paths = {
   serverEntry: path.resolve(import.meta.dirname, '..', 'src/index.server.tsx'),
 };
 
-export default ({ mode }) => ({
+export default ({ mode }: { mode: string }) => ({
   plugins: [react()],
   build: {
     sourcemap: mode === 'development',

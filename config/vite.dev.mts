@@ -1,6 +1,8 @@
 import path from 'path';
 import fs from 'fs';
-import { defineConfig, ViteDevServer } from 'vite';
+import http from 'http';
+import { defineConfig } from 'vite';
+import type { ViteDevServer } from 'vite';
 import base, { paths } from './vite.common.mts';
 import { createTheme } from '../src/server/theme';
 import { readUnknown } from '../src/server/reader';
@@ -33,7 +35,7 @@ const devSSR = () => ({
     const transports: ['websocket'] = ['websocket'];
     const remark = new RemarkRehype({ logger, plugins: [] })
 
-    bindSocket(vite.httpServer!, {
+    bindSocket(vite.httpServer as http.Server, {
       root,
       ignores,
       dist,
@@ -71,8 +73,9 @@ const devSSR = () => ({
 
         res.end(html);
       } catch (e) {
-        vite.ssrFixStacktrace(e);
-        console.error(e.stack ?? e.message);
+        const error = e instanceof Error ? e : new Error(String(e));
+        vite.ssrFixStacktrace(error);
+        console.error(error.stack ?? error.message);
         next();
       }
     });

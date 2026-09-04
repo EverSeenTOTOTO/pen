@@ -1,6 +1,7 @@
-import { CacheProvider, EmotionCache } from '@emotion/react';
+import { CacheProvider } from '@emotion/react';
+import type { EmotionCache } from '@emotion/react';
 import { Route, Routes } from 'react-router';
-import { AppRoutes } from './routes';
+import type { AppRoutes } from './routes';
 import { AppStore, RootContext } from './store';
 
 export function App({ store, routes, cache }: { store: AppStore, routes: AppRoutes, cache: EmotionCache }) {

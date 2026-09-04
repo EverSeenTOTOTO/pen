@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // fork from rehype-toc
-import { DocToc } from '@/types';
+import type { DocToc } from '@/types';
 import { visit } from 'unist-util-visit';
 import { h } from 'hastscript';
 import { uuid } from '../../utils';

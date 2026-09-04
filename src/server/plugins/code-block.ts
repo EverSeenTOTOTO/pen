@@ -19,7 +19,7 @@ function getLanguage(node: any) {
 }
 
 export const makeCodeBlockPlugin = (callback: any) => () => (tree: any) => {
-  visit(tree, 'element', (pre: any, index: number | null, parent: any) => {
+  visit(tree, 'element', (pre: any, index: number | undefined, parent: any) => {
     if (
       !parent
       || pre.tagName !== 'pre'

@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { ThemeOptions } from '@mui/material/styles';
-import { Plugin } from 'unified';
-import { Logger } from './server/logger';
+import type { ThemeOptions } from '@mui/material/styles';
+import type { Plugin } from 'unified';
+import type { Logger } from './server/logger';
 import type { RemarkRehype } from './server/rehype';
 import type { ThemeNames } from './server/theme';
 

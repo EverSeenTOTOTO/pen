@@ -1,4 +1,11 @@
-const pages = import.meta.glob('../pages/*.tsx', { eager: true });
+import type { ComponentType } from 'react';
+
+type PageModule = {
+  default: ComponentType;
+  prefetch?: unknown;
+};
+
+const pages = import.meta.glob('../pages/*.tsx', { eager: true }) as Record<string, PageModule>;
 
 const routes = Object.keys(pages).map((path) => {
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion

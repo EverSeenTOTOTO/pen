@@ -1,4 +1,4 @@
-import { DocToc } from '@/types';
+import type { DocToc } from '@/types';
 import { alpha, styled } from '@mui/material/styles';
 import { TreeItem } from '@mui/x-tree-view/TreeItem';
 
@@ -14,12 +14,12 @@ const Toc = ({ toc }: { toc: DocToc }) => {
   const text = decodeURIComponent(toc.text);
 
   return (toc.children.length > 0
-    ? <StyledTreeItem nodeId={toc.id} label={text}>
+    ? <StyledTreeItem itemId={toc.id} label={text}>
       {
         toc.children.map((child: DocToc) => <Toc key={child.id} toc={child} />)
       }
     </StyledTreeItem>
-    : <StyledTreeItem nodeId={toc.id} label={text} />
+    : <StyledTreeItem itemId={toc.id} label={text} />
   );
 };
 

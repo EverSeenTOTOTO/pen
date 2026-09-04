@@ -1,5 +1,5 @@
 import { makeAutoObservable } from 'mobx';
-import { AlertColor } from '@mui/lab/Alert';
+import type { AlertColor } from '@mui/lab/Alert';
 import type { AppStore } from '..';
 
 export class UiStore {

@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import { Watcher } from '@/server/watcher';
-import { PenDirectoryData, PenErrorData, WatcherOptions } from '@/types';
+import type { PenDirectoryData, PenErrorData, WatcherOptions } from '@/types';
 import { logger } from '@/server/logger';
 import path from 'path';
 import fs from 'fs';

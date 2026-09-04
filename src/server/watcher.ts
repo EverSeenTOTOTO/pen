@@ -3,16 +3,17 @@
 /* eslint-disable no-param-reassign */
 import path from 'path';
 import chokidar from 'chokidar';
-import {
+import type { FSWatcher } from 'chokidar';
+import { ServerEvents } from '../types';
+import type {
   PathInfo,
   EmitFunction,
-  ServerEvents,
   WatcherOptions,
   PenDirectoryData,
   ServerToClientEvents,
 } from '../types';
 import { formatRelative, resolvePathInfo } from '../utils';
-import { Logger } from './logger';
+import type { Logger } from './logger';
 import { readUnknown } from './reader';
 
 export class Watcher {
@@ -24,7 +25,7 @@ export class Watcher {
 
   remark: WatcherOptions['remark'];
 
-  watcher?: chokidar.FSWatcher;
+  watcher?: FSWatcher;
 
   emit?: EmitFunction<ServerToClientEvents, ServerEvents>
 
@@ -120,8 +121,8 @@ export class Watcher {
           stabilityThreshold: 1000,
         },
       });
-      this.watcher.on('error', (e) => {
-        this.sendError(e);
+      this.watcher.on('error', (e: unknown) => {
+        this.sendError(e instanceof Error ? e : new Error(String(e)));
         reject();
       });
       this.watcher.on('ready', () => {

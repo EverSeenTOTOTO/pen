@@ -1,9 +1,9 @@
 import path from 'path';
 import fs from 'fs';
 import deepmerge from 'deepmerge';
-import { ThemeOptions } from '@mui/material/styles';
+import type { ThemeOptions } from '@mui/material/styles';
 import { uuid } from '../utils';
-import { PenTheme } from '../types';
+import type { PenTheme } from '../types';
 
 const defaultTheme: ThemeOptions = {
   palette: {

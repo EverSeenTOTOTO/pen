@@ -1,8 +1,7 @@
 /* eslint-disable no-nested-ternary */
 import { makeAutoObservable } from 'mobx';
-import {
-  ClientEvents, PenDirectoryData, PenErrorData,
-} from '@/types';
+import { ClientEvents } from '@/types';
+import type { PenDirectoryData, PenErrorData } from '@/types';
 import { LRUCache } from 'lru-cache';
 import type { AppStore, PrefetchStore } from '..';
 
@@ -10,7 +9,7 @@ export type HomeState = {
   data?: PenDirectoryData | PenErrorData;
 };
 
-const cache = new LRUCache({
+const cache = new LRUCache<string, PenDirectoryData | PenErrorData>({
   max: import.meta.env.DEV ? 1 : 5,
 });
 
@@ -85,7 +84,9 @@ export class HomeStore implements PrefetchStore<HomeState> {
       this.loadingTimeout = false;
       this.data = data;
 
-      cache.set(reading, this.data);
+      if (reading !== undefined && this.data) {
+        cache.set(reading, this.data);
+      }
     }
   }
 

@@ -8,7 +8,7 @@ import createEmotionCache from './createEmotionCache';
 import { App } from './App';
 import { createStore } from './store';
 import { createRoutes } from './routes';
-import { PenTheme } from './types';
+import type { PenTheme } from './types';
 
 // Call enableStaticRendering(true) when running in an SSR environment, in which observer wrapped components should never re-render, but cleanup after the first rendering automatically.
 enableStaticRendering(true);

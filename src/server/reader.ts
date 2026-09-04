@@ -2,7 +2,7 @@
 import fs from 'fs';
 import path from 'path';
 import { LRUCache } from 'lru-cache';
-import {
+import type {
   PathInfo,
   PenMarkdownData,
   PenDirectoryData,

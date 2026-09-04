@@ -4,7 +4,7 @@ import http from 'http';
 import express from 'express';
 import cookieParser from 'cookie-parser';
 import getPort from 'get-port';
-import { PenOptions, PenCliOptions } from '@/types';
+import type { PenOptions, PenCliOptions } from '@/types';
 import { logger as builtInLogger, emptyLogger } from './logger';
 import { bindRender } from './render';
 import { bindSocket } from './socket';
