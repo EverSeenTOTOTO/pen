@@ -18,15 +18,21 @@ export const createSSRMiddleware = (options: RenderOptions) => {
 
     perf?.mark('parse theme start');
 
-    let themeMode: ThemeNames = 'dark';
-    let drawerVisible = false;
-    try {
-      const themeCookie: unknown = JSON.parse(req.cookies.themeMode);
-      if (isThemeName(themeCookie)) themeMode = themeCookie;
-      drawerVisible = JSON.parse(req.cookies.drawerVisible) === true;
-    } catch (e) {
-      options.logger.error(e);
-    }
+    // parse each cookie independently: a missing/malformed theme cookie must
+    // not abort the drawer cookie (and vice versa)
+    const parseCookieJson = (raw: string | undefined): unknown => {
+      if (raw === undefined) return undefined;
+      try {
+        return JSON.parse(raw);
+      } catch (e) {
+        options.logger.error(e);
+        return undefined;
+      }
+    };
+
+    const themeCookie: unknown = parseCookieJson(req.cookies.themeMode);
+    const themeMode: ThemeNames = isThemeName(themeCookie) ? themeCookie : 'dark';
+    const drawerVisible = parseCookieJson(req.cookies.drawerVisible) === true;
 
     perf?.measure('parse theme end', 'parse theme start');
     perf?.mark('read data start');

@@ -13,3 +13,62 @@ test('sidebar lists directory entries', async ({ page }) => {
   await expect(entries).toHaveCount(1);
   await expect(entries).toContainText('README');
 });
+
+test('anchor navigation from toc', async ({ page }) => {
+  // the sidebar is collapsed by default and the in-sidebar toggle button is
+  // unreachable while closed; the server reads the `drawerVisible` cookie, so
+  // seed it to boot with the sidebar (and the toc) open
+  await page.context().addCookies([
+    { name: 'drawerVisible', value: 'true', url: 'http://localhost:3210' },
+  ]);
+  await page.goto('/');
+  await expect(page.locator('.app')).toHaveClass(/app-sidebar-open/);
+  await expect(page.locator('.sidebar')).toHaveCSS('transform', 'matrix(1, 0, 0, 1, 0, 0)');
+
+  await page.locator('.toc-link', { hasText: '中文标题' }).first().click();
+  // scrollToHeading navigates via history.replaceState; the browser
+  // percent-encodes the CJK slug, `#中文标题` on the wire
+  await expect(page).toHaveURL(/#%E4%B8%AD%E6%96%87%E6%A0%87%E9%A2%98$/);
+  await expect(page.locator('#中文标题')).toBeVisible();
+});
+
+test('theme toggle persists', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+
+  await page.getByRole('button', { name: /switch to (light|dark) theme/i }).click();
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
+
+  // the cookie is written client-side by a store reaction — wait for it to
+  // land before reloading, otherwise the server re-renders the default theme
+  await expect
+    .poll(async () => (await page.context().cookies()).find((c) => c.name === 'themeMode')?.value)
+    .toBe('%22light%22');
+
+  await page.reload();
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
+});
+
+test('mermaid renders svg', async ({ page }) => {
+  await page.goto('/');
+  // mermaid is imported lazily on the client (separate async chunk) — allow a
+  // generous timeout for chunk load + render
+  await expect(page.locator('.mermaid-svg svg').first()).toBeVisible({ timeout: 15000 });
+});
+
+test('mobile overlay drawer', async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 667 });
+  await page.goto('/');
+
+  await page.getByRole('button', { name: 'Open menu' }).click();
+  await expect(page.locator('.app')).toHaveClass(/app-overlay-open/);
+  await expect(page.locator('.app-backdrop')).toBeVisible();
+  // the overlay drawer slides in above the backdrop
+  await expect(page.locator('.sidebar')).toHaveCSS('transform', 'matrix(1, 0, 0, 1, 0, 0)');
+
+  // click the backdrop clear of the 280px drawer
+  await page.locator('.app-backdrop').click({ position: { x: 350, y: 400 } });
+  await expect(page.locator('.app')).not.toHaveClass(/app-overlay-open/);
+  await expect(page.locator('.app-backdrop')).toBeHidden();
+  await expect(page.locator('.sidebar')).toHaveCSS('transform', 'matrix(1, 0, 0, 1, -280, 0)');
+});

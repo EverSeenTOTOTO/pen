@@ -363,6 +363,7 @@ body {
 
     & .sidebar {
       box-shadow: 0 0 40px rgb(0 0 0 / 40%);
+      transform: translateX(0);
     }
   }
 }
