@@ -1,4 +1,4 @@
-/* eslint-disable no-nested-ternary */
+ 
 import { makeAutoObservable } from 'mobx';
 import { ClientEvents } from '@/types';
 import type { PenDirectoryData, PenErrorData } from '@/types';

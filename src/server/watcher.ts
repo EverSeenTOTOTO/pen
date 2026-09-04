@@ -1,6 +1,6 @@
-/* eslint-disable class-methods-use-this */
-/* eslint-disable max-classes-per-file */
-/* eslint-disable no-param-reassign */
+ 
+ 
+ 
 import path from 'path';
 import chokidar from 'chokidar';
 import type { FSWatcher } from 'chokidar';

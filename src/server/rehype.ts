@@ -100,7 +100,7 @@ export class RemarkRehype {
       const { content } = await this.process(RemarkRehype.formatError(error));
 
       return { message: content };
-    } catch (err) {
+    } catch {
       return { message: error.message };
     }
   }

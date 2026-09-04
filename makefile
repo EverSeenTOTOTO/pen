@@ -4,7 +4,7 @@ DIST ?= dist
 
 .PHONY: prepare
 prepare:
-	npx husky install
+	npx husky
 	cp node_modules/github-markdown-css/github-markdown-*.css src/assets
 	cp node_modules/highlight.js/styles/github-dark.css src/assets/highlightjs-github-dark.css
 	cp node_modules/highlight.js/styles/github.css src/assets/highlightjs-github-light.css
@@ -17,8 +17,8 @@ prepare:
 .PHONY: lint
 lint:
 	npx eslint --fix .
-	npx stylelint "src/**/*.{css,scss}" --fix
-	# npx tsc -p . -noEmit
+	npx stylelint "src/assets/*.css" --fix
+	# npx tsc -p . --noEmit
 	@echo -e '\033[1;32mNo lint errors found.'
 
 .PHONY: clean

@@ -15,10 +15,10 @@ function isHtmlElementNode(node: any) {
 
 function getHeadingNumber(node: any) {
   if (isHtmlElementNode(node)) {
-    const match = /^h(?<heading>[1-6])$/.exec(node.tagName);
+    const heading = /^h(?<heading>[1-6])$/.exec(node.tagName)?.groups?.heading;
 
-    if (match) {
-      return Number(match.groups?.heading) ?? -1;
+    if (heading !== undefined) {
+      return Number(heading);
     }
   }
   return -1;
@@ -50,7 +50,7 @@ function modifyHeader(node: any) {
     const content = getInnerText(node);
     appearance.set(content, appearance.get(content) ? appearance.get(content)! + 1 : 1);
     const id = `H${uuid(content + appearance.get(content))}`;
-    // eslint-disable-next-line no-param-reassign
+     
     node.children = [
       h(
         'span', // for navigate
@@ -77,7 +77,7 @@ export function rehypeTocId() {
 /* ---- Seperator for rehypeTocId and rehypeToc ---- */
 
 function removeParent(toc: DocToc) {
-  // eslint-disable-next-line no-param-reassign
+   
   delete toc.parent;
   toc.children.forEach(removeParent);
 }

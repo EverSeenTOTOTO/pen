@@ -34,7 +34,7 @@ export class MockChokidar extends EventEmitter {
     return this;
   }
 
-  // eslint-disable-next-line class-methods-use-this
+   
   close() {
     return Promise.resolve();
   }

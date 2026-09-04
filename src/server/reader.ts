@@ -1,4 +1,4 @@
-/* eslint-disable no-param-reassign */
+ 
 import fs from 'fs';
 import path from 'path';
 import { LRUCache } from 'lru-cache';

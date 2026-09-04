@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
+ 
 import { observer } from 'mobx-react-lite';
 import { styled } from '@mui/material/styles';
 import MuiDrawer from '@mui/material/Drawer';

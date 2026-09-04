@@ -39,7 +39,7 @@ h6 {
   letter-spacing: 0.02em;
   line-height: 1.5;
   text-size-adjust: 100%;
-  word-wrap: break-word;
+  overflow-wrap: break-word;
 
   & .hljs {
     border-radius: 2px;
@@ -50,8 +50,7 @@ h6 {
   }
 
   p {
-    margin-block-end: 24px;
-    margin-block-start: 12px;
+    margin-block: 12px 24px;
     text-align: justify;
   }
 
@@ -102,7 +101,7 @@ h6 {
   }
 }
 
-@media (max-width: 960px) {
+@media (width <= 960px) {
   .markdown-body {
     font-size: 1.2em;
 

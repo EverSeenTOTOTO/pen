@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable no-param-reassign */
+ 
 import { visit } from 'unist-util-visit';
 import { h } from 'hastscript';
 

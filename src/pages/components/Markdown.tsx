@@ -44,7 +44,6 @@ const Data = observer(() => {
 
   useDocToc();
 
-  // eslint-disable-next-line @typescript-eslint/no-throw-literal
   if (home.loadingTimeout) throw new Promise<void>((res) => res());
 
   return <StyledPaper ref={ref} dangerouslySetInnerHTML={createMarkup(home.html)} />;

@@ -56,7 +56,7 @@ export function resolvePathInfo(root: string, relative: string): PathInfo {
     fullpath,
     filename,
     relativePath: isDirectory ? formatDirPath(relativePath) : relativePath,
-    // eslint-disable-next-line no-nested-ternary
+     
     type: isDirectory ? 'directory' : isMarkdown(fullpath) ? 'markdown' : 'other',
   };
 }
@@ -67,7 +67,7 @@ export const createMarkup = (__html: string) => ({ __html });
 
 export const uuid = (content?: string) => {
   // avoid bundle error
-  // eslint-disable-next-line global-require, @typescript-eslint/no-var-requires
+   
   const hash = crypto.createHash('sha256');
 
   return hash.update(content ?? 'pen').digest('hex').slice(0, 16);

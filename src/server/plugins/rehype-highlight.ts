@@ -1,4 +1,4 @@
-/* eslint-disable no-param-reassign */
+ 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import hljs from 'highlight.js/lib/core';
 import parse5 from 'parse5';
@@ -55,7 +55,7 @@ export default makeCodeBlockPlugin((language: string, node: any) => {
     if (hlcode.type === 'element' || hlcode.type === 'root') {
       node.children = hlcode.children;
     }
-  } catch (e) {
+  } catch {
     // pass
   }
 });
