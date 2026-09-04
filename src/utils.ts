@@ -1,6 +1,5 @@
 import path from 'path';
 import fs from 'fs';
-import crypto from 'crypto';
 import type { PathInfo } from './types';
 
 export function PASS() { }
@@ -65,13 +64,6 @@ export const stripNamespace = (namespace: string, pathname: string) => formatRel
 
 export const createMarkup = (__html: string) => ({ __html });
 
-export const uuid = (content?: string) => {
-  // avoid bundle error
-   
-  const hash = crypto.createHash('sha256');
-
-  return hash.update(content ?? 'pen').digest('hex').slice(0, 16);
-};
 
 export const perf = globalThis.performance && new Proxy(performance, {
   get(t, p) {

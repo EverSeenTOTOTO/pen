@@ -1,8 +1,12 @@
 # @everseen/pen
 
-A cli tool provides the ability to preview markdown files when editing, based on [socket.io](https://socket.io/) and [chokidar](https://github.com/paulmillr/chokidar), with builtin katex, highlight.js, copy, doctoc and vuepress style container support.
+A cli tool provides the ability to preview markdown files when editing, based on [socket.io](https://socket.io/) and [chokidar](https://github.com/paulmillr/chokidar), with builtin katex, highlight.js, copy, doctoc and vuepress style container support. Mermaid diagrams are rendered lazily on the client side, and headings get readable github-style anchor slugs with CJK characters preserved (e.g. `#中文标题`).
 
 <img src="./Pen.gif" width="1200" />
+
+## Requirements
+
++ Node.js >= 20.19
 
 ## Usage
 
@@ -55,7 +59,7 @@ pen -o -p 5000 -r ../docs
 
 ### Use with Node.js
 
-Check [cli.js](./cli.js) and [server/index.ts](./src/server/index.ts) as an example.
+Check [cli.mjs](./cli.mjs) and [server/index.ts](./src/server/index.ts) as an example.
 
 ## Q & A
 
@@ -67,16 +71,10 @@ Check [cli.js](./cli.js) and [server/index.ts](./src/server/index.ts) as an exam
 
     Try Power Shell, seems namespace `/doc` will be translate to `/D:/<pwd>/doc` in git bash.
 
-3. I want some markdown graph tools?
-
-    Originally, I considered integrating [mermaid](https://mermaid-js.github.io/mermaid/#/) or [graphviz](https://graphviz.org/), but finnaly I gave up since they all required additional effort and time to learn. (And will not display without support from a tool, unlike Latex/Tex, which is widely used). I now use online tools like [excalidraw](https://excalidraw.com/) for image demands.
-
 **PRs and issues are welcomed!**
 
 ## TODOs
 
-1. 减少内存占用
-2. 加快处理速度
-3. 渐进式渲染
-4. 单文档模式
-5. 修复footnote滚动遮挡问题
+1. 加快处理速度
+2. 渐进式渲染
+3. 单文档模式

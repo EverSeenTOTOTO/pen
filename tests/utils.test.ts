@@ -1,6 +1,6 @@
 import os from 'os';
 import {
-  formatRelative, resolvePathInfo, stripNamespace, uuid,
+  formatRelative, resolvePathInfo, stripNamespace,
 } from '@/utils';
 
 it('test formatRelative', () => {
@@ -46,9 +46,4 @@ it('test resolvePathInfo', () => {
     expect(resolvePathInfo('D:\\a', '/a').fullpath).toBe('D:/a/a');
     expect(resolvePathInfo('D:\\a', '/a').relativePath).toBe('/a');
   }
-});
-
-it('test uuid', () => {
-  expect(uuid('any').length).toBe(16);
-  expect(uuid('')).not.toBe(uuid('pen'));
 });
