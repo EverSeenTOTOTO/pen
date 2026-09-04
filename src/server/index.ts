@@ -11,7 +11,8 @@ import { bindSocket } from './socket';
 import { RemarkRehype } from './rehype';
 
 export const normalizeOptions = (opts?: Partial<PenOptions>) => {
-  const root = slash(opts?.root ? path.join(process.cwd(), opts?.root) : process.cwd());
+  // resolve (not join) so an absolute --root is honored instead of concatenated
+  const root = slash(path.resolve(process.cwd(), opts?.root ?? '.'));
 
   if (isMarkdown(root)) {
     throw new Error('The "root" option must be a directory.');
