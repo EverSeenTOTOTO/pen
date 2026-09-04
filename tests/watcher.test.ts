@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/ban-ts-comment */
+import { vi } from 'vitest';
 import { Watcher } from '@/server/watcher';
 import type { PenDirectoryData, PenErrorData, WatcherOptions } from '@/types';
 import { logger } from '@/server/logger';
@@ -10,9 +11,11 @@ import {
   mdA, mdb, rootDir, MockChokidar, dirA, mockRemark, dirAB,
 } from './setup';
 
-jest.mock('chokidar');
+vi.mock('chokidar', () => ({
+  default: { watch: vi.fn() },
+}));
 // @ts-ignore
-jest.spyOn(chokidar, 'watch').mockImplementation((root: string, options: unknown) => new MockChokidar(root, options));
+vi.spyOn(chokidar, 'watch').mockImplementation((root: string, options: unknown) => new MockChokidar(root, options));
 
 const createWatcher = (opts?: Partial<WatcherOptions>) => new Watcher({
   logger,
@@ -27,45 +30,48 @@ afterEach(async () => {
   await new Promise<void>((resolve) => { setTimeout(resolve, 100); });
 });
 
-it('test watcher', (done) => {
+it('test watcher', async () => {
   const watcher = createWatcher();
 
-  watcher.setupWatching('/').then(() => {
-    expect(watcher.watcher).toBeInstanceOf(MockChokidar);
-    expect(watcher.root).toBe(rootDir);
-    watcher?.close()?.finally(done);
-  });
+  await watcher.setupWatching('/');
+
+  expect(watcher.watcher).toBeInstanceOf(MockChokidar);
+  expect(watcher.root).toBe(rootDir);
+  await watcher.close();
 });
 
-it('test watch root', (done) => {
+it('test watch root', async () => {
   const watcher = createWatcher();
-
-  watcher.setupEmit((_, data) => {
-    const dir = data as PenDirectoryData;
-
-    expect(dir.relativePath).toBe('/');
-    expect(dir.children.length).toBe(2);
-
-    watcher.close()?.finally(done);
+  const emitted = new Promise<PenDirectoryData>((resolve) => {
+    watcher.setupEmit((_, data) => resolve(data as PenDirectoryData));
   });
-  watcher.setupWatching('/');
+
+  await watcher.setupWatching('/');
+
+  const dir = await emitted;
+
+  expect(dir.relativePath).toBe('/');
+  expect(dir.children.length).toBe(2);
+  await watcher.close();
 });
 
-it('test ignores', (done) => {
+it('test ignores', async () => {
   const watcher = createWatcher({
     ignores: [/A/],
   });
-
-  watcher.setupEmit((_, data) => {
-    const dir = data as PenDirectoryData;
-
-    expect(dir.children.length).toBe(0);
-    watcher.close()?.finally(done);
+  const emitted = new Promise<PenDirectoryData>((resolve) => {
+    watcher.setupEmit((_, data) => resolve(data as PenDirectoryData));
   });
-  watcher.setupWatching('/');
+
+  await watcher.setupWatching('/');
+
+  const dir = await emitted;
+
+  expect(dir.children.length).toBe(0);
+  await watcher.close();
 });
 
-it('test jumpTo nested', (done) => {
+it('test jumpTo nested', async () => {
   const watcher = createWatcher();
   const datas: any[] = [];
 
@@ -73,73 +79,75 @@ it('test jumpTo nested', (done) => {
     datas.push(data);
   });
 
-  watcher.setupWatching('/').then(() => {
-    watcher.setupWatching('/A/b.md').then(() => {
-      expect(datas[0].relativePath).toBe('/');
-      expect(datas[1].relativePath).toBe('/A/');
-      expect(datas[1].reading).not.toBeUndefined();
+  await watcher.setupWatching('/');
+  await watcher.setupWatching('/A/b.md');
 
-      watcher.close()?.finally(done);
-    });
-  });
+  expect(datas[0].relativePath).toBe('/');
+  expect(datas[1].relativePath).toBe('/A/');
+  expect(datas[1].reading).not.toBeUndefined();
+
+  await watcher.close();
 });
 
-it('test change', (done) => {
+it('test change', async () => {
   const watcher = createWatcher();
 
-  watcher.setupWatching('/A/b.md').then(() => {
-    watcher.setupEmit((_, data) => {
-      const dir = data as PenDirectoryData;
+  await watcher.setupWatching('/A/b.md');
 
-      expect(dir.reading?.content).toMatch(/!!TEST!! # change/);
-      watcher.close()?.finally(done);
-    });
-
-    fs.writeFileSync(mdb, '# change');
-    watcher.watcher?.emit('all', 'change', mdb);
+  const emitted = new Promise<PenDirectoryData>((resolve) => {
+    watcher.setupEmit((_, data) => resolve(data as PenDirectoryData));
   });
+
+  fs.writeFileSync(mdb, '# change');
+  watcher.watcher?.emit('all', 'change', mdb);
+
+  const dir = await emitted;
+
+  expect(dir.reading?.content).toMatch(/!!TEST!! # change/);
+  await watcher.close();
 });
 
-it('test addDir', (done) => {
+it('test addDir', async () => {
   const watcher = createWatcher();
 
-  watcher.setupEmit((_, data) => {
-    const dir = data as PenDirectoryData;
-
-    expect(dir.children.length).toBe(2);
+  const first = new Promise<PenDirectoryData>((resolve) => {
+    watcher.setupEmit((_, data) => resolve(data as PenDirectoryData));
   });
 
-  watcher.setupWatching('/A/b.md').then(() => {
-    watcher.setupEmit((_, data) => {
-      const dir = data as PenDirectoryData;
+  await watcher.setupWatching('/A/b.md');
 
-      expect(dir.children.length).toBe(3);
-      watcher.close()?.finally(done);
-    });
-
-    const dir = path.join(dirA, 'dir');
-    fs.mkdirSync(dir);
-    watcher.watcher?.emit('all', 'addDir', dir);
+  const second = new Promise<PenDirectoryData>((resolve) => {
+    watcher.setupEmit((_, data) => resolve(data as PenDirectoryData));
   });
+
+  const dir = path.join(dirA, 'dir');
+  fs.mkdirSync(dir);
+  watcher.watcher?.emit('all', 'addDir', dir);
+
+  expect((await first).children.length).toBe(2);
+  expect((await second).children.length).toBe(3);
+  await watcher.close();
 });
 
-it('test rm watching', (done) => {
+it('test rm watching', async () => {
   const watcher = createWatcher();
 
-  watcher.setupWatching('/A.md').then(() => {
-    watcher.setupEmit((_, data) => {
-      const err = data as PenErrorData;
+  await watcher.setupWatching('/A.md');
 
-      expect(err.message).toMatch(/no such file or directory/);
-      watcher.close()?.finally(done);
-    });
-
-    fs.rmSync(mdA);
-    watcher.watcher?.emit('all', 'unlink', mdA);
+  const emitted = new Promise<PenErrorData>((resolve) => {
+    watcher.setupEmit((_, data) => resolve(data as PenErrorData));
   });
+
+  fs.rmSync(mdA);
+  watcher.watcher?.emit('all', 'unlink', mdA);
+
+  const err = await emitted;
+
+  expect(err.message).toMatch(/no such file or directory/);
+  await watcher.close();
 });
 
-it('test add readme', (done) => {
+it('test add readme', async () => {
   const watcher = createWatcher();
   const datas: any[] = [];
 
@@ -151,24 +159,26 @@ it('test add readme', (done) => {
     }
   });
 
-  watcher.setupWatching('/').then(() => {
-    watcher.setupEmit((_, data) => {
-      const dir = data as PenDirectoryData;
+  await watcher.setupWatching('/');
 
-      expect(dir.reading?.content).toMatch(/!!TEST!! # README/);
-      watcher.close()?.finally(done);
-    });
-
-    const readme = path.join(rootDir, 'README.md');
-
-    fs.writeFileSync(readme, '# README');
-    watcher.watcher?.emit('all', 'add', readme);
-    fs.writeFileSync(readme, '# README changed');
-    watcher.watcher?.emit('all', 'change', readme);
+  const emitted = new Promise<PenDirectoryData>((resolve) => {
+    watcher.setupEmit((_, data) => resolve(data as PenDirectoryData));
   });
+
+  const readme = path.join(rootDir, 'README.md');
+
+  fs.writeFileSync(readme, '# README');
+  watcher.watcher?.emit('all', 'add', readme);
+  fs.writeFileSync(readme, '# README changed');
+  watcher.watcher?.emit('all', 'change', readme);
+
+  const dir = await emitted;
+
+  expect(dir.reading?.content).toMatch(/!!TEST!! # README/);
+  await watcher.close();
 });
 
-it('test sort', (done) => {
+it('test sort', async () => {
   const watcher = createWatcher({ root: dirAB });
 
   fs.mkdirSync(path.join(dirAB, '.a'));
@@ -177,12 +187,15 @@ it('test sort', (done) => {
   fs.writeFileSync(path.join(dirAB, '.a.md'), '');
   fs.writeFileSync(path.join(dirAB, 'a.md'), '');
 
-  watcher.setupEmit((_, data) => {
-    const dir = data as PenDirectoryData;
-
-    expect(dir.children.map((c) => c.filename)).toEqual(['.a', '.b', 'a', '.a.md', 'a.md']);
-
-    watcher.close()?.finally(done);
+  const emitted = new Promise<PenDirectoryData>((resolve) => {
+    watcher.setupEmit((_, data) => resolve(data as PenDirectoryData));
   });
-  watcher.setupWatching('/');
+
+  await watcher.setupWatching('/');
+
+  const dir = await emitted;
+
+  expect(dir.children.map((c) => c.filename)).toEqual(['.a', '.b', 'a', '.a.md', 'a.md']);
+
+  await watcher.close();
 });

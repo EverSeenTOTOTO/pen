@@ -47,4 +47,8 @@ start: build
 
 .PHONY: test
 test:
-	NODE_ENV=test npx jest --coverage --silent --runInBand --detectOpenHandles
+	npx vitest run --coverage
+
+.PHONY: test\:e2e
+test\:e2e:
+	npx playwright test
