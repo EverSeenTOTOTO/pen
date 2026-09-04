@@ -57,7 +57,6 @@ export type DocToc = {
   text: string,
   id: string,
   heading: number;
-  parent?: DocToc,
   children: DocToc[]
 };
 

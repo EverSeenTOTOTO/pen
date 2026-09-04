@@ -1,138 +1,45 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-// fork from rehype-toc
-import type { DocToc } from '@/types';
+import GithubSlugger from 'github-slugger';
 import { visit } from 'unist-util-visit';
-import { h } from 'hastscript';
-import { uuid } from '../../utils';
+import { toString } from 'hast-util-to-string';
+import type { Root, Element } from 'hast';
+import type { VFile } from 'vfile';
+import type { DocToc } from '@/types';
 
-function isHtmlElementNode(node: any) {
-  return typeof node === 'object'
-    && node.type === 'element'
-    && typeof node.tagName === 'string'
-    && 'properties' in node
-    && typeof node.properties === 'object';
-}
+const HEADING_REGEXP = /^h([1-6])$/;
 
-function getHeadingNumber(node: any) {
-  if (isHtmlElementNode(node)) {
-    const heading = /^h(?<heading>[1-6])$/.exec(node.tagName)?.groups?.heading;
+export const PEN_TOC_DATA = 'penToc';
 
-    if (heading !== undefined) {
-      return Number(heading);
-    }
-  }
-  return -1;
-}
+/**
+ * Single pass: slug every heading (github-slugger rules, CJK preserved),
+ * set the id on the heading element itself and collect the toc tree into
+ * file.data.penToc — replacing the old two-span hack and the second
+ * full re-parse of the rendered HTML.
+ */
+export function rehypeSlugToc() {
+  return (tree: Root, file: VFile) => {
+    const slugger = new GithubSlugger(); // per file: resets uniqueness
+    const root: DocToc = { id: '', text: '', heading: 0, children: [] };
+    const stack: DocToc[] = [root];
 
-function getInnerText(node: any): string {
-  let text = '';
+    visit(tree, 'element', (node: Element) => {
+      const match = typeof node.tagName === 'string' ? node.tagName.match(HEADING_REGEXP) : null;
+      if (!match) return;
 
-  if (node.type === 'text') {
-    text += node.value || '';
-  }
+      const heading = Number(match[1]);
+      const text = toString(node);
+      const id = slugger.slug(text);
 
-  if (node.children) {
-    const parent = node;
-    for (const child of parent.children) {
-      text += getInnerText(child);
-    }
-  }
+      node.properties.id = id;
 
-  return text.trim();
-}
-
-const appearance = new Map<string, number>();
-
-function modifyHeader(node: any) {
-  const heading = getHeadingNumber(node);
-
-  if (heading !== -1) {
-    const content = getInnerText(node);
-    appearance.set(content, appearance.get(content) ? appearance.get(content)! + 1 : 1);
-    const id = `H${uuid(content + appearance.get(content))}`;
-     
-    node.children = [
-      h(
-        'span', // for navigate
-        {
-          id,
-        },
-      ),
-      h(
-        'span', // for display
-        Array.isArray(node.children) ? node.children : [],
-      ),
-    ];
-  }
-}
-
-// add a unique id to each heading
-export function rehypeTocId() {
-  return (tree: any) => {
-    visit(tree, 'element', modifyHeader);
-    appearance.clear();
-  };
-}
-
-/* ---- Seperator for rehypeTocId and rehypeToc ---- */
-
-function removeParent(toc: DocToc) {
-   
-  delete toc.parent;
-  toc.children.forEach(removeParent);
-}
-
-function createToc(tree: any) {
-  const top: DocToc = {
-    id: uuid(),
-    text: 'never mind',
-    children: [],
-    heading: -1,
-  };
-
-  let last = top;
-
-  function extract(node: any) {
-    let parent = last;
-    const heading = getHeadingNumber(node);
-
-    if (heading !== -1) {
-      // find the closest upper heading
-      // 因为可能出现在DOM结构上是父子关系，但在header层级上是兄弟关系等
-      while (heading <= parent.heading) {
-        parent = parent.parent ?? top;
+      while (stack.length > 1 && heading <= stack[stack.length - 1].heading) {
+        stack.pop();
       }
 
-      const span = node.children.filter((each: any) => each.tagName === 'span')[0];
+      const item: DocToc = { id, text, heading, children: [] };
+      stack[stack.length - 1].children.push(item);
+      stack.push(item);
+    });
 
-      if (span) {
-        const { id } = span.properties;
-
-        last = {
-          id, // extract out for navigation: document.getElementById(id).scrollIntoView();
-          parent,
-          heading,
-          text: encodeURIComponent(getInnerText(node)),
-          children: [],
-        };
-
-        parent.children.push(last);
-      }
-    } else if (Array.isArray(node.children)) {
-      node.children.forEach(extract);
-    }
-  }
-
-  extract(tree);
-  // avoid recursive when stringify to json
-  removeParent(top);
-
-  return top.children;
-}
-
-// extract doc toc from html
-export function rehypeToc() {
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
-  this.Compiler = (tree: any): DocToc[] => createToc(tree);
+    file.data[PEN_TOC_DATA] = root.children;
+  };
 }

@@ -8,7 +8,6 @@ beforeEach(() => cache.clear());
 
 export const mockRemark = {
   render: {} as any,
-  tocExtractor: {} as any,
   usePlugins() { },
   process: (s: string) => Promise.resolve({ content: `!!TEST!! ${s}` }),
   processError: (s?: Error) => Promise.resolve({ message: s?.message ?? '' }),

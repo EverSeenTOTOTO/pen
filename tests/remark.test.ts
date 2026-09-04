@@ -13,8 +13,8 @@ it('test process markdown', async () => {
 
   const { content, toc } = await remark.process('# A');
 
-  expect(decodeURIComponent(content)).toMatch(/<h1><span id="H[^>]*><\/span><span>A<\/span><\/h1>/);
-  expect(toc?.[0].text).toMatch(/A/);
+  expect(decodeURIComponent(content)).toMatch(/<h1 id="a">A<\/h1>/);
+  expect(toc?.[0].text).toBe('A');
 });
 
 it('test process error', async () => {
@@ -27,13 +27,13 @@ it('test process error', async () => {
 
 it('test disable plugin', async () => {
   const remark = createRemark({
-    plugins: [['rehype-toc-id', false]],
+    plugins: [['rehype-slug-toc', false]],
   });
 
   const data = await remark.process('# A');
   const content = decodeURIComponent(data.content);
 
-  expect(content).not.toMatch(/<h1><span id="H[^>]*><\/span><span>A<\/span><\/h1>/);
+  expect(content).not.toMatch(/<h1 id=/);
   expect(content).toMatch(/<h1>A<\/h1>/);
 });
 

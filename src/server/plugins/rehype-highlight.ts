@@ -47,13 +47,18 @@ hljs.registerLanguage('yaml', yaml);
 hljs.registerLanguage('typescript', typescript);
 hljs.registerLanguage('wasm', wasm);
 
-export default makeCodeBlockPlugin((language: string, node: any) => {
+export default makeCodeBlockPlugin((language: string, code: any) => {
+  if (language === 'mermaid') {
+    code.properties.className = ['pen-mermaid-source'];
+    return; // highlight.js 不处理，保留源码给客户端渲染
+  }
+
   try {
-    const code = hljs.highlight(h2s.toString(node), { language }).value;
-    const hlcode = hfp.fromParse5(parse5.parse(code));
+    const highlightResult = hljs.highlight(h2s.toString(code), { language }).value;
+    const hlcode = hfp.fromParse5(parse5.parse(highlightResult));
 
     if (hlcode.type === 'element' || hlcode.type === 'root') {
-      node.children = hlcode.children;
+      code.children = hlcode.children;
     }
   } catch {
     // pass

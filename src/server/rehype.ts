@@ -1,5 +1,4 @@
 import type { DocToc, RemarkOptions, RemarkPlugin } from '@/types';
-import rehypeParse from 'rehype-parse';
 import rehypeRaw from 'rehype-raw';
 import rehypeStringify from 'rehype-stringify';
 import remarkDirective from 'remark-directive';
@@ -11,7 +10,7 @@ import remarkRehype from 'remark-rehype';
 import { unified } from 'unified';
 import type { Plugin, Processor } from 'unified';
 import { perf } from '../utils';
-import { rehypeToc, rehypeTocId } from './plugins/rehype-toc';
+import { rehypeSlugToc, PEN_TOC_DATA } from './plugins/rehype-toc';
 import rehypeHighlight from './plugins/rehype-highlight';
 import rehypeCopy from './plugins/rehype-copy';
 import { makeContainerPlugin } from './plugins/remark-container';
@@ -26,7 +25,7 @@ const defaultPlugins = [
   ['remark-rehype', remarkRehype, { allowDangerousHtml: true }], // FIXME: stupid escape strategy
   /* -------- Seperator for remark and rehype -------- */
   ['rehype-raw', rehypeRaw],
-  ['rehype-toc-id', rehypeTocId],
+  ['rehype-slug-toc', rehypeSlugToc],
   ['rehype-copy', rehypeCopy],
   ['rehype-highlight', rehypeHighlight],
   ['rehype-katex', rehypeKatex, { strict: false }], // FIXME: too slow on server side
@@ -38,17 +37,9 @@ export class RemarkRehype {
 
   logger: Logger;
 
-  tocExtractor: Processor;
-
   constructor(options: RemarkOptions) {
     this.render = unified();
     this.logger = options.logger;
-    // rehype-parse@8 ships unified@10 types; cast to the unified@11 Plugin to
-    // bridge the two type packages until Task 8 removes this code path.
-    const extractor = unified();
-    extractor.use(rehypeParse as unknown as Plugin);
-    extractor.use(rehypeToc);
-    this.tocExtractor = extractor;
 
     this.usePlugins(options.plugins);
   }
@@ -75,14 +66,11 @@ export class RemarkRehype {
     try {
       perf?.mark('process content');
 
-      const content = (await this.render.process(markdown)).toString();
+      const file = await this.render.process(markdown);
+      const content = file.toString();
+      const toc = file.data[PEN_TOC_DATA] as DocToc[] | undefined;
 
       perf?.measure('process content done', 'process content');
-      perf?.mark('process toc');
-
-      const toc = (await this.tocExtractor.process(content)).result as DocToc[];
-
-      perf?.measure('process toc done', 'process toc');
 
       return { content: encodeURIComponent(content), toc };
     } catch (reason) {
