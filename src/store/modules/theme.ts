@@ -1,20 +1,11 @@
 import { makeAutoObservable } from 'mobx';
-import { createTheme } from '@mui/material/styles';
-import type { ThemeOptions } from '@mui/material/styles';
-import { ClientEvents } from '@/types';
-import type { PenTheme } from '@/types';
+import type { ThemeNames } from '@/types';
 import type { AppStore, PrefetchStore } from '..';
 
-type ThemeState = Omit<PenTheme, 'css'>;
+export type ThemeState = { mode: ThemeNames };
 
 export class ThemeStore implements PrefetchStore<ThemeState> {
-  name: string = ''
-
-  id: string = ''
-
-  avaliable: string[] = []
-
-  options: ThemeOptions = {};
+  mode: ThemeNames = 'dark';
 
   root: AppStore;
 
@@ -23,39 +14,28 @@ export class ThemeStore implements PrefetchStore<ThemeState> {
     this.root = root;
   }
 
-  get theme() {
-    return createTheme(this.options);
-  }
-
-  get mode() {
-    return this.options.palette?.mode;
-  }
-
-  changeTheme(name: string) {
-    this.root.socket.emit(ClientEvents.FetchStyle, name);
-  }
-
-  hydrate(state: PenTheme): void {
-    if (globalThis.document && this.id) {
-      const styleElement = globalThis.document.getElementById(this.id);
-
-      if (styleElement) {
-        styleElement.id = state.id;
-        styleElement.innerHTML = state.css;
-      }
+  changeTheme(mode: ThemeNames) {
+    this.mode = mode;
+    if (typeof document !== 'undefined') {
+      document.documentElement.dataset.theme = mode;
+      document.getElementById('pen-markdown-css')
+        ?.setAttribute('href', `/assets/github-markdown-${mode}.css`);
+      document.getElementById('pen-hljs-css')
+        ?.setAttribute('href', `/assets/highlightjs-github-${mode}.css`);
     }
-    this.id = state.id;
-    this.name = state.name;
-    this.options = state.options;
-    this.avaliable = state.avaliable;
   }
 
-  dehydra() {
-    return {
-      id: this.id,
-      name: this.name,
-      options: this.options,
-      avaliable: this.avaliable,
-    };
+  /**
+   * Accepts either the client dehydra shape `{ mode }` (from
+   * __PREFETCHED_STATE__) or the server PenTheme `{ name, ... }` (from the
+   * SSR prefetch object).
+   */
+  hydrate(state: { mode?: ThemeNames; name?: ThemeNames }): void {
+    const mode = state?.mode ?? state?.name;
+    if (mode) this.changeTheme(mode);
+  }
+
+  dehydra(): ThemeState {
+    return { mode: this.mode };
   }
 }

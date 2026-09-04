@@ -5,7 +5,6 @@ import {
   ServerEvents,
 } from '@/types';
 import type {
-  PenTheme,
   EmitFunction,
   PenErrorData,
   PenSocketInfo,
@@ -51,7 +50,6 @@ export class SocketStore implements PrefetchStore<PenSocketInfo> {
         transports: this.transports,
       });
       this._socket.on(ServerEvents.PenData, (data) => this.onData(data));
-      this._socket.on(ServerEvents.PenStyle, (style) => this.onStyle(style));
       this._socket.on(ServerEvents.PenError, (error) => this.onData(error));
       this._socket.on('connect', () => this.onConnect());
       this._socket.on('disconnect', () => this.onDisconnect());
@@ -69,10 +67,6 @@ export class SocketStore implements PrefetchStore<PenSocketInfo> {
 
   onData(data: PenDirectoryData | PenErrorData) {
     this.root.home.hydrate({ data });
-  }
-
-  onStyle(style: PenTheme) {
-    this.root.theme.hydrate(style);
   }
 
   onError(error: Error) {

@@ -1,18 +1,16 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { ThemeOptions } from '@mui/material/styles';
 import type { Plugin } from 'unified';
 import type { Logger } from './server/logger';
 import type { RemarkRehype } from './server/rehype';
-import type { ThemeNames } from './server/theme';
+
+export type ThemeNames = 'dark' | 'light';
 
 // client fetch
 export enum ClientEvents {
-  FetchStyle = 'fetchstyle',
   FetchData = 'fetchdata',
 }
 
 export type ClientToServerEvents = {
-  [ClientEvents.FetchStyle]: (name: ThemeNames) => void;
   [ClientEvents.FetchData]: (relative: string) => void;
 };
 
@@ -20,13 +18,11 @@ export type ClientToServerEvents = {
 export enum ServerEvents {
   PenError = 'penerror',
   PenData = 'pendata',
-  PenStyle = 'penstyle',
 }
 
 export type ServerToClientEvents = {
   [ServerEvents.PenData]: (data: PenDirectoryData | PenErrorData) => void;
   [ServerEvents.PenError]: (error: PenErrorData) => void;
-  [ServerEvents.PenStyle]: (theme: PenTheme) => void;
 };
 
 export type EmitFunction<Evts extends { [k in string]: (...args: any[]) => void }, Evt extends keyof Evts> =
@@ -39,10 +35,9 @@ export type PenSocketInfo = {
 };
 
 export type PenTheme = {
-  name: string;
-  id: string;
-  css: string;
-  options: ThemeOptions;
+  name: ThemeNames;
+  css: string; // app chrome css for this theme (may be '')
+  links: string; // <link> tags for markdown/hljs theme css
   avaliable: string[];
 };
 

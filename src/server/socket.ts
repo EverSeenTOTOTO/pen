@@ -3,14 +3,12 @@ import https from 'https';
 import { Server, Socket } from 'socket.io';
 import {
   ClientEvents,
-  ServerEvents,
 } from '../types';
 import type {
   ClientToServerEvents,
   ServerToClientEvents,
   SocketOptions,
 } from '../types';
-import { createTheme } from './theme';
 import { Watcher } from './watcher';
 import { extendLogger } from './logger';
 
@@ -27,12 +25,6 @@ const setupWatcher = (socket: PenSocket, options: SocketOptions) => {
     watcher.close();
   });
   socket.on(ClientEvents.FetchData, (relative) => watcher.setupWatching(relative));
-};
-
-const setupThemeProvider = (socket: PenSocket, options: SocketOptions) => {
-  socket.on(ClientEvents.FetchStyle, async (name) => {
-    socket.emit(ServerEvents.PenStyle, await createTheme(name, options.dist));
-  });
 };
 
 export const bindSocket = (server: http.Server | https.Server, options: SocketOptions) => {
@@ -59,7 +51,6 @@ export const bindSocket = (server: http.Server | https.Server, options: SocketOp
 
     // log for distinct client
     setupWatcher(socket, { ...options, logger: extendLogger(logger, socket.id) });
-    setupThemeProvider(socket, options);
   });
 
   server.once('close', () => {

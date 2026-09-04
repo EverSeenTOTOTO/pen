@@ -3,10 +3,18 @@ import fs from 'fs';
 import express from 'express';
 import type { Express, Request, Response } from 'express';
 import { perf } from '@/utils';
-import type { RenderOptions } from '../types';
-import { createTheme } from './theme';
-import type { ThemeNames } from './theme';
+import type { PenTheme, RenderOptions, ThemeNames } from '../types';
+import { createTheme, isThemeName } from './theme';
 import { readUnknown } from './reader';
+
+/**
+ * Stamp the theme onto the rendered document: `data-theme` on the first
+ * `<html>` tag plus the theme-specific static css <link> tags, replacing the
+ * `<!--pen-theme-links-->` placeholder in index.html.
+ */
+export const applyThemeToTemplate = (html: string, theme: PenTheme): string => html
+  .replace('<html', `<html data-theme="${theme.name}"`) // first <html> tag only
+  .replace('<!--pen-theme-links-->', theme.links);
 
 export const createSSRMiddleware = (options: RenderOptions) => {
   const preloadPromise = Promise.all([
@@ -22,8 +30,9 @@ export const createSSRMiddleware = (options: RenderOptions) => {
     let themeMode: ThemeNames = 'dark';
     let drawerVisible = false;
     try {
-      themeMode = JSON.parse(req.cookies.themeMode);
-      drawerVisible = JSON.parse(req.cookies.drawerVisible);
+      const themeCookie: unknown = JSON.parse(req.cookies.themeMode);
+      if (isThemeName(themeCookie)) themeMode = themeCookie;
+      drawerVisible = JSON.parse(req.cookies.drawerVisible) === true;
     } catch (e) {
       options.logger.error(e);
     }
@@ -56,7 +65,7 @@ export const createSSRMiddleware = (options: RenderOptions) => {
       perf?.measure('render end', 'render start');
 
       res.setHeader('Content-Type', 'text/html');
-      res.end(html);
+      res.end(applyThemeToTemplate(html, themeData));
     } catch {
       // console.error(e.stack ?? e.message);
       next();

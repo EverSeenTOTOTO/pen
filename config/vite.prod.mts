@@ -22,8 +22,12 @@ export default defineConfig((c) => ({
     copy({
       targets: [
         {
-          src: slash(path.join(import.meta.dirname, '../src/assets/*')),
+          src: slash(path.join(import.meta.dirname, '../src/assets/**')),
           dest: 'assets/', // relate to dist
+          // vite-plugin-static-copy v4 keeps the path relative to the project
+          // root (dist/assets/src/assets/...); strip the two leading segments
+          // to copy flat into dist/assets/ with fonts/ preserved.
+          rename: { stripBase: 2 },
         },
       ],
     }),

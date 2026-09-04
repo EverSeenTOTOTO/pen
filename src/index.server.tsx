@@ -8,7 +8,6 @@ import createEmotionCache from './createEmotionCache';
 import { App } from './App';
 import { createStore } from './store';
 import { createRoutes } from './routes';
-import type { PenTheme } from './types';
 
 // Call enableStaticRendering(true) when running in an SSR environment, in which observer wrapped components should never re-render, but cleanup after the first rendering automatically.
 enableStaticRendering(true);
@@ -51,8 +50,9 @@ export async function render(context: RenderContext) {
   const emotionCss = constructStyleTagsFromChunks(emotionChunks);
 
   const state = store.dehydra();
-  const { theme } = prefetch as { theme: PenTheme };
-  const style = `<style id="${theme.id}">${theme.css}</style>${emotionCss}`;
+  // emotion styles only, transitional until Task 13 removes MUI/emotion;
+  // theme css <link> tags and data-theme are injected by src/server/render.ts
+  const style = emotionCss;
 
   ctx.html = ctx.template
     .replace(APP_HTML, html)

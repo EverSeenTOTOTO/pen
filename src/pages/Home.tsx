@@ -4,7 +4,7 @@ import { useStore } from '@/store';
 import CssBaseline from '@mui/material/CssBaseline';
 import Snackbar from '@mui/material/Snackbar';
 import Alert from '@mui/lab/Alert';
-import { ThemeProvider, styled } from '@mui/material/styles';
+import { createTheme, ThemeProvider, styled } from '@mui/material/styles';
 import {
   useAutoFetch, useClipboard,
 } from '@/store/hooks';
@@ -77,10 +77,12 @@ const Home = observer(() => {
 
 // migrate MUI@v4 to v5
 const MigratedHome = observer(() => {
-  const theme = useStore('theme');
+  const themeStore = useStore('theme');
+  // transitional until Task 13 removes MUI
+  const theme = createTheme({ palette: { mode: themeStore.mode === 'light' ? 'light' : 'dark' } });
 
   return (
-    <ThemeProvider theme={theme.theme}>
+    <ThemeProvider theme={theme}>
       <CssBaseline />
       <Home />
     </ThemeProvider>
