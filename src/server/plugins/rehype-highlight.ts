@@ -1,9 +1,6 @@
- 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import hljs from 'highlight.js/lib/core';
-import parse5 from 'parse5';
-import * as h2s from 'hast-util-to-string';
-import * as hfp from 'hast-util-from-parse5';
+import { createLowlight } from 'lowlight';
+import { toString } from 'hast-util-to-string';
+import type { Element } from 'hast';
 import xml from 'highlight.js/lib/languages/xml';
 import bash from 'highlight.js/lib/languages/bash';
 import c from 'highlight.js/lib/languages/c';
@@ -26,41 +23,42 @@ import typescript from 'highlight.js/lib/languages/typescript';
 import wasm from 'highlight.js/lib/languages/wasm';
 import { makeCodeBlockPlugin } from './code-block';
 
-hljs.registerLanguage('xml', xml);
-hljs.registerLanguage('bash', bash);
-hljs.registerLanguage('c', c);
-hljs.registerLanguage('cpp', cpp);
-hljs.registerLanguage('css', css);
-hljs.registerLanguage('markdown', markdown);
-hljs.registerLanguage('diff', diff);
-hljs.registerLanguage('go', go);
-hljs.registerLanguage('java', java);
-hljs.registerLanguage('javascript', javascript);
-hljs.registerLanguage('json', json);
-hljs.registerLanguage('lua', lua);
-hljs.registerLanguage('makefile', makefile);
-hljs.registerLanguage('plaintext', plaintext);
-hljs.registerLanguage('python', python);
-hljs.registerLanguage('rust', rust);
-hljs.registerLanguage('scss', scss);
-hljs.registerLanguage('yaml', yaml);
-hljs.registerLanguage('typescript', typescript);
-hljs.registerLanguage('wasm', wasm);
+const languages = {
+  xml, bash, c, cpp, css, markdown, diff, go, java,
+  javascript, json, lua, makefile, plaintext, python,
+  rust, scss, yaml, typescript, wasm,
+};
 
-export default makeCodeBlockPlugin((language: string, code: any) => {
+const lowlight = createLowlight(languages);
+
+lowlight.registerAlias({
+  xml: 'html',
+  javascript: ['js', 'mjs'],
+  typescript: 'ts',
+  bash: ['shell', 'sh'],
+  python: 'py',
+  cpp: 'c++',
+  yaml: 'yml',
+});
+
+/**
+ * Highlight a fenced code block in place, straight into hast children —
+ * no parse5 html round-trip. Mermaid blocks are marked and left for the
+ * client to render lazily.
+ */
+export const highlightCodeBlock = (language: string, code: Element): void => {
   if (language === 'mermaid') {
     code.properties.className = ['pen-mermaid-source'];
-    return; // highlight.js 不处理，保留源码给客户端渲染
+    return; // not highlighted server-side, source stays for the client render
   }
+
+  if (!lowlight.registered(language)) return;
 
   try {
-    const highlightResult = hljs.highlight(h2s.toString(code), { language }).value;
-    const hlcode = hfp.fromParse5(parse5.parse(highlightResult));
-
-    if (hlcode.type === 'element' || hlcode.type === 'root') {
-      code.children = hlcode.children;
-    }
+    code.children = lowlight.highlight(language, toString(code)).children as Element['children'];
   } catch {
-    // pass
+    // pass: leave the plain text untouched on grammar errors
   }
-});
+};
+
+export default makeCodeBlockPlugin(highlightCodeBlock);

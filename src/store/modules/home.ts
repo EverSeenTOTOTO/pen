@@ -9,8 +9,15 @@ export type HomeState = {
   data?: PenDirectoryData | PenErrorData;
 };
 
+// byte-bounded: approximate entry size as character count * 2 (utf-16 code
+// units), plus a fixed overhead for path/metadata
 const cache = new LRUCache<string, PenDirectoryData | PenErrorData>({
-  max: import.meta.env.DEV ? 1 : 5,
+  maxSize: 8 * 1024 * 1024,
+  sizeCalculation: (value) => {
+    const reading = 'reading' in value && value.reading ? value.reading.content.length : 0;
+    const content = 'content' in value ? String((value as { content: unknown }).content).length : 0;
+    return (content + reading) * 2 + 2048;
+  },
 });
 
 export class HomeStore implements PrefetchStore<HomeState> {

@@ -80,8 +80,15 @@ async function readDirectory(root: string, pathInfo: PathInfo, ignores: RegExp[]
 }
 
 // export for test
-export const cache = new LRUCache({
-  max: 10,
+// byte-bounded: approximate entry size as character count * 2 (utf-16 code
+// units), plus a fixed overhead for path/metadata
+export const cache = new LRUCache<string, (PenDirectoryData | PenMarkdownData) & { ctime: number }>({
+  maxSize: 16 * 1024 * 1024,
+  sizeCalculation: (value) => {
+    const reading = 'reading' in value && value.reading ? value.reading.content.length : 0;
+    const content = 'content' in value ? value.content.length : 0;
+    return (content + reading) * 2 + 2048;
+  },
 });
 
 export async function readUnknown(options: ReaderOptions) {
