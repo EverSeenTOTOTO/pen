@@ -3,18 +3,9 @@ import fs from 'fs';
 import express from 'express';
 import type { Express, Request, Response } from 'express';
 import { perf } from '@/utils';
-import type { PenTheme, RenderOptions, ThemeNames } from '../types';
+import type { RenderOptions, ThemeNames } from '../types';
 import { createTheme, isThemeName } from './theme';
 import { readUnknown } from './reader';
-
-/**
- * Stamp the theme onto the rendered document: `data-theme` on the first
- * `<html>` tag plus the theme-specific static css <link> tags, replacing the
- * `<!--pen-theme-links-->` placeholder in index.html.
- */
-export const applyThemeToTemplate = (html: string, theme: PenTheme): string => html
-  .replace('<html', `<html data-theme="${theme.name}"`) // first <html> tag only
-  .replace('<!--pen-theme-links-->', theme.links);
 
 export const createSSRMiddleware = (options: RenderOptions) => {
   const preloadPromise = Promise.all([
@@ -65,7 +56,7 @@ export const createSSRMiddleware = (options: RenderOptions) => {
       perf?.measure('render end', 'render start');
 
       res.setHeader('Content-Type', 'text/html');
-      res.end(applyThemeToTemplate(html, themeData));
+      res.end(html);
     } catch {
       // console.error(e.stack ?? e.message);
       next();

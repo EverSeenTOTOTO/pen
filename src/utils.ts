@@ -74,23 +74,28 @@ export const uuid = (content?: string) => {
 };
 
 export const perf = globalThis.performance && new Proxy(performance, {
-  get(t, p, r) {
-    const result = Reflect.get(t, p, r);
+  get(t, p) {
+    const result = Reflect.get(t, p) as unknown;
 
-    if (typeof result === 'function') {
-      if (process.env.NODE_ENV !== 'development') {
-        return PASS;
-      }
+    if (typeof result !== 'function') return result;
 
-      if (p === 'measure') {
-        return (...args: unknown[]) => {
-          const record = result(...args);
-
-          console.log(`${record.name}: ${record.duration}`);
-        };
-      }
+    if (process.env.NODE_ENV !== 'development') {
+      return PASS;
     }
 
-    return result;
+    // native Performance methods fail their brand check when the proxy is the
+    // receiver ("this" argument must be an instance of Performance) — always
+    // call them bound to the real global
+    const bound = result.bind(t) as (...args: unknown[]) => PerformanceEntry;
+
+    if (p === 'measure') {
+      return (...args: unknown[]) => {
+        const record = bound(...args);
+
+        console.log(`${record.name}: ${record.duration}`);
+      };
+    }
+
+    return bound;
   },
 });

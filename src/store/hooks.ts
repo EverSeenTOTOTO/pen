@@ -6,15 +6,21 @@ export const useClipboard = () => {
   const ui = useStore('ui');
 
   useEffect(() => {
-    import('clipboard').then((mod) => mod.default).then((Clipboard) => {
-      // clipboard
-      const clipboard = new Clipboard('.copy-btn');
-
-      clipboard.on('success', () => ui.notify('success', 'Copied.'));
-      clipboard.on('error', () => ui.notify('error', 'Copy failed.'));
-
-      return () => clipboard.destroy();
-    });
+    // rehype-copy renders `.copy-btn[data-clipboard-text]` on the server;
+    // delegate clicks and use the native clipboard api
+    const handler = async (e: MouseEvent) => {
+      const btn = (e.target as HTMLElement).closest?.('.copy-btn[data-clipboard-text]');
+      if (!btn) return;
+      const text = (btn as HTMLElement).dataset.clipboardText ?? '';
+      try {
+        await navigator.clipboard.writeText(text);
+        ui.notify('success', 'Copied.');
+      } catch {
+        ui.notify('error', 'Copy failed.');
+      }
+    };
+    document.addEventListener('click', handler);
+    return () => document.removeEventListener('click', handler);
   }, []);
 };
 
@@ -75,4 +81,45 @@ export const useScrollSpy = () => {
     headers.forEach((header) => observer.observe(header));
     return () => observer.disconnect();
   }, [home.html]);
+};
+
+export const useMermaid = () => {
+  const home = useStore('home');
+  const theme = useStore('theme');
+
+  useEffect(() => {
+    const blocks = Array.from(document.querySelectorAll<HTMLElement>('code.pen-mermaid-source'));
+    if (!blocks.length) return;
+
+    let cancelled = false;
+
+    import('mermaid').then(async (mod) => {
+      const mermaid = mod.default;
+      mermaid.initialize({
+        startOnLoad: false,
+        theme: theme.mode === 'dark' ? 'dark' : 'default',
+      });
+
+      for (const [i, block] of blocks.entries()) {
+        if (cancelled) return;
+        const source = block.textContent ?? '';
+        const id = `pen-mermaid-${i}`;
+        try {
+          await mermaid.parse(source); // throws on syntax error
+          const { svg } = await mermaid.render(id, source);
+          const host = document.createElement('div');
+          host.className = 'mermaid-svg';
+          host.innerHTML = svg;
+          block.replaceWith(host);
+        } catch (err) {
+          const errBox = document.createElement('div');
+          errBox.className = 'mermaid-error';
+          errBox.textContent = `Mermaid error: ${err instanceof Error ? err.message : String(err)}\n\n${source}`;
+          block.replaceWith(errBox);
+        }
+      }
+    });
+
+    return () => { cancelled = true; };
+  }, [home.html, theme.mode]);
 };

@@ -7,9 +7,9 @@ test('renders markdown readme', async ({ page }) => {
 
 test('sidebar lists directory entries', async ({ page }) => {
   await page.goto('/');
-  // the fixture root holds a single README.md; the drawer file list renders
-  // one anchor per entry (header breadcrumb links live outside the drawer)
-  const entries = page.locator('.MuiDrawer-root a[href]');
+  // the fixture root holds a single README.md; the sidebar file list renders
+  // one button.file-item per entry
+  const entries = page.locator('.sidebar button.file-item');
   await expect(entries).toHaveCount(1);
   await expect(entries).toContainText('README');
 });

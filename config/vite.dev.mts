@@ -10,20 +10,49 @@ import { bindSocket } from '../src/server/socket';
 import { logger } from '../src/server/logger';
 import { RemarkRehype } from '../src/server/rehype';
 
+/**
+ * Dev-only static middleware for `/assets/*`: the SSR'd dev page references
+ * `/assets/*.css` (theme markdown/hljs links, katex) but those files live in
+ * `src/assets` (copied to `dist/assets` by `make prepare` in prod builds),
+ * which vite's dev server does not serve. Streams css/fonts with the right
+ * content-type, 404 otherwise.
+ */
+const serveAssets = () => ({
+  name: 'dev-serve-assets',
+  configureServer(vite: ViteDevServer) {
+    const assetsRoot = path.join(process.cwd(), 'src', 'assets');
+    const contentTypes: Record<string, string> = {
+      '.css': 'text/css',
+      '.woff': 'font/woff',
+      '.woff2': 'font/woff2',
+      '.ttf': 'font/ttf',
+    };
+
+    // registered directly (not returned) so it runs before the SSR handler
+    vite.middlewares.use('/assets', (req, res) => {
+      const relative = decodeURIComponent((req.url ?? '').split('?')[0] ?? '');
+      const file = path.resolve(assetsRoot, `.${relative}`);
+      const contentType = contentTypes[path.extname(file)];
+
+      const notFound = () => {
+        res.statusCode = 404;
+        res.end('Not Found');
+      };
+
+      // path traversal guard (resolve + prefix check) and extension allowlist
+      if (!contentType || !file.startsWith(`${assetsRoot}${path.sep}`) || !fs.existsSync(file)) {
+        notFound();
+        return;
+      }
+
+      res.setHeader('Content-Type', contentType);
+      fs.createReadStream(file).on('error', notFound).pipe(res);
+    });
+  },
+});
+
 const devSSR = () => ({
   name: 'dev-ssr',
-  // Dev-mode transitional state: @mui v5 CJS cannot interop with vite 8's
-  // module runner (no __esModule handling), so dev SSR of the MUI app fails
-  // and requests fall through to the client-only SPA below. Inject the
-  // markdown/hljs/katex css so the CSR fallback is still styled. Removed
-  // when Phase 2 of the modernization plan deletes MUI.
-  transformIndexHtml(html: string) {
-    return html.replace('<!-- inject -->', [
-      '<link rel="stylesheet" href="/src/assets/github-markdown-light.css">',
-      '<link rel="stylesheet" href="/src/assets/highlightjs-github-light.css">',
-      '<link rel="stylesheet" href="/src/assets/katex.min.css">',
-    ].join('\n'));
-  },
   async configureServer(vite: ViteDevServer) {
     const namespace = '/';
     const ignores = [/^\/\./];
@@ -31,7 +60,9 @@ const devSSR = () => ({
     const dist = path.join(process.cwd(), 'src');
     const root = path.join(process.cwd(), '../..');
     const theme = await createTheme('dark', dist);
-    const templateHtml = fs.readFileSync(paths.template, 'utf-8');
+    // katex css link for dev/prod head parity (prod injects it at build time)
+    const templateHtml = fs.readFileSync(paths.template, 'utf-8')
+      .replace('<!-- inject -->', '<link rel="stylesheet" href="/assets/katex.min.css">');
     const transports: ['websocket'] = ['websocket'];
     const remark = new RemarkRehype({ logger, plugins: [] })
 
@@ -50,11 +81,15 @@ const devSSR = () => ({
     // 缺点是不能调试完整服务端代码，只能调试服务端同构应用的部分
     return () => vite.middlewares.use(async (req, res, next) => {
       try {
+        // prefetch the requested document (like prod SSR) instead of always '/'.
+        // vite's spa html-fallback rewrites req.url to /index.html before this
+        // post hook runs — the real path is req.originalUrl.
+        const relative = decodeURIComponent(req.originalUrl ?? '/').split('?')[0] || '/';
         const current = await readUnknown({
           remark,
           root,
           ignores,
-          relative: '/',
+          relative,
         });
         const { render } = await vite.ssrLoadModule(paths.serverEntry);
         const template = await vite.transformIndexHtml(req.originalUrl!, templateHtml);
@@ -92,45 +127,10 @@ export default defineConfig((c) => ({
   },
   plugins: [
     ...base(c).plugins,
+    serveAssets(),
     devSSR(),
   ],
   ssr: {
-    // @mui v5 has no exports map: externals fail node ESM dir-import and raw
-    // bundling hits `require is not defined` in vite 8's module runner. Route
-    // it through the ssr dep optimizer instead, which converts CJS to ESM.
-    // Transitional only — MUI is removed entirely in Phase 2 of the plan.
-    optimizeDeps: {
-      include: [
-        '@mui/material/Breadcrumbs',
-        '@mui/material/Container',
-        '@mui/material/CssBaseline',
-        '@mui/material/Divider',
-        '@mui/material/Drawer',
-        '@mui/material/IconButton',
-        '@mui/material/Link',
-        '@mui/material/List',
-        '@mui/material/ListItemButton',
-        '@mui/material/ListItemIcon',
-        '@mui/material/ListItemText',
-        '@mui/material/NoSsr',
-        '@mui/material/Paper',
-        '@mui/material/Skeleton',
-        '@mui/material/Snackbar',
-        '@mui/material/styles',
-        '@mui/material/Switch',
-        '@mui/material/Typography',
-        '@mui/lab/Alert',
-        '@mui/x-tree-view/TreeItem',
-        '@mui/x-tree-view/TreeView',
-        '@mui/icons-material/ChevronLeft',
-        '@mui/icons-material/ChevronRight',
-        '@mui/icons-material/Description',
-        '@mui/icons-material/ExpandLessTwoTone',
-        '@mui/icons-material/ExpandMore',
-        '@mui/icons-material/Folder',
-        '@mui/icons-material/Home',
-      ],
-    },
     noExternal: [
       /^(unified|(remark|rehype|hast|unist)[\w-.]+)/,
     ],

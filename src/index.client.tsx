@@ -1,6 +1,5 @@
 import { hydrateRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router';
-import createEmotionCache from './createEmotionCache';
 import { App } from './App';
 import { createRoutes } from './routes';
 import { createStore } from './store';
@@ -11,7 +10,6 @@ import './assets/index.css';
 const container = document.getElementById('root');
 const store = createStore();
 const routes = createRoutes();
-const cache = createEmotionCache();
 
 if (window.__PREFETCHED_STATE__) {
   if (import.meta.env.DEV) {
@@ -23,5 +21,5 @@ if (window.__PREFETCHED_STATE__) {
 }
 
 hydrateRoot(container!, <BrowserRouter>
-  <App store={store} routes={routes} cache={cache} />
+  <App store={store} routes={routes} />
 </BrowserRouter>);

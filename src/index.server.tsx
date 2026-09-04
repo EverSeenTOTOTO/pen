@@ -3,8 +3,7 @@ import serializeJavascript from 'serialize-javascript';
 import ReactDOMServer from 'react-dom/server.node';
 import { StaticRouter } from 'react-router';
 import { enableStaticRendering } from 'mobx-react-lite';
-import createEmotionServer from '@emotion/server/create-instance';
-import createEmotionCache from './createEmotionCache';
+import type { PenTheme } from './types';
 import { App } from './App';
 import { createStore } from './store';
 import { createRoutes } from './routes';
@@ -15,9 +14,17 @@ enableStaticRendering(true);
 // see index.html
 const APP_HTML = '<!--app-html-->';
 const APP_STATE = '<!--app-state-->';
-const APP_STYLE = '<!--app-style-->';
 
 const serialize = (state: Record<string, unknown>) => `<script>;window.__PREFETCHED_STATE__=${serializeJavascript(state)};</script>`;
+
+/**
+ * Stamp the theme onto the rendered document: `data-theme` on the first
+ * `<html>` tag plus the theme-specific static css <link> tags, replacing the
+ * `<!--pen-theme-links-->` placeholder in index.html.
+ */
+export const applyThemeToTemplate = (html: string, theme: PenTheme): string => html
+  .replace('<html', `<html data-theme="${theme.name}"`) // first <html> tag only
+  .replace('<!--pen-theme-links-->', theme.links);
 
 export type RenderContext = {
   req: Request;
@@ -30,34 +37,28 @@ export type RenderContext = {
 export async function render(context: RenderContext) {
   const ctx = context as Required<RenderContext>;
   const { req, prefetch } = ctx;
+  const { theme } = prefetch as { theme?: PenTheme };
 
   const store = createStore();
   const routes = createRoutes();
-  const cache = createEmotionCache();
-  const { extractCriticalToChunks, constructStyleTagsFromChunks } = createEmotionServer(cache);
 
   // ssr prefetch
   store.hydrate(prefetch);
 
   const html = ReactDOMServer.renderToString(
-    <StaticRouter location={req.url}>
-      <App store={store} routes={routes} cache={cache} />
+    <StaticRouter location={req.originalUrl ?? req.url}>
+      <App store={store} routes={routes} />
     </StaticRouter>,
   );
 
-  // Grab the CSS from emotion
-  const emotionChunks = extractCriticalToChunks(html);
-  const emotionCss = constructStyleTagsFromChunks(emotionChunks);
-
   const state = store.dehydra();
-  // emotion styles only, transitional until Task 13 removes MUI/emotion;
-  // theme css <link> tags and data-theme are injected by src/server/render.ts
-  const style = emotionCss;
 
   ctx.html = ctx.template
     .replace(APP_HTML, html)
-    .replace(APP_STYLE, style)
     .replace(APP_STATE, serialize(state));
+
+  // theme css <link> tags and data-theme are part of the rendered document
+  if (theme) ctx.html = applyThemeToTemplate(ctx.html, theme);
 
   return ctx;
 }
