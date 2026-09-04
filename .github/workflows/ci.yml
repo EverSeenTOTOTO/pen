@@ -22,4 +22,4 @@ jobs:
       - run: make build
       - run: npx playwright install --with-deps chromium
       - run: pnpm test
-      # TODO(Task 7): add pnpm test:e2e once playwright config lands
+      - run: pnpm test:e2e
