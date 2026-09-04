@@ -3,14 +3,14 @@ import { makeAutoObservable } from 'mobx';
 import {
   ClientEvents, PenDirectoryData, PenErrorData,
 } from '@/types';
-import LRU from 'lru-cache';
+import { LRUCache } from 'lru-cache';
 import type { AppStore, PrefetchStore } from '..';
 
 export type HomeState = {
   data?: PenDirectoryData | PenErrorData;
 };
 
-const cache = new LRU({
+const cache = new LRUCache({
   max: import.meta.env.DEV ? 1 : 5,
 });
 

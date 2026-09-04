@@ -1,7 +1,6 @@
 import path from 'path';
 import fs from 'fs';
 import { defineConfig, ViteDevServer } from 'vite';
-import deepmerge from 'deepmerge';
 import base, { paths } from './vite.common.mts';
 import { createTheme } from '../src/server/theme';
 import { readUnknown } from '../src/server/reader';
@@ -68,7 +67,8 @@ const devSSR = () => ({
   },
 });
 
-export default defineConfig((c) => deepmerge(base(c), {
+export default defineConfig((c) => ({
+  ...base(c),
   server: {
     host: true,
     watch: {
@@ -76,10 +76,12 @@ export default defineConfig((c) => deepmerge(base(c), {
     },
   },
   plugins: [
+    ...base(c).plugins,
     devSSR(),
   ],
   ssr: {
     noExternal: [
+      /^@mui\//,
       /^(unified|(remark|rehype|hast|unist)[\w-.]+)/,
     ],
   },

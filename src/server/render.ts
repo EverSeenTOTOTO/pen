@@ -9,7 +9,7 @@ import { readUnknown } from './reader';
 export const createSSRMiddleware = (options: RenderOptions) => {
   const preloadPromise = Promise.all([
     fs.promises.readFile(path.join(options.dist, 'index.html'), 'utf8'),
-    import(path.join(options.dist, 'index.server.js')).then((value) => value.render),
+    import(path.join(options.dist, 'index.server.mjs')).then((value) => value.render),
   ]);
 
   return async (req: Request, res: Response, next: () => void) => {

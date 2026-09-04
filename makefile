@@ -43,7 +43,7 @@ build: clean build\:server build\:client
 
 .PHONY: start
 start: build
-	node cli.js -o -r ../docs
+	node cli.mjs -o -r ../docs
 
 .PHONY: test
 test:

@@ -1,5 +1,5 @@
 import { CacheProvider, EmotionCache } from '@emotion/react';
-import { Route, Routes } from 'react-router-dom';
+import { Route, Routes } from 'react-router';
 import { AppRoutes } from './routes';
 import { AppStore, RootContext } from './store';
 

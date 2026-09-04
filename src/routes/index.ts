@@ -1,4 +1,4 @@
-const pages = import.meta.globEager('../pages/*.tsx');
+const pages = import.meta.glob('../pages/*.tsx', { eager: true });
 
 const routes = Object.keys(pages).map((path) => {
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion

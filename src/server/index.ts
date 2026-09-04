@@ -19,7 +19,7 @@ export const normalizeOptions = (opts?: Partial<PenOptions>) => {
 
   const silent = opts?.silent ?? false;
   const logger = silent ? emptyLogger : builtInLogger;
-  const dist = opts?.dist ? path.join(opts?.dist) : path.join(__dirname);
+  const dist = opts?.dist ? path.join(opts?.dist) : import.meta.dirname;
   const ignores = opts?.ignores?.filter((_: string) => _).map((p: string) => new RegExp(p, 'g')) ?? [];
 
   return {

@@ -1,20 +1,21 @@
 import { defineConfig } from 'vite';
-import deepmerge from 'deepmerge';
-// import { visualizer } from 'rollup-plugin-visualizer';
 import base, { paths } from './vite.common.mts';
-import pkg from '../package.json';
 
-export default defineConfig((c) => deepmerge(base(c), {
+export default defineConfig((c) => ({
+  ...base(c),
   build: {
+    ...base(c).build,
     ssr: paths.serverEntry,
     rollupOptions: {
       output: {
-        format: 'cjs'
+        format: 'esm',
+        entryFileNames: 'index.server.mjs',
       },
     },
   },
-  // plugins: [visualizer({ emitFile: true, filename: 'serverEntry.stats.html' })],
+  // MUI v5 packages cannot be loaded by node ESM externals (esm root files with
+  // directory imports, no exports map) — bundle them instead, keep the rest external.
   ssr: {
-    external: Object.keys(pkg.dependencies),
+    noExternal: [/^@mui\//],
   },
 }));

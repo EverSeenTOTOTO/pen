@@ -1,19 +1,17 @@
 import { defineConfig } from 'vite';
-// import { visualizer } from 'rollup-plugin-visualizer';
 import { paths } from './vite.common.mts';
-import pkg from '../package.json';
 
-// use vite as cjs bundler
+// use vite as esm bundler, all deps external
 export default defineConfig(({ mode }) => ({
-  // plugins: [visualizer({ emitFile: true, filename: 'server.stats.html' })],
   build: {
     ssr: true,
     sourcemap: mode === 'development',
-    emptyOutDir: false,
+    emptyOutDir: true,
     rollupOptions: {
       input: paths.server,
       output: {
-        format: 'cjs'
+        format: 'esm',
+        entryFileNames: 'index.mjs',
       },
     },
   },
@@ -24,10 +22,9 @@ export default defineConfig(({ mode }) => ({
       'node:os': 'os',
     },
   },
+  // MUI v5 packages cannot be loaded by node ESM externals (esm root files with
+  // directory imports, no exports map) — bundle them instead, keep the rest external.
   ssr: {
-    external: Object.keys(pkg.dependencies),
-    noExternal: [
-      /^(get-port|unified|(remark|rehype|hast|unist)[\w-.]+)/,
-    ],
+    noExternal: [/^@mui\//],
   },
 }));

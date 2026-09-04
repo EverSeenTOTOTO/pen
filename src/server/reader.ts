@@ -1,7 +1,7 @@
 /* eslint-disable no-param-reassign */
 import fs from 'fs';
 import path from 'path';
-import LRU from 'lru-cache';
+import { LRUCache } from 'lru-cache';
 import {
   PathInfo,
   PenMarkdownData,
@@ -80,7 +80,7 @@ async function readDirectory(root: string, pathInfo: PathInfo, ignores: RegExp[]
 }
 
 // export for test
-export const cache = new LRU({
+export const cache = new LRUCache({
   max: 10,
 });
 

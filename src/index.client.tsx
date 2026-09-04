@@ -1,11 +1,11 @@
 import { hydrateRoot } from 'react-dom/client';
-import { BrowserRouter } from 'react-router-dom';
+import { BrowserRouter } from 'react-router';
 import createEmotionCache from './createEmotionCache';
 import { App } from './App';
 import { createRoutes } from './routes';
 import { createStore } from './store';
 
-import './assets/index.scss';
+import './assets/index.css';
 
 const container = document.getElementById('root');
 const store = createStore();

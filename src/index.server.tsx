@@ -1,7 +1,7 @@
 import type { Request, Response } from 'express';
 import serializeJavascript from 'serialize-javascript';
 import ReactDOMServer from 'react-dom/server.node';
-import { StaticRouter } from 'react-router-dom/server.js';
+import { StaticRouter } from 'react-router';
 import { enableStaticRendering } from 'mobx-react-lite';
 import createEmotionServer from '@emotion/server/create-instance';
 import createEmotionCache from './createEmotionCache';

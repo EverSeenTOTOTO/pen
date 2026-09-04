@@ -1,7 +1,5 @@
 import path from 'path';
 import { defineConfig } from 'vite';
-import deepmerge from 'deepmerge';
-import legacy from '@vitejs/plugin-legacy';
 import { viteStaticCopy as copy } from 'vite-plugin-static-copy';
 // import { visualizer } from 'rollup-plugin-visualizer';
 import { slash } from '../src/utils';
@@ -16,14 +14,15 @@ const injectHtml = () => ({
   },
 });
 
-export default defineConfig((c) => deepmerge(base(c), {
+export default defineConfig((c) => ({
+  ...base(c),
   plugins: [
-    legacy(),
+    ...base(c).plugins,
     injectHtml(),
     copy({
       targets: [
         {
-          src: slash(path.join(__dirname, '../src/assets/*')),
+          src: slash(path.join(import.meta.dirname, '../src/assets/*')),
           dest: 'assets/', // relate to dist
         },
       ],
