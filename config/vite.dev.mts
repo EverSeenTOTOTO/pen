@@ -10,6 +10,18 @@ import { RemarkRehype } from '../src/server/rehype';
 
 const devSSR = () => ({
   name: 'dev-ssr',
+  // Dev-mode transitional state: @mui v5 CJS cannot interop with vite 8's
+  // module runner (no __esModule handling), so dev SSR of the MUI app fails
+  // and requests fall through to the client-only SPA below. Inject the
+  // markdown/hljs/katex css so the CSR fallback is still styled. Removed
+  // when Phase 2 of the modernization plan deletes MUI.
+  transformIndexHtml(html: string) {
+    return html.replace('<!-- inject -->', [
+      '<link rel="stylesheet" href="/src/assets/github-markdown-light.css">',
+      '<link rel="stylesheet" href="/src/assets/highlightjs-github-light.css">',
+      '<link rel="stylesheet" href="/src/assets/katex.min.css">',
+    ].join('\n'));
+  },
   async configureServer(vite: ViteDevServer) {
     const namespace = '/';
     const ignores = [/^\/\./];
@@ -80,8 +92,43 @@ export default defineConfig((c) => ({
     devSSR(),
   ],
   ssr: {
+    // @mui v5 has no exports map: externals fail node ESM dir-import and raw
+    // bundling hits `require is not defined` in vite 8's module runner. Route
+    // it through the ssr dep optimizer instead, which converts CJS to ESM.
+    // Transitional only — MUI is removed entirely in Phase 2 of the plan.
+    optimizeDeps: {
+      include: [
+        '@mui/material/Breadcrumbs',
+        '@mui/material/Container',
+        '@mui/material/CssBaseline',
+        '@mui/material/Divider',
+        '@mui/material/Drawer',
+        '@mui/material/IconButton',
+        '@mui/material/Link',
+        '@mui/material/List',
+        '@mui/material/ListItemButton',
+        '@mui/material/ListItemIcon',
+        '@mui/material/ListItemText',
+        '@mui/material/NoSsr',
+        '@mui/material/Paper',
+        '@mui/material/Skeleton',
+        '@mui/material/Snackbar',
+        '@mui/material/styles',
+        '@mui/material/Switch',
+        '@mui/material/Typography',
+        '@mui/lab/Alert',
+        '@mui/x-tree-view/TreeItem',
+        '@mui/x-tree-view/TreeView',
+        '@mui/icons-material/ChevronLeft',
+        '@mui/icons-material/ChevronRight',
+        '@mui/icons-material/Description',
+        '@mui/icons-material/ExpandLessTwoTone',
+        '@mui/icons-material/ExpandMore',
+        '@mui/icons-material/Folder',
+        '@mui/icons-material/Home',
+      ],
+    },
     noExternal: [
-      /^@mui\//,
       /^(unified|(remark|rehype|hast|unist)[\w-.]+)/,
     ],
   },
