@@ -1,6 +1,10 @@
 # @everseen/pen
 
-A cli tool provides the ability to preview markdown files when editing, based on [socket.io](https://socket.io/) and [chokidar](https://github.com/paulmillr/chokidar), with builtin katex, highlight.js, copy, doctoc and vuepress style container support. Mermaid diagrams are rendered lazily on the client side, and headings get readable github-style anchor slugs with CJK characters preserved (e.g. `#中文标题`).
+A cli tool to preview markdown files while editing — this README doubles as a
+living tour of every syntax pen supports. Browse it with `pen` and watch each
+section render: the sidebar builds a table of contents from the headings,
+anchors scroll with scrollspy, code blocks get highlight + copy buttons, math
+and mermaid render in place.
 
 <img src="./Pen.gif" width="1200" />
 
@@ -10,71 +14,144 @@ A cli tool provides the ability to preview markdown files when editing, based on
 
 ## Usage
 
-### Use with CLI
-
 ```bash
 # install globally
 npm i -g @everseen/pen
 
-# default usage
+# serve the current directory
 pen
 
-# use with cli options
+# or with options
 pen -o -p 5000 -r ../docs
 ```
 
-#### CLI Options
+### CLI Options
 
-+ `--help|-h`
+| Option | Default | Description |
+| --- | --- | --- |
+| `--help` `-h` | | Print help message |
+| `--root` `-r` | `.` | Watching directory, relative to current dir |
+| `--namespace` `-n` | `/` | socket.io namespace |
+| `--port` `-p` | `3000` | Server port, or the next auto-detected available one |
+| `--ignores` `-i` | `[]` | Ignored files, e.g. `-i "^\\."` for dotfiles |
+| `--silent` `-s` | `false` | Suppress logger messages |
+| `--open` `-o` | `false` | Open the browser automatically |
+| `--socketPath` `-S` | `/pensocket.io` | socket.io path |
 
-    Print help message.
+Use with Node.js: see [cli.mjs](./cli.mjs) and [server/index.ts](./src/server/index.ts).
 
-+ `--root|-r`
+## Syntax Tour
 
-    Set watching directory, relative path to current dir, default `.`.
+### Emphasis & Inline
 
-+ `--namespace|-n`
+**bold**, *italic*, ***bold italic***, ~~strikethrough~~, `inline code`,
+a [link](https://github.com/EverSeenTOTOTO/pen-middleware), a bare autolink
+<https://socket.io>, and a footnote[^note].
 
-    Set socket.io namespace, default `/`.
+[^note]: Footnotes come from GFM; pen renders them at the end of the document.
 
-+ `--port|-p`
+### Lists
 
-    Set server port, default `3000` or another auto-detected avaliable port.
+1. ordered item
+2. another one
+   - nested unordered
+   - sibling
+3. back to ordered
 
-+ `--ignores|-i`
+- [ ] task: unchecked
+- [x] task: done
 
-    Set ignoring files, default `[]`, for example if you want to ignore dotfiles: `-i "^\\."`
+### 中文标题（CJK anchors）
 
-+ `--silent|-s`
+标题会生成可读的 github 风格锚点，**中文字符原样保留**——点击侧边栏目录或标题旁的锚点链接即可跳转，滚动时目录高亮跟随（scrollspy）。
 
-    Ignore logger messages, default `false`.
+### Blockquote
 
-+ `--open|-o`
+> Quote level one.
+>
+> > Quote nested — with `code` and **emphasis** inside.
 
-    Open browser automatically, default `false`.
+### Table
 
-+ `--socketPath|-S`
+| Feature | Engine | Notes |
+| :--- | :--- | ---: |
+| GFM tables / tasks | remark-gfm | this table |
+| Math | remark-math + rehype-katex | below |
+| Diagrams | mermaid (lazy, client side) | below |
+| Containers | remark-directive | `:::info` etc. |
 
-    Set socket.io path, default `/pensocket.io`.
+### Code Highlight & Copy
 
-### Use with Node.js
+Fenced code gets syntax highlighting and a copy button on the host:
 
-Check [cli.mjs](./cli.mjs) and [server/index.ts](./src/server/index.ts) as an example.
+```ts
+import { createServer } from 'node:http';
 
-## Q & A
+// highlight.js via lowlight, github theme
+const server = createServer((req, res) => {
+  res.writeHead(200, { 'content-type': 'text/plain' });
+  res.end('hello from pen\n');
+});
 
-1. The UI looks ugly, how to customize theme?
+server.listen(3000);
+```
 
-    My fault🐶, fork this project and rewrite the client part, this is a small project!.
+### Math
 
-2. Error when using namespace `/xxx` in git bash on windows?
+Inline math $e^{i\pi} + 1 = 0$ flows with the text, block math gets its own
+display:
 
-    Try Power Shell, seems namespace `/doc` will be translate to `/D:/<pwd>/doc` in git bash.
+$$
+\int_{-\infty}^{\infty} e^{-x^2} \, dx = \sqrt{\pi}
+$$
+
+### Mermaid Diagram
+
+Mermaid blocks are marked at render time and drawn lazily on the client,
+following the current light/dark theme:
+
+```mermaid
+graph TD;
+  edit[Edit markdown]-->watch[chokidar watch];
+  watch-->render[remark/rehype pipeline];
+  render-->push[socket.io push];
+  push-->browser[Instant preview];
+```
+
+### Containers
+
+Directive containers render as callouts — `info`, `warn` and `error`:
+
+:::info
+A neutral note. The CLI defaults to port 3000 and falls back to the next free
+port when taken.
+:::
+
+:::warn
+Windows git bash mangles namespaces like `/doc` into `/D:/<pwd>/doc` — use
+Power Shell if you hit this.
+:::
+
+:::error
+An error-styled callout for failures worth shouting about.
+:::
+
+### Raw HTML & Details
+
+Rehype-raw passes inline HTML through, so `<details>` works:
+
+<details>
+<summary>Click to expand</summary>
+
+Hidden content, including a list:
+
+- one
+- two
+
+</details>
+
+### Horizontal Rule
+
+---
 
 **PRs and issues are welcomed!**
-
-## TODOs
-
-1. 加快处理速度
-2. 渐进式渲染
-3. 单文档模式
