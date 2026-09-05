@@ -15,7 +15,14 @@ const NewHeader = observer(() => {
     <header className="app-header">
       <div style={{ display: 'flex', alignItems: 'center', gap: 4, minWidth: 0, flex: 1 }}>
         <button type="button" className="icon-btn menu-toggle" aria-label="Open menu"
-          onClick={() => drawer.openOverlay()}>
+          onClick={() => {
+            // desktop: reopen the persistent sidebar; mobile: overlay drawer
+            if (window.matchMedia('(width >= 768px)').matches) {
+              drawer.toggle(true);
+            } else {
+              drawer.openOverlay();
+            }
+          }}>
           <Icon name="menu" />
         </button>
         <nav className="breadcrumb" aria-label="breadcrumb">

@@ -138,10 +138,6 @@ body {
   transition: transform 0.25s ease;
 }
 
-.app-sidebar-open .sidebar {
-  transform: translateX(0);
-}
-
 .sidebar-files {
   flex: 1 1 auto;
   overflow-y: auto;
@@ -371,5 +367,17 @@ body {
 @media (width >= 768px) {
   .app-backdrop {
     display: none !important;
+  }
+
+  /* persistent sidebar: `visible` only drives the desktop layout — mobile
+     reveals the sidebar exclusively through the overlay drawer */
+  .app-sidebar-open .sidebar {
+    transform: translateX(0);
+  }
+
+  /* closed on desktop the in-sidebar toggle is off-screen; keep the header
+     hamburger as the reopen affordance */
+  .app:not(.app-sidebar-open) .app-header .menu-toggle {
+    display: inline-flex;
   }
 }

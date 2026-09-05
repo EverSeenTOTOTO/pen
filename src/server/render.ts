@@ -32,7 +32,8 @@ export const createSSRMiddleware = (options: RenderOptions) => {
 
     const themeCookie: unknown = parseCookieJson(req.cookies.themeMode);
     const themeMode: ThemeNames = isThemeName(themeCookie) ? themeCookie : 'dark';
-    const drawerVisible = parseCookieJson(req.cookies.drawerVisible) === true;
+    // sidebar open by default; only an explicit `false` cookie closes it
+    const drawerVisible = parseCookieJson(req.cookies.drawerVisible) !== false;
 
     perf?.measure('parse theme end', 'parse theme start');
     perf?.mark('read data start');

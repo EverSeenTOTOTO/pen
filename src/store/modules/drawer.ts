@@ -6,7 +6,7 @@ type DrawerState = {
 };
 
 export class DrawerStore implements PrefetchStore<DrawerState> {
-  visible = false; // desktop: persistent sidebar open
+  visible = true; // desktop: persistent sidebar open by default
 
   overlay = false; // mobile: overlay drawer open (not persisted)
 

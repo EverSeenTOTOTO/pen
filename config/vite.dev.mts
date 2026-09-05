@@ -9,6 +9,7 @@ import { readUnknown } from '../src/server/reader';
 import { bindSocket } from '../src/server/socket';
 import { logger } from '../src/server/logger';
 import { RemarkRehype } from '../src/server/rehype';
+import { parseCookies } from '../src/cookie';
 
 /**
  * Dev-only static middleware for `/assets/*`: the SSR'd dev page references
@@ -93,6 +94,9 @@ const devSSR = () => ({
         });
         const { render } = await vite.ssrLoadModule(paths.serverEntry);
         const template = await vite.transformIndexHtml(req.originalUrl!, templateHtml);
+        // cookie parity with the prod middleware: sidebar open unless the
+        // cookie explicitly opts out (`setCookieJson` stores bare json booleans)
+        const drawerVisible = parseCookies(req.headers.cookie ?? '').drawerVisible !== 'false';
 
         const { html } = await render({
           req,
@@ -102,6 +106,7 @@ const devSSR = () => ({
           prefetch: {
             theme,
             home: { data: current },
+            drawer: { visible: drawerVisible },
             socket: { socketPath, transports, namespace },
           },
         });

@@ -14,10 +14,33 @@ test('sidebar lists directory entries', async ({ page }) => {
   await expect(entries).toContainText('README');
 });
 
+test('sidebar open by default on desktop', async ({ page }) => {
+  // fresh visitor, no `drawerVisible` cookie — the persistent sidebar boots
+  // open (regression: it used to start closed with no way to reopen it)
+  await page.goto('/');
+  await expect(page.locator('.app')).toHaveClass(/app-sidebar-open/);
+  await expect(page.locator('.sidebar')).toHaveCSS('transform', 'matrix(1, 0, 0, 1, 0, 0)');
+  await expect(page.locator('.app-header .menu-toggle')).toBeHidden();
+});
+
+test('desktop reopen from closed cookie', async ({ page }) => {
+  // explicit opt-out keeps the sidebar closed, but the header hamburger stays
+  // reachable as the reopen affordance
+  await page.context().addCookies([
+    { name: 'drawerVisible', value: 'false', url: 'http://localhost:3210' },
+  ]);
+  await page.goto('/');
+  await expect(page.locator('.app')).not.toHaveClass(/app-sidebar-open/);
+  await expect(page.locator('.sidebar')).toHaveCSS('transform', 'matrix(1, 0, 0, 1, -280, 0)');
+
+  await page.getByRole('button', { name: 'Open menu' }).click();
+  await expect(page.locator('.app')).toHaveClass(/app-sidebar-open/);
+  await expect(page.locator('.sidebar')).toHaveCSS('transform', 'matrix(1, 0, 0, 1, 0, 0)');
+});
+
 test('anchor navigation from toc', async ({ page }) => {
-  // the sidebar is collapsed by default and the in-sidebar toggle button is
-  // unreachable while closed; the server reads the `drawerVisible` cookie, so
-  // seed it to boot with the sidebar (and the toc) open
+  // seed the cookie explicitly so the toc is open regardless of the
+  // default-open change
   await page.context().addCookies([
     { name: 'drawerVisible', value: 'true', url: 'http://localhost:3210' },
   ]);
@@ -59,6 +82,10 @@ test('mermaid renders svg', async ({ page }) => {
 test('mobile overlay drawer', async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 667 });
   await page.goto('/');
+
+  // mobile ignores the desktop persistent-open state: the sidebar starts
+  // off-screen even though `visible` defaults to true
+  await expect(page.locator('.sidebar')).toHaveCSS('transform', 'matrix(1, 0, 0, 1, -280, 0)');
 
   await page.getByRole('button', { name: 'Open menu' }).click();
   await expect(page.locator('.app')).toHaveClass(/app-overlay-open/);
