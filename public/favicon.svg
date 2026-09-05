@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- pen nib on ink-blue, amber stroke — paper-and-ink mark -->
+  <rect width="32" height="32" rx="7" fill="#101720"/>
+  <path d="M22.5 6.5 25.5 9.5 14 21l-3-3z" fill="#d6a35c"/>
+  <path d="M11 18l3 3-4.5 1.5z" fill="#d9d4c7"/>
+  <circle cx="22" cy="21" r="1.6" fill="#d6a35c" opacity="0.55"/>
+</svg>

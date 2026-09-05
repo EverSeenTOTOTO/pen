@@ -40,6 +40,10 @@ h6 {
   background-color: transparent;
   color: var(--pen-fg);
 
+  /* header 与正文之间的 gap (header 是兄弟节点, 纸面的 margin 会被
+     github-markdown-css 的 first-child !important 清零, 只能放在这里) */
+  padding-top: 24px;
+
   /* 衬线主角: 拉丁走 Source Serif/Georgia, 中文走宋体族 */
   font-family: "Source Serif 4", "Noto Serif CJK SC", "Source Han Serif SC", "Songti SC", SimSun, Georgia, "Times New Roman", serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
   -webkit-font-smoothing: subpixel-antialiased;
@@ -159,6 +163,7 @@ h6 {
 @media (width <= 960px) {
   .markdown-body {
     font-size: 1.15em;
+    padding-top: 16px;
 
     & .copy-btn {
       right: 0.3rem;

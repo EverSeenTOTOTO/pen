@@ -173,6 +173,18 @@ const devSSR = () => ({
         res.end(html);
       } catch (e) {
         const error = e instanceof Error ? e : new Error(String(e));
+
+        // a missing static asset (favicon, dead img src, ...) is not a render
+        // failure — 404 quietly instead of logging a stack per request.
+        // (`relative` lives inside the try, re-derive it here)
+        const failedPath = decodeURIComponent(req.originalUrl ?? '/').split('?')[0] || '/';
+        const ext = path.extname(failedPath).toLowerCase();
+        if (ext && !/\.(md|markdown|html?)$/.test(ext)) {
+          res.statusCode = 404;
+          res.end('Not Found');
+          return;
+        }
+
         vite.ssrFixStacktrace(error);
         console.error(error.stack ?? error.message);
         next();
@@ -186,7 +198,8 @@ export default defineConfig((c) => ({
   server: {
     host: true,
     watch: {
-      ignored: ['coverage/*'],
+      // dist churn (make build / e2e runs) must not reload the dev page
+      ignored: ['coverage/*', 'dist/*'],
     },
   },
   plugins: [

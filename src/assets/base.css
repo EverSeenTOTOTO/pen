@@ -81,7 +81,11 @@ body {
 
 .app-main {
   margin-left: 0;
-  padding: 0 20px;
+
+  /* bottom breathing only — the header gap lives on .markdown-body (the
+     header's sibling), because github-markdown-css zeroes first/last child
+     margins with !important and would eat it on the paper */
+  padding: 0 16px 48px;
   transition: margin-left 0.25s ease;
 }
 
@@ -181,6 +185,33 @@ body {
   overflow-y: auto;
   border-top: 1px solid var(--pen-border);
   padding: 8px 0;
+}
+
+/* thin rounded scrollbars that match the chrome */
+.sidebar-files,
+.sidebar-toc {
+  scrollbar-width: thin;
+  scrollbar-color: var(--pen-border) transparent;
+
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    border: 2px solid transparent;
+    border-radius: 4px;
+    background: var(--pen-border);
+    background-clip: padding-box;
+
+    &:hover {
+      background: var(--pen-fg-muted);
+      background-clip: padding-box;
+    }
+  }
 }
 
 /* small-caps label separating the file tree from the document outline */
@@ -383,9 +414,9 @@ body {
 
 /* ---- markdown paper ---- */
 .markdown-paper {
-  max-width: 880px;
-  margin: 32px auto;
-  padding: 40px 48px;
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 36px 40px;
   border: 1px solid var(--pen-border);
   border-radius: 12px;
   background: var(--pen-paper);
@@ -405,7 +436,7 @@ body {
 @media (width < 768px) {
   .app-main {
     margin-left: 0 !important;
-    padding: 0 8px;
+    padding: 0 8px 24px;
   }
 
   .app-header .menu-toggle {
@@ -413,7 +444,7 @@ body {
   }
 
   .markdown-paper {
-    margin: 8px auto;
+    margin: 0 auto;
     padding: 20px 16px;
     border: none;
     border-radius: 8px;
