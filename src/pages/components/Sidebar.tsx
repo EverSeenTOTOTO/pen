@@ -43,8 +43,34 @@ const Sidebar = observer(() => {
           onClick={() => window.scrollTo({ top: 0 })}>
           <Icon name="arrowUp" />
         </button>
+        <button type="button" className="icon-btn" aria-label="Close sidebar"
+          onClick={() => {
+            // desktop closes the persistent sidebar, mobile the overlay
+            if (drawer.overlay) {
+              drawer.closeOverlay();
+            } else {
+              drawer.toggle(false);
+            }
+          }}>
+          <Icon name="chevronLeft" />
+        </button>
       </div>
     </aside>
+  );
+});
+
+// narrow desktop strip shown while the sidebar is collapsed: keeps the
+// reopen affordance at the bottom-left, next to where the footer sits when
+// open — no reaching to the top of the page
+export const SidebarRail = observer(() => {
+  const drawer = useStore('drawer');
+  return (
+    <div className="sidebar-rail">
+      <button type="button" className="icon-btn" aria-label="Open sidebar"
+        onClick={() => drawer.toggle(true)}>
+        <Icon name="menu" size={18} />
+      </button>
+    </div>
   );
 });
 

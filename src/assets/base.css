@@ -112,7 +112,7 @@ body {
 }
 
 .app-header .menu-toggle {
-  display: inline-flex; /* the single sidebar switch, always reachable */
+  display: none; /* mobile-only overlay drawer switch; desktop uses the rail */
 }
 
 /* ---- breadcrumbs ---- */
@@ -246,6 +246,23 @@ body {
     width: 28px;
     height: 28px;
   }
+}
+
+/* collapsed desktop strip: reopen affordance stays bottom-left, level with
+   the sidebar footer — shown only on desktop while the sidebar is closed */
+.sidebar-rail {
+  position: fixed;
+  inset-block: 0;
+  left: 0;
+  z-index: 20;
+  display: none;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  width: 44px;
+  padding-bottom: 6px;
+  background: var(--pen-bg);
+  border-right: 1px solid var(--pen-border);
 }
 
 .file-item {
@@ -450,6 +467,10 @@ body {
     padding: 0 8px 24px;
   }
 
+  .app-header .menu-toggle {
+    display: inline-flex; /* hamburger */
+  }
+
   .markdown-paper {
     margin: 0 auto;
     padding: 20px 16px;
@@ -487,5 +508,14 @@ body {
      reveals the sidebar exclusively through the overlay drawer */
   .app-sidebar-open .sidebar {
     transform: translateX(0);
+  }
+
+  /* collapsed: swap the sidebar for the narrow reopen rail */
+  .app:not(.app-sidebar-open) .sidebar-rail {
+    display: flex;
+  }
+
+  .app:not(.app-sidebar-open) .app-main {
+    margin-left: 44px;
   }
 }

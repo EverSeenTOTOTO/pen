@@ -4,7 +4,7 @@ import { useStore } from '@/store';
 import {
   useAutoFetch, useClipboard, useMermaid, useScrollSpy,
 } from '@/store/hooks';
-import Sidebar from './components/Sidebar';
+import Sidebar, { SidebarRail } from './components/Sidebar';
 import NewHeader from './components/NewHeader';
 import Markdown from './components/Markdown';
 import Toast from './components/Toast';
@@ -24,6 +24,7 @@ const Home = observer(() => {
     })}>
       <div className="app-backdrop" onClick={() => drawer.closeOverlay()} />
       <Sidebar />
+      <SidebarRail />
       <div className="app-main">
         <NewHeader />
         <Markdown />

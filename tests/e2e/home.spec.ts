@@ -21,11 +21,17 @@ test('sidebar open by default on desktop', async ({ page }) => {
   await expect(page.locator('.app')).toHaveClass(/app-sidebar-open/);
   await expect(page.locator('.sidebar')).toHaveCSS('transform', 'matrix(1, 0, 0, 1, 0, 0)');
 
-  // the single header switch reflects and drives the state both ways
-  await expect(page.locator('.app-header .menu-toggle')).toHaveAttribute('aria-label', 'Close menu');
-  await page.getByRole('button', { name: 'Close menu' }).click();
+  // the header hamburger is mobile-only; desktop closes from the sidebar
+  // footer and reopens from the collapsed rail
+  await expect(page.locator('.app-header .menu-toggle')).toBeHidden();
+  await page.getByRole('button', { name: 'Close sidebar' }).click();
   await expect(page.locator('.app')).not.toHaveClass(/app-sidebar-open/);
-  await expect(page.locator('.app-header .menu-toggle')).toHaveAttribute('aria-label', 'Open menu');
+  await expect(page.locator('.sidebar-rail')).toBeVisible();
+  await expect(page.locator('.app-main')).toHaveCSS('margin-left', '44px');
+
+  await page.getByRole('button', { name: 'Open sidebar' }).click();
+  await expect(page.locator('.app')).toHaveClass(/app-sidebar-open/);
+  await expect(page.locator('.sidebar-rail')).toBeHidden();
 });
 
 // the closed sidebar slides fully off-screen: translateX(-100%) of its
@@ -36,16 +42,17 @@ const hiddenTransform = (page: Page) => page.evaluate(() => {
 });
 
 test('desktop reopen from closed cookie', async ({ page }) => {
-  // explicit opt-out keeps the sidebar closed, but the header hamburger stays
-  // reachable as the reopen affordance
+  // explicit opt-out keeps the sidebar closed, but the collapsed rail keeps
+  // the reopen affordance reachable at the bottom-left
   await page.context().addCookies([
     { name: 'drawerVisible', value: 'false', url: 'http://localhost:3210' },
   ]);
   await page.goto('/');
   await expect(page.locator('.app')).not.toHaveClass(/app-sidebar-open/);
   await expect(page.locator('.sidebar')).toHaveCSS('transform', await hiddenTransform(page));
+  await expect(page.locator('.sidebar-rail')).toBeVisible();
 
-  await page.getByRole('button', { name: 'Open menu' }).click();
+  await page.getByRole('button', { name: 'Open sidebar' }).click();
   await expect(page.locator('.app')).toHaveClass(/app-sidebar-open/);
   await expect(page.locator('.sidebar')).toHaveCSS('transform', 'matrix(1, 0, 0, 1, 0, 0)');
 });
