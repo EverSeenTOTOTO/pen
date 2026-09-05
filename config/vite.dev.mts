@@ -4,7 +4,7 @@ import http from 'http';
 import { defineConfig } from 'vite';
 import type { ViteDevServer } from 'vite';
 import base, { paths } from './vite.common.mts';
-import { createTheme } from '../src/server/theme';
+import { createTheme, isThemeName } from '../src/server/theme';
 import { readUnknown } from '../src/server/reader';
 import { bindSocket } from '../src/server/socket';
 import { logger } from '../src/server/logger';
@@ -119,7 +119,13 @@ const devSSR = () => ({
     const socketPath = '/pensocket.io';
     const dist = path.join(process.cwd(), 'src');
     const root = path.join(process.cwd(), '../..');
-    const theme = await createTheme('dark', dist);
+    // both themes precomputed — the per-request cookie picks one (parity
+    // with the prod middleware; without it dev always boots dark)
+    const themes = {
+      dark: await createTheme('dark', dist),
+      light: await createTheme('light', dist),
+    };
+    const defaultTheme = themes.dark;
     // render-blocking head links for dev/prod parity: prod gets the built
     // stylesheet <link> from vite, but in dev base/index.css only arrive as
     // runtime <style> tags when the client entry executes — the ssr markup
@@ -162,8 +168,16 @@ const devSSR = () => ({
         });
         const { render } = await vite.ssrLoadModule(paths.serverEntry);
         const template = await vite.transformIndexHtml(req.originalUrl!, templateHtml);
-        // cookie parity with the prod middleware: sidebar open unless the
-        // cookie explicitly opts out (`setCookieJson` stores bare json booleans)
+        // cookie parity with the prod middleware: themeMode holds a json
+        // string, drawerVisible a bare json boolean
+        const theme = (() => {
+          try {
+            const parsed = JSON.parse(parseCookies(req.headers.cookie ?? '').themeMode ?? '');
+            return isThemeName(parsed) ? themes[parsed] : defaultTheme;
+          } catch {
+            return defaultTheme;
+          }
+        })();
         const drawerVisible = parseCookies(req.headers.cookie ?? '').drawerVisible !== 'false';
 
         const { html } = await render({

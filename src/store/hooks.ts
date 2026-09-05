@@ -88,8 +88,12 @@ export const useMermaid = () => {
   const theme = useStore('theme');
 
   useEffect(() => {
-    const blocks = Array.from(document.querySelectorAll<HTMLElement>('code.pen-mermaid-source'));
-    if (!blocks.length) return;
+    // fresh sources (new document) plus already-rendered hosts (theme flip:
+    // the source block was replaced on first render, so the host carries the
+    // source in data-mermaid-source for re-rendering)
+    const sources = Array.from(document.querySelectorAll<HTMLElement>('code.pen-mermaid-source'));
+    const hosts = Array.from(document.querySelectorAll<HTMLElement>('.mermaid-svg[data-mermaid-source]'));
+    if (!sources.length && !hosts.length) return;
 
     let cancelled = false;
 
@@ -100,22 +104,35 @@ export const useMermaid = () => {
         theme: theme.mode === 'dark' ? 'dark' : 'default',
       });
 
-      for (const [i, block] of blocks.entries()) {
+      const targets = [
+        ...sources.map((el) => ({ el, host: null as HTMLElement | null, source: el.textContent ?? '' })),
+        ...hosts.map((host) => ({ el: null as HTMLElement | null, host, source: host.dataset.mermaidSource ?? '' })),
+      ];
+
+      for (const [i, { el, host, source }] of targets.entries()) {
         if (cancelled) return;
-        const source = block.textContent ?? '';
-        const id = `pen-mermaid-${i}`;
+        // theme in the id: re-renders must not collide with live svgs
+        const id = `pen-mermaid-${i}-${theme.mode}`;
         try {
           await mermaid.parse(source); // throws on syntax error
           const { svg } = await mermaid.render(id, source);
-          const host = document.createElement('div');
-          host.className = 'mermaid-svg';
-          host.innerHTML = svg;
-          block.replaceWith(host);
+          if (cancelled) return;
+          const target = host ?? el;
+          if (!target) continue;
+          if (host) {
+            host.innerHTML = svg;
+          } else {
+            const div = document.createElement('div');
+            div.className = 'mermaid-svg';
+            div.dataset.mermaidSource = source;
+            div.innerHTML = svg;
+            target.replaceWith(div);
+          }
         } catch (err) {
           const errBox = document.createElement('div');
           errBox.className = 'mermaid-error';
           errBox.textContent = `Mermaid error: ${err instanceof Error ? err.message : String(err)}\n\n${source}`;
-          block.replaceWith(errBox);
+          (host ?? el)?.replaceWith(errBox);
         }
       }
     });

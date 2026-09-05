@@ -84,8 +84,10 @@ body {
 
   /* bottom breathing only — the header gap lives on .markdown-body (the
      header's sibling), because github-markdown-css zeroes first/last child
-     margins with !important and would eat it on the paper */
-  padding: 0 16px 48px;
+     margins with !important and would eat it on the paper. The tall tail is
+     book-end whitespace: it lets anchor jumps scroll trailing headings all
+     the way to the top instead of running out of document. */
+  padding: 0 16px 90vh;
   transition: margin-left 0.25s ease;
 }
 
@@ -473,7 +475,7 @@ body {
 @media (width < 768px) {
   .app-main {
     margin-left: 0 !important;
-    padding: 0 8px 24px;
+    padding: 0 8px 90vh;
   }
 
   .app-header .menu-toggle {
