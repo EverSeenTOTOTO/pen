@@ -120,9 +120,18 @@ const devSSR = () => ({
     const dist = path.join(process.cwd(), 'src');
     const root = path.join(process.cwd(), '../..');
     const theme = await createTheme('dark', dist);
-    // katex css link for dev/prod head parity (prod injects it at build time)
+    // render-blocking head links for dev/prod parity: prod gets the built
+    // stylesheet <link> from vite, but in dev base/index.css only arrive as
+    // runtime <style> tags when the client entry executes — the ssr markup
+    // flashes unstyled first (FOUC / layout jump). Serving them as links
+    // from src/assets (serveAssets) makes the first paint correct; the
+    // duplicate runtime injection is same-rules and harmless.
     const templateHtml = fs.readFileSync(paths.template, 'utf-8')
-      .replace('<!-- inject -->', '<link rel="stylesheet" href="/assets/katex.min.css">');
+      .replace('<!-- inject -->', [
+        '<link rel="stylesheet" href="/assets/katex.min.css">',
+        '<link rel="stylesheet" href="/assets/base.css">',
+        '<link rel="stylesheet" href="/assets/index.css">',
+      ].join('\n  '));
     const transports: ['websocket'] = ['websocket'];
     const remark = new RemarkRehype({ logger, plugins: [] })
 
