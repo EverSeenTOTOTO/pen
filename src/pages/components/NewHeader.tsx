@@ -6,8 +6,8 @@ import Icon from './Icon';
 import ThemeToggle from './Toggle';
 
 // mobile-only overlay drawer switch (desktop opens/closes the persistent
-// sidebar from the sidebar footer and the collapsed rail) — no window access,
-// so server and first client render always match
+// sidebar from the sidebar footer and the collapsed rail) — the menu glyph
+// stays static everywhere the sidebar switch appears; only the label flips
 const MenuToggle = observer(() => {
   const drawer = useStore('drawer');
 
@@ -18,7 +18,7 @@ const MenuToggle = observer(() => {
       aria-label={drawer.overlay ? 'Close menu' : 'Open menu'}
       onClick={() => (drawer.overlay ? drawer.closeOverlay() : drawer.openOverlay())}
     >
-      <Icon name={drawer.overlay ? 'chevronLeft' : 'menu'} />
+      <Icon name="menu" />
     </button>
   );
 });

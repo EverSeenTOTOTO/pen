@@ -38,34 +38,47 @@ const Sidebar = observer(() => {
     <aside className="sidebar" data-open={drawer.visible}>
       <Files />
       <TocTree />
-      <div className="sidebar-footer">
-        <button type="button" className="icon-btn" aria-label="Back to top"
-          onClick={() => window.scrollTo({ top: 0 })}>
-          <Icon name="arrowUp" />
-        </button>
-        <button type="button" className="icon-btn" aria-label="Close sidebar"
-          onClick={() => {
-            // desktop closes the persistent sidebar, mobile the overlay
-            if (drawer.overlay) {
-              drawer.closeOverlay();
-            } else {
-              drawer.toggle(false);
-            }
-          }}>
-          <Icon name="chevronLeft" />
-        </button>
-      </div>
+      <SidebarControls />
     </aside>
   );
 });
 
-// narrow desktop strip shown while the sidebar is collapsed: keeps the
-// reopen affordance at the bottom-left, next to where the footer sits when
-// open — no reaching to the top of the page
+// shared footer controls: back-to-top plus the sidebar switch — one menu
+// glyph regardless of state, so the affordance reads the same everywhere
+const SidebarControls = observer(() => {
+  const drawer = useStore('drawer');
+  return (
+    <div className="sidebar-footer">
+      <button type="button" className="icon-btn" aria-label="Back to top"
+        onClick={() => window.scrollTo({ top: 0 })}>
+        <Icon name="arrowUp" />
+      </button>
+      <button type="button" className="icon-btn" aria-label="Close sidebar"
+        onClick={() => {
+          // desktop closes the persistent sidebar, mobile the overlay
+          if (drawer.overlay) {
+            drawer.closeOverlay();
+          } else {
+            drawer.toggle(false);
+          }
+        }}>
+        <Icon name="menu" size={18} />
+      </button>
+    </div>
+  );
+});
+
+// narrow desktop strip shown while the sidebar is collapsed: same controls
+// as the footer (back-to-top above the switch), pinned at the bottom-left
+// — no reaching to the top of the page
 export const SidebarRail = observer(() => {
   const drawer = useStore('drawer');
   return (
     <div className="sidebar-rail">
+      <button type="button" className="icon-btn" aria-label="Back to top"
+        onClick={() => window.scrollTo({ top: 0 })}>
+        <Icon name="arrowUp" />
+      </button>
       <button type="button" className="icon-btn" aria-label="Open sidebar"
         onClick={() => drawer.toggle(true)}>
         <Icon name="menu" size={18} />

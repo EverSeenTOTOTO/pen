@@ -198,30 +198,37 @@ body {
   padding: 8px 0;
 }
 
-/* thin rounded scrollbars that match the chrome */
+/* thin rounded scrollbars everywhere a scroll area can appear: the page,
+   sidebar lists, code blocks (both axes). firefox via scrollbar-* (spec says
+   inherited, chromium's implementation is not — so list the containers),
+   chromium via the universal pseudos below */
+:root,
 .sidebar-files,
-.sidebar-toc {
+.sidebar-toc,
+.markdown-body pre {
   scrollbar-width: thin;
   scrollbar-color: var(--pen-border) transparent;
+}
 
-  &::-webkit-scrollbar {
-    width: 8px;
-  }
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
 
-  &::-webkit-scrollbar-track {
-    background: transparent;
-  }
+::-webkit-scrollbar-track,
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
 
-  &::-webkit-scrollbar-thumb {
-    border: 2px solid transparent;
-    border-radius: 4px;
-    background: var(--pen-border);
+::-webkit-scrollbar-thumb {
+  border: 3px solid transparent;
+  border-radius: 5px;
+  background: var(--pen-border);
+  background-clip: padding-box;
+
+  &:hover {
+    background: var(--pen-fg-muted);
     background-clip: padding-box;
-
-    &:hover {
-      background: var(--pen-fg-muted);
-      background-clip: padding-box;
-    }
   }
 }
 
@@ -241,11 +248,6 @@ body {
   gap: 2px;
   padding: 6px 10px;
   border-top: 1px solid var(--pen-border);
-
-  & .icon-btn {
-    width: 28px;
-    height: 28px;
-  }
 }
 
 /* collapsed desktop strip: reopen affordance stays bottom-left, level with
@@ -259,10 +261,17 @@ body {
   flex-direction: column;
   justify-content: flex-end;
   align-items: center;
+  gap: 2px;
   width: 44px;
   padding-bottom: 6px;
   background: var(--pen-bg);
   border-right: 1px solid var(--pen-border);
+}
+
+.sidebar-footer .icon-btn,
+.sidebar-rail .icon-btn {
+  width: 28px;
+  height: 28px;
 }
 
 .file-item {
