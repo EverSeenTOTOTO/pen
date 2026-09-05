@@ -56,6 +56,10 @@ export const highlightCodeBlock = (language: string, code: Element): void => {
 
   try {
     code.children = lowlight.highlight(language, toString(code)).children as Element['children'];
+    // the hljs theme css keys its base code colors off `.hljs`
+    const classes = ((code.properties.className ?? []) as string[]).filter((c) => c !== 'hljs');
+    classes.push('hljs');
+    code.properties.className = classes;
   } catch {
     // pass: leave the plain text untouched on grammar errors
   }
