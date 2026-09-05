@@ -20,7 +20,12 @@ test('sidebar open by default on desktop', async ({ page }) => {
   await page.goto('/');
   await expect(page.locator('.app')).toHaveClass(/app-sidebar-open/);
   await expect(page.locator('.sidebar')).toHaveCSS('transform', 'matrix(1, 0, 0, 1, 0, 0)');
-  await expect(page.locator('.app-header .menu-toggle')).toBeHidden();
+
+  // the single header switch reflects and drives the state both ways
+  await expect(page.locator('.app-header .menu-toggle')).toHaveAttribute('aria-label', 'Close menu');
+  await page.getByRole('button', { name: 'Close menu' }).click();
+  await expect(page.locator('.app')).not.toHaveClass(/app-sidebar-open/);
+  await expect(page.locator('.app-header .menu-toggle')).toHaveAttribute('aria-label', 'Open menu');
 });
 
 // the closed sidebar slides fully off-screen: translateX(-100%) of its
@@ -97,6 +102,8 @@ test('mobile overlay drawer', async ({ page }) => {
   await page.getByRole('button', { name: 'Open menu' }).click();
   await expect(page.locator('.app')).toHaveClass(/app-overlay-open/);
   await expect(page.locator('.app-backdrop')).toBeVisible();
+  // the same switch now offers to close the overlay
+  await expect(page.locator('.app-header .menu-toggle')).toHaveAttribute('aria-label', 'Close menu');
   // the overlay drawer slides in above the backdrop
   await expect(page.locator('.sidebar')).toHaveCSS('transform', 'matrix(1, 0, 0, 1, 0, 0)');
 

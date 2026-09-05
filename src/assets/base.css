@@ -97,7 +97,10 @@ body {
 .app-header {
   position: sticky;
   top: 0;
-  z-index: 10;
+
+  /* above the sidebar/overlay drawer (z 20) so the unified menu switch stays
+     clickable while the mobile drawer is open */
+  z-index: 25;
   height: var(--pen-header-height);
   display: flex;
   align-items: center;
@@ -109,7 +112,7 @@ body {
 }
 
 .app-header .menu-toggle {
-  display: none; /* hamburger, mobile only */
+  display: inline-flex; /* the single sidebar switch, always reachable */
 }
 
 /* ---- breadcrumbs ---- */
@@ -132,6 +135,14 @@ body {
       color: var(--pen-accent);
     }
   }
+}
+
+/* icon-only home link: inline svg sits on the text baseline unless the
+   anchor becomes a flex box — keeps it centered against the crumbs */
+.breadcrumb-home {
+  display: inline-flex;
+  align-items: center;
+  flex: none;
 }
 
 .breadcrumb-sep {
@@ -439,10 +450,6 @@ body {
     padding: 0 8px 24px;
   }
 
-  .app-header .menu-toggle {
-    display: inline-flex; /* hamburger */
-  }
-
   .markdown-paper {
     margin: 0 auto;
     padding: 20px 16px;
@@ -480,11 +487,5 @@ body {
      reveals the sidebar exclusively through the overlay drawer */
   .app-sidebar-open .sidebar {
     transform: translateX(0);
-  }
-
-  /* closed on desktop the in-sidebar toggle is off-screen; keep the header
-     hamburger as the reopen affordance */
-  .app:not(.app-sidebar-open) .app-header .menu-toggle {
-    display: inline-flex;
   }
 }

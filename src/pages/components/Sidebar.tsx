@@ -18,7 +18,11 @@ const Files = observer(() => {
           className="file-item"
           aria-current={home.reading === doc.relativePath || undefined}
           disabled={home.loading}
-          onClick={() => nav(doc.relativePath)}
+          onClick={() => {
+            nav(doc.relativePath);
+            // on mobile the overlay drawer must dismiss after picking a file
+            drawer.closeOverlay();
+          }}
         >
           <Icon name={doc.type === 'directory' ? 'folder' : 'file'} size={16} />
           <span className="file-name">{doc.filename}</span>
@@ -38,10 +42,6 @@ const Sidebar = observer(() => {
         <button type="button" className="icon-btn" aria-label="Back to top"
           onClick={() => window.scrollTo({ top: 0 })}>
           <Icon name="arrowUp" />
-        </button>
-        <button type="button" className="icon-btn" aria-label="Toggle sidebar"
-          onClick={() => drawer.toggle()}>
-          <Icon name={drawer.visible ? 'chevronLeft' : 'chevronRight'} />
         </button>
       </div>
     </aside>
