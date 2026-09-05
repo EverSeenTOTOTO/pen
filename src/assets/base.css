@@ -1,23 +1,49 @@
+/*
+ * Pen visual language — 阅读器·纸感书卷 (2026-09 共识)
+ *
+ * 双主题: 亮·米白纸 / 暗·墨蓝夜; 强调色 铜(#a86b32) / 琥珀(#d6a35c)。
+ * 衬线正文是主角 (字体栈在 index.css), 纸面浮起 (圆角 12 + 轻投影),
+ * 侧栏与 header 退入 chrome 底色 (--pen-bg), 纸面用 --pen-paper 高一档。
+ * 选中态 = 柔和胶囊 (--pen-select) + 左侧 2px 指示条; hover 一律胶囊化。
+ * 布局骨架 (header 48 / 桌面持久侧栏 / 移动 overlay) 与 JS 行为不在样式层变更。
+ */
+
 /* ---- tokens ---- */
 :root {
   --pen-header-height: 48px;
-  --pen-sidebar-width: 280px;
-  --pen-bg: #fff;
-  --pen-fg: rgb(0 0 0 / 80%);
-  --pen-fg-muted: rgb(0 0 0 / 50%);
-  --pen-border: rgb(0 0 0 / 12%);
-  --pen-accent: #0969da;
-  --pen-paper: #fff;
-  --pen-backdrop: rgb(0 0 0 / 40%);
+  --pen-sidebar-width: 248px;
+
+  /* light · 米白纸 */
+  --pen-bg: #f2eee6;
+  --pen-paper: #fdfbf7;
+  --pen-code-bg: #f6f2ea;
+  --pen-fg: #33302a;
+  --pen-fg-muted: #857c6e;
+  --pen-border: #e4dccc;
+  --pen-accent: #a86b32;
+  --pen-link: #8a5a2b;
+  --pen-hover: rgb(168 107 50 / 10%);
+  --pen-select: rgb(168 107 50 / 16%);
+  --pen-backdrop: rgb(51 44 36 / 45%);
+  --pen-shadow-paper: 0 1px 2px rgb(51 44 36 / 6%), 0 8px 24px rgb(51 44 36 / 8%);
+  --pen-shadow-float: 0 4px 16px rgb(51 44 36 / 14%);
 }
 
 :root[data-theme='dark'] {
-  --pen-bg: #0d1117;
-  --pen-fg: rgb(255 255 255 / 80%);
-  --pen-fg-muted: rgb(255 255 255 / 50%);
-  --pen-border: rgb(255 255 255 / 15%);
-  --pen-accent: #58a6ff;
-  --pen-paper: #0d1117;
+  /* dark · 墨蓝夜 */
+  --pen-bg: #101720;
+  --pen-paper: #161e28;
+  --pen-code-bg: #0d131c;
+  --pen-fg: #d9d4c7;
+  --pen-fg-muted: #8b95a3;
+  --pen-border: #232c38;
+  --pen-accent: #d6a35c;
+  --pen-link: #d6a35c;
+  --pen-hover: rgb(214 163 92 / 12%);
+  --pen-select: rgb(214 163 92 / 20%);
+  --pen-backdrop: rgb(5 9 15 / 60%);
+  --pen-shadow-paper: 0 8px 32px rgb(0 0 0 / 45%);
+  --pen-shadow-float: 0 6px 20px rgb(0 0 0 / 50%);
 }
 
 /* ---- shell ---- */
@@ -45,13 +71,17 @@ body {
   margin: 0;
 }
 
+::selection {
+  background: var(--pen-select);
+}
+
 .app {
   min-height: 100dvh;
 }
 
 .app-main {
   margin-left: 0;
-  padding: 0 16px;
+  padding: 0 20px;
   transition: margin-left 0.25s ease;
 }
 
@@ -85,6 +115,7 @@ body {
   gap: 4px;
   min-width: 0;
   overflow: hidden;
+  font-size: 0.8125rem;
 
   & a {
     color: var(--pen-fg-muted);
@@ -116,9 +147,10 @@ body {
   background: transparent;
   color: var(--pen-fg-muted);
   cursor: pointer;
+  transition: background-color 0.15s, color 0.15s;
 
   &:hover {
-    background: var(--pen-border);
+    background: var(--pen-hover);
     color: var(--pen-fg);
   }
 }
@@ -151,26 +183,49 @@ body {
   padding: 8px 0;
 }
 
+/* small-caps label separating the file tree from the document outline */
+.sidebar-toc-title {
+  padding: 2px 18px 6px;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--pen-fg-muted);
+}
+
 .sidebar-footer {
   display: flex;
   justify-content: flex-end;
-  gap: 4px;
-  padding: 4px;
+  gap: 2px;
+  padding: 6px 10px;
   border-top: 1px solid var(--pen-border);
+
+  & .icon-btn {
+    width: 28px;
+    height: 28px;
+  }
 }
 
 .file-item {
   display: flex;
   align-items: center;
   gap: 8px;
-  width: 100%;
-  padding: 6px 12px;
+  width: calc(100% - 16px);
+  margin: 1px 8px;
+  padding: 5px 10px;
   border: none;
+  border-radius: 6px;
   background: transparent;
   color: var(--pen-fg);
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   text-align: left;
   cursor: pointer;
+  transition: background-color 0.15s;
+
+  & svg {
+    color: var(--pen-fg-muted);
+    flex: none;
+  }
 
   & .file-name {
     overflow: hidden;
@@ -179,11 +234,17 @@ body {
   }
 
   &:hover {
-    background: var(--pen-border);
+    background: var(--pen-hover);
   }
 
   &[aria-current='true'] {
+    background: var(--pen-select);
     color: var(--pen-accent);
+    box-shadow: inset 2px 0 0 var(--pen-accent);
+
+    & svg {
+      color: var(--pen-accent);
+    }
   }
 }
 
@@ -193,6 +254,11 @@ body {
   list-style: none;
   margin: 0;
   padding: 0;
+}
+
+.toc-children {
+  /* compounds with the inline `depth * 14` padding for clearer hierarchy */
+  padding-left: 12px;
 }
 
 .toc-row {
@@ -209,9 +275,15 @@ body {
   width: 20px;
   height: 20px;
   border: none;
+  border-radius: 4px;
   background: transparent;
   color: var(--pen-fg-muted);
   cursor: pointer;
+
+  &:hover {
+    background: var(--pen-hover);
+    color: var(--pen-fg);
+  }
 }
 
 .toc-toggle-leaf {
@@ -221,20 +293,25 @@ body {
 .toc-link {
   flex: 1;
   min-width: 0;
-  padding: 3px 8px 3px 0;
+  margin-right: 8px;
+  padding: 3px 8px;
+  border-radius: 6px;
   font-size: 0.8125rem;
   color: var(--pen-fg);
   text-decoration: none;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  transition: background-color 0.15s;
 
   &:hover {
+    background: var(--pen-hover);
     color: var(--pen-accent);
   }
 }
 
 .toc-link-active {
+  background: var(--pen-select);
   color: var(--pen-accent);
   font-weight: 600;
 }
@@ -246,8 +323,9 @@ body {
   right: 12px;
   z-index: 100;
   padding: 8px 16px;
-  border-radius: 6px;
+  border-radius: 8px;
   font-size: 0.875rem;
+  box-shadow: var(--pen-shadow-float);
   opacity: 0;
   transform: translateY(-8px);
   pointer-events: none;
@@ -260,12 +338,12 @@ body {
 }
 
 .toast-success {
-  background: #1a7f37;
+  background: #477a50;
   color: #fff;
 }
 
 .toast-error {
-  background: #cf222e;
+  background: #b3443e;
   color: #fff;
 }
 
@@ -274,17 +352,12 @@ body {
   color: #fff;
 }
 
-.toast-warning {
-  background: #9a6700;
-  color: #fff;
-}
-
 /* ---- skeleton ---- */
 .skeleton {
   height: 14px;
   margin: 12px 0;
   border-radius: 4px;
-  background: linear-gradient(90deg, var(--pen-border) 25%, var(--pen-fg-muted) 50%, var(--pen-border) 75%);
+  background: linear-gradient(90deg, var(--pen-border) 25%, var(--pen-hover) 50%, var(--pen-border) 75%);
   background-size: 200% 100%;
   animation: pen-shimmer 1.4s infinite;
 }
@@ -310,18 +383,19 @@ body {
 
 /* ---- markdown paper ---- */
 .markdown-paper {
-  max-width: 960px;
-  margin: 16px auto;
-  padding: 24px;
+  max-width: 880px;
+  margin: 32px auto;
+  padding: 40px 48px;
   border: 1px solid var(--pen-border);
-  border-radius: 8px;
+  border-radius: 12px;
   background: var(--pen-paper);
+  box-shadow: var(--pen-shadow-paper);
 }
 
 /* ---- mermaid ---- */
 .mermaid-error {
   padding: 12px;
-  border: 1px dashed #cf222e;
+  border: 1px dashed #b3443e;
   color: var(--pen-fg);
   font-size: 0.85rem;
   white-space: pre-wrap;
@@ -340,8 +414,10 @@ body {
 
   .markdown-paper {
     margin: 8px auto;
-    padding: 12px;
+    padding: 20px 16px;
     border: none;
+    border-radius: 8px;
+    box-shadow: none;
   }
 
   .app-backdrop {
@@ -358,7 +434,7 @@ body {
     }
 
     & .sidebar {
-      box-shadow: 0 0 40px rgb(0 0 0 / 40%);
+      box-shadow: var(--pen-shadow-float);
       transform: translateX(0);
     }
   }

@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
 
 test('renders markdown readme', async ({ page }) => {
   await page.goto('/');
@@ -23,6 +23,13 @@ test('sidebar open by default on desktop', async ({ page }) => {
   await expect(page.locator('.app-header .menu-toggle')).toBeHidden();
 });
 
+// the closed sidebar slides fully off-screen: translateX(-100%) of its
+// computed width — read the width instead of hardcoding the token
+const hiddenTransform = (page: Page) => page.evaluate(() => {
+  const width = document.querySelector('.sidebar')?.getBoundingClientRect().width ?? 0;
+  return `matrix(1, 0, 0, 1, ${-Math.round(width)}, 0)`;
+});
+
 test('desktop reopen from closed cookie', async ({ page }) => {
   // explicit opt-out keeps the sidebar closed, but the header hamburger stays
   // reachable as the reopen affordance
@@ -31,7 +38,7 @@ test('desktop reopen from closed cookie', async ({ page }) => {
   ]);
   await page.goto('/');
   await expect(page.locator('.app')).not.toHaveClass(/app-sidebar-open/);
-  await expect(page.locator('.sidebar')).toHaveCSS('transform', 'matrix(1, 0, 0, 1, -280, 0)');
+  await expect(page.locator('.sidebar')).toHaveCSS('transform', await hiddenTransform(page));
 
   await page.getByRole('button', { name: 'Open menu' }).click();
   await expect(page.locator('.app')).toHaveClass(/app-sidebar-open/);
@@ -85,7 +92,7 @@ test('mobile overlay drawer', async ({ page }) => {
 
   // mobile ignores the desktop persistent-open state: the sidebar starts
   // off-screen even though `visible` defaults to true
-  await expect(page.locator('.sidebar')).toHaveCSS('transform', 'matrix(1, 0, 0, 1, -280, 0)');
+  await expect(page.locator('.sidebar')).toHaveCSS('transform', await hiddenTransform(page));
 
   await page.getByRole('button', { name: 'Open menu' }).click();
   await expect(page.locator('.app')).toHaveClass(/app-overlay-open/);
@@ -93,9 +100,9 @@ test('mobile overlay drawer', async ({ page }) => {
   // the overlay drawer slides in above the backdrop
   await expect(page.locator('.sidebar')).toHaveCSS('transform', 'matrix(1, 0, 0, 1, 0, 0)');
 
-  // click the backdrop clear of the 280px drawer
+  // click the backdrop clear of the 248px drawer
   await page.locator('.app-backdrop').click({ position: { x: 350, y: 400 } });
   await expect(page.locator('.app')).not.toHaveClass(/app-overlay-open/);
   await expect(page.locator('.app-backdrop')).toBeHidden();
-  await expect(page.locator('.sidebar')).toHaveCSS('transform', 'matrix(1, 0, 0, 1, -280, 0)');
+  await expect(page.locator('.sidebar')).toHaveCSS('transform', await hiddenTransform(page));
 });

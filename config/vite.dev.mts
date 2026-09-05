@@ -52,6 +52,65 @@ const serveAssets = () => ({
   },
 });
 
+/**
+ * Dev-only static middleware for the markdown root: prod serves it with
+ * `express.static(root)` after SSR, dev otherwise falls through to the SSR
+ * html fallback — images referenced by documents would come back as
+ * `text/html` and render as broken images. Serves any file with an extension
+ * except markdown (those go through SSR), mirroring prod.
+ */
+const serveRootStatics = () => ({
+  name: 'dev-serve-root-statics',
+  configureServer(vite: ViteDevServer) {
+    const rootDir = path.join(process.cwd(), '../..');
+    const contentTypes: Record<string, string> = {
+      '.png': 'image/png',
+      '.jpg': 'image/jpeg',
+      '.jpeg': 'image/jpeg',
+      '.gif': 'image/gif',
+      '.svg': 'image/svg+xml',
+      '.webp': 'image/webp',
+      '.avif': 'image/avif',
+      '.ico': 'image/x-icon',
+      '.mp4': 'video/mp4',
+      '.webm': 'video/webm',
+      '.mp3': 'audio/mpeg',
+      '.woff': 'font/woff',
+      '.woff2': 'font/woff2',
+      '.ttf': 'font/ttf',
+    };
+
+    // registered directly (not returned) so it runs before the SSR handler
+    vite.middlewares.use((req, res, next) => {
+      if (req.method !== 'GET' && req.method !== 'HEAD') {
+        next();
+        return;
+      }
+
+      const relative = decodeURIComponent((req.url ?? '').split('?')[0] ?? '');
+      const ext = path.extname(relative).toLowerCase();
+
+      // extensionless paths and markdown are SSR routes
+      if (!ext || /\.(md|markdown)$/.test(ext)) {
+        next();
+        return;
+      }
+
+      const file = path.resolve(rootDir, `.${relative}`);
+      const contentType = contentTypes[ext];
+
+      // path traversal guard (resolve + prefix check) and extension allowlist
+      if (!contentType || !file.startsWith(`${rootDir}${path.sep}`) || !fs.existsSync(file)) {
+        next();
+        return;
+      }
+
+      res.setHeader('Content-Type', contentType);
+      fs.createReadStream(file).on('error', () => next()).pipe(res);
+    });
+  },
+});
+
 const devSSR = () => ({
   name: 'dev-ssr',
   async configureServer(vite: ViteDevServer) {
@@ -133,6 +192,7 @@ export default defineConfig((c) => ({
   plugins: [
     ...base(c).plugins,
     serveAssets(),
+    serveRootStatics(),
     devSSR(),
   ],
   ssr: {

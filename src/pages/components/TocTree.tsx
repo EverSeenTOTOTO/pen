@@ -48,6 +48,7 @@ const TocTree = observer(() => {
   if (!toc.length) return null;
   return (
     <nav className="sidebar-toc" aria-label="Table of contents">
+      <div className="sidebar-toc-title">Contents</div>
       <ul className="toc">
         {toc.map((node) => <TocNode key={node.id} node={node} />)}
       </ul>

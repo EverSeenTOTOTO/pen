@@ -1,3 +1,12 @@
+/*
+ * 正文排版与内容区覆写 — 纸感书卷
+ *
+ * 衬线正文是主角; github-markdown-css / highlight.js 为硬编码色值的
+ * 拷贝文件 (src/assets/*.css, 由主题切换换 <link>), 此处以同层选择器
+ * 覆写 (本文件在文档流中晚于主题 <link> 加载, 同优先级时后者胜出),
+ * 代码 token 一律加 .markdown-body 前缀抬升优先级, 与加载顺序解耦。
+ */
+
 html,
 body {
   font-size: 16px;
@@ -5,7 +14,7 @@ body {
 }
 
 img {
-  border-radius: 1px;
+  border-radius: 4px;
 }
 
 *,
@@ -26,37 +35,72 @@ h6 {
 }
 
 .markdown-body {
-  font-family: serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  /* 关键: github-markdown-css 会给 .markdown-body 刷整块主题背景,
+     抹掉纸面层次 — 置为透明, 让 .markdown-paper (base.css) 承担纸面 */
+  background-color: transparent;
+  color: var(--pen-fg);
+
+  /* 衬线主角: 拉丁走 Source Serif/Georgia, 中文走宋体族 */
+  font-family: "Source Serif 4", "Noto Serif CJK SC", "Source Han Serif SC", "Songti SC", SimSun, Georgia, "Times New Roman", serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
   -webkit-font-smoothing: subpixel-antialiased;
   font-weight: 400;
+  font-size: 17px;
+  line-height: 1.8;
   hyphens: auto;
   letter-spacing: 0.02em;
-  line-height: 1.5;
   text-size-adjust: 100%;
   overflow-wrap: break-word;
 
-  & .hljs {
-    border-radius: 2px;
+  & h1,
+  & h2 {
+    border-bottom-color: var(--pen-border);
   }
 
-  h1 {
-    margin: 0;
+  & strong {
+    color: var(--pen-fg);
   }
 
-  p {
-    margin-block: 12px 24px;
+  & a {
+    color: var(--pen-link);
+
+    &:hover {
+      color: var(--pen-accent);
+    }
+  }
+
+  & blockquote {
+    border-left-color: var(--pen-border);
+    color: var(--pen-fg-muted);
+  }
+
+  & hr {
+    height: 1px;
+    background: var(--pen-border);
+  }
+
+  & th,
+  & td {
+    border-color: var(--pen-border);
+  }
+
+  & p {
+    margin-block: 14px 28px;
     text-align: justify;
   }
 
-  blockquote > p,
-  li > p {
-    text-indent: 0;
+  & .hljs {
+    border-radius: 8px;
+  }
+
+  & h1 {
+    margin: 0;
   }
 
   & .container {
     padding: 0.1rem 1.5rem;
-    border-left-width: 0.5rem;
-    border-left-style: solid;
+    border-left: 3px solid var(--pen-accent);
+    border-radius: 4px;
+    background: var(--pen-hover);
     margin: 1rem 0;
 
     & p {
@@ -65,10 +109,21 @@ h6 {
     }
   }
 
-  pre {
+  & pre {
     position: relative;
-    font-family: "Source Code Pro", monospace;
+    border: 1px solid var(--pen-border);
+    background: var(--pen-code-bg);
+    font-family: "Source Code Pro", ui-monospace, monospace;
   }
+
+  & :not(pre) > code {
+    padding: 0.15em 0.4em;
+    border-radius: 4px;
+    background: var(--pen-code-bg);
+    font-size: 0.875em;
+  }
+
+  /* 代码注释提亮 (仅暗色需要, 见下方作用域规则) */
 
   & .copy-btn-container {
     position: relative;
@@ -95,9 +150,15 @@ h6 {
   }
 }
 
+/* 暗色下 hljs 注释偏沉底, 提亮一档; 亮色保持原色 */
+:root[data-theme='dark'] .markdown-body .hljs-comment,
+:root[data-theme='dark'] .markdown-body .hljs-quote {
+  color: #9aa5b5;
+}
+
 @media (width <= 960px) {
   .markdown-body {
-    font-size: 1.2em;
+    font-size: 1.15em;
 
     & .copy-btn {
       right: 0.3rem;
