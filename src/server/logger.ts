@@ -59,8 +59,13 @@ export const printBanner = (logger: Logger, title: string, rows: Array<[string, 
   const INDENT = ' '.repeat(19); // align under the first row's prefix
   const contentWidth = Math.max(visibleLength(title), ...rows.map(([, value]) => KEY_WIDTH + 1 + visibleLength(value)));
   const row = (text: string, pad: number) => ` ${text}${' '.repeat(Math.max(0, pad))} `;
+  // title embedded in the top rule so top and bottom borders are the same
+  // `─` run — a bare title row reads as a missing border
+  const titleText = ` ${title} `;
+  const dashesLeft = 3;
+  const dashesRight = Math.max(0, contentWidth + 2 - dashesLeft - visibleLength(titleText));
   const lines = [
-    chalk.gray('┌') + row(paint.accent.bold(title), contentWidth - visibleLength(title)) + chalk.gray('┐'),
+    chalk.gray('┌') + chalk.gray('─'.repeat(dashesLeft)) + paint.accent.bold(titleText) + chalk.gray('─'.repeat(dashesRight)) + chalk.gray('┐'),
     ...rows.map(([key, value]) => (
       chalk.gray('│') + row(`${chalk.gray(key.padEnd(KEY_WIDTH))} ${value}`, contentWidth - KEY_WIDTH - 1 - visibleLength(value)) + chalk.gray('│')
     )),
