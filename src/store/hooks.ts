@@ -171,18 +171,19 @@ export const useDiagramViewer = () => {
 
       const hint = document.createElement('div');
       hint.className = 'mermaid-viewer-hint';
-      hint.textContent = 'wheel to zoom · drag to pan · double-click to reset';
+      hint.textContent = 'esc to close · wheel to zoom · drag to pan · double-click to reset';
 
       overlay.append(stage, toolbar, hint);
-      overlay.addEventListener('click', (e) => {
-        if (e.target === overlay) close();
-      });
+      // clicking never exits (a stray click while inspecting details must
+      // not throw the viewer away) — Esc and the toolbar close button do.
+      // wheel zooms; pointerdown anywhere pans, so dragging works from the
+      // backdrop too, not only when grabbing the diagram itself
       overlay.addEventListener('wheel', onWheel, { passive: false });
       stage.addEventListener('dblclick', () => reset());
-      stage.addEventListener('pointerdown', (e) => {
+      overlay.addEventListener('pointerdown', (e) => {
         if ((e.target as HTMLElement).closest('.mermaid-viewer-toolbar')) return;
         e.preventDefault();
-        stage?.setPointerCapture(e.pointerId);
+        overlay?.setPointerCapture(e.pointerId);
         const start = { x: e.clientX - tx, y: e.clientY - ty };
         const onMove = (ev: PointerEvent) => {
           tx = ev.clientX - start.x;
@@ -190,12 +191,12 @@ export const useDiagramViewer = () => {
           apply();
         };
         const onUp = () => {
-          stage?.releasePointerCapture(e.pointerId);
-          stage?.removeEventListener('pointermove', onMove);
-          stage?.removeEventListener('pointerup', onUp);
+          overlay?.releasePointerCapture(e.pointerId);
+          overlay?.removeEventListener('pointermove', onMove);
+          overlay?.removeEventListener('pointerup', onUp);
         };
-        stage?.addEventListener('pointermove', onMove);
-        stage?.addEventListener('pointerup', onUp);
+        overlay?.addEventListener('pointermove', onMove);
+        overlay?.addEventListener('pointerup', onUp);
       });
       document.addEventListener('keydown', onKeydown);
 
