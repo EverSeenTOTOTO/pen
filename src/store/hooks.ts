@@ -59,14 +59,14 @@ export const useAutoFetch = () => {
 };
 
 /**
- * In-page diagram viewer: the `.mermaid-expand` button on rendered diagrams
- * opens the svg on a full-viewport overlay — wheel zoom anchored at the
- * cursor, drag to pan, double-click or the toolbar to reset, Esc / backdrop
- * click / toolbar to close. DOM-imperative because the diagrams live inside
- * dangerouslySetInnerHTML content; everything is delegated or on the overlay
- * itself, so re-rendered hosts keep working.
+ * In-page media viewer: the `.mermaid-expand` button on rendered diagrams
+ * and clicks on content images open the element on a full-viewport overlay —
+ * wheel zoom anchored at the cursor, drag to pan, Esc / toolbar to close.
+ * DOM-imperative because the content lives inside dangerouslySetInnerHTML;
+ * everything is delegated or on the overlay itself, so re-rendered hosts
+ * keep working.
  */
-export const useDiagramViewer = () => {
+export const useMediaViewer = () => {
   useEffect(() => {
     let scale = 1;
     let tx = 0;
@@ -129,24 +129,40 @@ export const useDiagramViewer = () => {
 
     const open = (source: Element) => {
       close();
-      const svg = source.querySelector('svg');
-      if (!svg) return;
 
       overlay = document.createElement('div');
       overlay.className = 'mermaid-viewer';
       stage = document.createElement('div');
       stage.className = 'mermaid-viewer-stage';
-      const clone = svg.cloneNode(true) as SVGSVGElement;
-      // mermaid ships an inline `max-width: <natural>px` that stylesheet
-      // rules cannot beat — clear it and size from the viewBox so the clone
-      // lays out at its natural geometry instead of a squeezed 100%-width
-      clone.style.maxWidth = 'none';
-      const viewBox = clone.getAttribute('viewBox')?.trim().split(/\s+/);
-      if (viewBox && viewBox.length === 4) {
-        clone.style.width = `${Number.parseFloat(viewBox[2])}px`;
-        clone.style.height = `${Number.parseFloat(viewBox[3])}px`;
+
+      if (source.tagName === 'IMG') {
+        // content image lightbox: size from the natural dimensions so the
+        // fit calculation and pan math work on stable geometry
+        const img = source.cloneNode(true) as HTMLImageElement;
+        const w = img.naturalWidth || img.width;
+        const h = img.naturalHeight || img.height;
+        if (w) img.style.width = `${w}px`;
+        if (h) img.style.height = `${h}px`;
+        stage.appendChild(img);
+      } else {
+        const svg = source.querySelector('svg');
+        if (!svg) {
+          overlay.remove();
+          overlay = null;
+          return;
+        }
+        const clone = svg.cloneNode(true) as SVGSVGElement;
+        // mermaid ships an inline `max-width: <natural>px` that stylesheet
+        // rules cannot beat — clear it and size from the viewBox so the clone
+        // lays out at its natural geometry instead of a squeezed 100%-width
+        clone.style.maxWidth = 'none';
+        const viewBox = clone.getAttribute('viewBox')?.trim().split(/\s+/);
+        if (viewBox && viewBox.length === 4) {
+          clone.style.width = `${Number.parseFloat(viewBox[2])}px`;
+          clone.style.height = `${Number.parseFloat(viewBox[3])}px`;
+        }
+        stage.appendChild(clone);
       }
-      stage.appendChild(clone);
 
       const toolbar = document.createElement('div');
       toolbar.className = 'mermaid-viewer-toolbar';
@@ -209,10 +225,20 @@ export const useDiagramViewer = () => {
     };
 
     const onRootClick = (e: MouseEvent) => {
-      const btn = (e.target as HTMLElement).closest?.('.mermaid-expand');
-      if (!btn) return;
-      const host = btn.closest('.mermaid-svg');
-      if (host) open(host);
+      const target = e.target as HTMLElement;
+      const btn = target.closest?.('.mermaid-expand');
+      if (btn) {
+        const host = btn.closest('.mermaid-svg');
+        if (host) open(host);
+        return;
+      }
+      // content images get the lightbox instead of bare navigation — even
+      // when wrapped in a link
+      const img = target.closest?.('.markdown-body img');
+      if (img) {
+        e.preventDefault();
+        open(img);
+      }
     };
     document.addEventListener('click', onRootClick);
 

@@ -2,7 +2,7 @@ import { observer } from 'mobx-react-lite';
 import clsx from 'clsx';
 import { useStore } from '@/store';
 import {
-  useAutoFetch, useClipboard, useDiagramViewer, useMermaid, useScrollSpy,
+  useAutoFetch, useClipboard, useMediaViewer, useMermaid, useScrollSpy,
 } from '@/store/hooks';
 import Sidebar, { SidebarRail } from './components/Sidebar';
 import NewHeader from './components/NewHeader';
@@ -16,7 +16,7 @@ const Home = observer(() => {
   useClipboard();
   useScrollSpy();
   useMermaid();
-  useDiagramViewer();
+  useMediaViewer();
 
   return (
     <div className={clsx('app', {

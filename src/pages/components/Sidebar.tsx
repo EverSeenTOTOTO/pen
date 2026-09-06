@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { useStore } from '@/store';
 import { useNav } from '@/store/hooks';
@@ -8,10 +9,29 @@ const Files = observer(() => {
   const home = useStore('home');
   const drawer = useStore('drawer');
   const nav = useNav();
+  const [filter, setFilter] = useState('');
+
+  const needle = filter.trim().toLowerCase();
+  const entries = needle
+    ? drawer.subdirs.filter((doc) => doc.filename.toLowerCase().includes(needle))
+    : drawer.subdirs;
 
   return (
     <div className="sidebar-files">
-      {drawer.subdirs.map((doc) => (
+      <input
+        className="sidebar-filter"
+        type="text"
+        value={filter}
+        placeholder="Filter files…"
+        aria-label="Filter files"
+        autoComplete="off"
+        spellCheck={false}
+        onChange={(e) => setFilter(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === 'Escape') setFilter('');
+        }}
+      />
+      {entries.map((doc) => (
         <button
           key={doc.relativePath}
           type="button"
@@ -28,6 +48,9 @@ const Files = observer(() => {
           <span className="file-name">{doc.filename}</span>
         </button>
       ))}
+      {needle && entries.length === 0 && (
+        <div className="sidebar-filter-empty">No match.</div>
+      )}
     </div>
   );
 });

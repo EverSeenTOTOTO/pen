@@ -246,6 +246,16 @@ body {
     box-shadow: var(--pen-shadow-float);
     padding: 16px;
   }
+
+  & img {
+    max-width: none;
+    display: block;
+    background: var(--pen-paper);
+    border: 1px solid var(--pen-border);
+    border-radius: 8px;
+    box-shadow: var(--pen-shadow-float);
+    padding: 8px;
+  }
 }
 
 .mermaid-viewer-toolbar {
@@ -370,6 +380,33 @@ body {
   flex: 1 1 auto;
   overflow-y: auto;
   padding: 8px 0;
+}
+
+.sidebar-filter {
+  width: calc(100% - 16px);
+  margin: 0 8px 8px;
+  padding: 4px 10px;
+  border: 1px solid var(--pen-border);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--pen-fg);
+  font-size: 0.75rem;
+  font-family: inherit;
+
+  &::placeholder {
+    color: var(--pen-fg-muted);
+  }
+
+  &:focus-visible {
+    outline: none;
+    border-color: var(--pen-accent);
+  }
+}
+
+.sidebar-filter-empty {
+  padding: 4px 18px;
+  color: var(--pen-fg-muted);
+  font-size: 0.75rem;
 }
 
 .sidebar-toc {
@@ -631,6 +668,20 @@ body {
 }
 
 /* ---- markdown paper ---- */
+.paper-updated {
+  animation: pen-flash 1.2s ease-out;
+}
+
+@keyframes pen-flash {
+  from {
+    box-shadow: var(--pen-shadow-paper), 0 0 0 2px var(--pen-select);
+  }
+
+  to {
+    box-shadow: var(--pen-shadow-paper);
+  }
+}
+
 .markdown-paper {
   max-width: 960px;
   margin: 0 auto;

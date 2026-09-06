@@ -31,6 +31,10 @@ export class HomeStore implements PrefetchStore<HomeState> {
 
   loadingTimeout = false;
 
+  // bumped when a socket push changed the content of the document already
+  // on screen — the paper flashes so the edit landing is visible
+  updatedTick = 0;
+
   root: AppStore;
 
   timeoutId?: NodeJS.Timeout;
@@ -89,7 +93,16 @@ export class HomeStore implements PrefetchStore<HomeState> {
 
       this.loading = false;
       this.loadingTimeout = false;
+
+      // same document, different content = a save landed: flash the paper
+      // (compare against the pre-swap values — `last` is not reliable here,
+      // the initial fetch short-circuits on the cache hit and never sets it)
+      const previousHtml = this.html;
+      const previousReading = this.reading;
       this.data = data;
+      if (previousHtml && previousHtml !== this.html && previousReading === reading) {
+        this.updatedTick++;
+      }
 
       if (reading !== undefined && this.data) {
         cache.set(reading, this.data);

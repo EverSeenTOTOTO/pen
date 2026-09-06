@@ -7,9 +7,9 @@ test('renders markdown readme', async ({ page }) => {
 
 test('sidebar lists directory entries', async ({ page }) => {
   await page.goto('/');
-  // fixture root: README.md plus the notebook/ and noreadme/ fixture dirs
+  // fixture root: README.md, evil.md plus the notebook/ and noreadme/ dirs
   const entries = page.locator('.sidebar button.file-item');
-  await expect(entries).toHaveCount(3);
+  await expect(entries).toHaveCount(4);
   await expect(entries.filter({ hasText: 'README.md' })).toHaveCount(1);
 });
 
@@ -107,6 +107,44 @@ test('empty directory shows the empty state', async ({ page }) => {
   // .gitkeep is dotfile-ignored, so the directory reads as empty
   await expect(page.locator('.file-index-empty')).toBeVisible();
   await expect(page.locator('.file-index-item')).toHaveCount(0);
+});
+
+test('content images open the lightbox', async ({ page }) => {
+  await page.goto('/');
+  await page.locator('.markdown-body img').first().click();
+  await expect(page.locator('.mermaid-viewer img')).toBeVisible();
+  await expect(page.locator('.mermaid-viewer-zoom')).toHaveText(/\d+%/);
+  await page.keyboard.press('Escape');
+  await expect(page.locator('.mermaid-viewer')).toHaveCount(0);
+});
+
+test('raw html is sanitized', async ({ page }) => {
+  await page.goto('/evil.md');
+  await expect(page.locator('.markdown-body')).toContainText('Safe text');
+  // no script execution, no event handlers, no javascript: urls survive
+  const audit = await page.evaluate(() => ({
+    pwned: (window as unknown as { __pwned?: boolean }).__pwned === true,
+    scripts: document.querySelectorAll('.markdown-body script').length,
+    onerror: !!document.querySelector('.markdown-body [onerror]'),
+    jsHref: !!document.querySelector('.markdown-body a[href^="javascript:"]'),
+  }));
+  expect(audit).toEqual({ pwned: false, scripts: 0, onerror: false, jsHref: false });
+});
+
+test('sidebar filter narrows the file list', async ({ page }) => {
+  await page.goto('/');
+  const entries = page.locator('.sidebar button.file-item');
+  await expect(entries).toHaveCount(4);
+
+  await page.locator('.sidebar-filter').fill('note');
+  await expect(entries).toHaveCount(1);
+  await expect(entries).toContainText('notebook');
+
+  await page.locator('.sidebar-filter').fill('zzz-nothing');
+  await expect(page.locator('.sidebar-filter-empty')).toBeVisible();
+
+  await page.locator('.sidebar-filter').press('Escape');
+  await expect(entries).toHaveCount(4);
 });
 
 test('copying math puts latex source on the clipboard', async ({ page }) => {

@@ -40,3 +40,9 @@ graph TD; A-->B;
 :::info
 This is an info container.
 :::
+
+## Image
+
+A tiny pixel:
+
+![pixel](./pixel.png)
