@@ -145,11 +145,15 @@ test('mermaid viewer zooms, pans and closes', async ({ page }) => {
   await page.locator('.mermaid-svg .mermaid-expand').first().click();
   const stage = page.locator('.mermaid-viewer-stage');
   await expect(page.locator('.mermaid-viewer svg')).toBeVisible();
-  await expect(page.locator('.mermaid-viewer-zoom')).toHaveText('100%');
+  // the diagram is fitted to the viewport on open — small fixture diagrams
+  // upscale — so only assert a percentage shows
+  const label = page.locator('.mermaid-viewer-zoom');
+  await expect(label).toHaveText(/\d+%/);
+  const initialZoom = Number((await label.textContent())?.replace('%', ''));
 
   // toolbar zoom in
   await page.getByRole('button', { name: 'Zoom in' }).click();
-  await expect(page.locator('.mermaid-viewer-zoom')).toHaveText('125%');
+  await expect.poll(async () => Number((await label.textContent())?.replace('%', ''))).toBeGreaterThan(initialZoom);
 
   // drag pans (inline style keeps the raw calc; computed matrices resolve
   // the -50% into pixels and are awkward to match)
@@ -160,7 +164,7 @@ test('mermaid viewer zooms, pans and closes', async ({ page }) => {
   await page.mouse.down();
   await page.mouse.move(cx + 60, cy + 40, { steps: 4 });
   await page.mouse.up();
-  await expect(stage).toHaveAttribute('style', /scale\(1\.25\)/);
+  await expect(stage).toHaveAttribute('style', /scale\(/);
   await expect(stage).toHaveAttribute('style', /\+ 60px/);
   await expect(stage).toHaveAttribute('style', /\+ 40px/);
 

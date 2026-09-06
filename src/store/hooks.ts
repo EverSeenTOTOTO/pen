@@ -82,10 +82,11 @@ export const useDiagramViewer = () => {
     };
 
     const reset = (initial?: { w: number, h: number }) => {
-      // fit large diagrams into the viewport on open
+      // fit the diagram to the viewport in BOTH directions — small diagrams
+      // are enlarged to fill ~85%, large ones shrunk (vectors stay crisp)
       if (initial) {
-        const fit = Math.min(1, (innerWidth * 0.9) / initial.w, (innerHeight * 0.8) / initial.h);
-        scale = Math.max(fit, 0.1);
+        const fit = Math.min((innerWidth * 0.85) / initial.w, (innerHeight * 0.8) / initial.h);
+        scale = Math.min(8, Math.max(0.15, fit));
       } else {
         scale = 1;
       }
@@ -135,7 +136,17 @@ export const useDiagramViewer = () => {
       overlay.className = 'mermaid-viewer';
       stage = document.createElement('div');
       stage.className = 'mermaid-viewer-stage';
-      stage.appendChild(svg.cloneNode(true));
+      const clone = svg.cloneNode(true) as SVGSVGElement;
+      // mermaid ships an inline `max-width: <natural>px` that stylesheet
+      // rules cannot beat — clear it and size from the viewBox so the clone
+      // lays out at its natural geometry instead of a squeezed 100%-width
+      clone.style.maxWidth = 'none';
+      const viewBox = clone.getAttribute('viewBox')?.trim().split(/\s+/);
+      if (viewBox && viewBox.length === 4) {
+        clone.style.width = `${Number.parseFloat(viewBox[2])}px`;
+        clone.style.height = `${Number.parseFloat(viewBox[3])}px`;
+      }
+      stage.appendChild(clone);
 
       const toolbar = document.createElement('div');
       toolbar.className = 'mermaid-viewer-toolbar';
