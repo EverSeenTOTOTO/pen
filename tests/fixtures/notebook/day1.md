@@ -1,0 +1,3 @@
+# Day One
+
+Notebook entry.

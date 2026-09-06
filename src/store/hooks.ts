@@ -80,7 +80,7 @@ export const useScrollSpy = () => {
 
     headers.forEach((header) => observer.observe(header));
     return () => observer.disconnect();
-  }, [home.html]);
+  }, [home.data]);
 };
 
 export const useMermaid = () => {
@@ -138,5 +138,9 @@ export const useMermaid = () => {
     });
 
     return () => { cancelled = true; };
-  }, [home.html, theme.mode]);
+    // `home.data`, not `home.html`: on a refetch of identical content the
+    // html string is unchanged, but the Suspense fallback swapped the DOM —
+    // the effect must re-run against the fresh source blocks or a slow
+    // `import('mermaid')` resolves against detached nodes (prod chunk load)
+  }, [home.data, theme.mode]);
 };

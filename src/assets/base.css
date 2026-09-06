@@ -172,6 +172,71 @@ body {
   }
 }
 
+/* ---- directory index (page shown when a dir has no README) ---- */
+.file-index {
+  font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+
+.file-index-title {
+  margin: 0 0 18px;
+  color: var(--pen-fg);
+  font-size: 1.375rem;
+  font-weight: 600;
+  word-break: break-all;
+}
+
+.file-index-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.file-index-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid var(--pen-border);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--pen-fg);
+  font-size: 0.875rem;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s, background-color 0.15s;
+
+  & svg {
+    flex: none;
+    color: var(--pen-accent);
+  }
+
+  & span {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  &:hover {
+    border-color: var(--pen-accent);
+    background: var(--pen-hover);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: default;
+  }
+}
+
+.file-index-empty {
+  margin: 0;
+  color: var(--pen-fg-muted);
+}
+
 /* ---- sidebar ---- */
 .sidebar {
   position: fixed;

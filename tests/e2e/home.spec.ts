@@ -7,11 +7,10 @@ test('renders markdown readme', async ({ page }) => {
 
 test('sidebar lists directory entries', async ({ page }) => {
   await page.goto('/');
-  // the fixture root holds a single README.md; the sidebar file list renders
-  // one button.file-item per entry
+  // fixture root: README.md plus the notebook/ and noreadme/ fixture dirs
   const entries = page.locator('.sidebar button.file-item');
-  await expect(entries).toHaveCount(1);
-  await expect(entries).toContainText('README');
+  await expect(entries).toHaveCount(3);
+  await expect(entries.filter({ hasText: 'README.md' })).toHaveCount(1);
 });
 
 test('sidebar open by default on desktop', async ({ page }) => {
@@ -89,6 +88,25 @@ test('theme toggle persists', async ({ page }) => {
 
   await page.reload();
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
+});
+
+test('directory without readme renders an index of children', async ({ page }) => {
+  await page.goto('/notebook');
+  // no README here — the content area becomes a file index instead of empty
+  await expect(page.locator('.file-index-title')).toHaveText('/notebook/');
+  const card = page.locator('.file-index-item', { hasText: 'day1.md' });
+  await expect(card).toBeVisible();
+
+  await card.click();
+  await expect(page).toHaveURL(/\/notebook\/day1\.md$/);
+  await expect(page.locator('.markdown-body h1')).toContainText('Day One');
+});
+
+test('empty directory shows the empty state', async ({ page }) => {
+  await page.goto('/noreadme');
+  // .gitkeep is dotfile-ignored, so the directory reads as empty
+  await expect(page.locator('.file-index-empty')).toBeVisible();
+  await expect(page.locator('.file-index-item')).toHaveCount(0);
 });
 
 test('copying math puts latex source on the clipboard', async ({ page }) => {
