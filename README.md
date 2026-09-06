@@ -42,8 +42,9 @@ Beyond standard GFM, pen renders:
 
 ### Math
 
-Inline math $e^{i\pi} + 1 = 0$ flows with the text, block math gets its own
-display:
+Formulas are rendered with [KaTeX](https://katex.org/) (remark-math +
+rehype-katex). Inline math $e^{i\pi} + 1 = 0$ flows with the text, block
+math gets its own display:
 
 $$
 \int_{-\infty}^{\infty} e^{-x^2} \, dx = \sqrt{\pi}
