@@ -13,7 +13,7 @@ import type {
   ServerToClientEvents,
 } from '../types';
 import { formatRelative, resolvePathInfo } from '../utils';
-import { scope } from './logger';
+import { scope, paint } from './logger';
 import type { Logger } from './logger';
 import { readUnknown } from './reader';
 
@@ -70,7 +70,9 @@ export class Watcher {
   protected onChange(event: string, detail: string) {
     const relative = formatRelative(path.relative(this.root, detail));
 
-    this.logger.log(`${scope('watch')}${event}  ${relative}`);
+    // adds green, removals red, edits yellow
+    const eventColor = event.startsWith('unlink') ? paint.gone : event.startsWith('add') ? paint.ok : paint.changed;
+    this.logger.log(`${scope('watch')}${eventColor(event.padEnd(10))}${relative}`);
 
     switch (event) {
       case 'addDir':

@@ -35,15 +35,31 @@ betterLogger(console, {
 /** aligned dim scope label for log lines: `request GET / 200 9ms` */
 export const scope = (name: string) => chalk.gray(name.padEnd(8));
 
-/** framed startup summary — one logger call so only the first line is prefixed */
+/** semantic paints shared across log call sites */
+export const paint = {
+  ok: chalk.green,
+  changed: chalk.yellow,
+  gone: chalk.red,
+  accent: chalk.hex('#d6a35c'), // the visual language's amber
+  metric: chalk.cyan,
+  slow: (ms: number) => (ms >= 500 ? chalk.red : ms >= 100 ? chalk.yellow : chalk.gray),
+  status: (code: number) => (code >= 500 ? chalk.red : code >= 400 ? chalk.yellow : code >= 300 ? chalk.cyan : chalk.green),
+};
+
+/** framed startup summary — one logger call so only the first line is prefixed.
+ * Values may carry ansi colors; widths are measured on the visible text. */
 export const printBanner = (logger: Logger, title: string, rows: Array<[string, string]>) => {
+  // eslint-disable-next-line no-control-regex -- stripping ansi escapes is the point
+  const ANSI = /\u001b\[[0-9;]*m/g;
+  const visible = (s: string) => s.replace(ANSI, '');
+  const visibleLength = (s: string) => visible(s).length;
   const KEY_WIDTH = 9; // rows render as `key.padEnd(9) + ' ' + value`
-  const contentWidth = Math.max(title.length, ...rows.map(([, value]) => KEY_WIDTH + 1 + value.length));
+  const contentWidth = Math.max(visibleLength(title), ...rows.map(([, value]) => KEY_WIDTH + 1 + visibleLength(value)));
   const row = (text: string, pad: number) => ` ${text}${' '.repeat(Math.max(0, pad))} `;
   const block = [
-    chalk.gray('┌') + row(chalk.bold(title), contentWidth - title.length) + chalk.gray('┐'),
+    chalk.gray('┌') + row(paint.accent.bold(title), contentWidth - visibleLength(title)) + chalk.gray('┐'),
     ...rows.map(([key, value]) => (
-      chalk.gray('│') + row(`${chalk.gray(key.padEnd(KEY_WIDTH))} ${value}`, contentWidth - KEY_WIDTH - 1 - value.length) + chalk.gray('│')
+      chalk.gray('│') + row(`${chalk.gray(key.padEnd(KEY_WIDTH))} ${value}`, contentWidth - KEY_WIDTH - 1 - visibleLength(value)) + chalk.gray('│')
     )),
     chalk.gray('└') + '─'.repeat(contentWidth + 2) + chalk.gray('┘'),
   ].join('\n');

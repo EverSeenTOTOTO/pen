@@ -10,7 +10,8 @@ import { bindSocket } from '../src/server/socket';
 import { logger } from '../src/server/logger';
 import { RemarkRehype } from '../src/server/rehype';
 import { parseCookies } from '../src/cookie';
-import { scope } from '../src/server/logger';
+import { scope, paint } from '../src/server/logger';
+import chalk from 'chalk';
 
 /**
  * Dev-only static middleware for `/assets/*`: the SSR'd dev page references
@@ -199,7 +200,8 @@ const devSSR = () => ({
         });
 
         res.end(html);
-        logger.log(`${scope('request')}${req.method} ${relative} 200 ${(performance.now() - start).toFixed(1)}ms`);
+        const ms = performance.now() - start;
+        logger.log(`${scope('request')}${chalk.white(req.method)} ${relative} ${paint.status(200)('200')} ${paint.slow(ms)(`${ms.toFixed(1)}ms`)}`);
       } catch (e) {
         const error = e instanceof Error ? e : new Error(String(e));
 

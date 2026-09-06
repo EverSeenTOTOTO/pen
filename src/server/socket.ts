@@ -1,5 +1,6 @@
 import http from 'http';
 import https from 'https';
+import chalk from 'chalk';
 import { Server, Socket } from 'socket.io';
 import {
   ClientEvents,
@@ -10,7 +11,7 @@ import type {
   SocketOptions,
 } from '../types';
 import { Watcher } from './watcher';
-import { extendLogger, scope } from './logger';
+import { extendLogger, scope, paint } from './logger';
 
 type PenSocket = Socket<ClientToServerEvents, ServerToClientEvents>;
 
@@ -21,9 +22,9 @@ const setupWatcher = (socket: PenSocket, options: SocketOptions) => {
 
   watcher.setupEmit(socket.emit.bind(socket));
 
-  logger.log(`${scope('socket')}${client} connected`);
+  logger.log(`${scope('socket')}${chalk.gray(client)} ${paint.ok('connected')}`);
   socket.on('disconnect', () => {
-    logger.warn(`${scope('socket')}${client} disconnected`);
+    logger.warn(`${scope('socket')}${chalk.gray(client)} ${paint.changed('disconnected')}`);
     watcher.close();
   });
   socket.on(ClientEvents.FetchData, (relative) => watcher.setupWatching(relative));

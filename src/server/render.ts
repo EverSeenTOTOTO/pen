@@ -1,12 +1,13 @@
 import path from 'path';
 import fs from 'fs';
 import express from 'express';
+import chalk from 'chalk';
 import type { Express, Request, Response } from 'express';
 import { perf } from '@/utils';
 import type { RenderOptions, ThemeNames } from '../types';
 import { createTheme, isThemeName } from './theme';
 import { readUnknown } from './reader';
-import { scope } from './logger';
+import { scope, paint } from './logger';
 
 export const createSSRMiddleware = (options: RenderOptions) => {
   const preloadPromise = Promise.all([
@@ -99,8 +100,13 @@ export const bindRender = (app: Express, options: RenderOptions) => {
       const isDoc = !path.extname(req.path) || /\.(md|markdown)$/i.test(req.path);
       if (!isDoc && res.statusCode < 400) return;
 
-      const ms = (performance.now() - start).toFixed(1);
-      const line = `${req.method} ${req.originalUrl} ${res.statusCode} ${ms}ms`;
+      const ms = performance.now() - start;
+      const line = [
+        chalk.white(req.method),
+        req.originalUrl,
+        paint.status(res.statusCode)(String(res.statusCode)),
+        paint.slow(ms)(`${ms.toFixed(1)}ms`),
+      ].join(' ');
       const level = res.statusCode >= 500 ? 'error' : res.statusCode >= 400 ? 'warn' : 'log';
       options.logger[level](`${scope('request')}${line}`);
     });

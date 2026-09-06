@@ -5,7 +5,7 @@ import express from 'express';
 import cookieParser from 'cookie-parser';
 import getPort from 'get-port';
 import type { PenOptions, PenCliOptions } from '@/types';
-import { logger as builtInLogger, emptyLogger, printBanner } from './logger';
+import { logger as builtInLogger, emptyLogger, printBanner, paint } from './logger';
 import { version } from '../../package.json';
 import { bindRender } from './render';
 import { bindSocket } from './socket';
@@ -59,7 +59,7 @@ export const createServer = async (opts?: PenCliOptions) => {
 
   return new Promise((resolve) => server.listen(avaliablePort, () => {
     printBanner(options.logger, `pen v${version}`, [
-      ['listening', `http://localhost:${avaliablePort}${options.namespace}`],
+      ['listening', paint.metric(`http://localhost:${avaliablePort}${options.namespace}`)],
       ['root', options.root],
       ['ignores', options.ignores.map((re) => re.source).join(', ') || '(none)'],
       ['socket', `${options.socketPath} (ns ${options.namespace})`],

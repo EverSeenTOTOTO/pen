@@ -12,6 +12,7 @@ import remarkRehype from 'remark-rehype';
 import { unified } from 'unified';
 import type { Plugin, Processor } from 'unified';
 import { perf } from '../utils';
+import { paint } from './logger';
 import { rehypeSlugToc, PEN_TOC_DATA } from './plugins/rehype-toc';
 import rehypeHighlight from './plugins/rehype-highlight';
 import rehypeCopy from './plugins/rehype-copy';
@@ -91,7 +92,7 @@ export class RemarkRehype {
     }
 
     const enabled = [...plugins.values()].filter(([ , plug]) => plug !== false).length;
-    this.logger.info(`pipeline ready (${enabled} plugins)`);
+    this.logger.info(`pipeline ready (${paint.metric(String(enabled))} plugins)`);
   }
 
   async process(markdown: string): Promise<{ content: string, toc?: DocToc[] }> {
