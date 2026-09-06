@@ -10,6 +10,7 @@ import { bindSocket } from '../src/server/socket';
 import { logger } from '../src/server/logger';
 import { RemarkRehype } from '../src/server/rehype';
 import { parseCookies } from '../src/cookie';
+import { scope } from '../src/server/logger';
 
 /**
  * Dev-only static middleware for `/assets/*`: the SSR'd dev page references
@@ -158,6 +159,7 @@ const devSSR = () => ({
 
     // 缺点是不能调试完整服务端代码，只能调试服务端同构应用的部分
     return () => vite.middlewares.use(async (req, res, next) => {
+      const start = performance.now();
       try {
         // prefetch the requested document (like prod SSR) instead of always '/'.
         // vite's spa html-fallback rewrites req.url to /index.html before this
@@ -197,6 +199,7 @@ const devSSR = () => ({
         });
 
         res.end(html);
+        logger.log(`${scope('request')}${req.method} ${relative} 200 ${(performance.now() - start).toFixed(1)}ms`);
       } catch (e) {
         const error = e instanceof Error ? e : new Error(String(e));
 

@@ -84,7 +84,7 @@ export const perf = globalThis.performance && new Proxy(performance, {
       return (...args: unknown[]) => {
         const record = bound(...args);
 
-        console.log(`${record.name}: ${record.duration}`);
+        console.log(`${record.name} ${record.duration.toFixed(1)}ms`);
       };
     }
 

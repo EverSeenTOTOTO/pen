@@ -13,6 +13,7 @@ import type {
   ServerToClientEvents,
 } from '../types';
 import { formatRelative, resolvePathInfo } from '../utils';
+import { scope } from './logger';
 import type { Logger } from './logger';
 import { readUnknown } from './reader';
 
@@ -63,13 +64,13 @@ export class Watcher {
 
     await this.refresh(pathInfo.relativePath);
 
-    this.logger.log(`Pen switched to ${pathInfo.fullpath}`);
+    this.logger.log(`${scope('watch')}dir  ${pathInfo.relativePath}`);
   }
 
   protected onChange(event: string, detail: string) {
     const relative = formatRelative(path.relative(this.root, detail));
 
-    this.logger.log(`Pen detected ${event}: ${relative}`);
+    this.logger.log(`${scope('watch')}${event}  ${relative}`);
 
     switch (event) {
       case 'addDir':

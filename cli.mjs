@@ -24,7 +24,6 @@ const opts = program.opts();
 
 createServer(opts)
   .then(({ port, options }) => {
-    options.logger.done(`Pen server listening on ${port}`);
     if (opts.open) {
       open(`http://localhost:${port}${options.namespace}`);
     }

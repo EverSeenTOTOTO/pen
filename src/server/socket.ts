@@ -10,18 +10,20 @@ import type {
   SocketOptions,
 } from '../types';
 import { Watcher } from './watcher';
-import { extendLogger } from './logger';
+import { extendLogger, scope } from './logger';
 
 type PenSocket = Socket<ClientToServerEvents, ServerToClientEvents>;
 
 const setupWatcher = (socket: PenSocket, options: SocketOptions) => {
   const { logger } = options;
   const watcher = new Watcher(options);
+  const client = socket.id.slice(0, 4); // full ids only add noise
 
   watcher.setupEmit(socket.emit.bind(socket));
 
+  logger.log(`${scope('socket')}${client} connected`);
   socket.on('disconnect', () => {
-    logger.warn(`Pen disconnect with ${socket.id}`);
+    logger.warn(`${scope('socket')}${client} disconnected`);
     watcher.close();
   });
   socket.on(ClientEvents.FetchData, (relative) => watcher.setupWatching(relative));
@@ -38,8 +40,7 @@ export const bindSocket = (server: http.Server | https.Server, options: SocketOp
     path: socketPath,
   });
 
-  logger.info(`Pen socket path: ${socketPath}`);
-  logger.info(`Pen socket namespace: ${namespace}`);
+  logger.log(`${scope('socket')}path ${socketPath} (ns ${namespace})`);
 
   const nsp = io.of(namespace);
 
@@ -47,10 +48,8 @@ export const bindSocket = (server: http.Server | https.Server, options: SocketOp
     logger.error(`Pen socket error: ${e.message}`);
   });
   nsp.on('connection', (socket) => {
-    logger.done(`Pen connected with ${socket.id}`);
-
     // log for distinct client
-    setupWatcher(socket, { ...options, logger: extendLogger(logger, socket.id) });
+    setupWatcher(socket, { ...options, logger: extendLogger(logger, socket.id.slice(0, 4)) });
   });
 
   server.once('close', () => {

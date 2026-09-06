@@ -82,13 +82,16 @@ export class RemarkRehype {
 
     for (const [name, plug, ...opts] of [...plugins.values()]) {
       if (plug !== false) {
-        this.logger.info(`Pen add remark/rehype plugin: ${name}`);
+        this.logger.debug(`plugin   ${name}`);
 
         // unified's use() overloads cannot express "any plugin with any settings";
         // bridge via a Plugin with unknown parameters.
         this.render.use(plug as Plugin<unknown[], any, any>, ...opts);
       }
     }
+
+    const enabled = [...plugins.values()].filter(([ , plug]) => plug !== false).length;
+    this.logger.info(`pipeline ready (${enabled} plugins)`);
   }
 
   async process(markdown: string): Promise<{ content: string, toc?: DocToc[] }> {

@@ -5,7 +5,8 @@ import express from 'express';
 import cookieParser from 'cookie-parser';
 import getPort from 'get-port';
 import type { PenOptions, PenCliOptions } from '@/types';
-import { logger as builtInLogger, emptyLogger } from './logger';
+import { logger as builtInLogger, emptyLogger, printBanner } from './logger';
+import { version } from '../../package.json';
 import { bindRender } from './render';
 import { bindSocket } from './socket';
 import { RemarkRehype } from './rehype';
@@ -47,14 +48,22 @@ export const createServer = async (opts?: PenCliOptions) => {
   bindRender(app, { ...options, remark });
   bindSocket(server, { ...options, remark });
 
-  options.logger.info('Pen starting server, please wait...');
+  options.logger.info('starting server...');
 
   const port = parseInt(opts?.port ?? '3000', 10);
   const avaliablePort = await getPort({ port: Number.isNaN(port) ? 3000 : port });
 
   if (avaliablePort !== port) {
-    options.logger.warn(`Pen found port ${opts?.port} unavaliable, use port ${avaliablePort} instead`);
+    options.logger.warn(`port ${opts?.port} in use, using ${avaliablePort} instead`);
   }
 
-  return new Promise((resolve) => server.listen(avaliablePort, () => resolve({ server, port: avaliablePort, options })));
+  return new Promise((resolve) => server.listen(avaliablePort, () => {
+    printBanner(options.logger, `pen v${version}`, [
+      ['listening', `http://localhost:${avaliablePort}${options.namespace}`],
+      ['root', options.root],
+      ['ignores', options.ignores.map((re) => re.source).join(', ') || '(none)'],
+      ['socket', `${options.socketPath} (ns ${options.namespace})`],
+    ]);
+    resolve({ server, port: avaliablePort, options });
+  }));
 };

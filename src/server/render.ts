@@ -6,6 +6,7 @@ import { perf } from '@/utils';
 import type { RenderOptions, ThemeNames } from '../types';
 import { createTheme, isThemeName } from './theme';
 import { readUnknown } from './reader';
+import { scope } from './logger';
 
 export const createSSRMiddleware = (options: RenderOptions) => {
   const preloadPromise = Promise.all([
@@ -88,6 +89,23 @@ export const bindRender = (app: Express, options: RenderOptions) => {
   });
 
   const router = express.Router();
+
+  // request line: `GET /notebook/day1.md 200 9ms`, colored by status class.
+  // Successful static-asset responses stay quiet — pages and failures are
+  // the interesting part
+  router.use((req, res, next) => {
+    const start = performance.now();
+    res.on('finish', () => {
+      const isDoc = !path.extname(req.path) || /\.(md|markdown)$/i.test(req.path);
+      if (!isDoc && res.statusCode < 400) return;
+
+      const ms = (performance.now() - start).toFixed(1);
+      const line = `${req.method} ${req.originalUrl} ${res.statusCode} ${ms}ms`;
+      const level = res.statusCode >= 500 ? 'error' : res.statusCode >= 400 ? 'warn' : 'log';
+      options.logger[level](`${scope('request')}${line}`);
+    });
+    next();
+  });
 
   router.use(ssr);
   router.use(serveRoot);
