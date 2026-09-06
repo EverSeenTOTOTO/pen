@@ -27,6 +27,10 @@ const answer = 42;
 console.log(answer);
 ```
 
+## Math
+
+Inline math $e^{i\pi} + 1 = 0$ in a sentence.
+
 ## Diagram
 
 ```mermaid

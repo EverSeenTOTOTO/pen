@@ -24,6 +24,7 @@ const serveAssets = () => ({
     const assetsRoot = path.join(process.cwd(), 'src', 'assets');
     const contentTypes: Record<string, string> = {
       '.css': 'text/css',
+      '.js': 'text/javascript', // katex copy-tex contrib (plain script)
       '.woff': 'font/woff',
       '.woff2': 'font/woff2',
       '.ttf': 'font/ttf',
@@ -131,12 +132,14 @@ const devSSR = () => ({
     // runtime <style> tags when the client entry executes — the ssr markup
     // flashes unstyled first (FOUC / layout jump). Serving them as links
     // from src/assets (serveAssets) makes the first paint correct; the
-    // duplicate runtime injection is same-rules and harmless.
+    // duplicate runtime injection is same-rules and harmless. The copy-tex
+    // script matches the prod injectHtml plugin.
     const templateHtml = fs.readFileSync(paths.template, 'utf-8')
       .replace('<!-- inject -->', [
         '<link rel="stylesheet" href="/assets/katex.min.css">',
         '<link rel="stylesheet" href="/assets/base.css">',
         '<link rel="stylesheet" href="/assets/index.css">',
+        '<script defer src="/assets/katex-copy-tex.min.js"></script>',
       ].join('\n  '));
     const transports: ['websocket'] = ['websocket'];
     const remark = new RemarkRehype({ logger, plugins: [] })

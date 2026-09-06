@@ -91,6 +91,28 @@ test('theme toggle persists', async ({ page }) => {
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
 });
 
+test('copying math puts latex source on the clipboard', async ({ page }) => {
+  await page.goto('/');
+  // katex copy-tex rewrites the copy event payload: selecting rendered math
+  // must yield the latex source (with $ delimiters), not the visual glyphs
+  const clipboard = await page.evaluate(() => {
+    const katex = document.querySelector('.katex');
+    if (!katex) return '(no math)';
+    const range = document.createRange();
+    range.selectNode(katex);
+    const sel = getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+    return new Promise((resolve) => {
+      document.addEventListener('copy', (e) => {
+        resolve(e.clipboardData?.getData('text/plain') ?? '(empty)');
+      }, { once: true });
+      document.execCommand('copy');
+    });
+  });
+  await expect(clipboard).toContain('$e^{i');
+});
+
 test('mermaid renders svg', async ({ page }) => {
   await page.goto('/');
   // mermaid is imported lazily on the client (separate async chunk) — allow a
