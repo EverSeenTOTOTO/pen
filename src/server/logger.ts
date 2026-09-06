@@ -46,25 +46,28 @@ export const paint = {
   status: (code: number) => (code >= 500 ? chalk.red : code >= 400 ? chalk.yellow : code >= 300 ? chalk.cyan : chalk.green),
 };
 
-/** framed startup summary — one logger call so only the first line is prefixed.
- * Values may carry ansi colors; widths are measured on the visible text. */
+/** framed startup summary — printed as one log entry: only the first row
+ * carries the `time level` prefix, so continuation rows are padded to that
+ * width (12 time + 1 space + 4 info + 2 gap — must match the format config
+ * above). Values may carry ansi colors; widths are measured on visible text. */
 export const printBanner = (logger: Logger, title: string, rows: Array<[string, string]>) => {
   // eslint-disable-next-line no-control-regex -- stripping ansi escapes is the point
   const ANSI = /\u001b\[[0-9;]*m/g;
   const visible = (s: string) => s.replace(ANSI, '');
   const visibleLength = (s: string) => visible(s).length;
   const KEY_WIDTH = 9; // rows render as `key.padEnd(9) + ' ' + value`
+  const INDENT = ' '.repeat(19); // align under the first row's prefix
   const contentWidth = Math.max(visibleLength(title), ...rows.map(([, value]) => KEY_WIDTH + 1 + visibleLength(value)));
   const row = (text: string, pad: number) => ` ${text}${' '.repeat(Math.max(0, pad))} `;
-  const block = [
+  const lines = [
     chalk.gray('┌') + row(paint.accent.bold(title), contentWidth - visibleLength(title)) + chalk.gray('┐'),
     ...rows.map(([key, value]) => (
       chalk.gray('│') + row(`${chalk.gray(key.padEnd(KEY_WIDTH))} ${value}`, contentWidth - KEY_WIDTH - 1 - visibleLength(value)) + chalk.gray('│')
     )),
     chalk.gray('└') + '─'.repeat(contentWidth + 2) + chalk.gray('┘'),
-  ].join('\n');
+  ];
 
-  logger.done(block);
+  logger.done(lines.join(`\n${INDENT}`));
 };
 
 export const extendLogger = (basic: Logger, prefix = 'App'): Logger => {
