@@ -218,7 +218,10 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--pen-backdrop);
+
+  /* opaque: the page behind must not bleed through while inspecting
+     diagram details — the whole point of the viewer */
+  background: var(--pen-bg);
 }
 
 .mermaid-viewer-stage {
@@ -237,6 +240,7 @@ body {
     max-width: none;
     display: block;
     background: var(--pen-paper);
+    border: 1px solid var(--pen-border);
     border-radius: 8px;
     box-shadow: var(--pen-shadow-float);
     padding: 16px;
