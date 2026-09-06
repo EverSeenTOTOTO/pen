@@ -138,6 +138,39 @@ test('mermaid renders svg', async ({ page }) => {
   await expect(page.locator('.mermaid-svg svg').first()).toBeVisible({ timeout: 15000 });
 });
 
+test('mermaid viewer zooms, pans and closes', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.locator('.mermaid-svg svg').first()).toBeVisible({ timeout: 15000 });
+
+  await page.locator('.mermaid-svg .mermaid-expand').first().click();
+  const stage = page.locator('.mermaid-viewer-stage');
+  await expect(page.locator('.mermaid-viewer svg')).toBeVisible();
+  await expect(page.locator('.mermaid-viewer-zoom')).toHaveText('100%');
+
+  // toolbar zoom in
+  await page.getByRole('button', { name: 'Zoom in' }).click();
+  await expect(page.locator('.mermaid-viewer-zoom')).toHaveText('125%');
+
+  // drag pans (inline style keeps the raw calc; computed matrices resolve
+  // the -50% into pixels and are awkward to match)
+  const box = await stage.boundingBox();
+  const cx = box.x + box.width / 2;
+  const cy = box.y + box.height / 2;
+  await page.mouse.move(cx, cy);
+  await page.mouse.down();
+  await page.mouse.move(cx + 60, cy + 40, { steps: 4 });
+  await page.mouse.up();
+  await expect(stage).toHaveAttribute('style', /scale\(1\.25\)/);
+  await expect(stage).toHaveAttribute('style', /\+ 60px/);
+  await expect(stage).toHaveAttribute('style', /\+ 40px/);
+
+  // esc closes and unlocks the page scroll
+  await expect(page.locator('html')).toHaveClass(/pen-viewer-open/);
+  await page.keyboard.press('Escape');
+  await expect(page.locator('.mermaid-viewer')).toHaveCount(0);
+  await expect(page.locator('html')).not.toHaveClass(/pen-viewer-open/);
+});
+
 test('mobile overlay drawer', async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 667 });
   await page.goto('/');

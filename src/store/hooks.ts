@@ -58,6 +58,160 @@ export const useAutoFetch = () => {
   }, [location.pathname]);
 };
 
+/**
+ * In-page diagram viewer: the `.mermaid-expand` button on rendered diagrams
+ * opens the svg on a full-viewport overlay — wheel zoom anchored at the
+ * cursor, drag to pan, double-click or the toolbar to reset, Esc / backdrop
+ * click / toolbar to close. DOM-imperative because the diagrams live inside
+ * dangerouslySetInnerHTML content; everything is delegated or on the overlay
+ * itself, so re-rendered hosts keep working.
+ */
+export const useDiagramViewer = () => {
+  useEffect(() => {
+    let scale = 1;
+    let tx = 0;
+    let ty = 0;
+    let overlay: HTMLElement | null = null;
+    let stage: HTMLElement | null = null;
+    let zoomLabel: HTMLElement | null = null;
+
+    const apply = () => {
+      if (!stage) return;
+      stage.style.transform = `translate(calc(-50% + ${tx}px), calc(-50% + ${ty}px)) scale(${scale})`;
+      if (zoomLabel) zoomLabel.textContent = `${Math.round(scale * 100)}%`;
+    };
+
+    const reset = (initial?: { w: number, h: number }) => {
+      // fit large diagrams into the viewport on open
+      if (initial) {
+        const fit = Math.min(1, (innerWidth * 0.9) / initial.w, (innerHeight * 0.8) / initial.h);
+        scale = Math.max(fit, 0.1);
+      } else {
+        scale = 1;
+      }
+      tx = 0;
+      ty = 0;
+      apply();
+    };
+
+    const close = () => {
+      overlay?.removeEventListener('wheel', onWheel);
+      document.removeEventListener('keydown', onKeydown);
+      document.documentElement.classList.remove('pen-viewer-open');
+      overlay?.remove();
+      overlay = null;
+      stage = null;
+      zoomLabel = null;
+    };
+
+    const zoomAt = (clientX: number, clientY: number, factor: number) => {
+      const next = Math.min(8, Math.max(0.15, scale * factor));
+      if (next === scale) return;
+      // keep the point under the cursor fixed: the stage is anchored at the
+      // viewport center pre-transform, so work in cursor-relative coords
+      const dx = clientX - innerWidth / 2 - tx;
+      const dy = clientY - innerHeight / 2 - ty;
+      tx = clientX - innerWidth / 2 - (dx / scale) * next;
+      ty = clientY - innerHeight / 2 - (dy / scale) * next;
+      scale = next;
+      apply();
+    };
+
+    const onWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      zoomAt(e.clientX, e.clientY, e.deltaY < 0 ? 1.15 : 1 / 1.15);
+    };
+
+    const onKeydown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') close();
+    };
+
+    const open = (source: Element) => {
+      close();
+      const svg = source.querySelector('svg');
+      if (!svg) return;
+
+      overlay = document.createElement('div');
+      overlay.className = 'mermaid-viewer';
+      stage = document.createElement('div');
+      stage.className = 'mermaid-viewer-stage';
+      stage.appendChild(svg.cloneNode(true));
+
+      const toolbar = document.createElement('div');
+      toolbar.className = 'mermaid-viewer-toolbar';
+      zoomLabel = document.createElement('span');
+      zoomLabel.className = 'mermaid-viewer-zoom';
+      const mkBtn = (label: string, glyph: string, onClick: () => void) => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'icon-btn';
+        b.setAttribute('aria-label', label);
+        b.textContent = glyph;
+        b.addEventListener('click', (e) => { e.stopPropagation(); onClick(); });
+        return b;
+      };
+      toolbar.append(
+        mkBtn('Zoom in', '+', () => zoomAt(innerWidth / 2, innerHeight / 2, 1.25)),
+        zoomLabel,
+        mkBtn('Zoom out', '−', () => zoomAt(innerWidth / 2, innerHeight / 2, 1 / 1.25)),
+        mkBtn('Reset zoom', '⤢', () => reset()),
+        mkBtn('Close viewer', '✕', close),
+      );
+
+      const hint = document.createElement('div');
+      hint.className = 'mermaid-viewer-hint';
+      hint.textContent = 'wheel to zoom · drag to pan · double-click to reset';
+
+      overlay.append(stage, toolbar, hint);
+      overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) close();
+      });
+      overlay.addEventListener('wheel', onWheel, { passive: false });
+      stage.addEventListener('dblclick', () => reset());
+      stage.addEventListener('pointerdown', (e) => {
+        if ((e.target as HTMLElement).closest('.mermaid-viewer-toolbar')) return;
+        e.preventDefault();
+        stage?.setPointerCapture(e.pointerId);
+        const start = { x: e.clientX - tx, y: e.clientY - ty };
+        const onMove = (ev: PointerEvent) => {
+          tx = ev.clientX - start.x;
+          ty = ev.clientY - start.y;
+          apply();
+        };
+        const onUp = () => {
+          stage?.releasePointerCapture(e.pointerId);
+          stage?.removeEventListener('pointermove', onMove);
+          stage?.removeEventListener('pointerup', onUp);
+        };
+        stage?.addEventListener('pointermove', onMove);
+        stage?.addEventListener('pointerup', onUp);
+      });
+      document.addEventListener('keydown', onKeydown);
+
+      document.documentElement.classList.add('pen-viewer-open');
+      document.body.appendChild(overlay);
+
+      requestAnimationFrame(() => {
+        const rect = stage.getBoundingClientRect();
+        reset({ w: rect.width, h: rect.height });
+      });
+    };
+
+    const onRootClick = (e: MouseEvent) => {
+      const btn = (e.target as HTMLElement).closest?.('.mermaid-expand');
+      if (!btn) return;
+      const host = btn.closest('.mermaid-svg');
+      if (host) open(host);
+    };
+    document.addEventListener('click', onRootClick);
+
+    return () => {
+      document.removeEventListener('click', onRootClick);
+      close();
+    };
+  }, []);
+};
+
 export const scrollToHeading = (id: string) => {
   document.getElementById(id)?.scrollIntoView();
   history.replaceState(null, '', `#${id}`);
@@ -81,6 +235,19 @@ export const useScrollSpy = () => {
     headers.forEach((header) => observer.observe(header));
     return () => observer.disconnect();
   }, [home.data]);
+};
+
+const EXPAND_ICON = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg>';
+
+/** corner affordance opening the diagram in the in-page viewer */
+const attachExpandButton = (host: HTMLElement) => {
+  if (host.querySelector('.mermaid-expand')) return;
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.className = 'mermaid-expand';
+  btn.setAttribute('aria-label', 'Expand diagram');
+  btn.innerHTML = EXPAND_ICON;
+  host.appendChild(btn);
 };
 
 export const useMermaid = () => {
@@ -121,11 +288,13 @@ export const useMermaid = () => {
           if (!target) continue;
           if (host) {
             host.innerHTML = svg;
+            attachExpandButton(host);
           } else {
             const div = document.createElement('div');
             div.className = 'mermaid-svg';
             div.dataset.mermaidSource = source;
             div.innerHTML = svg;
+            attachExpandButton(div);
             target.replaceWith(div);
           }
         } catch (err) {
