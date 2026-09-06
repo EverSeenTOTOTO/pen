@@ -669,15 +669,22 @@ body {
 
 /* ---- markdown paper ---- */
 .paper-updated {
-  animation: pen-flash 1.2s ease-out;
+  animation: pen-flash 1.6s ease-out;
 }
 
+/* a clearly visible amber ring plus a faint warm wash over the paper —
+   the first cut (2px ring at --pen-select opacity) was imperceptible */
 @keyframes pen-flash {
-  from {
-    box-shadow: var(--pen-shadow-paper), 0 0 0 2px var(--pen-select);
+  0% {
+    box-shadow: var(--pen-shadow-paper), 0 0 0 3px color-mix(in srgb, var(--pen-accent) 65%, transparent);
+    background-color: color-mix(in srgb, var(--pen-accent) 7%, var(--pen-paper));
   }
 
-  to {
+  60% {
+    box-shadow: var(--pen-shadow-paper), 0 0 0 3px color-mix(in srgb, var(--pen-accent) 30%, transparent);
+  }
+
+  100% {
     box-shadow: var(--pen-shadow-paper);
   }
 }
