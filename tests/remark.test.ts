@@ -43,8 +43,9 @@ it('test highlightjs', async () => {
   const data = await remark.process('```ts\nconsole.log()\n```\n```bash\nls -lf\n```');
   const content = decodeURIComponent(data.content);
 
-  expect(content).toMatch(/<code class="language-ts">/);
-  expect(content).toMatch(/<code class="language-bash">/);
+  // the hljs base class is added for theme base colors
+  expect(content).toMatch(/<code class="language-ts hljs">/);
+  expect(content).toMatch(/<code class="language-bash hljs">/);
 });
 
 it('test container', async () => {
@@ -61,6 +62,29 @@ it('test copy', async () => {
   const { content } = await remark.process('```ts\nconsole.log()\n```');
 
   expect(decodeURIComponent(content)).toMatch(/data-clipboard-text="console.log()/);
+});
+
+it('test sanitize raw html', async () => {
+  const remark = createRemark();
+
+  const { content } = await remark.process(
+    '<script>window.__pwned = true</script>\n\n<img src="x" onerror="alert(1)" />\n\n[evil](javascript:alert(1))',
+  );
+  const html = decodeURIComponent(content);
+
+  expect(html).not.toMatch(/<script/);
+  expect(html).not.toMatch(/onerror/);
+  expect(html).not.toMatch(/javascript:/);
+});
+
+it('test frontmatter stripped', async () => {
+  const remark = createRemark();
+
+  const { content } = await remark.process('---\ntitle: T\n---\n\n# A');
+  const html = decodeURIComponent(content);
+
+  expect(html).not.toMatch(/title: T/);
+  expect(html).toMatch(/<h1 id="a">A<\/h1>/);
 });
 
 it('test toc', async () => {

@@ -1,7 +1,9 @@
 import type { DocToc, RemarkOptions, RemarkPlugin } from '@/types';
 import rehypeRaw from 'rehype-raw';
+import rehypeSanitize, { defaultSchema } from 'rehype-sanitize';
 import rehypeStringify from 'rehype-stringify';
 import remarkDirective from 'remark-directive';
+import remarkFrontmatter from 'remark-frontmatter';
 import remarkGFM from 'remark-gfm';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
@@ -16,15 +18,42 @@ import rehypeCopy from './plugins/rehype-copy';
 import { makeContainerPlugin } from './plugins/remark-container';
 import type { Logger } from './logger';
 
+/**
+ * Sanitize runs right after rehype-raw, while the tree still only holds
+ * user-supplied markup (markdown-generated nodes plus raw html): everything
+ * downstream — heading ids, copy buttons, katex/mermaid output — is our own
+ * generation and never passes through it. Schema is the default plus the
+ * html features pen documents commonly use.
+ */
+const sanitizeSchema = {
+  ...defaultSchema,
+  tagNames: [
+    ...(defaultSchema.tagNames ?? []),
+    'details',
+    'summary',
+    'kbd',
+    'mark',
+    'picture',
+    'source',
+  ],
+  attributes: {
+    ...defaultSchema.attributes,
+    '*': [...(defaultSchema.attributes?.['*'] ?? []), 'className'],
+    source: ['src', 'srcset', 'type', 'media'],
+  },
+};
+
 const defaultPlugins = [
   ['remark-parse', remarkParse],
+  ['remark-frontmatter', remarkFrontmatter],
   ['remark-directive', remarkDirective],
   ['remark-gfm', remarkGFM],
   ['remark-container', makeContainerPlugin(['info', 'warn', 'error'])],
   ['remark-math', remarkMath],
-  ['remark-rehype', remarkRehype, { allowDangerousHtml: true }], // FIXME: stupid escape strategy
+  ['remark-rehype', remarkRehype, { allowDangerousHtml: true }],
   /* -------- Seperator for remark and rehype -------- */
   ['rehype-raw', rehypeRaw],
+  ['rehype-sanitize', rehypeSanitize, sanitizeSchema],
   ['rehype-slug-toc', rehypeSlugToc],
   ['rehype-copy', rehypeCopy],
   ['rehype-highlight', rehypeHighlight],
