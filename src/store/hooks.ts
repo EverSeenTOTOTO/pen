@@ -171,7 +171,7 @@ export const useDiagramViewer = () => {
 
       const hint = document.createElement('div');
       hint.className = 'mermaid-viewer-hint';
-      hint.textContent = 'esc to close · wheel to zoom · drag to pan · double-click to reset';
+      hint.textContent = 'esc to close · wheel to zoom · drag to pan';
 
       overlay.append(stage, toolbar, hint);
       // clicking never exits (a stray click while inspecting details must
@@ -179,7 +179,6 @@ export const useDiagramViewer = () => {
       // wheel zooms; pointerdown anywhere pans, so dragging works from the
       // backdrop too, not only when grabbing the diagram itself
       overlay.addEventListener('wheel', onWheel, { passive: false });
-      stage.addEventListener('dblclick', () => reset());
       overlay.addEventListener('pointerdown', (e) => {
         if ((e.target as HTMLElement).closest('.mermaid-viewer-toolbar')) return;
         e.preventDefault();

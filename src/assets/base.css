@@ -173,15 +173,14 @@ body {
 }
 
 /* ---- mermaid expand (corner affordance on rendered diagrams) ---- */
-.mermaid-svg {
-  position: relative;
-}
-
 .mermaid-expand {
+  /* anchored to the .copy-btn-container (the code block), mirroring the
+     copy tag's own offsets, so both sit flush with the block's corners —
+     for narrow diagrams the svg edge is inset by the pre padding and would
+     otherwise detach the button from the block edge */
   position: absolute;
 
-  /* bottom-right: the top corners belong to the copy/language tag and the
-     diagram content */
+  /* bottom-right: the top-right corner belongs to the copy/language tag */
   right: 12px;
   bottom: 10px;
   display: inline-flex;
@@ -203,7 +202,7 @@ body {
   }
 }
 
-.mermaid-svg:hover .mermaid-expand {
+.copy-btn-container:hover .mermaid-expand {
   opacity: 0.9;
 }
 
