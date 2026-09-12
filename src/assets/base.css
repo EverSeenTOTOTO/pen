@@ -678,6 +678,13 @@ body {
   box-shadow: var(--pen-shadow-paper);
 }
 
+/* wide screens: claim more of the viewport for the paper */
+@media (width >= 1440px) {
+  .markdown-paper {
+    max-width: 1200px;
+  }
+}
+
 /* ---- mermaid ---- */
 .mermaid-error {
   padding: 12px;
