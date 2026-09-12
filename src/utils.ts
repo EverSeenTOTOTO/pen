@@ -26,10 +26,6 @@ export function isMarkdown(filepath: string) {
   return /\.(md|markdown)$/i.test(filepath);
 }
 
-export function isReadme(filepath: string) {
-  return /(README|index)\.(md|markdown)$/i.test(filepath);
-}
-
 // '\\' -> '/'
 // '\\\\' -> '/'
 // '//' -> '/'

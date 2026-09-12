@@ -7,9 +7,10 @@ test('renders markdown readme', async ({ page }) => {
 
 test('sidebar lists directory entries', async ({ page }) => {
   await page.goto('/');
-  // fixture root: README.md, evil.md plus the notebook/ and noreadme/ dirs
+  // fixture root: README.md, evil.md, pixel.png plus the media/, notebook/
+  // and noreadme/ dirs
   const entries = page.locator('.sidebar button.file-item');
-  await expect(entries).toHaveCount(4);
+  await expect(entries).toHaveCount(5);
   await expect(entries.filter({ hasText: 'README.md' })).toHaveCount(1);
 });
 
@@ -90,6 +91,23 @@ test('theme toggle persists', async ({ page }) => {
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
 });
 
+test('directory without preferred docs opens the first markdown', async ({ page }) => {
+  await page.goto('/notebook');
+  // no README/index/skill here — the first markdown in sort order becomes
+  // the default reading instead of the file index
+  await expect(page.locator('.markdown-body h1')).toContainText('Day One');
+  await expect(page.locator('.file-index')).toHaveCount(0);
+});
+
+test('directory without markdown renders an index of children', async ({ page }) => {
+  await page.goto('/media');
+  // only a screenshots/ subdir here — no markdown to read, so the content
+  // area becomes a file index of the directory's children
+  await expect(page.locator('.file-index-title')).toHaveText('/media/');
+  const card = page.locator('.file-index-item', { hasText: 'screenshots' });
+  await expect(card).toBeVisible();
+});
+
 test('breadcrumb stays stable across directory round trips', async ({ page }) => {
   // regression: a directory reading ends in `/`, whose split produced an
   // empty crumb segment with a duplicate react key — every home/directory
@@ -108,18 +126,6 @@ test('breadcrumb stays stable across directory round trips', async ({ page }) =>
     await expect(page.locator('.breadcrumb > span')).toHaveCount(1);
     await expect(page.locator('.breadcrumb > span').first()).toHaveText('/README.md');
   }
-});
-
-test('directory without readme renders an index of children', async ({ page }) => {
-  await page.goto('/notebook');
-  // no README here — the content area becomes a file index instead of empty
-  await expect(page.locator('.file-index-title')).toHaveText('/notebook/');
-  const card = page.locator('.file-index-item', { hasText: 'day1.md' });
-  await expect(card).toBeVisible();
-
-  await card.click();
-  await expect(page).toHaveURL(/\/notebook\/day1\.md$/);
-  await expect(page.locator('.markdown-body h1')).toContainText('Day One');
 });
 
 test('empty directory shows the empty state', async ({ page }) => {
@@ -154,7 +160,7 @@ test('raw html is sanitized', async ({ page }) => {
 test('sidebar filter narrows the file list', async ({ page }) => {
   await page.goto('/');
   const entries = page.locator('.sidebar button.file-item');
-  await expect(entries).toHaveCount(4);
+  await expect(entries).toHaveCount(5);
 
   await page.locator('.sidebar-filter').fill('note');
   await expect(entries).toHaveCount(1);
@@ -164,7 +170,7 @@ test('sidebar filter narrows the file list', async ({ page }) => {
   await expect(page.locator('.sidebar-filter-empty')).toBeVisible();
 
   await page.locator('.sidebar-filter').press('Escape');
-  await expect(entries).toHaveCount(4);
+  await expect(entries).toHaveCount(5);
 });
 
 test('copying math puts latex source on the clipboard', async ({ page }) => {

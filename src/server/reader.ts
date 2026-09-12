@@ -9,7 +9,6 @@ import type {
   ReaderOptions,
 } from '../types';
 import {
-  isReadme,
   resolvePathInfo,
 } from '../utils';
 import { RemarkRehype } from './rehype';
@@ -38,6 +37,24 @@ function sortChildren(a: PathInfo, b: PathInfo) {
   if (b.filename.startsWith('.')) return 1;
 
   return a.filename < b.filename ? -1 : 0;
+}
+
+// default reading preference: README first, then index, then skill, then
+// whatever markdown sorts first — a directory without any markdown has no
+// reading and falls back to the client's file index
+const READING_CANDIDATES = [
+  /^readme\.(md|markdown)$/i,
+  /^index\.(md|markdown)$/i,
+  /^skill\.(md|markdown)$/i,
+];
+
+function pickReading(children: PathInfo[]): PathInfo | undefined {
+  for (const pattern of READING_CANDIDATES) {
+    const hit = children.find((each) => each.type === 'markdown' && pattern.test(each.filename));
+    if (hit) return hit;
+  }
+
+  return children.find((each) => each.type === 'markdown');
 }
 
 async function readMarkdown(render: RemarkRehype, pathInfo: PathInfo): Promise<PenMarkdownData> {
@@ -123,13 +140,11 @@ export async function readUnknown(options: ReaderOptions) {
   if (pathInfo.type === 'markdown') {
     data.reading = await readCache(pathInfo) as PenMarkdownData;
   } else {
-    // if readme
-    const readme = data.children.filter((each) => isReadme(each.filename));
+    // pick a default reading for the directory by preference order
+    const reading = pickReading(data.children);
 
-    if (readme.length > 0) {
-      const readmeInfo = resolvePathInfo(root, readme[0].relativePath);
-
-      data.reading = await readMarkdown(remark, readmeInfo);
+    if (reading) {
+      data.reading = await readMarkdown(remark, resolvePathInfo(root, reading.relativePath));
     }
   }
 
