@@ -29,7 +29,11 @@ export class UiStore {
   get breadcrumb() {
     if (!this.root.home.reading || this.root.home.reading === '/') return [];
 
-    const split = this.root.home.reading.split('/').slice(1);
+    // directory readings carry a trailing slash (`/docs/`) which splits into
+    // an empty last segment — drop it: it renders a phantom crumb whose
+    // resolved link duplicates its sibling's react key, and reconciliation
+    // over the duplicate keys leaks a stale node per navigation
+    const split = this.root.home.reading.split('/').slice(1).filter(Boolean);
     const result = [];
 
     for (let i = 0; i < split.length; ++i) {

@@ -90,6 +90,26 @@ test('theme toggle persists', async ({ page }) => {
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
 });
 
+test('breadcrumb stays stable across directory round trips', async ({ page }) => {
+  // regression: a directory reading ends in `/`, whose split produced an
+  // empty crumb segment with a duplicate react key — every home/directory
+  // round trip then leaked one stale crumb node into the header
+  await page.goto('/');
+  await expect(page.locator('.breadcrumb > span')).toHaveCount(1);
+
+  for (let i = 0; i < 3; i++) {
+    await page.locator('.sidebar .file-item', { hasText: 'notebook' }).click();
+    await expect(page.locator('.breadcrumb > span')).toHaveCount(1);
+    // the single crumb is the directory itself — no phantom empty crumb
+    // (textContent includes the leading `/` separator)
+    await expect(page.locator('.breadcrumb > span').first()).toHaveText('/notebook');
+
+    await page.locator('.breadcrumb-home').click();
+    await expect(page.locator('.breadcrumb > span')).toHaveCount(1);
+    await expect(page.locator('.breadcrumb > span').first()).toHaveText('/README.md');
+  }
+});
+
 test('directory without readme renders an index of children', async ({ page }) => {
   await page.goto('/notebook');
   // no README here — the content area becomes a file index instead of empty
