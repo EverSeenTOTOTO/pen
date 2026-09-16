@@ -77,13 +77,14 @@ it('test sanitize raw html', async () => {
   expect(html).not.toMatch(/javascript:/);
 });
 
-it('test frontmatter stripped', async () => {
+it('test frontmatter rendered as a yaml block', async () => {
   const remark = createRemark();
 
   const { content } = await remark.process('---\ntitle: T\n---\n\n# A');
   const html = decodeURIComponent(content);
 
-  expect(html).not.toMatch(/title: T/);
+  expect(html).toMatch(/<code class="language-yaml hljs">/);
+  expect(html).toMatch(/title: T/);
   expect(html).toMatch(/<h1 id="a">A<\/h1>/);
 });
 

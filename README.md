@@ -97,6 +97,11 @@ const server = createServer((req, res) => {
 server.listen(3000);
 ```
 
+### Frontmatter
+
+YAML frontmatter renders back as a highlighted `yaml` block at the top of
+the document instead of being swallowed by the parser.
+
 ### Source Preview
 
 Code files and common config files (`ts`, `py`, `yml`, `toml`, `Dockerfile`,

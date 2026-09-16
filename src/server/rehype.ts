@@ -17,6 +17,7 @@ import { rehypeSlugToc, PEN_TOC_DATA } from './plugins/rehype-toc';
 import rehypeHighlight from './plugins/rehype-highlight';
 import rehypeCopy from './plugins/rehype-copy';
 import { makeContainerPlugin } from './plugins/remark-container';
+import remarkFrontmatterView from './plugins/remark-frontmatter-view';
 import type { Logger } from './logger';
 
 /**
@@ -47,6 +48,7 @@ const sanitizeSchema = {
 const defaultPlugins = [
   ['remark-parse', remarkParse],
   ['remark-frontmatter', remarkFrontmatter],
+  ['remark-frontmatter-view', remarkFrontmatterView],
   ['remark-directive', remarkDirective],
   ['remark-gfm', remarkGFM],
   ['remark-container', makeContainerPlugin(['info', 'warn', 'error'])],

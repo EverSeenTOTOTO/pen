@@ -150,6 +150,16 @@ test('code files render a highlighted source view', async ({ page }) => {
   await expect(page.locator('.markdown-body code.hljs .hljs-keyword').first()).toBeVisible();
 });
 
+test('yaml frontmatter renders as a highlighted block', async ({ page }) => {
+  await page.goto('/notebook');
+  // day1.md carries frontmatter — it renders as a yaml block instead of
+  // being swallowed by the parser
+  const block = page.locator('.markdown-body pre code.language-yaml');
+  await expect(block).toBeVisible();
+  await expect(block).toContainText('title: day one');
+  await expect(page.locator('.markdown-body h1')).toContainText('Day One');
+});
+
 test('plain-text tier renders without highlight spans', async ({ page }) => {
   await page.goto('/srcpreview/data.toml');
   const code = page.locator('.markdown-body pre code.hljs');
