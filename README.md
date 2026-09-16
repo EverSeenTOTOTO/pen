@@ -97,6 +97,15 @@ const server = createServer((req, res) => {
 server.listen(3000);
 ```
 
+### Source Preview
+
+Code files and common config files (`ts`, `py`, `yml`, `toml`, `Dockerfile`,
+`Makefile`, …) are previewed as highlighted source — the same highlighter as
+fenced code blocks, following the light/dark theme. Files without a grammar
+(say, `toml` or `rst`) render as plain text. Directory listings include every
+file; clicking one that pen cannot preview shows an in-place notice instead
+of navigating. A directory without any markdown reads its first code file.
+
 ### 中文标题（CJK anchors）
 
 标题锚点是 github 风格 slug，**中文字符原样保留**——侧边栏目录可跳转，滚动时高亮跟随。

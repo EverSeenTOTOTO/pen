@@ -7,11 +7,12 @@ test('renders markdown readme', async ({ page }) => {
 
 test('sidebar lists directory entries', async ({ page }) => {
   await page.goto('/');
-  // fixture root: README.md, evil.md, pixel.png plus the media/, notebook/
-  // and noreadme/ dirs
+  // fixture root: README.md, evil.md, pixel.png plus the media/, notebook/,
+  // noreadme/ and srcpreview/ dirs — unsupported files are listed too
   const entries = page.locator('.sidebar button.file-item');
-  await expect(entries).toHaveCount(5);
+  await expect(entries).toHaveCount(7);
   await expect(entries.filter({ hasText: 'README.md' })).toHaveCount(1);
+  await expect(entries.filter({ hasText: 'pixel.png' })).toHaveCount(1);
 });
 
 test('sidebar open by default on desktop', async ({ page }) => {
@@ -117,10 +118,13 @@ test('breadcrumb stays stable across directory round trips', async ({ page }) =>
 
   for (let i = 0; i < 3; i++) {
     await page.locator('.sidebar .file-item', { hasText: 'notebook' }).click();
-    await expect(page.locator('.breadcrumb > span')).toHaveCount(1);
-    // the single crumb is the directory itself — no phantom empty crumb
-    // (textContent includes the leading `/` separator)
-    await expect(page.locator('.breadcrumb > span').first()).toHaveText('/notebook');
+    // notebook/ reads day1.md via the markdown fallback — one crumb per
+    // real path segment, no phantom empty crumb (textContent includes the
+    // leading `/` separator)
+    const crumbs = page.locator('.breadcrumb > span');
+    await expect(crumbs).toHaveCount(2);
+    await expect(crumbs.first()).toHaveText('/notebook');
+    await expect(crumbs.nth(1)).toHaveText('/day1.md');
 
     await page.locator('.breadcrumb-home').click();
     await expect(page.locator('.breadcrumb > span')).toHaveCount(1);
@@ -128,11 +132,37 @@ test('breadcrumb stays stable across directory round trips', async ({ page }) =>
   }
 });
 
-test('empty directory shows the empty state', async ({ page }) => {
+test('unsupported files are listed but toast on click', async ({ page }) => {
   await page.goto('/noreadme');
-  // .gitkeep is dotfile-ignored, so the directory reads as empty
-  await expect(page.locator('.file-index-empty')).toBeVisible();
-  await expect(page.locator('.file-index-item')).toHaveCount(0);
+  // .gitkeep used to be filtered out of the listing entirely — now every
+  // entry is listed, and the unsupported one stays in place with a toast
+  const item = page.locator('.file-index-item', { hasText: '.gitkeep' });
+  await expect(item).toHaveClass(/file-index-unsupported/);
+  await item.click();
+
+  await expect(page.locator('.toast')).toContainText('No preview available');
+  await expect(page).toHaveURL(/\/noreadme$/);
+});
+
+test('code files render a highlighted source view', async ({ page }) => {
+  await page.goto('/srcpreview/app.ts');
+  await expect(page.locator('.markdown-body pre code.hljs')).toBeVisible();
+  await expect(page.locator('.markdown-body code.hljs .hljs-keyword').first()).toBeVisible();
+});
+
+test('plain-text tier renders without highlight spans', async ({ page }) => {
+  await page.goto('/srcpreview/data.toml');
+  const code = page.locator('.markdown-body pre code.hljs');
+  await expect(code).toContainText('port = 3210');
+  await expect(page.locator('.markdown-body .hljs-keyword')).toHaveCount(0);
+});
+
+test('code-only directory reads the first code file', async ({ page }) => {
+  await page.goto('/srcpreview');
+  // no markdown here — the first code file in sort order becomes the
+  // default reading instead of the file index
+  await expect(page.locator('.markdown-body pre code.hljs')).toBeVisible();
+  await expect(page.locator('.file-index')).toHaveCount(0);
 });
 
 test('content images open the lightbox', async ({ page }) => {
@@ -160,7 +190,7 @@ test('raw html is sanitized', async ({ page }) => {
 test('sidebar filter narrows the file list', async ({ page }) => {
   await page.goto('/');
   const entries = page.locator('.sidebar button.file-item');
-  await expect(entries).toHaveCount(5);
+  await expect(entries).toHaveCount(7);
 
   await page.locator('.sidebar-filter').fill('note');
   await expect(entries).toHaveCount(1);
@@ -170,7 +200,7 @@ test('sidebar filter narrows the file list', async ({ page }) => {
   await expect(page.locator('.sidebar-filter-empty')).toBeVisible();
 
   await page.locator('.sidebar-filter').press('Escape');
-  await expect(entries).toHaveCount(5);
+  await expect(entries).toHaveCount(7);
 });
 
 test('copying math puts latex source on the clipboard', async ({ page }) => {

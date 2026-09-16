@@ -1,6 +1,7 @@
 import path from 'path';
 import fs from 'fs';
 import type { PathInfo } from './types';
+import { resolvePreview } from './languages';
 
 export function PASS() { }
 
@@ -52,7 +53,13 @@ export function resolvePathInfo(root: string, relative: string): PathInfo {
     filename,
     relativePath: isDirectory ? formatDirPath(relativePath) : relativePath,
      
-    type: isDirectory ? 'directory' : isMarkdown(fullpath) ? 'markdown' : 'other',
+    type: isDirectory
+      ? 'directory'
+      : isMarkdown(fullpath)
+        ? 'markdown'
+        : resolvePreview(filename)
+          ? 'code'
+          : 'other',
   };
 }
 

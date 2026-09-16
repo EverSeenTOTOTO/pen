@@ -1,17 +1,17 @@
 import { observer } from 'mobx-react-lite';
 import { useStore } from '@/store';
-import { useNav } from '@/store/hooks';
+import { useEntryNav } from '@/store/hooks';
 import Icon from './Icon';
 
 /**
- * Shown when a directory page has no README to read: the content area
+ * Shown when a directory page has no previewable reading: the content area
  * becomes an index of the directory's children instead of dead space —
  * and on mobile it doubles as the primary navigation page.
  */
 const FileIndex = observer(() => {
   const home = useStore('home');
   const drawer = useStore('drawer');
-  const nav = useNav();
+  const nav = useEntryNav();
 
   const entries = drawer.subdirs;
 
@@ -26,11 +26,11 @@ const FileIndex = observer(() => {
               <li key={doc.relativePath}>
                 <button
                   type="button"
-                  className="file-index-item"
+                  className={`file-index-item${doc.type === 'other' ? ' file-index-unsupported' : ''}`}
                   disabled={home.loading}
-                  onClick={() => nav(doc.relativePath)}
+                  onClick={() => nav(doc)}
                 >
-                  <Icon name={doc.type === 'directory' ? 'folder' : 'file'} size={18} />
+                  <Icon name={doc.type === 'directory' ? 'folder' : doc.type === 'code' ? 'code' : 'file'} size={18} />
                   <span>{doc.filename}</span>
                 </button>
               </li>

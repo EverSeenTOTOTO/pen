@@ -51,7 +51,8 @@ it('test watch root', async () => {
   const dir = await emitted;
 
   expect(dir.relativePath).toBe('/');
-  expect(dir.children.length).toBe(2);
+  // A/, A.md and A.txt — unsupported files are listed too
+  expect(dir.children.length).toBe(3);
   await watcher.close();
 });
 

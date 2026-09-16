@@ -1,14 +1,14 @@
 import { useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { useStore } from '@/store';
-import { useNav } from '@/store/hooks';
+import { useEntryNav } from '@/store/hooks';
 import Icon from './Icon';
 import TocTree from './TocTree';
 
 const Files = observer(() => {
   const home = useStore('home');
   const drawer = useStore('drawer');
-  const nav = useNav();
+  const entryNav = useEntryNav();
   const [filter, setFilter] = useState('');
 
   const needle = filter.trim().toLowerCase();
@@ -39,12 +39,12 @@ const Files = observer(() => {
           aria-current={home.reading === doc.relativePath || undefined}
           disabled={home.loading}
           onClick={() => {
-            nav(doc.relativePath);
+            entryNav(doc);
             // on mobile the overlay drawer must dismiss after picking a file
             drawer.closeOverlay();
           }}
         >
-          <Icon name={doc.type === 'directory' ? 'folder' : 'file'} size={16} />
+          <Icon name={doc.type === 'directory' ? 'folder' : doc.type === 'code' ? 'code' : 'file'} size={16} />
           <span className="file-name">{doc.filename}</span>
         </button>
       ))}

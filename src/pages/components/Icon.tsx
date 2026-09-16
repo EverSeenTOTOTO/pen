@@ -11,6 +11,12 @@ const ICONS = {
     </>
   ),
   chevronLeft: <path d="M15 18l-6-6 6-6" />,
+  code: (
+    <>
+      <path d="M16 18l6-6-6-6" />
+      <path d="M8 6l-6 6 6 6" />
+    </>
+  ),
   chevronRight: <path d="M9 18l6-6-6-6" />,
   chevronDown: <path d="M6 9l6 6 6-6" />,
   home: (

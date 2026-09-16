@@ -361,6 +361,15 @@ body {
   color: var(--pen-fg-muted);
 }
 
+/* unsupported entries stay listed but visibly inert */
+.file-index-unsupported {
+  color: var(--pen-fg-muted);
+
+  & svg {
+    color: var(--pen-fg-muted);
+  }
+}
+
 /* ---- sidebar ---- */
 .sidebar {
   position: fixed;

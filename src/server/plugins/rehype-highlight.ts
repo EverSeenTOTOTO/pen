@@ -1,6 +1,8 @@
 import { createLowlight } from 'lowlight';
 import { toString } from 'hast-util-to-string';
-import type { Element } from 'hast';
+import { unified } from 'unified';
+import rehypeStringify from 'rehype-stringify';
+import type { Element, Root } from 'hast';
 import xml from 'highlight.js/lib/languages/xml';
 import bash from 'highlight.js/lib/languages/bash';
 import c from 'highlight.js/lib/languages/c';
@@ -21,12 +23,21 @@ import scss from 'highlight.js/lib/languages/scss';
 import yaml from 'highlight.js/lib/languages/yaml';
 import typescript from 'highlight.js/lib/languages/typescript';
 import wasm from 'highlight.js/lib/languages/wasm';
+import llvm from 'highlight.js/lib/languages/llvm';
+import vim from 'highlight.js/lib/languages/vim';
+import objectivec from 'highlight.js/lib/languages/objectivec';
+import cmake from 'highlight.js/lib/languages/cmake';
+import glsl from 'highlight.js/lib/languages/glsl';
+import x86asm from 'highlight.js/lib/languages/x86asm';
+import ini from 'highlight.js/lib/languages/ini';
+import scheme from 'highlight.js/lib/languages/scheme';
 import { makeCodeBlockPlugin } from './code-block';
 
 const languages = {
   xml, bash, c, cpp, css, markdown, diff, go, java,
   javascript, json, lua, makefile, plaintext, python,
   rust, scss, yaml, typescript, wasm,
+  llvm, vim, objectivec, cmake, glsl, x86asm, ini, scheme,
 };
 
 const lowlight = createLowlight(languages);
@@ -66,3 +77,35 @@ export const highlightCodeBlock = (language: string, code: Element): void => {
 };
 
 export default makeCodeBlockPlugin(highlightCodeBlock);
+
+// serialize synthetic <pre><code> fragments once — rehype-stringify escapes
+// text nodes, so arbitrary file source cannot inject markup
+const stringify = unified().use(rehypeStringify);
+
+/**
+ * Render a source file body for the code preview: the same highlighter as
+ * fenced blocks, applied to a synthetic code element instead of markdown
+ * output. A null language is the plain-text tier — escaped, unhighlighted.
+ */
+export const highlightSource = (language: string | null, source: string): string => {
+  const code: Element = {
+    type: 'element',
+    tagName: 'code',
+    properties: { className: ['hljs'] },
+    children: [{ type: 'text', value: source }],
+  };
+
+  if (language) highlightCodeBlock(language, code);
+
+  const tree: Root = {
+    type: 'root',
+    children: [{
+      type: 'element',
+      tagName: 'pre',
+      properties: {},
+      children: [code],
+    }],
+  };
+
+  return stringify.stringify(tree);
+};

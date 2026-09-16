@@ -48,6 +48,17 @@ beforeAll(() => {
 
   fs.mkdirSync(path.join(rootDir, 'nomd'), { recursive: true });
   fs.writeFileSync(path.join(rootDir, 'nomd', 'pixel.png'), '');
+
+  fs.mkdirSync(path.join(rootDir, 'codeonly'), { recursive: true });
+  fs.writeFileSync(path.join(rootDir, 'codeonly', 'app.ts'), 'const answer: number = 42;\n');
+  fs.writeFileSync(path.join(rootDir, 'codeonly', 'zzz.toml'), 'a = 1\n');
+
+  fs.mkdirSync(path.join(rootDir, 'mixed'), { recursive: true });
+  fs.writeFileSync(path.join(rootDir, 'mixed', 'main.go'), 'package main\n');
+  fs.writeFileSync(path.join(rootDir, 'mixed', 'readme.md'), '# readme');
+
+  fs.mkdirSync(path.join(rootDir, 'bigfile'), { recursive: true });
+  fs.writeFileSync(path.join(rootDir, 'bigfile', 'big.ts'), 'x'.repeat(2 * 1024 * 1024 + 1));
 });
 
 afterAll(() => {
@@ -77,4 +88,40 @@ it('falls back to the first markdown in sort order', async () => {
 it('no markdown means no reading', async () => {
   const data = await read('/nomd/');
   expect(data.reading).toBeUndefined();
+});
+
+it('lists unsupported files alongside previewable ones', async () => {
+  const data = await read('/nomd/');
+  expect(data.children.map((c) => c.filename)).toContain('pixel.png');
+});
+
+it('falls back to the first code file when no markdown exists', async () => {
+  const data = await read('/codeonly/');
+  expect(data.reading).toMatchObject({ type: 'code', relativePath: '/codeonly/app.ts' });
+});
+
+it('prefers markdown over code for the reading', async () => {
+  const data = await read('/mixed/');
+  expect(data.reading?.relativePath).toBe('/mixed/readme.md');
+});
+
+it('code reading carries highlighted content', async () => {
+  const data = await read('/codeonly/app.ts');
+  expect(data.reading).toMatchObject({ type: 'code', language: 'typescript' });
+  expect(decodeURIComponent(data.reading?.content ?? '')).toContain('hljs-keyword');
+});
+
+it('plain-text tier reads without highlight spans', async () => {
+  const data = await read('/codeonly/zzz.toml');
+  expect(data.reading).toMatchObject({ type: 'code', language: null });
+  expect(decodeURIComponent(data.reading?.content ?? '')).toContain('a = 1');
+  expect(decodeURIComponent(data.reading?.content ?? '')).not.toContain('hljs-');
+});
+
+it('rejects unsupported files when requested directly', async () => {
+  await expect(read('/nomd/pixel.png')).rejects.toThrow('not a previewable file');
+});
+
+it('rejects oversized code files', async () => {
+  await expect(read('/bigfile/big.ts')).rejects.toThrow('too large');
 });

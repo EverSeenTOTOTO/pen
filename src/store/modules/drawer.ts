@@ -42,7 +42,10 @@ export class DrawerStore implements PrefetchStore<DrawerState> {
   }
 
   get toc() {
-    return this.root.home.data?.reading?.toc ?? [];
+    // code readings have no toc — only markdown does
+    const reading = this.root.home.data?.reading;
+
+    return reading?.type === 'markdown' ? reading.toc ?? [] : [];
   }
 
   protected expandToc() {

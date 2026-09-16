@@ -42,7 +42,7 @@ export type PenTheme = {
 };
 
 export type PathInfo = {
-  type: 'directory' | 'markdown' | 'other',
+  type: 'directory' | 'markdown' | 'code' | 'other',
   filename: string,
   relativePath: string,
   fullpath: string,
@@ -63,12 +63,20 @@ export type PenMarkdownData = {
   toc?: DocToc[],
 };
 
+export type PenCodeData = {
+  type: 'code',
+  filename: string,
+  relativePath: string,
+  content: string,
+  language: string | null, // null = plain-text tier, previewable without a grammar
+};
+
 export type PenDirectoryData = {
   type: 'directory',
   filename: string,
   relativePath: string,
   children: Omit<PathInfo, 'fullpath'>[],
-  reading?: PenMarkdownData
+  reading?: PenMarkdownData | PenCodeData
 };
 
 export type PenErrorData = {

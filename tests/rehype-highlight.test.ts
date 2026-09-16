@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { h } from 'hastscript';
 import type { Element } from 'hast';
-import rehypeHighlight, { highlightCodeBlock } from '@/server/plugins/rehype-highlight';
+import rehypeHighlight, { highlightCodeBlock, highlightSource } from '@/server/plugins/rehype-highlight';
 import { makeCodeBlockPlugin } from '@/server/plugins/code-block';
 
 // exercise the exported callback through the same wrapper the default
@@ -35,5 +35,31 @@ describe('rehype-highlight', () => {
     const code = h('code', { className: ['language-js'] }, 'const a = 1;');
     rehypeHighlight()(h('div', [h('pre', [code])]));
     expect(JSON.stringify(code)).toContain('hljs-keyword');
+  });
+});
+
+describe('highlightSource', () => {
+  it('wraps highlighted source in a pre>code html fragment', () => {
+    const html = highlightSource('js', 'const a = 1;');
+    expect(html).toMatch(/^<pre><code class="hljs">/);
+    expect(html).toContain('hljs-keyword');
+    expect(html).toContain('const');
+  });
+
+  it('escapes markup in source text', () => {
+    const html = highlightSource(null, '<script>alert(1)</script>');
+    expect(html).not.toContain('<script');
+    expect(html).toContain('&#x3C;script');
+  });
+
+  it('renders the plain-text tier without highlight spans', () => {
+    expect(highlightSource(null, 'a = 1')).toBe('<pre><code class="hljs">a = 1</code></pre>');
+  });
+
+  it('highlights the newly registered grammars', () => {
+    expect(highlightSource('llvm', 'define void @f() {}')).toContain('hljs-');
+    expect(highlightSource('scheme', '(define (f x) x)')).toContain('hljs-');
+    expect(highlightSource('vim', 'set number')).toContain('hljs-');
+    expect(highlightSource('ini', 'key = value')).toContain('hljs-');
   });
 });

@@ -1,6 +1,7 @@
 import { useLocation, useNavigate } from 'react-router';
 import { useEffect, useTransition } from 'react';
 import { useStore } from '.';
+import type { PathInfo } from '@/types';
 
 export const useClipboard = () => {
   const ui = useStore('ui');
@@ -37,6 +38,25 @@ export const useNav = () => {
     if (!socket.socket.connected) {
       ui.notify('error', 'socket not connect');
     }
+  };
+};
+
+/**
+ * Navigate a directory entry: previewable kinds go through the normal nav,
+ * unsupported ones get an in-place toast instead — no navigation, no history
+ * entry, no server round trip.
+ */
+export const useEntryNav = () => {
+  const nav = useNav();
+  const ui = useStore('ui');
+
+  return (entry: Omit<PathInfo, 'fullpath'>) => {
+    if (entry.type === 'other') {
+      ui.notify('info', `No preview available: ${entry.filename}`);
+      return;
+    }
+
+    nav(entry.relativePath);
   };
 };
 
