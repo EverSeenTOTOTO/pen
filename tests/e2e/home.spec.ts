@@ -150,6 +150,14 @@ test('code files render a highlighted source view', async ({ page }) => {
   await expect(page.locator('.markdown-body code.hljs .hljs-keyword').first()).toBeVisible();
 });
 
+test('navigating a code file keeps the url clean', async ({ page }) => {
+  await page.goto('/srcpreview');
+  await page.locator('.sidebar .file-item', { hasText: 'app.ts' }).click();
+  await expect(page.locator('.markdown-body pre code.hljs')).toBeVisible();
+  // code files are files, not directories — no trailing slash
+  await expect(page).toHaveURL(/\/srcpreview\/app\.ts$/);
+});
+
 test('yaml frontmatter renders as a highlighted block', async ({ page }) => {
   await page.goto('/notebook');
   // day1.md carries frontmatter — it renders as a yaml block instead of

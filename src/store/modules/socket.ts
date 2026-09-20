@@ -13,6 +13,7 @@ import type {
   ServerToClientEvents,
 } from '@/types';
 import { formatDirPath, isMarkdown, stripNamespace } from '@/utils';
+import { resolvePreview } from '@/languages';
 import type { AppStore, PrefetchStore } from '..';
 
 export class SocketStore implements PrefetchStore<PenSocketInfo> {
@@ -38,7 +39,12 @@ export class SocketStore implements PrefetchStore<PenSocketInfo> {
   resolveRelativePath(relative: string) {
     const path = `${this.namespace === '/' ? '' : this.namespace}${relative}`;
 
-    return isMarkdown(path) ? path : formatDirPath(path);
+    // directories keep the trailing slash; previewable files (markdown or
+    // whitelisted source) must not get one appended
+    const filename = path.slice(path.lastIndexOf('/') + 1);
+    const isFile = isMarkdown(path) || resolvePreview(filename) !== undefined;
+
+    return isFile ? path : formatDirPath(path);
   }
 
   get socket() {
