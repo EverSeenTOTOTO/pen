@@ -8,9 +8,10 @@ test('renders markdown readme', async ({ page }) => {
 test('sidebar lists directory entries', async ({ page }) => {
   await page.goto('/');
   // fixture root: README.md, evil.md, pixel.png plus the media/, notebook/,
-  // noreadme/ and srcpreview/ dirs — unsupported files are listed too
+  // noreadme/, srcpreview/ and entryonly/ dirs — unsupported files are
+  // listed too
   const entries = page.locator('.sidebar button.file-item');
-  await expect(entries).toHaveCount(7);
+  await expect(entries).toHaveCount(8);
   await expect(entries.filter({ hasText: 'README.md' })).toHaveCount(1);
   await expect(entries.filter({ hasText: 'pixel.png' })).toHaveCount(1);
 });
@@ -219,6 +220,13 @@ test('code-only directory reads the first code file', async ({ page }) => {
   await expect(page.locator('.file-index')).toHaveCount(0);
 });
 
+test('code-only directory prefers its entry file', async ({ page }) => {
+  await page.goto('/entryonly');
+  // index.js is the entry convention; aaa.ts sorts first — the entry wins
+  await expect(page.locator('.markdown-body pre code.hljs')).toContainText("export const entry = 'index.js'");
+  await expect(page.locator('.file-index')).toHaveCount(0);
+});
+
 test('content images open the lightbox', async ({ page }) => {
   await page.goto('/');
   await page.locator('.markdown-body img').first().click();
@@ -244,7 +252,7 @@ test('raw html is sanitized', async ({ page }) => {
 test('sidebar filter narrows the file list', async ({ page }) => {
   await page.goto('/');
   const entries = page.locator('.sidebar button.file-item');
-  await expect(entries).toHaveCount(7);
+  await expect(entries).toHaveCount(8);
 
   await page.locator('.sidebar-filter').fill('note');
   await expect(entries).toHaveCount(1);
@@ -254,7 +262,7 @@ test('sidebar filter narrows the file list', async ({ page }) => {
   await expect(page.locator('.sidebar-filter-empty')).toBeVisible();
 
   await page.locator('.sidebar-filter').press('Escape');
-  await expect(entries).toHaveCount(7);
+  await expect(entries).toHaveCount(8);
 });
 
 test('copying math puts latex source on the clipboard', async ({ page }) => {

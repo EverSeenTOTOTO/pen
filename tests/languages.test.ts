@@ -19,6 +19,7 @@ describe('resolvePreview', () => {
     expect(resolvePreview('plot.m')).toEqual({ language: 'objectivec' });
     expect(resolvePreview('run.rkt')).toEqual({ language: 'scheme' });
     expect(resolvePreview('hello.ll')).toEqual({ language: 'llvm' });
+    expect(resolvePreview('app.properties')).toEqual({ language: 'properties' });
   });
 
   it('falls back to plain text when no grammar exists', () => {

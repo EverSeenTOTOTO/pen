@@ -30,6 +30,7 @@ import cmake from 'highlight.js/lib/languages/cmake';
 import glsl from 'highlight.js/lib/languages/glsl';
 import x86asm from 'highlight.js/lib/languages/x86asm';
 import ini from 'highlight.js/lib/languages/ini';
+import properties from 'highlight.js/lib/languages/properties';
 import scheme from 'highlight.js/lib/languages/scheme';
 import { makeCodeBlockPlugin } from './code-block';
 
@@ -37,7 +38,7 @@ const languages = {
   xml, bash, c, cpp, css, markdown, diff, go, java,
   javascript, json, lua, makefile, plaintext, python,
   rust, scss, yaml, typescript, wasm,
-  llvm, vim, objectivec, cmake, glsl, x86asm, ini, scheme,
+  llvm, vim, objectivec, cmake, glsl, x86asm, ini, scheme, properties,
 };
 
 const lowlight = createLowlight(languages);

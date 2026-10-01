@@ -61,5 +61,6 @@ describe('highlightSource', () => {
     expect(highlightSource('scheme', '(define (f x) x)')).toContain('hljs-');
     expect(highlightSource('vim', 'set number')).toContain('hljs-');
     expect(highlightSource('ini', 'key = value')).toContain('hljs-');
+    expect(highlightSource('properties', 'key=value')).toContain('hljs-');
   });
 });

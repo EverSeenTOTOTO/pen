@@ -57,6 +57,14 @@ beforeAll(() => {
   fs.writeFileSync(path.join(rootDir, 'mixed', 'main.go'), 'package main\n');
   fs.writeFileSync(path.join(rootDir, 'mixed', 'readme.md'), '# readme');
 
+  fs.mkdirSync(path.join(rootDir, 'entrypick'), { recursive: true });
+  fs.writeFileSync(path.join(rootDir, 'entrypick', 'aaa.ts'), 'const a = 1;\n');
+  fs.writeFileSync(path.join(rootDir, 'entrypick', 'main.py'), 'print(1)\n');
+
+  fs.mkdirSync(path.join(rootDir, 'pypkg'), { recursive: true });
+  fs.writeFileSync(path.join(rootDir, 'pypkg', 'aaa.py'), 'a = 1\n');
+  fs.writeFileSync(path.join(rootDir, 'pypkg', '__init__.py'), '');
+
   fs.mkdirSync(path.join(rootDir, 'bigfile'), { recursive: true });
   fs.writeFileSync(path.join(rootDir, 'bigfile', 'big.ts'), 'x'.repeat(2 * 1024 * 1024 + 1));
 });
@@ -103,6 +111,16 @@ it('falls back to the first code file when no markdown exists', async () => {
 it('prefers markdown over code for the reading', async () => {
   const data = await read('/mixed/');
   expect(data.reading?.relativePath).toBe('/mixed/readme.md');
+});
+
+it('prefers an entry file over the first code file in sort order', async () => {
+  const data = await read('/entrypick/');
+  expect(data.reading?.relativePath).toBe('/entrypick/main.py');
+});
+
+it('falls back through the entry tiers to package entries', async () => {
+  const data = await read('/pypkg/');
+  expect(data.reading?.relativePath).toBe('/pypkg/__init__.py');
 });
 
 it('code reading carries highlighted content', async () => {

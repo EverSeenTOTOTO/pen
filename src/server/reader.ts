@@ -48,13 +48,24 @@ function sortChildren(a: PathInfo, b: PathInfo) {
 }
 
 // default reading preference: README first, then index, then skill, then
-// whatever markdown sorts first, then the first code file — a directory
-// without any previewable file has no reading and falls back to the
-// client's file index
+// whatever markdown sorts first, then the first code entry file, then the
+// first code file — a directory without any previewable file has no
+// reading and falls back to the client's file index
 const READING_CANDIDATES = [
   /^readme\.(md|markdown)$/i,
   /^index\.(md|markdown)$/i,
   /^skill\.(md|markdown)$/i,
+];
+
+// entry file conventions: code directories are entered at index/main/app
+// — give them the same reachability a markdown README gets
+const ENTRY_CANDIDATES = [
+  /^index\./i, // index.js / index.ts / index.vue / index.html …
+  /^main\./i, // main.py / main.go / main.c / main.rs …
+  /^app\./i, // app.ts / app.py / app.js …
+  /^(server|cli|client)\./i, // service & tool entries
+  /^(__init__|__main__)\.py$/i, // python package / runpy entries
+  /^mod\.rs$/i, // rust module entry
 ];
 
 function pickReading(children: Omit<PathInfo, 'fullpath'>[]): Omit<PathInfo, 'fullpath'> | undefined {
@@ -63,8 +74,18 @@ function pickReading(children: Omit<PathInfo, 'fullpath'>[]): Omit<PathInfo, 'fu
     if (hit) return hit;
   }
 
-  return children.find((each) => each.type === 'markdown')
-    ?? children.find((each) => each.type === 'code');
+  if (children.some((each) => each.type === 'markdown')) {
+    return children.find((each) => each.type === 'markdown');
+  }
+
+  const code = children.filter((each) => each.type === 'code');
+
+  for (const pattern of ENTRY_CANDIDATES) {
+    const hit = code.find((each) => pattern.test(each.filename));
+    if (hit) return hit;
+  }
+
+  return code[0];
 }
 
 async function readMarkdown(render: RemarkRehype, pathInfo: PathInfo): Promise<PenMarkdownData> {

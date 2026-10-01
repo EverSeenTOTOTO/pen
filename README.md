@@ -109,7 +109,9 @@ Code files and common config files (`ts`, `py`, `yml`, `toml`, `Dockerfile`,
 fenced code blocks, following the light/dark theme. Files without a grammar
 (say, `toml` or `rst`) render as plain text. Directory listings include every
 file; clicking one that pen cannot preview shows an in-place notice instead
-of navigating. A directory without any markdown reads its first code file.
+of navigating. A directory without any markdown reads its entry file
+(`index.*`, `main.*`, `app.*`, `server.*`/`cli.*`/`client.*`, `__init__.py`,
+`mod.rs`) before falling back to its first code file.
 
 ### 中文标题（CJK anchors）
 
