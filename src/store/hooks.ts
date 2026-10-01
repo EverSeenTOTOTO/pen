@@ -270,7 +270,15 @@ export const useMediaViewer = () => {
 };
 
 export const scrollToHeading = (id: string) => {
-  document.getElementById(id)?.scrollIntoView();
+  const el = document.getElementById(id);
+  if (!el) return;
+
+  // without a book-end tail below the paper, a trailing heading cannot be
+  // scrolled to the top — there is nothing left to scroll into. Center it
+  // instead so it still lands fully visible in the viewport.
+  const rest = document.documentElement.scrollHeight - el.offsetTop - el.offsetHeight;
+
+  el.scrollIntoView({ block: rest < innerHeight ? 'center' : 'start' });
   history.replaceState(null, '', `#${id}`);
 };
 

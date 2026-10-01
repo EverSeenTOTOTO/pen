@@ -75,6 +75,42 @@ test('anchor navigation from toc', async ({ page }) => {
   await expect(page.locator('#中文标题')).toBeVisible();
 });
 
+test('no bookend tail under the paper', async ({ page }) => {
+  // regression: .app-main used to pad ~90vh below the paper so anchor
+  // jumps could pin trailing headings to the top — scrolling to the bottom
+  // revealed a near-full page of blank. Anchor jumps center trailing
+  // headings instead now; only breathing room remains.
+  await page.goto('/');
+  await page.waitForSelector('.markdown-paper');
+
+  const gap = await page.evaluate(() => {
+    const paper = document.querySelector('.markdown-paper');
+    return document.documentElement.scrollHeight - (paper.getBoundingClientRect().bottom + scrollY);
+  });
+
+  expect(gap).toBeLessThan(300);
+});
+
+test('trailing anchor centers instead of running out of document', async ({ page }) => {
+  await page.context().addCookies([
+    { name: 'drawerVisible', value: 'true', url: 'http://localhost:3210' },
+  ]);
+  await page.goto('/');
+  await expect(page.locator('.toc-link').first()).toBeVisible();
+
+  // "Image" is the last heading, inside the final screenful — there is no
+  // scroll left to pin it to the top, so it must land fully visible
+  await page.locator('.toc-link', { hasText: 'Image' }).click();
+  await expect(page).toHaveURL(/#image$/);
+
+  // scroll-behavior is smooth — poll until the jump settles, then require
+  // the heading fully inside the viewport
+  await expect.poll(async () => {
+    const box = await page.locator('#image').boundingBox();
+    return box ? Math.round(box.y + box.height) : -1;
+  }).toBeLessThanOrEqual(page.viewportSize()!.height);
+});
+
 test('theme toggle persists', async ({ page }) => {
   await page.goto('/');
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');

@@ -84,10 +84,9 @@ body {
 
   /* bottom breathing only — the header gap lives on .markdown-body (the
      header's sibling), because github-markdown-css zeroes first/last child
-     margins with !important and would eat it on the paper. The tall tail is
-     book-end whitespace: it lets anchor jumps scroll trailing headings all
-     the way to the top instead of running out of document. */
-  padding: 0 16px 90vh;
+     margins with !important and would eat it on the paper. No book-end
+     tail: anchor jumps center trailing headings instead (scrollToHeading). */
+  padding: 0 16px 96px;
   transition: margin-left 0.25s ease;
 }
 
