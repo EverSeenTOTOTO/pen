@@ -10,3 +10,4 @@ src/assets/katex*
 src/assets/fonts
 .vscode
 .clinic
+*.tgz

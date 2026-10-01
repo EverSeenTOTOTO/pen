@@ -28,7 +28,7 @@ pen -o -p 5000 -r ../docs
 | `--help` `-h` | | Print help message |
 | `--root` `-r` | `.` | Watching directory, relative to current dir |
 | `--namespace` `-n` | `/` | socket.io namespace |
-| `--port` `-p` | `3000` | Server port, or the next auto-detected available one |
+| `--port` `-p` | `3000` | Server port, or the next free one (`3001`, `3002`, …) |
 | `--ignores` `-i` | `[]` | Ignored files, e.g. `-i "^\\."` for dotfiles |
 | `--silent` `-s` | `false` | Suppress logger messages |
 | `--open` `-o` | `false` | Open the browser automatically |

@@ -51,7 +51,12 @@ export const createServer = async (opts?: PenCliOptions) => {
   options.logger.info('starting server...');
 
   const port = parseInt(opts?.port ?? '3000', 10);
-  const avaliablePort = await getPort({ port: Number.isNaN(port) ? 3000 : port });
+  // sequential fallback (3000, 3001, …): a predictable port stays findable
+  // in scrolled-back logs — get-port's random pick was not
+  const base = Number.isNaN(port) ? 3000 : port;
+  const avaliablePort = await getPort({
+    port: Array.from({ length: 20 }, (_, i) => base + i),
+  });
 
   if (avaliablePort !== port) {
     options.logger.warn(`port ${opts?.port} in use, using ${avaliablePort} instead`);
