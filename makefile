@@ -52,3 +52,8 @@ test:
 .PHONY: test\:e2e
 test\:e2e:
 	npx playwright test
+
+# re-record the readme demo gif (Pen.gif) — needs ffmpeg on PATH
+.PHONY: demo
+demo:
+	node scripts/record-demo.mjs

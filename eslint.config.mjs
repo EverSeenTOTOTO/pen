@@ -26,6 +26,17 @@ export default tseslint.config(
     },
   },
   {
+    // browser-automation scripts: node apis plus `document`/`window` inside
+    // the page.evaluate snippets they carry
+    files: ['scripts/**/*.mjs'],
+    languageOptions: {
+      globals: {
+        ...nodeGlobals.node,
+        ...nodeGlobals.browser,
+      },
+    },
+  },
+  {
     rules: {
       'no-console': 'off',
       '@typescript-eslint/no-explicit-any': 'warn',
