@@ -10,6 +10,9 @@ describe('resolvePreview', () => {
     expect(resolvePreview('LICENSE')).toEqual({ language: null });
     expect(resolvePreview('.gitignore')).toEqual({ language: null });
     expect(resolvePreview('.env')).toEqual({ language: 'ini' });
+    expect(resolvePreview('.yarnrc')).toEqual({ language: 'ini' });
+    expect(resolvePreview('.gitconfig')).toEqual({ language: 'ini' });
+    expect(resolvePreview('nginx.conf')).toEqual({ language: 'ini' });
   });
 
   it('maps extensions case-insensitively', () => {

@@ -19,6 +19,8 @@ const FILENAMES: Record<string, string | null> = {
   '.clang-tidy': 'yaml',
   '.gitmodules': 'ini',
   '.npmrc': 'ini',
+  '.yarnrc': 'ini',
+  '.gitconfig': 'ini',
   '.coveragerc': 'ini',
   '.srcinfo': 'ini',
   '.pkginfo': 'ini',
@@ -45,7 +47,7 @@ const EXTENSIONS: Record<string, string | null> = {
   rs: 'rust', go: 'go', java: 'java', m: 'objectivec', mm: 'objectivec',
   s: 'x86asm', asm: 'x86asm', hlsl: 'glsl', ll: 'llvm',
   // config
-  yml: 'yaml', yaml: 'yaml', cmake: 'cmake', properties: 'properties',
+  yml: 'yaml', yaml: 'yaml', cmake: 'cmake', properties: 'properties', conf: 'ini',
   diff: 'diff', patch: 'diff', wat: 'wasm', wast: 'wasm',
   // known plain text without a grammar — previewable, unhighlighted
   toml: null, rst: null, mlir: null, mir: null, td: null, fir: null,
