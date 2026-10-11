@@ -259,7 +259,10 @@ body {
 
 .mermaid-viewer-toolbar {
   position: absolute;
-  top: 16px;
+
+  /* bottom-right, aligned with the expand affordance's corner of the
+     diagrams — controls and entry point read as one cluster */
+  bottom: 16px;
   right: 16px;
   z-index: 1;
   display: flex;
