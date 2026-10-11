@@ -14,11 +14,12 @@ import { scope, paint } from '../src/server/logger';
 import chalk from 'chalk';
 
 /**
- * Dev-only static middleware for `/assets/*`: the SSR'd dev page references
- * `/assets/*.css` (theme markdown/hljs links, katex) but those files live in
- * `src/assets` (copied to `dist/assets` by `make prepare` in prod builds),
- * which vite's dev server does not serve. Streams css/fonts with the right
- * content-type, 404 otherwise.
+ * Dev-only static middleware for `/assets/*` and `/vendor/*`: the SSR'd dev
+ * page references `/assets/*.css` (base/index/katex dev links) and the
+ * theme links point at `/vendor/*.css` (parity with prod, where those
+ * stable-name copies live in dist/vendor) — but the files live in
+ * `src/assets`, which vite's dev server does not serve. Streams
+ * css/fonts with the right content-type, 404 otherwise.
  */
 const serveAssets = () => ({
   name: 'dev-serve-assets',
@@ -32,8 +33,7 @@ const serveAssets = () => ({
       '.ttf': 'font/ttf',
     };
 
-    // registered directly (not returned) so it runs before the SSR handler
-    vite.middlewares.use('/assets', (req, res) => {
+    const streamAsset = (req: http.IncomingMessage, res: http.ServerResponse) => {
       const relative = decodeURIComponent((req.url ?? '').split('?')[0] ?? '');
       const file = path.resolve(assetsRoot, `.${relative}`);
       const contentType = contentTypes[path.extname(file)];
@@ -51,7 +51,11 @@ const serveAssets = () => ({
 
       res.setHeader('Content-Type', contentType);
       fs.createReadStream(file).on('error', notFound).pipe(res);
-    });
+    };
+
+    // registered directly (not returned) so it runs before the SSR handler
+    vite.middlewares.use('/assets', streamAsset);
+    vite.middlewares.use('/vendor', streamAsset);
   },
 });
 

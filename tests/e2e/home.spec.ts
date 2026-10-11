@@ -121,6 +121,13 @@ test('theme toggle persists', async ({ page }) => {
   await page.getByRole('button', { name: /switch to (light|dark) theme/i }).click();
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
 
+  // regression: the client-side href rewrite used the /assets prefix,
+  // which stopped being served when stable-name copies moved to
+  // /vendor — hydration clobbered the ssr links into 404s
+  const href = await page.locator('#pen-markdown-css').getAttribute('href');
+  expect(href).toMatch(/^\/vendor\//);
+  expect(await page.evaluate(async (h) => (await fetch(h)).status, href)).toBe(200);
+
   // the cookie is written client-side by a store reaction — wait for it to
   // land before reloading, otherwise the server re-renders the default theme
   await expect

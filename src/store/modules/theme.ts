@@ -19,9 +19,9 @@ export class ThemeStore implements PrefetchStore<ThemeState> {
     if (typeof document !== 'undefined') {
       document.documentElement.dataset.theme = mode;
       document.getElementById('pen-markdown-css')
-        ?.setAttribute('href', `/assets/github-markdown-${mode}.css`);
+        ?.setAttribute('href', `/vendor/github-markdown-${mode}.css`);
       document.getElementById('pen-hljs-css')
-        ?.setAttribute('href', `/assets/highlightjs-github-${mode}.css`);
+        ?.setAttribute('href', `/vendor/highlightjs-github-${mode}.css`);
     }
   }
 
