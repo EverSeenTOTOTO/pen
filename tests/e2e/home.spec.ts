@@ -1,4 +1,6 @@
 import { test, expect, type Page } from '@playwright/test';
+import fs from 'fs';
+import path from 'path';
 
 test('renders markdown readme', async ({ page }) => {
   await page.goto('/');
@@ -329,6 +331,33 @@ test('mermaid viewer zooms, pans and closes', async ({ page }) => {
   await page.keyboard.press('Escape');
   await expect(page.locator('.mermaid-viewer')).toHaveCount(0);
   await expect(page.locator('html')).not.toHaveClass(/pen-viewer-open/);
+});
+
+test('open mermaid viewer follows edits', async ({ page }) => {
+  // regression: the viewer's stage clone kept the render id, which
+  // mermaid's own cleanup removed on the next render — fullscreen went
+  // blank on every edit while open. It must survive the edit AND swap in
+  // the fresh diagram.
+  const dir = path.join(__dirname, '..', 'fixtures', 'mermaidlive');
+  const doc = (graph: string) => `# live\n\n\`\`\`mermaid\n${graph}\n\`\`\`\n`;
+  const write = (graph: string) => fs.writeFileSync(path.join(dir, 'demo.md'), doc(graph));
+
+  fs.mkdirSync(dir, { recursive: true });
+  write('graph LR;\n  a-->b;\n');
+  try {
+    await page.goto('/mermaidlive');
+    await expect(page.locator('.mermaid-svg svg').first()).toBeVisible({ timeout: 15000 });
+
+    await page.locator('.mermaid-svg .mermaid-expand').first().click();
+    await expect(page.locator('.mermaid-viewer svg')).toBeVisible();
+
+    write('graph LR;\n  a-->b;\n  b-->fresh;\n');
+    await expect.poll(() => page.locator('.mermaid-viewer svg')
+      .evaluate((el) => el.textContent?.includes('fresh') ?? false)).toBe(true);
+    await expect(page.locator('.mermaid-viewer svg')).toHaveCount(1);
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
 });
 
 test('mobile overlay drawer', async ({ page }) => {

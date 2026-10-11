@@ -94,6 +94,11 @@ export const useMediaViewer = () => {
     let overlay: HTMLElement | null = null;
     let stage: HTMLElement | null = null;
     let zoomLabel: HTMLElement | null = null;
+    // which mermaid of the paper the viewer shows (by document ordinal),
+    // or null for images — content cannot be the identity: editing the
+    // diagram changes its source, so re-render events re-locate the host
+    // by position instead
+    let openIndex: number | null = null;
 
     const apply = () => {
       if (!stage) return;
@@ -115,6 +120,24 @@ export const useMediaViewer = () => {
       apply();
     };
 
+    // clone a rendered mermaid svg for the viewer stage. The id MUST go:
+    // mermaid's own render cleanup removes same-id elements, and while the
+    // viewer is open this clone is the only element carrying that id.
+    // max-width is cleared (stylesheet rules cannot beat mermaid's inline
+    // one) and size comes from the viewBox so it lays out at natural
+    // geometry instead of a squeezed 100%-width.
+    const mountMermaidClone = (svg: SVGSVGElement) => {
+      const clone = svg.cloneNode(true) as SVGSVGElement;
+      clone.removeAttribute('id');
+      clone.style.maxWidth = 'none';
+      const viewBox = clone.getAttribute('viewBox')?.trim().split(/\s+/);
+      if (viewBox && viewBox.length === 4) {
+        clone.style.width = `${Number.parseFloat(viewBox[2])}px`;
+        clone.style.height = `${Number.parseFloat(viewBox[3])}px`;
+      }
+      return clone;
+    };
+
     const close = () => {
       overlay?.removeEventListener('wheel', onWheel);
       document.removeEventListener('keydown', onKeydown);
@@ -123,6 +146,7 @@ export const useMediaViewer = () => {
       overlay = null;
       stage = null;
       zoomLabel = null;
+      openIndex = null;
     };
 
     const zoomAt = (clientX: number, clientY: number, factor: number) => {
@@ -164,6 +188,7 @@ export const useMediaViewer = () => {
         if (w) img.style.width = `${w}px`;
         if (h) img.style.height = `${h}px`;
         stage.appendChild(img);
+        openIndex = null;
       } else {
         const svg = source.querySelector('svg');
         if (!svg) {
@@ -171,17 +196,8 @@ export const useMediaViewer = () => {
           overlay = null;
           return;
         }
-        const clone = svg.cloneNode(true) as SVGSVGElement;
-        // mermaid ships an inline `max-width: <natural>px` that stylesheet
-        // rules cannot beat — clear it and size from the viewBox so the clone
-        // lays out at its natural geometry instead of a squeezed 100%-width
-        clone.style.maxWidth = 'none';
-        const viewBox = clone.getAttribute('viewBox')?.trim().split(/\s+/);
-        if (viewBox && viewBox.length === 4) {
-          clone.style.width = `${Number.parseFloat(viewBox[2])}px`;
-          clone.style.height = `${Number.parseFloat(viewBox[3])}px`;
-        }
-        stage.appendChild(clone);
+        stage.appendChild(mountMermaidClone(svg));
+        openIndex = mermaidHosts().indexOf(source);
       }
 
       const toolbar = document.createElement('div');
@@ -244,6 +260,24 @@ export const useMediaViewer = () => {
       });
     };
 
+    const mermaidHosts = () => Array.from(document.querySelectorAll('.markdown-body .mermaid-svg'));
+
+    // live updates: while the viewer shows a diagram, its paper host may be
+    // re-rendered (edit or theme flip) — swap the fresh svg into the stage
+    // in place, keeping the current zoom and pan
+    const onMermaidRendered = (e: Event) => {
+      const host = (e as CustomEvent).detail?.host as HTMLElement | undefined;
+      if (!overlay || !stage || !host || openIndex === null) return;
+      if (mermaidHosts().indexOf(host) !== openIndex) return;
+
+      const svg = host.querySelector('svg');
+      if (!svg) return; // parse errors leave the last good diagram in place
+
+      stage.querySelector('svg')?.remove();
+      stage.appendChild(mountMermaidClone(svg));
+    };
+    document.addEventListener(MERMAID_RENDERED, onMermaidRendered);
+
     const onRootClick = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
       const btn = target.closest?.('.mermaid-expand');
@@ -264,6 +298,7 @@ export const useMediaViewer = () => {
 
     return () => {
       document.removeEventListener('click', onRootClick);
+      document.removeEventListener(MERMAID_RENDERED, onMermaidRendered);
       close();
     };
   }, []);
@@ -303,6 +338,10 @@ export const useScrollSpy = () => {
 };
 
 const EXPAND_ICON = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg>';
+
+// useMermaid dispatches this after re-rendering a paper host, so an open
+// viewer can swap in the fresh diagram while keeping its zoom and pan
+const MERMAID_RENDERED = 'pen-mermaid-rendered';
 
 /** corner affordance opening the diagram in the in-page viewer */
 const attachExpandButton = (host: HTMLElement) => {
@@ -351,9 +390,11 @@ export const useMermaid = () => {
           if (cancelled) return;
           const target = host ?? el;
           if (!target) continue;
+          let rendered: HTMLElement | null = null;
           if (host) {
             host.innerHTML = svg;
             attachExpandButton(host);
+            rendered = host;
           } else {
             const div = document.createElement('div');
             div.className = 'mermaid-svg';
@@ -361,7 +402,11 @@ export const useMermaid = () => {
             div.innerHTML = svg;
             attachExpandButton(div);
             target.replaceWith(div);
+            rendered = div;
           }
+          // an open viewer follows the re-render (its stage clone is a
+          // snapshot that nothing else would refresh)
+          document.dispatchEvent(new CustomEvent(MERMAID_RENDERED, { detail: { host: rendered } }));
         } catch (err) {
           const errBox = document.createElement('div');
           errBox.className = 'mermaid-error';
