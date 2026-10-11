@@ -8,8 +8,8 @@ import base from './vite.common.mts';
 const injectHtml = () => ({
   name: 'inject-html',
   transformIndexHtml(html: string) {
-    return html.replace('<!-- inject -->', `<link rel="stylesheet" href="/assets/katex.min.css">
-<script defer src="/assets/katex-copy-tex.min.js"></script>
+    return html.replace('<!-- inject -->', `<link rel="stylesheet" href="/vendor/katex.min.css">
+<script defer src="/vendor/katex-copy-tex.min.js"></script>
     `);
   },
 });
@@ -23,10 +23,14 @@ export default defineConfig((c) => ({
       targets: [
         {
           src: slash(path.join(import.meta.dirname, '../src/assets/**')),
-          dest: 'assets/', // relate to dist
+          // vendor/, NOT assets/: these copies keep stable file names
+          // (github-markdown-*.css, katex, fonts/), so they must be served
+          // with revalidation — assets/ is reserved for content-hashed
+          // build output and gets immutable year-long caching
+          dest: 'vendor/', // relate to dist
           // vite-plugin-static-copy v4 keeps the path relative to the project
-          // root (dist/assets/src/assets/...); strip the two leading segments
-          // to copy flat into dist/assets/ with fonts/ preserved.
+          // root (dist/vendor/src/assets/...); strip the two leading segments
+          // to copy flat into dist/vendor/ with fonts/ preserved.
           rename: { stripBase: 2 },
         },
       ],

@@ -12,8 +12,8 @@ export const isThemeName = (v: unknown): v is ThemeNames =>
 
 /** theme-specific <link> tags injected into the SSR template */
 export const themeLinks = (name: ThemeNames): string => [
-  `<link id="pen-markdown-css" rel="stylesheet" href="/assets/github-markdown-${name}.css">`,
-  `<link id="pen-hljs-css" rel="stylesheet" href="/assets/highlightjs-github-${name}.css">`,
+  `<link id="pen-markdown-css" rel="stylesheet" href="/vendor/github-markdown-${name}.css">`,
+  `<link id="pen-hljs-css" rel="stylesheet" href="/vendor/highlightjs-github-${name}.css">`,
 ].join('\n');
 
 export const createTheme = async (name: ThemeNames, dist?: string): Promise<PenTheme> => {

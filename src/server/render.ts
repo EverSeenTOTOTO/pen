@@ -82,11 +82,25 @@ export const bindRender = (app: Express, options: RenderOptions) => {
     index: false,
     dotfiles: 'allow',
   });
-  const serveDist = express.static(dist, {
+  // content-hashed build output (assets/): url changes with content, so a
+  // full year of immutable caching is safe. maxAge is in MILLISECONDS —
+  // the old value of 31536000 silently meant ~9 hours.
+  const serveAssets = express.static(path.join(dist, 'assets'), {
     index: false,
     dotfiles: 'allow',
     immutable: true,
-    maxAge: 31536000,
+    maxAge: 365 * 24 * 60 * 60 * 1000,
+  });
+  // version-stable vendor copies (vendor/: theme css, katex, fonts) keep
+  // their urls across releases — revalidate via etag instead of caching
+  const serveVendor = express.static(path.join(dist, 'vendor'), {
+    index: false,
+    dotfiles: 'allow',
+  });
+  // dist root leftovers (favicon) — default revalidation
+  const serveDist = express.static(dist, {
+    index: false,
+    dotfiles: 'allow',
   });
 
   const router = express.Router();
@@ -116,6 +130,9 @@ export const bindRender = (app: Express, options: RenderOptions) => {
   router.use(ssr);
   router.use(serveRoot);
 
+  // specific subtrees first — the root-level dist mount is the fallback
+  app.use('/assets', serveAssets);
+  app.use('/vendor', serveVendor);
   app.use(serveDist);
   app.use(namespace, router);
   app.use(serveRoot);
