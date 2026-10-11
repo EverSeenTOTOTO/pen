@@ -351,6 +351,17 @@ test('open mermaid viewer follows edits', async ({ page }) => {
     await page.locator('.mermaid-svg .mermaid-expand').first().click();
     await expect(page.locator('.mermaid-viewer svg')).toBeVisible();
 
+    // regression 2: the stage clone must carry a RENAMED render id that
+    // its embedded <style> still scopes to — dropping the id left the
+    // diagram all-black, keeping it verbatim got the clone deleted
+    const stage = page.locator('.mermaid-viewer-stage svg');
+    await expect(stage).toHaveAttribute('id', /-viewer$/);
+    const styleScoped = await stage.evaluate((el) => {
+      const style = el.querySelector('style');
+      return style?.textContent?.includes(`#${el.id}`) ?? false;
+    });
+    expect(styleScoped).toBe(true);
+
     write('graph LR;\n  a-->b;\n  b-->fresh;\n');
     await expect.poll(() => page.locator('.mermaid-viewer svg')
       .evaluate((el) => el.textContent?.includes('fresh') ?? false)).toBe(true);

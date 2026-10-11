@@ -120,15 +120,22 @@ export const useMediaViewer = () => {
       apply();
     };
 
-    // clone a rendered mermaid svg for the viewer stage. The id MUST go:
-    // mermaid's own render cleanup removes same-id elements, and while the
-    // viewer is open this clone is the only element carrying that id.
+    // clone a rendered mermaid svg for the viewer stage. The render id
+    // must be RENAMED, not dropped: mermaid scopes the svg's embedded
+    // <style> rules to #id (dropping it left the clone unstyled — an
+    // all-black diagram), while keeping it verbatim let mermaid's own
+    // next-render cleanup remove the clone (a blank viewer). Rewriting
+    // every occurrence — id attrs, url(#…) refs, style selectors — makes
+    // the clone self-contained and unguessable by the cleanup.
     // max-width is cleared (stylesheet rules cannot beat mermaid's inline
     // one) and size comes from the viewBox so it lays out at natural
     // geometry instead of a squeezed 100%-width.
     const mountMermaidClone = (svg: SVGSVGElement) => {
-      const clone = svg.cloneNode(true) as SVGSVGElement;
-      clone.removeAttribute('id');
+      const host = document.createElement('div');
+
+      host.innerHTML = svg.outerHTML.replaceAll(svg.id, `${svg.id}-viewer`);
+
+      const clone = host.firstElementChild as SVGSVGElement;
       clone.style.maxWidth = 'none';
       const viewBox = clone.getAttribute('viewBox')?.trim().split(/\s+/);
       if (viewBox && viewBox.length === 4) {
